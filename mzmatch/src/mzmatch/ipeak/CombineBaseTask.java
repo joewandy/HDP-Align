@@ -1,5 +1,8 @@
 package mzmatch.ipeak;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -8,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Vector;
+import java.util.zip.GZIPOutputStream;
 
 import mzmatch.ipeak.Combine.Options;
 import mzmatch.ipeak.sort.Clusterer;
@@ -27,11 +31,37 @@ import peakml.IPeak;
 import peakml.IPeak.MatchCompare;
 import peakml.IPeakSet;
 import peakml.io.Header;
+import peakml.io.ParseResult;
+import peakml.io.peakml.PeakMLWriter;
 import peakml.math.Signal;
 
 public abstract class CombineBaseTask implements CombineTask {
 
-	protected void preprocess(IPeakSet<IPeak> peaks) {
+	public void process(final Options options, Header header,
+			Vector<IPeakSet<IPeak>> peaksets, ParseResult[] results,
+			final Random random, CorrelationMeasure measure, float rangeMin,
+			float rangeMax, int totalPeaks, OutputStream output) throws IOException, FileNotFoundException {
+
+		// greedily match peaks across files
+		List<IPeakSet<IPeak>> matches = getMatches(peaksets, options.ppm, options.rtwindow);						
+		
+		// unpack potential sub-peaksets
+		List<IPeakSet<IPeak>> data = new ArrayList<IPeakSet<IPeak>>();		
+		for (IPeakSet<IPeak> match : matches) {								
+			IPeakSet<IPeak> alignmentCluster = new IPeakSet<IPeak>(unpack(match));
+			data.add(alignmentCluster);
+		}
+
+		// write the result
+		if (options.verbose)
+			System.out.println("Writing the results");
+		PeakMLWriter.write(header, data, null, new GZIPOutputStream(output), null);
+		
+	}
+	
+	protected abstract List<IPeakSet<IPeak>> getMatches(Vector<IPeakSet<IPeak>> peaksets, double massTolerance, double rtTolerance);
+	
+	protected void preprocessBeforeGrouping(IPeakSet<IPeak> peaks) {
 
 		// the annotation result is used where later ?
 		IdentifyPeaksets.identify(peaks);
@@ -66,7 +96,7 @@ public abstract class CombineBaseTask implements CombineTask {
 		for (int i = 0; i < peaksets.size(); i++) {	
 
 			IPeakSet<IPeak> peaks = peaksets.get(i);
-			preprocess(peaks);
+			preprocessBeforeGrouping(peaks);
 
 			System.out.println("Grouping peaks from sourcePeakSet " + i);
 
@@ -265,6 +295,7 @@ public abstract class CombineBaseTask implements CombineTask {
 
 	}
 
+	@Deprecated
 	protected void evaluateResult(int noOfReplicates, int totalPeaks,
 			int peaksInThreeClusters, int peaksInTwoClusters,
 			List<double[]> intensesAll) {
