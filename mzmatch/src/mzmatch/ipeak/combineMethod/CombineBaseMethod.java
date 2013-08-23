@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,10 +12,8 @@ import java.util.Random;
 import java.util.Vector;
 import java.util.zip.GZIPOutputStream;
 
-import mzmatch.ipeak.Combine;
 import mzmatch.ipeak.Combine.Options;
 import mzmatch.ipeak.sort.Clusterer;
-import mzmatch.ipeak.sort.Clustering;
 import mzmatch.ipeak.sort.CorrelationClusterer;
 import mzmatch.ipeak.sort.CorrelationMeasure;
 import mzmatch.ipeak.sort.CorrelationParameters;
@@ -24,17 +21,20 @@ import mzmatch.ipeak.sort.Data;
 import mzmatch.ipeak.sort.IdentifyPeaksets;
 import mzmatch.ipeak.sort.PeakLikelihoodScorer;
 import mzmatch.ipeak.sort.PeakPosteriorScorer;
-import mzmatch.ipeak.sort.RetentionTimeClusteringScorer;
-import mzmatch.ipeak.sort.SimpleClustering;
 import mzmatch.ipeak.sort.RelatedPeaks.PeakComparer;
+import mzmatch.ipeak.sort.RetentionTimeClusteringScorer;
 import mzmatch.ipeak.sort.SampleHandler;
+import mzmatch.ipeak.sort.SimpleClustering;
 import peakml.IPeak;
-import peakml.IPeak.MatchCompare;
 import peakml.IPeakSet;
 import peakml.io.Header;
 import peakml.io.ParseResult;
+import peakml.io.WriterProgressListener;
 import peakml.io.peakml.PeakMLWriter;
-import peakml.math.Signal;
+
+import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
+import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
+import com.joewandy.alignmentResearch.objectModel.Feature;
 
 public abstract class CombineBaseMethod implements CombineMethod {
 
@@ -43,8 +43,13 @@ public abstract class CombineBaseMethod implements CombineMethod {
 			final Random random, CorrelationMeasure measure, float rangeMin,
 			float rangeMax, int totalPeaks, OutputStream output) throws IOException, FileNotFoundException {
 
-		// greedily match peaks across files
-		List<IPeakSet<IPeak>> matches = getMatches(peaksets, options.ppm, options.rtwindow);						
+		// do some preprocessing, mostly storing temporary sequence IDs
+		for (IPeakSet<IPeak> peaks : peaksets) {
+			preprocess(peaks);			
+		}
+		
+		// match peaks across files
+		List<IPeakSet<IPeak>> matches = getMatches(peaksets, options);						
 		
 		// unpack potential sub-peaksets
 		List<IPeakSet<IPeak>> data = new ArrayList<IPeakSet<IPeak>>();		
@@ -57,12 +62,13 @@ public abstract class CombineBaseMethod implements CombineMethod {
 		if (options.verbose)
 			System.out.println("Writing the results");
 		PeakMLWriter.write(header, data, null, new GZIPOutputStream(output), null);
+		System.out.println("Done !");
 		
 	}
 	
-	protected abstract List<IPeakSet<IPeak>> getMatches(Vector<IPeakSet<IPeak>> peaksets, double massTolerance, double rtTolerance);
+	protected abstract List<IPeakSet<IPeak>> getMatches(List<IPeakSet<IPeak>> peaksets, Options options);
 	
-	protected void preprocessBeforeGrouping(IPeakSet<IPeak> peaks) {
+	protected void preprocess(IPeakSet<IPeak> peaks) {
 
 		// the annotation result is used where later ?
 		IdentifyPeaksets.identify(peaks);
@@ -76,18 +82,78 @@ public abstract class CombineBaseMethod implements CombineMethod {
 
 	}
 	
-	/**
-	 * TODO: don't directly pass the options, instead encapsulate the relevant attributes into another object ?
-	 * @param options
-	 * @param header
-	 * @param peaksets
-	 * @param random
-	 * @param measure
-	 * @param rangeMin
-	 * @param rangeMax
-	 * @param method
-	 * @return
+	protected Vector<IPeak> unpack(IPeak peak) {
+
+		Vector<IPeak> peaks = new Vector<IPeak>();
+		if (IPeakSet.class.equals(peak.getClass())) {
+			IPeakSet<IPeak> peakset = (IPeakSet<IPeak>) peak;
+			for (IPeak p : peakset)
+				peaks.addAll(unpack(p));
+		} else
+			peaks.add(peak);
+		return peaks;
+
+	}
+	
+	/*
+	 * ===================================================
+	 * METHODS FOR CALLING EXTERNAL ALIGNMENT ALGORITHMS
+	 * ===================================================
 	 */
+	
+	protected List<IPeakSet<IPeak>> mapAlignmentResult(
+			List<IPeakSet<IPeak>> peaksets, List<AlignmentFile> dataList,
+			List<AlignmentRow> result) {
+		
+		// map data file to sample
+		Map<AlignmentFile, IPeakSet<IPeak>> dataToSampleMap = new HashMap<AlignmentFile, IPeakSet<IPeak>>();
+		for (int i = 0; i < dataList.size(); i++) {
+			AlignmentFile file = dataList.get(i);
+			IPeakSet<IPeak> sample = peaksets.get(i);
+			dataToSampleMap.put(file, sample);
+		}
+
+		// map alignment row to ipeakset
+		List<IPeakSet<IPeak>> matches = new ArrayList<IPeakSet<IPeak>>();
+		for (AlignmentRow row : result) {
+			List<IPeak> alignedPeaks = mapAlignmentRowToIPeakList(row, dataToSampleMap);
+			IPeakSet<IPeak> peakset = new IPeakSet<IPeak>(alignedPeaks);
+			matches.add(peakset);
+		}
+		return matches;
+
+	}
+
+	private List<IPeak> mapAlignmentRowToIPeakList(AlignmentRow row, Map<AlignmentFile, IPeakSet<IPeak>> dataToSampleMap) {
+		
+		List<IPeak> match = new ArrayList<IPeak>();
+		
+		for (Feature feature : row.getFeatures()) {
+			
+			// find out which data file this feature comes from ?
+			AlignmentFile file = feature.getData();
+			
+			// find out which sample it is ?
+			IPeakSet<IPeak> sample = dataToSampleMap.get(file);
+			
+			// retrieve the actual IPeak object, and add to matching result
+			int index = feature.getPeakID();
+			IPeak peak = sample.get(index);
+			match.add(peak);
+			
+		}
+		
+		return match;
+		
+	}
+
+	/*
+	 * ===================================================
+	 * METHODS FOR GROUPING
+	 * TODO: remove them out to another class later ..
+	 * ===================================================
+	 */
+	
 	protected List<Map<Integer, List<IPeak>>> groupPeaks(final Options options,
 			Header header, Vector<IPeakSet<IPeak>> peaksets,
 			final Random random, CorrelationMeasure measure, float rangeMin,
@@ -97,12 +163,12 @@ public abstract class CombineBaseMethod implements CombineMethod {
 		for (int i = 0; i < peaksets.size(); i++) {	
 
 			IPeakSet<IPeak> peaks = peaksets.get(i);
-			preprocessBeforeGrouping(peaks);
+			preprocess(peaks);
 
 			System.out.println("Grouping peaks from sourcePeakSet " + i);
 
 			List<IPeak> basepeaks = null;
-			if (CombineMethod.GREEDY_GROUPING.equals(method)) {
+			if (CombineMethod.GROUPING_GREEDY.equals(method)) {
 
 				/* 
 				 * group peaks in a greedy manner
@@ -110,7 +176,7 @@ public abstract class CombineBaseMethod implements CombineMethod {
 				 */
 				basepeaks = greedyGrouping(options, header, measure, peaks);
 				
-			} else if (CombineMethod.CORR_GROUPING.equals(method)) {
+			} else if (CombineMethod.GROUPING_MIXTURE.equals(method)) {
 			
 				/* 
 				 * group peaks by correlations
@@ -140,6 +206,7 @@ public abstract class CombineBaseMethod implements CombineMethod {
 	 * @param peaks
 	 * @return
 	 */
+	@Deprecated
 	protected void randomiseGroupIds(List<IPeak> peaks) {
 
 		// get all group ids
@@ -161,8 +228,33 @@ public abstract class CombineBaseMethod implements CombineMethod {
 		}		
 		
 	}		
+	
+	@Deprecated
+	protected void evaluateResult(int noOfReplicates, int totalPeaks,
+			int peaksInThreeClusters, int peaksInTwoClusters,
+			List<double[]> intensesAll) {
 
-	protected Map<Integer, List<IPeak>> mapPeaksToGroups(IPeakSet<IPeak> peaks) {
+		double n2r = peaksInTwoClusters * 100 / totalPeaks;
+		double n3r = peaksInThreeClusters * 100 / totalPeaks;
+
+//		System.out.println("K = " + CombineTask.NO_OF_ALIGNMENT_CLUSTERS);
+//		System.out.println("Total peaks = " + totalPeaks);
+//		System.out.println("N2R = " + peaksInTwoClusters + "("
+//				+ String.format("%.2f", n2r) + "%)");
+//		System.out.println("N3R = " + peaksInThreeClusters + "("
+//				+ String.format("%.2f", n3r) + "%)");
+
+		for (int sourcePeakset = 0; sourcePeakset < noOfReplicates; sourcePeakset++) {
+			double[] intenses = new double[intensesAll.size()];
+			for (int i = 0; i < intensesAll.size(); i++) {
+				intenses[i] = intensesAll.get(i)[sourcePeakset];
+			}
+//			System.out.println("intenses_" + sourcePeakset + " = " + Arrays.toString(intenses) + ";");
+		}
+
+	}
+	
+	private Map<Integer, List<IPeak>> mapPeaksToGroups(IPeakSet<IPeak> peaks) {
 		Map<Integer, List<IPeak>> peaksMap = new HashMap<Integer, List<IPeak>>();
 		for (int j = 0; j < peaks.size(); j++) {
 
@@ -183,7 +275,7 @@ public abstract class CombineBaseMethod implements CombineMethod {
 		}
 		return peaksMap;
 	}	
-	
+			
 	/**
 	 * TODO: extract options & hardcoded values into another class
 	 * @param options
@@ -192,7 +284,7 @@ public abstract class CombineBaseMethod implements CombineMethod {
 	 * @param peaks
 	 * @return
 	 */
-	protected List<IPeak> greedyGrouping(final Options options, Header header,
+	private List<IPeak> greedyGrouping(final Options options, Header header,
 			CorrelationMeasure measure, IPeakSet<IPeak> peaks) {
 		
 		/*
@@ -224,7 +316,7 @@ public abstract class CombineBaseMethod implements CombineMethod {
 	 * @param peaks
 	 * @return
 	 */
-	protected List<IPeak> correlationGrouping(final Options options,
+	private List<IPeak> correlationGrouping(final Options options,
 			Header header, final Random random, CorrelationMeasure measure,
 			float rangeMin, float rangeMax, IPeakSet<IPeak> peaks) {
 
@@ -282,96 +374,5 @@ public abstract class CombineBaseMethod implements CombineMethod {
 		return basepeaks;
 
 	}
-
-	protected Vector<IPeak> unpack(IPeak peak) {
-
-		Vector<IPeak> peaks = new Vector<IPeak>();
-		if (IPeakSet.class.equals(peak.getClass())) {
-			IPeakSet<IPeak> peakset = (IPeakSet<IPeak>) peak;
-			for (IPeak p : peakset)
-				peaks.addAll(unpack(p));
-		} else
-			peaks.add(peak);
-		return peaks;
-
-	}
-
-	@Deprecated
-	protected void evaluateResult(int noOfReplicates, int totalPeaks,
-			int peaksInThreeClusters, int peaksInTwoClusters,
-			List<double[]> intensesAll) {
-
-		double n2r = peaksInTwoClusters * 100 / totalPeaks;
-		double n3r = peaksInThreeClusters * 100 / totalPeaks;
-
-//		System.out.println("K = " + CombineTask.NO_OF_ALIGNMENT_CLUSTERS);
-//		System.out.println("Total peaks = " + totalPeaks);
-//		System.out.println("N2R = " + peaksInTwoClusters + "("
-//				+ String.format("%.2f", n2r) + "%)");
-//		System.out.println("N3R = " + peaksInThreeClusters + "("
-//				+ String.format("%.2f", n3r) + "%)");
-
-		for (int sourcePeakset = 0; sourcePeakset < noOfReplicates; sourcePeakset++) {
-			double[] intenses = new double[intensesAll.size()];
-			for (int i = 0; i < intensesAll.size(); i++) {
-				intenses[i] = intensesAll.get(i)[sourcePeakset];
-			}
-//			System.out.println("intenses_" + sourcePeakset + " = " + Arrays.toString(intenses) + ";");
-		}
-
-	}
-
-	/**
-	 * Compares list by their size In descending order
-	 * 
-	 * @author joewandy
-	 * 
-	 */
-	public static class ListSizeComparator<T> implements Comparator<List<T>> {
-		@Override
-		public int compare(List<T> o1, List<T> o2) {
-			int size1 = o1.size();
-			int size2 = o2.size();
-			return -Integer.compare(size1, size2);
-		}
-	}
-
-	public static class PeakMatchCompare<T extends IPeak> implements MatchCompare<T> {
-
-		private double rtWindow;
-		
-		public PeakMatchCompare(double rtWindow) {
-			this.rtWindow = rtWindow;
-		}
-		
-		public double distance(IPeak peak1, IPeak peak2) {
-		
-			double diff = Math.abs(peak1.getRetentionTime()
-					- peak2.getRetentionTime());
-			
-			if (diff > rtWindow) {
-				return -1;
-			}
-
-			Signal signal1 = peak1.getSignal();
-			Signal signal2 = peak2.getSignal();
-			if (diff > 30) {
-				double min1 = signal1.getMinX();
-				double max1 = signal1.getMaxX();
-				double min2 = signal2.getMinX();
-				double max2 = signal2.getMaxX();
-				if (min1 < min2 && max1 < min2) {
-					return -1;
-				}
-				if (min2 < min1 && max2 < min1) {
-					return -1;
-				}
-			}
-
-			return signal1.compareTo(signal2);
-
-		}
-
-	}
-
+	
 }

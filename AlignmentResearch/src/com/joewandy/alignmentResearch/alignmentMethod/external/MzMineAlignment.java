@@ -41,6 +41,7 @@ import net.sf.mzmine.util.ExitCode;
 import net.sf.mzmine.util.Range;
 
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
+import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
 import com.joewandy.alignmentResearch.alignmentMethod.BaseAlignment;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
@@ -49,9 +50,6 @@ import com.joewandy.alignmentResearch.objectModel.Feature;
 
 public abstract class MzMineAlignment extends BaseAlignment implements
 		AlignmentMethod, TaskListener {
-
-	// show setup dialog or not before alignment ?
-	private static final boolean SHOW_PARAM_SETUP_DIALOG = false;
 
 	// the value is set inside matchFeatures(), used by statusChanged()
 	private Task alignerTask;
@@ -71,10 +69,9 @@ public abstract class MzMineAlignment extends BaseAlignment implements
 	 *            Retention time tolerance in seconds
 	 * @param rtDrift
 	 */
-	public MzMineAlignment(List<AlignmentFile> dataList,
-			double massTolerance, double rtTolerance) {
+	public MzMineAlignment(List<AlignmentFile> dataList, AlignmentMethodParam param) {
 
-		super(dataList, massTolerance, rtTolerance);
+		super(dataList, param);
 		dataMap = new HashMap<AlignmentFile, RawDataFile>();
 		resultQueue = new ArrayBlockingQueue<AlignmentList>(1);
 		
@@ -119,7 +116,7 @@ public abstract class MzMineAlignment extends BaseAlignment implements
 		MZmineProcessingModule module = this.getAlignerModule();
 		System.out.println("Setting parameters for module " + module.getName());
 		ExitCode exitCode = ExitCode.OK;
-		if (MzMineAlignment.SHOW_PARAM_SETUP_DIALOG) {
+		if (AlignmentMethodParam.SHOW_PARAM_SETUP_DIALOG) {
 			exitCode = params.showSetupDialog();			
 		}
 		

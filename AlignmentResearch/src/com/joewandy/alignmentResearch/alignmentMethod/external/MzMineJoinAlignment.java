@@ -18,6 +18,7 @@ import net.sf.mzmine.parameters.parametertypes.RTToleranceParameter;
 import net.sf.mzmine.taskcontrol.TaskListener;
 
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
+import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 
 public class MzMineJoinAlignment extends MzMineAlignment implements
@@ -36,14 +37,11 @@ public class MzMineJoinAlignment extends MzMineAlignment implements
 	 *            Retention time tolerance in seconds
 	 * @param rtDrift
 	 */
-	public MzMineJoinAlignment(List<AlignmentFile> dataList,
-			double massTolerance, double rtTolerance) {
-
-		super(dataList, massTolerance, rtTolerance);
+	public MzMineJoinAlignment(List<AlignmentFile> dataList, AlignmentMethodParam param) {
+		super(dataList, param);
 		this.alignerModule = new JoinAlignerModule();
-		
 	}
-	
+		
 	protected ParameterSet prepareParameterSet(PeakList[] peakLists) {
 		
 		ParameterSet params = new JoinAlignerParameters();

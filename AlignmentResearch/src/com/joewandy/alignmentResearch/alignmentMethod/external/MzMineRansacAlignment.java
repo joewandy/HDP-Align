@@ -16,48 +16,20 @@ import net.sf.mzmine.parameters.parametertypes.RTToleranceParameter;
 import net.sf.mzmine.taskcontrol.TaskListener;
 
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
+import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 
 public class MzMineRansacAlignment extends MzMineAlignment implements
 		AlignmentMethod, TaskListener {
 
-	/** 
-	 * This value sets the range, in terms of retention time, to create the model 
-	 * using RANSAC and non-linear regression algorithm. 
-	 * Maximum allowed retention time difference
-	 */
-	private static final int PARAM_RT_TOLERANCE_BEFORE_CORRECTION = 300;
-
-	/**
-	 * Maximum number of iterations allowed in the algorithm to find the right model 
-	 * consistent in all the pairs of aligned peaks. When its value is 0, the number 
-	 * of iterations (k) will be estimate automatically.
-	 */
-	private static final int PARAM_RANSAC_ITERATION = 50000;
-//	private static final int PARAM_RANSAC_ITERATION = 0;
-
-	/**
-	 * % of points required to consider the model valid (d).
-	 */
-	private static final double PARAM_MINIMUM_NO_OF_POINTS = 0.10;
-
-	/**
-	 * Threshold value (minutes) for determining when a data 
-	 * point fits a model (t)
-	 */
-	private static final int PARAM_THRESHOLD_VALUE = 15;
-	
-	/**
-	 * Switch between polynomial model or lineal model
-	 */
-	private static final boolean PARAM_LINEAR_MODEL = true;
-	
-	/**
-	 * If checked, only rows having same charge state can be aligned
-	 */
-	private static final boolean PARAM_REQUIRE_SAME_CHARGE_STATE = false;	
-
 	private MZmineProcessingModule alignerModule;
+	private double rtToleranceBeforeMinute;
+	private double rtToleranceAfterMinute;
+	private int ransacIteration;
+	private double nMinPoints;
+	private double threshold;
+	private boolean linearModel;
+	private boolean sameChargeRequired;
 
 	/**
 	 * Creates a simple join aligner
@@ -70,14 +42,18 @@ public class MzMineRansacAlignment extends MzMineAlignment implements
 	 *            Retention time tolerance in seconds
 	 * @param rtDrift
 	 */
-	public MzMineRansacAlignment(List<AlignmentFile> dataList,
-			double massTolerance, double rtTolerance) {
-
-		super(dataList, massTolerance, rtTolerance);
+	public MzMineRansacAlignment(List<AlignmentFile> dataList, AlignmentMethodParam param) {
+		super(dataList, param);
 		this.alignerModule = new RansacAlignerModule();
-		
+		this.rtToleranceBeforeMinute = param.getRansacRtToleranceBeforeMinute();
+		this.rtToleranceAfterMinute = param.getRansacRtToleranceAfterMinute();
+		this.ransacIteration = param.getRansacIteration();
+		this.nMinPoints = param.getRansacNMinPoints();
+		this.threshold = param.getRansacThreshold();
+		this.linearModel = param.isRansacLinearModel();
+		this.sameChargeRequired = param.isRansacSameChargeRequired();
 	}
-	
+		
 	protected ParameterSet prepareParameterSet(PeakList[] peakLists) {
 		
 		ParameterSet params = new RansacAlignerParameters();
@@ -98,10 +74,7 @@ public class MzMineRansacAlignment extends MzMineAlignment implements
 		
 		// pre-initialise rt tolerance before & after parameters
 
-		final boolean absolute = true;
-		final double rtToleranceBeforeMinute = MzMineRansacAlignment.PARAM_RT_TOLERANCE_BEFORE_CORRECTION / 60.0;
-		final double rtToleranceAfterMinute = this.rtTolerance / 60.0;
-		
+		final boolean absolute = true;		
 		RTTolerance rtToleranceBefore = new RTTolerance(absolute, rtToleranceBeforeMinute);
 		RTToleranceParameter rtToleranceBeforeParam = params.getParameter(RansacAlignerParameters.RTToleranceBefore);
 		RTTolerance rtToleranceAfter = new RTTolerance(absolute, rtToleranceAfterMinute);
@@ -112,12 +85,6 @@ public class MzMineRansacAlignment extends MzMineAlignment implements
 		
 		// pre-initialise other ransac parameters
 		
-		final int ransacIteration = MzMineRansacAlignment.PARAM_RANSAC_ITERATION;
-		final double nMinPoints = MzMineRansacAlignment.PARAM_MINIMUM_NO_OF_POINTS/100.0;
-		final double threshold = MzMineRansacAlignment.PARAM_THRESHOLD_VALUE;
-		final boolean linearModel = MzMineRansacAlignment.PARAM_LINEAR_MODEL;
-		final boolean sameChargeRequired = MzMineRansacAlignment.PARAM_REQUIRE_SAME_CHARGE_STATE;
-
 		params.getParameter(RansacAlignerParameters.Iterations).setValue(ransacIteration);
 		params.getParameter(RansacAlignerParameters.NMinPoints).setValue(nMinPoints);
 		params.getParameter(RansacAlignerParameters.Margin).setValue(threshold);		

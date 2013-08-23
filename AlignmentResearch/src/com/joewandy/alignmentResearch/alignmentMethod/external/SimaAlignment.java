@@ -15,6 +15,7 @@ import org.apache.commons.exec.ExecuteException;
 import org.apache.commons.io.FileUtils;
 
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
+import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
 import com.joewandy.alignmentResearch.alignmentMethod.BaseAlignment;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
@@ -50,8 +51,8 @@ public class SimaAlignment extends BaseAlignment implements AlignmentMethod {
 	 * @param massTolerance Mass tolerance in ppm
 	 * @param rtTolerance Retention time tolerance in seconds
 	 */
-	public SimaAlignment(List<AlignmentFile> dataList, double massTolerance, double rtTolerance) {		
-		super(dataList, massTolerance, rtTolerance);
+	public SimaAlignment(List<AlignmentFile> dataList, AlignmentMethodParam param) {		
+		super(dataList, param);
 	}
 	
 	@Override

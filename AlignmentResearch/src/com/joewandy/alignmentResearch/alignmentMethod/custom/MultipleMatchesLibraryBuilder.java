@@ -11,6 +11,7 @@ import java.util.concurrent.BlockingQueue;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
+import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
 import com.joewandy.alignmentResearch.main.FeatureXMLAlignment;
 import com.joewandy.alignmentResearch.objectModel.AlignmentEdge;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
@@ -63,7 +64,9 @@ public class MultipleMatchesLibraryBuilder implements Runnable, PairwiseLibraryB
 		files.add(data1);
 		files.add(data2);
 
-		AlignmentMethod pairwiseAligner = new MultipleMatchesAlignment(files, massTolerance, rtTolerance);
+		AlignmentMethodParam.Builder paramBuilder = new AlignmentMethodParam.Builder(massTolerance, rtTolerance);
+		AlignmentMethodParam param = paramBuilder.build();
+		AlignmentMethod pairwiseAligner = new MultipleMatchesAlignment(files, param);
 		List<AlignmentRow> rows = pairwiseAligner.align();
 
 		// TODO: hack .. mark all features as unaligned, necessary when doing the final alignment later

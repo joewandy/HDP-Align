@@ -12,8 +12,6 @@ import com.joewandy.alignmentResearch.objectModel.Feature;
 
 public abstract class BaseAlignment implements AlignmentMethod {
 
-	private static final boolean ALIGN_BY_RELATIVE_MASS_TOLERANCE = false;
-	
 	protected double massTolerance;
 	protected boolean usePpm;
 	protected double rtTolerance;
@@ -29,14 +27,14 @@ public abstract class BaseAlignment implements AlignmentMethod {
 	 * @param rtTolerance Retention time tolerance in seconds
 	 * @param rtDrift 
 	 */
-	public BaseAlignment(List<AlignmentFile> dataList, double massTolerance, double rtTolerance) {		
+	public BaseAlignment(List<AlignmentFile> dataList, AlignmentMethodParam param) {		
 
 		this.dataList = dataList;		
 		
-		this.massTolerance = massTolerance;
+		this.massTolerance = param.getMassTolerance();
 		 // we use absolute mass tolerance for now to be the same as Lange, et al. (2008)
-		this.usePpm = BaseAlignment.ALIGN_BY_RELATIVE_MASS_TOLERANCE;		
-		this.rtTolerance = rtTolerance;
+		this.usePpm = param.isUsePpm();
+		this.rtTolerance = param.getRtTolerance();
 		
 		this.filters = new ArrayList<AlignmentResultFilter>();
 		this.filteredResult = new ArrayList<AlignmentRow>();				

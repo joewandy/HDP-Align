@@ -9,6 +9,7 @@ import java.util.PriorityQueue;
 import java.util.Set;
 
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
+import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
 import com.joewandy.alignmentResearch.alignmentMethod.BaseAlignment;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
@@ -26,9 +27,9 @@ public class CustomJoinAlignment extends BaseAlignment implements AlignmentMetho
 	 * @param rtTolerance Retention time tolerance in seconds
 	 * @param rtDrift 
 	 */
-	public CustomJoinAlignment(List<AlignmentFile> dataList, double massTolerance, double rtTolerance) {
+	public CustomJoinAlignment(List<AlignmentFile> dataList, AlignmentMethodParam param) {
 
-		super(dataList, massTolerance, rtTolerance);
+		super(dataList, param);
 		
 		featureList = new ArrayList<AlignmentList>();
 		for (AlignmentFile data : dataList) {

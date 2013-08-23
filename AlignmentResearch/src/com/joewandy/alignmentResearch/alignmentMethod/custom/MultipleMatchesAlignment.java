@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
+import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
 import com.joewandy.alignmentResearch.alignmentMethod.BaseAlignment;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
@@ -20,8 +21,8 @@ public class MultipleMatchesAlignment extends BaseAlignment implements Alignment
 	 * @param rtTolerance Retention time tolerance in seconds
 	 * @param rtDrift 
 	 */
-	public MultipleMatchesAlignment(List<AlignmentFile> dataList, double massTolerance, double rtTolerance) {		
-		super(dataList, massTolerance, rtTolerance);
+	public MultipleMatchesAlignment(List<AlignmentFile> dataList, AlignmentMethodParam param) {		
+		super(dataList, param);
 	}
 	
 	@Override

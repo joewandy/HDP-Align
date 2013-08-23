@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +12,7 @@ import java.util.Queue;
 import java.util.Set;
 
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
+import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
 import com.joewandy.alignmentResearch.alignmentMethod.BaseAlignment;
 import com.joewandy.alignmentResearch.main.FeatureXMLAlignment;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
@@ -34,9 +34,9 @@ public class GroupingInfoAlignment extends BaseAlignment implements AlignmentMet
 	 * @param rtTolerance Retention time tolerance in seconds
 	 * @param rtDrift 
 	 */
-	public GroupingInfoAlignment(List<AlignmentFile> dataList, double massTolerance, double rtTolerance) {
+	public GroupingInfoAlignment(List<AlignmentFile> dataList, AlignmentMethodParam param) {
 
-		super(dataList, massTolerance, rtTolerance);
+		super(dataList, param);
 		
 		featureList = new ArrayList<AlignmentList>();
 		for (AlignmentFile data : dataList) {

@@ -1,26 +1,16 @@
 package com.joewandy.alignmentResearch.alignmentMethod.custom;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-
-import org.paukov.combinatorics.Factory;
-import org.paukov.combinatorics.Generator;
-import org.paukov.combinatorics.ICombinatoricsVector;
 
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
+import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
 import com.joewandy.alignmentResearch.alignmentMethod.BaseAlignment;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentLibrary;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
 import com.joewandy.alignmentResearch.objectModel.ExtendedLibrary;
-import com.joewandy.alignmentResearch.objectModel.ExtendedLibraryEntry;
 import com.joewandy.alignmentResearch.objectModel.Feature;
 import com.joewandy.alignmentResearch.util.GraphEdgeConstructor;
 
@@ -36,9 +26,9 @@ public class ConsistencyAlignment extends BaseAlignment implements AlignmentMeth
 	 * @param rtTolerance Retention time tolerance in seconds
 	 * @param rtDrift 
 	 */
-	public ConsistencyAlignment(List<AlignmentFile> dataList, double massTolerance, double rtTolerance, int windowMultiply) {		
-		super(dataList, massTolerance, rtTolerance);
-		this.windowMultiply = windowMultiply;
+	public ConsistencyAlignment(List<AlignmentFile> dataList, AlignmentMethodParam param) {		
+		super(dataList, param);
+		this.windowMultiply = param.getRtWindowMultiply();
 	}
 	
 	@Override

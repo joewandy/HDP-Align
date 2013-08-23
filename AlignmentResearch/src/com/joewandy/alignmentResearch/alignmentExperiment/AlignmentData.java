@@ -29,6 +29,15 @@ public class AlignmentData {
 		return null;
 	}
 
+	public AlignmentFile getAlignmentFileById(int id) {
+		for (AlignmentFile file : alignmentDataList) {
+			if (file.getId() == id) {
+				return file;
+			}
+		}
+		return null;
+	}
+	
 	public GroundTruth getGroundTruth() {
 		return groundTruth;
 	}	

@@ -7,6 +7,7 @@ import java.util.concurrent.BlockingQueue;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
+import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
 import com.joewandy.alignmentResearch.objectModel.AlignmentEdge;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentLibrary;
@@ -57,7 +58,9 @@ public class BaselineMethodLibraryBuilder implements Runnable, PairwiseLibraryBu
 		files.add(data1);
 		files.add(data2);
 
-		AlignmentMethod pairwiseAligner = new BaselineAlignment(files, massTolerance, rtTolerance);
+		AlignmentMethodParam.Builder paramBuilder = new AlignmentMethodParam.Builder(massTolerance, rtTolerance);
+		AlignmentMethodParam param = paramBuilder.build();
+		AlignmentMethod pairwiseAligner = new BaselineAlignment(files, param);
 		List<AlignmentRow> rows = pairwiseAligner.align();
 
 		// TODO: hack .. mark all features as unaligned, necessary when doing the final alignment later

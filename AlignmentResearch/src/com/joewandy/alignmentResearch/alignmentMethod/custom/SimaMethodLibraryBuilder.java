@@ -7,6 +7,7 @@ import java.util.concurrent.BlockingQueue;
 import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
+import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
 import com.joewandy.alignmentResearch.alignmentMethod.external.MzMineRansacAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.external.SimaAlignment;
 import com.joewandy.alignmentResearch.objectModel.AlignmentEdge;
@@ -58,7 +59,10 @@ public class SimaMethodLibraryBuilder implements Runnable, PairwiseLibraryBuilde
 		List<AlignmentFile> files = new ArrayList<AlignmentFile>();
 		files.add(data1);
 		files.add(data2);
-		AlignmentMethod simaAligner = new SimaAlignment(files, massTolerance, rtTolerance);
+		
+		AlignmentMethodParam.Builder paramBuilder = new AlignmentMethodParam.Builder(massTolerance, rtTolerance);
+		AlignmentMethodParam param = paramBuilder.build();
+		AlignmentMethod simaAligner = new SimaAlignment(files, param);
 		List<AlignmentRow> rows = getAlignedRows(simaAligner);
 		
 		/*

@@ -34,6 +34,7 @@ import com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.Alignmen
 import com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.AlignmentDataGeneratorFactory;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodFactory;
+import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
 import com.joewandy.alignmentResearch.filter.AlignmentResultFilter;
 import com.joewandy.alignmentResearch.filter.GraphAlignmentResultFilter;
 import com.joewandy.alignmentResearch.filter.SizeAlignmentResultFilter;
@@ -61,10 +62,11 @@ public class FeatureXMLAlignment {
 	public static final int ALIGNMENT_SIZE_THRESHOLD = 2;
 	public static final int GROUP_SIZE_THRESHOLD = 0;
 	
+	public static final boolean ALIGN_BY_RELATIVE_MASS_TOLERANCE = false;
 	public static final int RTWINDOW_MULTIPLY = 1;
 	public static final boolean PARALLEL_LIBRARY_BUILD = false;
 
-	public static final boolean WEIGHT_USE_WEIGHTED_SCORE = true;
+	public static final boolean WEIGHT_USE_WEIGHTED_SCORE = false;
 	public static final boolean WEIGHT_USE_PROB_CLUSTERING_WEIGHT = false;
 	public static final boolean WEIGHT_USE_ALL_PEAKS = false;
 	
@@ -357,7 +359,9 @@ public class FeatureXMLAlignment {
 		}	
 
 		// pick alignment method
-		AlignmentMethod aligner = AlignmentMethodFactory.getAlignmentMethod(options, data);
+		AlignmentMethodParam.Builder paramBuilder = new AlignmentMethodParam.Builder(
+				options.alignmentPpm, options.alignmentRtwindow);
+		AlignmentMethod aligner = AlignmentMethodFactory.getAlignmentMethod(options.method, paramBuilder, data);
 
 		// setup some filters to prune alignment results later
 		if (options.grouping) {
