@@ -1,0 +1,14 @@
+#Fat Jar Configuration File
+#Wed Aug 08 22:07:53 BST 2012
+onejar.license.required=true
+manifest.classpath=
+manifest.removesigners=true
+onejar.checkbox=false
+jarname=mzmatch.jar
+manifest.mergeall=true
+manifest.mainclass=
+manifest.file=<createnew>
+jarname.isextern=false
+onejar.expand=
+excludes=<po|cmdline>~.svn/;<jar|Jama-1.0.2.jar>;<jar|lma_v14.jar>;<jar|iText-2.1.7.jar>;<jar|swt_3.5.1-win32.jar>;<jar|jcommon-1.0.16.jar>;<jar|jfreechart-1.0.13.jar>;<jar|swt_3.5.1-win32.jar>
+includes=

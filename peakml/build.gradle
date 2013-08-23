@@ -1,0 +1,45 @@
+import org.gradle.plugins.ide.eclipse.model.SourceFolder
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+sourceSets.main.java.srcDir 'src'
+
+repositories {
+	flatDir {
+		dirs 'lib'
+	}
+}
+
+eclipse.classpath.file.whenMerged { classpath ->
+	classpath.entries.add(new SourceFolder('/domsax', ''))
+}
+
+eclipse {
+    	pathVariables 'GRADLE_USER_HOME': gradle.gradleUserHomeDir
+	project {
+		referencedProjects 'domsax'
+	}
+}
+
+dependencies {
+	compile project(':domsax')
+
+	//compile 'com.lowagie:iText:2.1.7'
+	//compile 'javanumerics:Jama:1.0.2'
+	//compile 'jfree:jcommon:1.0.16'
+	//compile 'jfree:jfreechart:1.0.13'
+	compile files('lib/iText-2.1.7.jar')
+	compile files('lib/Jama-1.0.2.jar')
+	compile files('lib/jcommon-1.0.16.jar')
+	compile files('lib/jfreechart-1.0.13.jar')
+	//testCompile 'junit:junit:4.6'
+	compile files('lib/lma_v14.jar')
+	compile files('lib/swt_3.5.1-win32.jar')
+	testCompile files('lib/junit-4.6.jar')
+}
+
+task fatjar(type: Jar) {
+	from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+	classifier = 'with-dependencies'
+}

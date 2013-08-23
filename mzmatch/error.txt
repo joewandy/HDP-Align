@@ -1,0 +1,5 @@
+java.io.FileNotFoundException: /home/joewandy/Dropbox/Project/complex_dataset/streptococcus_data/orbitrap_apcpk_merlo/abcpk/C18/04/*.peakml (No such file or directory)
+	at java.io.FileInputStream.open(Native Method)
+	at java.io.FileInputStream.<init>(FileInputStream.java:138)
+	at java.io.FileInputStream.<init>(FileInputStream.java:97)
+	at mzmatch.ipeak.align.CowCoda.main(CowCoda.java:315)

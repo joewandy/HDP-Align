@@ -1,0 +1,564 @@
+
+<!DOCTYPE html>
+<meta charset="utf-8">
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no"/>
+    <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=true"></script>
+    <script src="http://d3js.org/d3.v3.js"></script> 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.1/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.1/themes/ui-lightness/jquery-ui.css" type="text/css" media="all" />
+        
+	<style>
+
+      text.mono {
+        font-size: 14pt;
+        font-family: Helvetica;
+        fill: #000;
+      }
+      text.highlight {
+        fill: #F00;
+      }
+
+      #map{
+        width:800px;
+        height:400px;
+      }          
+
+      .stations, .stations svg {
+        position: absolute;
+      }
+      
+      .stations svg {
+        width: 60px;
+        height: 20px;
+        padding-right: 100px;
+        font: 10px sans-serif;
+      }
+      
+      /* tell the SVG path to be a thin blue line without any area fill */
+      path {
+        stroke: steelblue;
+        stroke-width: 1;
+        fill: none;
+      }
+
+      .axis {
+        shape-rendering: crispEdges;
+      }
+
+      .x.axis line {
+        stroke: lightgrey;
+      }
+
+      .x.axis .minor {
+        stroke-opacity: .5;
+      }
+
+      .x.axis path {
+        display: none;
+      }
+
+      .y.axis line, .y.axis path {
+        fill: none;
+        stroke: #000;
+      }
+
+	#content {
+	  width: 1200px ;
+	  margin-left: auto ;
+	  margin-right: auto ;
+	}
+            
+    </style>
+  </head>
+
+
+  <body>
+  
+  <div id="content">
+  
+  <div id="requestForm" >
+      <form>
+
+       Commodities: <input id="commoditiesQueryTextField" type="text" name="commodities" size="160" /><br/><br/>
+
+	   <input id="timeMinQueryTextField" type="hidden" name="timeMin" value="1600" />
+	   <input id="timeMaxQueryTextField" type="hidden" name="timeMax" value="2000" />
+       <div id="timeQueryDiv">Year Range: 1600 - 2000</div><br/>
+       <div id="graph" class="aGraph"></div>
+	   <div id="slider-range" style="width: 80%px; margin-left:10%; margin-right:10%"></div><br/>
+
+      <button type="button" onclick="sendRequest()">Click Me!</button> <br/><br/>   
+    </form></div> 
+
+    <div id="map"></div>
+
+    <div id="colAxisChooser">
+      <input type="radio" name="colAxis" value="Locations" onClick="colsToLocations()">Locations<br>
+      <input type="radio" name="colAxis" value="Locations" onClick="colsToDisasters()">Disasters<br>
+      <input type="radio" name="colAxis" value="Locations" onClick="colsToDiseases()">Diseases<br>
+      <input type="radio" name="colAxis" value="Commodities" onClick="colsToCommodities()">Commodities
+    </div>
+
+    <div id="chart">
+      <button type="button" text="Change axis" onclick="changeAxis()"/>
+    </div>
+
+	</div>
+
+    <script>
+
+    function sendRequest()
+    {
+      $('#console').text("Send Request");
+//      $.ajax({
+//        dataType: "json",
+//        url: "http://138.251.207.183/test.php",
+//        data: $("#commoditiesQueryTextField").text(),
+//        success: function(data, httpCode, something){ updateData(data);},
+//        error: function(data){ $('#console').text("Request Error");} 
+//      });
+      // $.get("http://138.251.207.183/test.php", function(data) {
+      //   // alert("Data Loaded: " + data);
+      //   updateData(data);
+      // });
+      var url1 = "data/commoditylocation.json";
+      showMap(url1);
+      var url2 = "data/commodities-2.json" ;
+      showMatrix(url2);  
+    }
+
+      ////////////////////////
+      /// VISUALIATIONS ///// 
+      //////////////////////
+      
+
+      var margin = { top: 50, right: 0, bottom: 100, left: 30 },
+          width = 960 - margin.left - margin.right,
+          height = 430 - margin.top - margin.bottom,
+          gridSize = 20;
+          legendElementWidth = gridSize*2,
+          buckets = 9,
+          colors = ["#ffffd9","#edf8b1","#c7e9b4","#7fcdbb","#41b6c4","#1d91c0","#225ea8","#253494","#081d58"], // alternatively colorbrewer.YlGnBu[9]
+          x_zero = 120,
+          y_zero = 60;
+      var svg_mat;
+      var columns = new Array();
+        var colCount = 0;
+        var rows = new Array();
+        var rowCount = 0;
+        var freqMax = 0;
+
+        
+
+      var opacityMapper = d3.scale.linear();
+      var groupMapper = d3.scale.linear();
+        
+
+     function colsToLocations(){
+
+      /////////////////////
+      //// MATRIX with data
+      /////////////////////
+
+      d3.json("data/commoditylocation.json", function(error, data) 
+      {
+          var columns = new Array();
+          var colCount = 0;
+          var maxOcc = 0;
+          for (var i = 0, len = data.length; i < len; i++) {
+              if(columns.indexOf(data[i].location_text) == -1){
+                columns[colCount] = data[i].location_text;
+                colCount++;
+                if( data[i].freq > maxOcc){
+                  maxOcc = data[i].freq;
+                }
+              }
+          }
+
+          opacityMapper.domain([1, maxOcc])
+          opacityMapper.range([0, 1]);
+
+
+          var colLabels = svg_mat.selectAll(".columnLabel").remove();
+          var colLabels = svg_mat.selectAll(".columnLabel")
+                .data(columns)
+                .enter().append("text")
+                  .attr("id", function(d,i){ return data[i].location_text})
+                  .text(function(d,i) { return data[i].location_text; })
+                  .attr("y", function(d, i) { return i * gridSize + x_zero; })
+                  .attr("x", -y_zero + 10)
+                  .style("text-anchor", "right")
+                  .attr("transform", "rotate(-90)")
+                  .on("mouseover", mouseOverLabel)
+                  .on("mouseout", mouseOutLabel)
+                  .attr("class", "mono")
+                  .call(d3.behavior.drag().on("drag", moveColLabel))
+
+          var cells = svg_mat.selectAll(".cell").remove();
+          var cells = svg_mat.selectAll(".cell")
+                .data(data)
+                .enter().append("rect")
+                .attr("y", function(d,i) { 
+                   return y_zero + (rows.indexOf(data[i].commodity_text)) * gridSize; })
+                    .attr("x", function(d,i) { 
+                   return x_zero + (columns.indexOf(data[i].location_text)) * gridSize;
+                })
+                  .attr("rx", 4)
+                  .attr("class", "cell")
+                  .attr("ry", 4)
+                  .attr("width", gridSize)
+                  .attr("height", gridSize)
+                  .style("fill", "#000")
+                  .style("opacity", function(d,i){return opacityMapper(data[i].freq);})
+                ;
+
+        });
+
+    }
+    function colsToDisasters(){
+
+    }
+    function colsToDiseases(){
+
+    }
+    function colsToCommodities(){
+
+    }
+
+      var googlemap;
+      googlemap = new google.maps.Map(d3.select("#map").node(), {
+            zoom: 2,
+            center: new google.maps.LatLng(0,0),
+            mapTypeId: google.maps.MapTypeId.TERRAIN
+      }); 
+      
+    
+      
+
+
+
+      
+
+
+      //////////////////////////
+      //// HELPER FUNCTIONS ////
+      //////////////////////////
+
+      function showMap(url){
+        d3.json(url, function(error, data) 
+      {
+        //////////////////////////
+        //// MAP with data
+        //////////////////////////
+
+        groupMapper.domain([0, (rows.length-1)/2, rows.length-1])
+        groupMapper.range(["#F00", "#0F0", "#00F"]);
+
+   
+        var overlay = new google.maps.OverlayView();
+ 
+        // Add the container when the overlay is added to the map.
+        overlay.onAdd = function() 
+        {
+          var layer = d3.select(this.getPanes().overlayLayer).append("div")
+              .attr("class", "stations");
+  
+            // Draw each marker as a separate SVG element.
+            // We could use a single SVG, but what size would it have?
+            overlay.draw = function() 
+            {
+              var projection = this.getProjection(), 
+                padding = 10;
+           
+                var marker = layer.selectAll("svg")
+                    .data(data)
+                    .each(transform) // update existing markers
+                    .enter().append("svg:svg")
+                    .each(transform)
+           
+                // Add a circle.
+                marker.append("svg:circle")
+                    .attr("r", 2)
+                    .attr("class", function(d,i){return "marker "+ data[i].commodity_text;})
+                    .attr("fill", "#000")  
+                    .attr("opacity", 0.1)
+                    .attr("cx", padding)
+                    .attr("cy", padding);
+           
+                function transform(d) 
+                {
+                  var d = new google.maps.LatLng(d.lat, d.lon);
+                  d = projection.fromLatLngToDivPixel(d);
+                  return d3.select(this)
+                      .style("left", (d.x - padding) + "px")
+                      .style("top", (d.y - padding) + "px");
+                };
+              }
+          }      
+          overlay.setMap(googlemap);
+        });
+ 
+      }
+
+
+      function showMatrix(url){
+        // PARSE DATA AND INIT VISUALIZATION
+      // d3.json("data/trades_2.json", function(error, data) 
+      d3.json(url, function(error, data) 
+      {
+       
+        /////////////////////
+        //// MATRIX with data
+        /////////////////////
+
+        
+        var colorScale = d3.scale.quantile()
+              .domain([1880,1890])
+              .range(colors);
+
+
+        for (var i = 0, len = data.length; i < len; i++) 
+        {
+            if(rows.indexOf(data[i].commodity_1) == -1){
+              rows[rowCount] = data[i].commodity_1;
+              rowCount++;
+            }
+            if(rows.indexOf(data[i].commodity_2) == -1){
+               columns[colCount] = data[i].commodity_2;
+               colCount++;
+            }
+            if(data[i].freq > freqMax){
+                freqMax = data[i].freq;
+            }
+            $('#console').text("FreqMax " + freqMax);
+    
+        }
+
+        opacityMapper.domain([1, freqMax])
+        opacityMapper.range([0, 1]);
+
+       
+        svg_mat = d3.select("#chart").append("svg")
+              .attr("width", width + margin.left + margin.right)
+              .attr("height", height + margin.top + margin.bottom)
+              .append("g")
+              .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        var rowLabels = svg_mat.selectAll(".rowLabel")
+              .data(rows)
+              .enter().append("text")
+                .text(function (d,i) { return rows[i] })
+                .attr("x", -10)
+                .attr("y", function (d, i) { return ((i+1) * gridSize) + y_zero -5; })
+                .style("text-anchor", "end")
+                .attr("transform", "translate(100,0)")
+                .on("mouseover", mouseOverLabel)
+                .on("mouseout", mouseOutLabel)
+                .attr("class", "mono")
+   
+        var colLabels = svg_mat.selectAll(".columnLabel")
+              .data(columns)
+              .enter().append("text")
+                .attr("id", function(d,i){ return columns[i];})
+                .text(function(d,i) { return columns[i];})
+                .attr("y", function(d, i) { return i * gridSize + x_zero; })
+                .attr("x", -y_zero + 10)
+                .style("text-anchor", "right")
+                .attr("transform", "rotate(-90)")
+                .on("mouseover", mouseOverLabel)
+                .on("mouseout", mouseOutLabel)
+                .attr("class", "mono columnLabel")
+                .call(d3.behavior.drag().on("drag", moveColLabel))
+
+
+        var cells = svg_mat.selectAll(".cell")
+              .data(data)
+              .enter().append("rect")
+                .attr("y", function(d,i) { 
+                   return y_zero + (rows.indexOf(data[i].commodity_1)) * gridSize; })
+                .attr("x", function(d,i) { 
+                   return x_zero + (columns.indexOf(data[i].commodity_2)) * gridSize;
+                })
+                .attr("rx", 3).attr("ry", 3)
+                .attr("width", gridSize)
+                .attr("height", gridSize)
+                // .style("fill", function(d,i) { return colorScale(data[i].pub_year)})
+                .style("fill", "#000000")
+                .style("opacity", function(d,i){return opacityMapper(data[i].freq);})
+                .attr("class", "cell");
+              ;
+      });
+      // END OF JSON PARSING
+      }
+
+      function setPosition(i)
+      {
+        d3.select(this)
+          .attr("y", function(d,i) { 
+                   return y_zero + (rows.indexOf(data[i].commodity_1)) * gridSize; })
+          .attr("x", function(d,i) { 
+                   return x_zero + (columns.indexOf(data[i].commodity_2)) * gridSize;
+                })
+        return d3.select(this);
+      }
+
+
+      function showError(t)
+      {
+        $('#console').text("Request Error");
+        // d3.json(jsonData, function(error, data) 
+        // {
+        //     // update data
+        // }
+      }
+
+      var mouseOverLabel = function()
+      {
+        var label = d3.select(this);
+        label.attr("class", "mono highlight columnLabel");
+        
+        d3.selectAll("." + label.text())
+          .each(transformMarker) // update existing markers
+      }
+
+      var mouseOutLabel = function(){
+      d3.selectAll(".columnLabel")
+                .attr("class", "mono columnLabel")
+
+       d3.selectAll(".marker")
+          .each(resetMarker) // update existing markers
+      }
+
+      function transformMarker(d) 
+      {
+        d3.select(this)
+          .attr("fill", "#f00")  
+          .attr("opacity", 1);
+        return d3.select(this);
+      };
+
+      function resetMarker(d) 
+      {
+        d3.select(this)
+          .attr("fill", "#000")  
+          .attr("opacity", .1);
+        return d3.select(this);
+      };
+
+
+      function moveColLabel(){
+        var dragTarget = d3.select(this);
+        dragTarget
+          .attr("y", function(){return d3.event.dx + parseInt(dragTarget.attr("y"))});
+
+        svg_mat.selectAll(".columnLabel")
+          .attr("x", function(d,i){return 100});
+      }
+
+    </script>
+    
+    <!--  FOR SLIDER -->
+	 <script>
+    /* implementation heavily influenced by http://bl.ocks.org/1166403 */
+
+    // define dimensions of graph
+    var m = [80, 80, 80, 80]; // margins
+    var w = 1000 - m[1] - m[3]; // width
+    var h = 400 - m[0] - m[2]; // height
+
+    // create a simple data array that we'll plot with a line (this array represents only the Y values, X will just be the index location)
+    var data = [0];
+    for (var i = 1; i < 1000; i++) {
+      var sign = Math.random() > 0.5 ? +1 : -1;
+      data.push(data[i-1] + sign * Math.random());
+    }
+
+    // X scale will fit all values from data[] within pixels 0-w
+    var x = d3.scale.linear().domain([0, data.length]).range([0, w]);
+    // Y scale will fit values from 0-10 within pixels h-0 (Note the inverted domain for the y-scale: bigger is up!)
+    var y = d3.scale.linear().domain([d3.min(data), d3.max(data)]).range([h, 0]);
+      // automatically determining max range can work something like this
+      // var y = d3.scale.linear().domain([0, d3.max(data)]).range([h, 0]);
+
+    // create a line function that can convert data[] into x and y points
+    var line = d3.svg.line().interpolate("monotone")
+      // assign the X function to plot our line as we wish
+      .x(function(d,i) {
+        // verbose logging to show what's actually being done
+        // console.log('Plotting X value for data point: ' + d + ' using index: ' + i + ' to be at: ' + x(i) + ' using our xScale.');
+        // return the X coordinate where we want to plot this datapoint
+        return x(i);
+      })
+      .y(function(d) {
+        // verbose logging to show what's actually being done
+        // console.log('Plotting Y value for data point: ' + d + ' to be at: ' + y(d) + " using our yScale.");
+        // return the Y coordinate where we want to plot this datapoint
+        return y(d);
+      });
+
+      // Add an SVG element with the desired dimensions and margin.
+      var graph = d3.select("#graph").append("svg:svg")
+            .attr("width", w + m[1] + m[3])
+            .attr("height", h + m[0] + m[2])
+            .attr("display", "none")
+          	.append("svg:g")
+            .attr("transform", "translate(" + m[3] + "," + m[0] + ")");
+
+      // create yAxis
+      var xAxis = d3.svg.axis().scale(x).tickSize(-h).tickSubdivide(3);
+      // Add the x-axis.
+      graph.append("svg:g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(0," + h + ")")
+            .call(xAxis);
+
+      // create left yAxis
+      var yAxisLeft = d3.svg.axis().scale(y).ticks(4).orient("left");
+      // Add the y-axis to the left
+      graph.append("svg:g")
+            .attr("class", "y axis")
+            .attr("transform", "translate(-25,0)")
+            .call(yAxisLeft);
+
+       var clip = graph.append("defs").append("svg:clipPath")
+        .attr("id", "clip")
+        .append("svg:rect")
+        .attr("id", "clip-rect")
+        .attr("x", "0")
+        .attr("y", "0")
+        .attr("width", w)
+        .attr("height", h);
+
+
+      // Add the line by appending an svg:path element with the data line we created above
+      // do this AFTER the axes above so that the line is above the tick-lines
+      var path = graph.append("svg:path")
+        .attr("class","path")
+        .attr("clip-path", "url(#clip)")
+        .attr("d", line(data));
+
+
+  $(function() {
+        $( "#slider-range" ).slider({
+            range: true,
+            min: 1600,
+            max: 2000,
+            values: [ 1600, 2000 ],
+            slide: function( event, ui ) {
+              var begin = ui.values[0];
+              var end = ui.values[1];
+              console.log("begin:", begin, "end:", end);
+              $("#timeQueryDiv").html("Year Range: " + begin + " - " + end);
+              $("#timeMinQueryTextField").val(begin);
+              $("#timeMaxQueryTextField").val(end);
+            }
+        });
+    });
+  
+  </script>
+      
+  </body>
+</html>

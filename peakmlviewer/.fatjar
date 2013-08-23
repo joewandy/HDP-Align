@@ -1,0 +1,14 @@
+#Fat Jar Configuration File
+#Thu Jan 21 17:45:35 CET 2010
+onejar.license.required=true
+manifest.classpath=
+manifest.removesigners=true
+onejar.checkbox=false
+jarname=peakmlviewer_win32_v1.0.0.jar
+manifest.mergeall=true
+manifest.mainclass=peakmlviewer.PeakMLViewer
+manifest.file=<createnew>
+jarname.isextern=false
+onejar.expand=
+excludes=
+includes=
