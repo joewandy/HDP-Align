@@ -3,7 +3,7 @@ package com.joewandy.mzmatch;
 import java.io.IOException;
 import java.util.Arrays;
 
-import mzmatch.ipeak.CombineTask;
+import mzmatch.ipeak.combineMethod.CombineMethod;
 import dk.ange.octave.OctaveEngine;
 import dk.ange.octave.OctaveEngineFactory;
 import dk.ange.octave.type.Octave;
@@ -23,8 +23,8 @@ public class TestOctaveEngine {
 		int numAlignmentClusters = 50;
 		octave.put("K", Octave.scalar(numAlignmentClusters));
 		
-		octave.eval("cd " + CombineTask.MATLAB_OUTPUT_PATH);
-		octave.eval("load " + CombineTask.MATLAB_OUTPUT_FILENAME);
+		octave.eval("cd " + CombineMethod.MATLAB_OUTPUT_PATH);
+		octave.eval("load " + CombineMethod.MATLAB_OUTPUT_FILENAME);
 		octave.eval("pkg load general;");
 		octave.eval("q = par_em(X, K);");
 		DoubleMatrix octaveMat = octave.get(OctaveDouble.class, "q");

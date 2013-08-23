@@ -28,6 +28,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 
+import mzmatch.ipeak.combineMethod.CombineGreedyMethod;
+import mzmatch.ipeak.combineMethod.CombineMethod;
 import mzmatch.ipeak.sort.CorrelationMeasure;
 import mzmatch.ipeak.sort.RelatedPeaks.CosineMeasure;
 import mzmatch.ipeak.sort.RelatedPeaks.PearsonMeasure;
@@ -449,9 +451,9 @@ public class Combine {
 				totalPeaks += ps.getPeaks().size();
 			}
 
-			CombineTask task = null;
+			CombineMethod task = null;
 			if ("greedy".equals(options.method)) {
-				task = new CombineGreedyTask();
+				task = new CombineGreedyMethod();
 			} else if ("join".equals(options.method)) {
 				
 			} else if ("ransac".equals(options.method)) {

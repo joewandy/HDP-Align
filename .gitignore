@@ -1,4 +1,5 @@
 *.mat
+*.zip
 .svn*
 *.pydevproject
 .project
