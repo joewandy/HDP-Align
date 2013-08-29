@@ -125,6 +125,8 @@ public class SimaAlignment extends BaseAlignment implements AlignmentMethod {
 		cmdLine.addArgument("${mz}");
 		cmdLine.addArgument("-i");
 		cmdLine.addArgument("${tempDirPath}");
+		cmdLine.addArgument("-a");
+		cmdLine.addArgument("reference");
 		cmdLine.setSubstitutionMap(map);
 		DefaultExecutor executor = new DefaultExecutor();
 		

@@ -622,7 +622,7 @@ public class IPeakSet<Type extends IPeak> extends IPeak implements Iterable<Type
 			peak.setPatternID(id);
 	}
 
-	// debug only
+	// should be used for debugging only
 	public void setSourcePeakset(int peaksetIndex)
 	{
 		int peakId = 0;

@@ -38,7 +38,7 @@ public class PeakMLToFeatureXML {
 	
 	// main entrance
 	final static String version = "1.0";
-	final static String application = "MLToMzMine";
+	final static String application = "PeakMLToFeatureXML";
 
 	@OptionsClass(name = application, version = version, author = "Joe Wandy (j.wandy.1@research.gla.ac.uk)", 
 			description = "Convert PeakML to a XML format that can be imported by MzMine (via the Import XML function)"

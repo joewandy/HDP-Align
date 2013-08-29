@@ -1,3 +1,3 @@
 java.lang.NullPointerException
-	at com.joewandy.alignmentResearch.main.FeatureXMLAlignment.runExperiment(FeatureXMLAlignment.java:347)
-	at com.joewandy.alignmentResearch.main.FeatureXMLAlignment.main(FeatureXMLAlignment.java:229)
+	at com.joewandy.alignmentResearch.main.FeatureXMLAlignment.runExperiment(FeatureXMLAlignment.java:369)
+	at com.joewandy.alignmentResearch.main.FeatureXMLAlignment.main(FeatureXMLAlignment.java:233)

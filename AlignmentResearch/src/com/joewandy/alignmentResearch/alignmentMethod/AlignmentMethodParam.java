@@ -12,8 +12,7 @@ public class AlignmentMethodParam {
 	 * using RANSAC and non-linear regression algorithm. 
 	 * Maximum allowed retention time difference
 	 */
-//	public static final int PARAM_RT_TOLERANCE_BEFORE_CORRECTION = 300;
-	public static final int PARAM_RT_TOLERANCE_BEFORE_CORRECTION = 120;
+	public static final int PARAM_RT_TOLERANCE_BEFORE_CORRECTION = 300;
 
 	/**
 	 * Maximum number of iterations allowed in the algorithm to find the right model 

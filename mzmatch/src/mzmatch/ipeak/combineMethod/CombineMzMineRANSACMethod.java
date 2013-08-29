@@ -2,7 +2,7 @@ package mzmatch.ipeak.combineMethod;
 
 import java.util.List;
 
-import mzmatch.ipeak.Combine.Options;
+import mzmatch.ipeak.CombineOptions;
 import peakml.IPeak;
 import peakml.IPeakSet;
 
@@ -18,7 +18,7 @@ public class CombineMzMineRANSACMethod extends CombineBaseMethod implements Comb
 
 	@Override
 	protected List<IPeakSet<IPeak>> getMatches(
-			List<IPeakSet<IPeak>> peaksets, Options options) {
+			List<IPeakSet<IPeak>> peaksets, CombineOptions options) {
 		
 		// convert List<IPeakSet<IPeak>> to List<AlignmentFile>
 		AlignmentDataGenerator gen = new RealDataGenerator(peaksets);

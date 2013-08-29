@@ -12,7 +12,7 @@ import java.util.Random;
 import java.util.Vector;
 import java.util.zip.GZIPOutputStream;
 
-import mzmatch.ipeak.Combine.Options;
+import mzmatch.ipeak.CombineOptions;
 import mzmatch.ipeak.sort.Clusterer;
 import mzmatch.ipeak.sort.CorrelationClusterer;
 import mzmatch.ipeak.sort.CorrelationMeasure;
@@ -38,7 +38,7 @@ import com.joewandy.alignmentResearch.objectModel.Feature;
 
 public abstract class CombineBaseMethod implements CombineMethod {
 
-	public void process(final Options options, Header header,
+	public void process(final CombineOptions options, Header header,
 			Vector<IPeakSet<IPeak>> peaksets, ParseResult[] results,
 			final Random random, CorrelationMeasure measure, float rangeMin,
 			float rangeMax, int totalPeaks, OutputStream output) throws IOException, FileNotFoundException {
@@ -66,7 +66,7 @@ public abstract class CombineBaseMethod implements CombineMethod {
 		
 	}
 	
-	protected abstract List<IPeakSet<IPeak>> getMatches(List<IPeakSet<IPeak>> peaksets, Options options);
+	protected abstract List<IPeakSet<IPeak>> getMatches(List<IPeakSet<IPeak>> peaksets, CombineOptions options);
 	
 	protected void preprocess(IPeakSet<IPeak> peaks) {
 
@@ -154,7 +154,7 @@ public abstract class CombineBaseMethod implements CombineMethod {
 	 * ===================================================
 	 */
 	
-	protected List<Map<Integer, List<IPeak>>> groupPeaks(final Options options,
+	protected List<Map<Integer, List<IPeak>>> groupPeaks(final CombineOptions options,
 			Header header, Vector<IPeakSet<IPeak>> peaksets,
 			final Random random, CorrelationMeasure measure, float rangeMin,
 			float rangeMax, String method) {
@@ -284,7 +284,7 @@ public abstract class CombineBaseMethod implements CombineMethod {
 	 * @param peaks
 	 * @return
 	 */
-	private List<IPeak> greedyGrouping(final Options options, Header header,
+	private List<IPeak> greedyGrouping(final CombineOptions options, Header header,
 			CorrelationMeasure measure, IPeakSet<IPeak> peaks) {
 		
 		/*
@@ -316,7 +316,7 @@ public abstract class CombineBaseMethod implements CombineMethod {
 	 * @param peaks
 	 * @return
 	 */
-	private List<IPeak> correlationGrouping(final Options options,
+	private List<IPeak> correlationGrouping(final CombineOptions options,
 			Header header, final Random random, CorrelationMeasure measure,
 			float rangeMin, float rangeMax, IPeakSet<IPeak> peaks) {
 

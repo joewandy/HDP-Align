@@ -105,7 +105,7 @@ public class GroupingInfoAlignment extends BaseAlignment implements AlignmentMet
 
             /*
              * 2. Next, maps between rows and their scores. For the first iteration,
-             * since nothing is inside scoreQueue, nothing will happen.
+             * since nothing is inside scoreList, nothing will happen.
              */
             
             Map<AlignmentRow, AlignmentRow> alignmentMapping = mapping(scoreList);
@@ -116,19 +116,19 @@ public class GroupingInfoAlignment extends BaseAlignment implements AlignmentMet
              */
             
             // Align all rows using mapping
-            for (AlignmentRow row : allRows) {
+            for (AlignmentRow referenceRow : allRows) {
             	
-            	AlignmentRow referenceRow = alignmentMapping.get(row);
+            	AlignmentRow masterListRow = alignmentMapping.get(referenceRow);
             	
                 // If we have no mapping for this row, add as new entry to masterList
-                if (referenceRow == null) {
-                    referenceRow = new AlignmentRow(newRowId);
+                if (masterListRow == null) {
+                    masterListRow = new AlignmentRow(newRowId);
                     newRowId++;
-                    masterList.addRow(referenceRow);
+                    masterList.addRow(masterListRow);
                 }
                 
                 // Add all peaks from the original row to the aligned row
-                referenceRow.addFeatures(row.getFeatures());
+                masterListRow.addFeatures(referenceRow.getFeatures());
             	
             }
             
@@ -152,7 +152,6 @@ public class GroupingInfoAlignment extends BaseAlignment implements AlignmentMet
 		Set<AlignmentRow> men = new HashSet<AlignmentRow>();
 		Set<AlignmentRow> women = new HashSet<AlignmentRow>();
 
-		// Iterate scores by ascending order, lower score (lower difference) is better match
 		for (WeightedRowVsRowScore score : scoreList) {
 		    AlignmentRow man = score.getMasterListCandidate();
 		    AlignmentRow woman = score.getReference();

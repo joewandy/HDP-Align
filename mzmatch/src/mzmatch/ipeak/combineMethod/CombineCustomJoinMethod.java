@@ -2,7 +2,7 @@ package mzmatch.ipeak.combineMethod;
 
 import java.util.List;
 
-import mzmatch.ipeak.Combine.Options;
+import mzmatch.ipeak.CombineOptions;
 import peakml.IPeak;
 import peakml.IPeakSet;
 
@@ -18,7 +18,7 @@ public class CombineCustomJoinMethod extends CombineBaseMethod implements Combin
 
 	@Override
 	protected List<IPeakSet<IPeak>> getMatches(
-			List<IPeakSet<IPeak>> peaksets, Options options) {
+			List<IPeakSet<IPeak>> peaksets, CombineOptions options) {
 		
 		// convert List<IPeakSet<IPeak>> to List<AlignmentFile>
 		AlignmentDataGenerator gen = new RealDataGenerator(peaksets);
@@ -29,6 +29,7 @@ public class CombineCustomJoinMethod extends CombineBaseMethod implements Combin
 		// pass this to the alignment method
 		AlignmentMethodParam.Builder paramBuilder = new AlignmentMethodParam.Builder(
 				options.ppm, options.rtwindow);
+		paramBuilder.usePpm(true);
 		AlignmentMethod aligner = AlignmentMethodFactory.getAlignmentMethod(
 				AlignmentMethodFactory.ALIGNMENT_METHOD_CUSTOM_JOIN, 
 				paramBuilder, data);
