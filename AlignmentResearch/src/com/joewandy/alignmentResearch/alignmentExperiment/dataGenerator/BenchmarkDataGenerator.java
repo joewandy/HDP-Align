@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.InputMismatchException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -181,8 +182,8 @@ public class BenchmarkDataGenerator extends BaseDataGenerator implements Alignme
 				}
 				lineSplitter.close();
 				groupID++; // new groupID for every line in ground truth
-				
-				// don't need this ..
+								
+				// don't need this .. ?
 				// if (gtFeatures.getFeatureCount() > 1) {
 					groundTruthEntries.add(gtFeatures);	
 				//	}
@@ -197,6 +198,16 @@ public class BenchmarkDataGenerator extends BaseDataGenerator implements Alignme
 			}
 		}
 
+		System.out.println("Ground truth loaded = " + groundTruthEntries.size() + " rows");
+		Iterator<GroundTruthFeatureGroup> it = groundTruthEntries.iterator();
+		while (it.hasNext()) {
+			GroundTruthFeatureGroup gg = it.next();
+			if (gg.getFeatureCount() < 2) {
+				it.remove();
+			}
+		}
+		System.out.println("Retaining only entries size > 2 = " + groundTruthEntries.size() + " rows");
+		
 		GroundTruth groundTruth = new GroundTruth(groundTruthEntries);
 		return groundTruth;
 		

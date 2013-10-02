@@ -88,6 +88,7 @@ for s = 1:NSAMPS
     ZZall = ZZall + 1.0*Z*Z';
     [r,c] = find(Z);
     [r I] = sort(r,'ascend');
+
     allZ(:,s) = c(I);
 end
 out.allZ = allZ;

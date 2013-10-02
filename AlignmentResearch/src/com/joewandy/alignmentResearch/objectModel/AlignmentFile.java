@@ -1,25 +1,25 @@
 package com.joewandy.alignmentResearch.objectModel;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import nu.xom.Attribute;
-import nu.xom.Element;
-import nu.xom.Elements;
 import peakml.chemistry.PeriodicTable;
 
 import com.joewandy.alignmentResearch.comparator.FeatureIntensityComparator;
 
 public class AlignmentFile {
 
-	private final static double EPSILON = 0.0001;
+	public final static double EPSILON = 0.0001;
 	
 	private int id;
 	private String filename;
 	private List<Feature> features;
+	private List<Feature> sortedFeatures; // sorted by intensity descending
+	private double[][] ZZProb;
 	
 	public AlignmentFile(int id, String filename) {
 		this.id = id;
@@ -33,6 +33,8 @@ public class AlignmentFile {
 		for (Feature feature : features) {
 			feature.setData(this);
 		}
+		this.sortedFeatures = new ArrayList<Feature>(features);
+		Collections.sort(this.sortedFeatures, new FeatureIntensityComparator());
 	}
 			
 	public int getId() {
@@ -41,6 +43,14 @@ public class AlignmentFile {
 
 	public String getFilename() {
 		return filename;
+	}
+	
+	public double[][] getZZProb() {
+		return ZZProb;
+	}
+
+	public void setZZProb(double[][] zZProb) {
+		ZZProb = zZProb;
 	}
 	
 	public String getFilenameWithoutExtension() {
@@ -52,6 +62,30 @@ public class AlignmentFile {
 		return features;
 	}
 	
+	public List<Feature> getUndeletedFeatures() {
+		List<Feature> result = new ArrayList<Feature>();
+		for (Feature f : features) {
+			if (!f.isDelete()) {
+				result.add(f);
+			}
+		}
+		return result;
+	}
+
+	public List<Feature> getDeletedFeatures() {
+		List<Feature> result = new ArrayList<Feature>();
+		for (Feature f : features) {
+			if (f.isDelete()) {
+				result.add(f);
+			}
+		}
+		return result;
+	}
+
+	public List<Feature> getSortedFeatures() {
+		return sortedFeatures;
+	}
+		
 	public int getFeaturesCount() {
 		return features.size();
 	}
@@ -87,10 +121,6 @@ public class AlignmentFile {
 	
 	public Feature removeFeatureByIndex(int index) {
 		return features.remove(index);
-	}
-
-	public void sortFeatures() {
-		Collections.sort(this.features, new FeatureIntensityComparator());
 	}
 	
 	public void retainFeatures(Set<Feature> whiteList) {
@@ -128,10 +158,10 @@ public class AlignmentFile {
 			delta = massTol;			
 		}
 
-		double massLower = referenceFeature.getMass() - delta;
-		double massUpper = referenceFeature.getMass() + delta;
-		double rtLower = referenceFeature.getRt() - rtTol;
-		double rtUpper = referenceFeature.getRt() + rtTol;		
+		double massLower = referenceFeature.getMass() - delta/2;
+		double massUpper = referenceFeature.getMass() + delta/2;
+		double rtLower = referenceFeature.getRt() - rtTol/2;
+		double rtUpper = referenceFeature.getRt() + rtTol/2;		
 		
 		for (Feature toCheck : this.features) {
 			if (toCheck.isAligned()) {
@@ -174,10 +204,10 @@ public class AlignmentFile {
 			delta = massTol;			
 		}
 
-		double massLower = referenceFeature.getMass() - delta;
-		double massUpper = referenceFeature.getMass() + delta;
-		double rtLower = referenceFeature.getRt() - rtTol;
-		double rtUpper = referenceFeature.getRt() + rtTol;		
+		double massLower = referenceFeature.getMass() - delta/2;
+		double massUpper = referenceFeature.getMass() + delta/2;
+		double rtLower = referenceFeature.getRt() - rtTol/2;
+		double rtUpper = referenceFeature.getRt() + rtTol/2;		
 		
 		for (Feature toCheck : this.features) {
 			// get all features in range, even if they have been aligned
@@ -220,8 +250,8 @@ public class AlignmentFile {
 			delta = massTol;			
 		}
 
-		double massLower = referenceFeature.getMass() - delta;
-		double massUpper = referenceFeature.getMass() + delta;
+		double massLower = referenceFeature.getMass() - delta/2;
+		double massUpper = referenceFeature.getMass() + delta/2;
 		
 		for (Feature toCheck : this.features) {
 			double massToCheck = toCheck.getMass();

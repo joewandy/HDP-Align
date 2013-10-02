@@ -12,6 +12,7 @@ import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodFactory;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
+import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
 
 public class CombineMzMineJoinMethod extends CombineBaseMethod implements CombineMethod {
@@ -33,13 +34,14 @@ public class CombineMzMineJoinMethod extends CombineBaseMethod implements Combin
 		AlignmentMethod aligner = AlignmentMethodFactory.getAlignmentMethod(
 				AlignmentMethodFactory.ALIGNMENT_METHOD_MZMINE_JOIN, 
 				paramBuilder, data);
-		List<AlignmentRow> result = aligner.align();
-		System.out.println("Total " + result.size() + " rows aligned");
+		AlignmentList result = aligner.align();
+		List<AlignmentRow> resultRows = result.getRows();
+		System.out.println("Total " + result.getRowsCount() + " rows aligned");
 		
 		// map the result back to List<IPeakSet<IPeak>>
 		List<IPeakSet<IPeak>> matches = mapAlignmentResult(peaksets, dataList,
-				result);		
-		assert(matches.size() == result.size());
+				resultRows);		
+		assert(matches.size() == result.getRowsCount());
 
 		return matches;
 

@@ -76,7 +76,7 @@ public class MaximumWeightMatching implements FeatureMatching {
 			row1.setAligned(true);
 			row2.setAligned(true);
 			
-			AlignmentRow merged = new AlignmentRow(rowId++);
+			AlignmentRow merged = new AlignmentRow(matchedList, rowId++);
 			merged.addAlignedFeatures(row1.getFeatures());
 			merged.addAlignedFeatures(row2.getFeatures());
 			

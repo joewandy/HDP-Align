@@ -5,11 +5,13 @@ import java.util.List;
 import com.joewandy.alignmentResearch.alignmentExperiment.AlignmentData;
 import com.joewandy.alignmentResearch.alignmentMethod.custom.BaselineAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.custom.ConsistencyAlignment;
-import com.joewandy.alignmentResearch.alignmentMethod.custom.CustomJoinAlignment;
-import com.joewandy.alignmentResearch.alignmentMethod.custom.GroupingInfoAlignment;
+import com.joewandy.alignmentResearch.alignmentMethod.custom.MyGroupMatchingAlignment;
+import com.joewandy.alignmentResearch.alignmentMethod.custom.MyJoinAlignment;
+import com.joewandy.alignmentResearch.alignmentMethod.custom.MyStableMarriageAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.external.MzMineJoinAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.external.MzMineRansacAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.external.SimaAlignment;
+import com.joewandy.alignmentResearch.main.FeatureXMLAlignment;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 
 public class AlignmentMethodFactory {
@@ -20,11 +22,10 @@ public class AlignmentMethodFactory {
 	// a simple greedy alignment algorithm as baseline
 	public static final String ALIGNMENT_METHOD_BASELINE = "baseline";
 
-	// my own join aligner
-	public static final String ALIGNMENT_METHOD_CUSTOM_JOIN = "customJoin";
-	
-	// my own grouping info aligner
-	public static final String ALIGNMENT_METHOD_GROUPING_INFO = "groupingInfo";
+	// my own aligners
+	public static final String ALIGNMENT_METHOD_MY_JOIN = "myJoin";
+	public static final String ALIGNMENT_METHOD_MY_STABLE_MARRIAGE = "myStableMarriage";
+	public static final String ALIGNMENT_METHOD_MY_GROUP_MATCHING = "myGroupMatching";
 	
 	// calls mzMine Join aligner
 	public static final String ALIGNMENT_METHOD_MZMINE_JOIN = "join";
@@ -47,10 +48,12 @@ public class AlignmentMethodFactory {
 		AlignmentMethod aligner = null; 
 		if (AlignmentMethodFactory.ALIGNMENT_METHOD_BASELINE.equals(method)) {				
 			aligner = new BaselineAlignment(alignmentDataList, param);
-		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_CUSTOM_JOIN.equals(method)) {
-			aligner = new CustomJoinAlignment(alignmentDataList, param);
-		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_GROUPING_INFO.equals(method)) {
-			aligner = new GroupingInfoAlignment(alignmentDataList, param);
+		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_JOIN.equals(method)) {
+			aligner = new MyJoinAlignment(alignmentDataList, param);
+		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_STABLE_MARRIAGE.equals(method)) {
+			aligner = new MyStableMarriageAlignment(alignmentDataList, param, FeatureXMLAlignment.WEIGHT_USE_WEIGHTED_SCORE);
+		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_GROUP_MATCHING.equals(method)) {
+			aligner = new MyGroupMatchingAlignment(alignmentDataList, param);
 		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MZMINE_RANSAC.equals(method)) {
 			aligner = new MzMineRansacAlignment(alignmentDataList, param);
 		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MZMINE_JOIN.equals(method)) {

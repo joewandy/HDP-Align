@@ -16,7 +16,7 @@ import com.joewandy.alignmentResearch.objectModel.FeatureGroup;
 
 public class GraphEdgeConstructor {
 
-	public List<AlignmentEdge> constructEdgeList(List<AlignmentRow> rows) {
+	public List<AlignmentEdge> constructEdgeList(List<AlignmentRow> rows, double dmz, double drt) {
 		
 		List<AlignmentEdge> edgeList = new ArrayList<AlignmentEdge>();
 		Map<String, AlignmentVertex> allVertices = new HashMap<String, AlignmentVertex>();
@@ -77,7 +77,7 @@ public class GraphEdgeConstructor {
 					if (f1.getData() != f2.getData() && !v1.equals(v2)) {
 						// here we also create the alignment pair between f1 & f2 
 						// (inside the constructor of AlignmentEdge)
-						AlignmentPair pair = new AlignmentPair(f1, f2);
+						AlignmentPair pair = new AlignmentPair(f1, f2, dmz, drt);
 						AlignmentEdge edge = new AlignmentEdge(v1, v2, pair);
 						edgeList.add(edge);		
 						// also store this alignment pair inside the row itself

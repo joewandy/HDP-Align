@@ -28,7 +28,7 @@ public class RetentionTimePrinter {
 
 	}
 
-	public void printRt2(AlignmentFile firstFile, AlignmentFile secondFile, List<AlignmentRow> result) {
+	public void printRt2(AlignmentFile firstFile, AlignmentFile secondFile, List<AlignmentRow> result, double dmz, double drt) {
 
 		System.out.println("Printing retention times ...");
 		System.out.println("rt1, group1, rt2, group2");
@@ -36,7 +36,7 @@ public class RetentionTimePrinter {
 			Feature feature1 = row.getFeaturesFromFile(firstFile.getFilenameWithoutExtension());
 			Feature feature2 = row.getFeaturesFromFile(secondFile.getFilenameWithoutExtension());
 			if (feature1 != null && feature2 != null) {
-				AlignmentPair aligned = new AlignmentPair(feature1, feature2);
+				AlignmentPair aligned = new AlignmentPair(feature1, feature2, dmz, drt);
 				aligned.print();
 			}
 		}

@@ -38,7 +38,7 @@ public class MultipleMatchesAlignment extends BaseAlignment implements Alignment
 			for (Feature feature : data.getFeatures()) {
 
 				// process features
-				AlignmentRow row = new AlignmentRow(rowId);
+				AlignmentRow row = new AlignmentRow(alignedList, rowId);
 				Set<Feature> nearbyFeatures = findMatchingFeatures(i, feature);
 				nearbyFeatures.add(feature); // remember to add this current feature too
 				row.addAlignedFeatures(nearbyFeatures);

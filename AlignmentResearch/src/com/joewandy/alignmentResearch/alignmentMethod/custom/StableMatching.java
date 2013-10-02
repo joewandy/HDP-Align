@@ -11,6 +11,8 @@ import java.util.Queue;
 
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
+import com.joewandy.alignmentResearch.objectModel.DistanceCalculator;
+import com.joewandy.alignmentResearch.objectModel.EuclideanDistanceCalculator;
 import com.joewandy.alignmentResearch.objectModel.ExtendedLibrary;
 
 public class StableMatching implements FeatureMatching {
@@ -79,7 +81,7 @@ public class StableMatching implements FeatureMatching {
 			row1.setAligned(true);
 			row2.setAligned(true);
 			
-			AlignmentRow merged = new AlignmentRow(rowId++);
+			AlignmentRow merged = new AlignmentRow(masterList, rowId++);
 			merged.addAlignedFeatures(row1.getFeatures());
 			merged.addAlignedFeatures(row2.getFeatures());
 			
@@ -249,10 +251,9 @@ public class StableMatching implements FeatureMatching {
 		
 	private double computeSimilarity(double mass1, double mass2, double rt1, double rt2) {
 
-		double massDist = Math.pow(mass1-mass2, 2);
-		double rtDist = Math.pow(rt1-rt2, 2);
-		double euclideanDist = Math.sqrt(massDist + rtDist);
-		double similarity = 1/(1+euclideanDist);
+		DistanceCalculator calc = new EuclideanDistanceCalculator();
+		double dist = calc.compute(mass1, mass2, rt1, rt2);		
+		double similarity = 1/dist;
 		return similarity;
 	
 	}

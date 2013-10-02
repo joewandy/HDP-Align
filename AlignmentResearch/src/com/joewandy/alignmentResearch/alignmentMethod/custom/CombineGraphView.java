@@ -137,9 +137,8 @@ public class CombineGraphView {
 				AlignmentEdge existing = alignmentGraph.findEdge(
 						e.getLeft(), e.getRight());
 				if (existing != null) {
-					existing.incrementWeight();
 					existing.addAlignmentPair(e.getAlignmentPairs());
-					existing.updateAlignmentPairScore();
+					existing.updateAlignmentPairWeight();
 				} else {				
 					alignmentGraph.addVertex(e.getLeft());
 					alignmentGraph.addVertex(e.getRight());

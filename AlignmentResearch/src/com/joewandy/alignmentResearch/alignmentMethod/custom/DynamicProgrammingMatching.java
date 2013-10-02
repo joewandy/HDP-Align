@@ -69,7 +69,7 @@ public class DynamicProgrammingMatching implements FeatureMatching {
 //				continue;
 //			}
 			
-			AlignmentRow merged = new AlignmentRow(rowId++);
+			AlignmentRow merged = new AlignmentRow(matchedList, rowId++);
 			merged.addAlignedFeatures(row1.getFeatures());
 			merged.addAlignedFeatures(row2.getFeatures());
 			matchedList.addRow(merged);

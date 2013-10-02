@@ -24,7 +24,6 @@ public class Feature {
 	private double totalIntensityError;
 	private int noPairs;
 	private boolean delete;
-	private double[][] ZZProb;
 	
 	public Feature(int peakID, double mass, double rt, double intensity) {
 		super();
@@ -128,11 +127,7 @@ public class Feature {
 	}
 	
 	public double[][] getZZProb() {
-		return ZZProb;
-	}
-
-	public void setZZProb(double[][] zZProb) {
-		ZZProb = zZProb;
+		return data.getZZProb();
 	}
 
 	public String csvForm() {

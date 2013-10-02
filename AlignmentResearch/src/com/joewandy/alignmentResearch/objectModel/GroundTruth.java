@@ -12,12 +12,8 @@ public class GroundTruth {
 	private final static double EPSILON = 0.0001;
 	private List<GroundTruthFeatureGroup> groundTruth;
 	
-	public GroundTruth(List<GroundTruthFeatureGroup> groundTruthEntries) {
-		
+	public GroundTruth(List<GroundTruthFeatureGroup> groundTruthEntries) {		
 		this.groundTruth = groundTruthEntries;
-		System.out.println("Ground truth loaded = " + this.groundTruth.size() + " rows");
-		System.out.println("Ground truth features count = " + this.getFeatureCount() + " features");
-		
 	}
 		
 	public Set<Feature> getAllUniqueFeatures() {
@@ -76,31 +72,19 @@ public class GroundTruth {
 
 	public EvaluationResult evaluate(List<AlignmentRow> alignmentResult) {
 		
-		// convert alignmentResult to feature groups
-		List<FeatureGroup> tool = new ArrayList<FeatureGroup>();
-		int groupID = 1;
-		for (AlignmentRow row : alignmentResult) {
-			FeatureGroup group = new FeatureGroup(groupID);
-			groupID++;
-			Set<Feature> alignedFeatures = row.getFeatures();
-			for (Feature feature : alignedFeatures) {
-				feature.clearGroups();
-			}
-			group.addFeatures(alignedFeatures);
-			tool.add(group);
-		}
+		List<FeatureGroup> tool = convertToFeatureGroup(alignmentResult);
 		
 		System.out.println("Calculating ");
 		
 		// for every consensus feature in ground truth
 		int N = this.groundTruth.size();
+		int M = 0; 
 		double precision = 0;
 		double recall = 0;
 		int totalTp = 0;
 		int totalFp = 0;
 		int totalPositives = 0;
-		int M = 0; 
-		for (int i = 0; i < this.groundTruth.size(); i++) {
+		for (int i = 0; i < N; i++) {
 			
 			if (i % 100 == 0) {
 				System.out.print('.');
@@ -186,9 +170,108 @@ public class GroundTruth {
 
 	}
 
+	public EvaluationResult evaluate2(List<AlignmentRow> alignmentResult) {
+		
+		// convert alignmentResult to feature groups
+		List<FeatureGroup> tool = convertToFeatureGroup(alignmentResult);		
+		System.out.println("Calculating ");
+		
+		// for every item in tool
+		int N = this.groundTruth.size();
+		int M = tool.size(); 
+		int G = this.getFeatureCount();
+		double precision = 0;
+		double recall = 0;
+		int totalTp = 0;
+		int totalFp = 0;
+		int totalPositives = 0;
+		for (int j = 0; j < M; j++) {
+			
+			if (j % 1000 == 0) {
+				System.out.print('.');
+			}
+
+			// ignore singleton alignments from tool
+			FeatureGroup t = tool.get(j);
+			if (t.getFeatureCount() == 1) {
+				continue;
+			}								
+			
+			// find ground truth entries that intersect with this tool entry
+			FeatureGroup gTilde = new FeatureGroup(-1); 
+			for (FeatureGroup g : this.groundTruth) {
+				
+				int count = getIntersectCount(t, g);
+				if (count > 0) {
+					gTilde.addFeatures(g.getFeatures());
+				}
+				
+			}
+			int gTildeCount = gTilde.getFeatureCount();
+			if (gTildeCount == 0) {
+				// skip if no matches at all
+				continue;
+			}				
+
+			// get intersection between tool and gold
+			Set<Feature> intersect = getIntersection(t, gTilde);			
+			int intersectCount = intersect.size();
+			int tCount = t.getFeatureCount();
+			int fp = tCount - intersectCount;
+			int tp = intersectCount;
+			precision += ((double) intersectCount / tCount);
+			recall += ((double) intersectCount / gTildeCount);
+
+			totalTp += tp;
+			totalFp += fp;
+			totalPositives += tp + fp;
+						
+		}
+				
+//		precision = precision / M;		
+//		recall = recall / M;
+
+		precision = (double)totalTp / (totalTp + totalFp);
+		recall = (double)totalTp / G;
+		
+		/*
+		 * Calculations here
+		 */
+		
+		double f1 = (2*precision*recall) / (precision + recall);
+		double f05 = (1.25*precision*recall) / ((0.25*precision) + recall);
+		
+		double totalTpRatio = ((double) totalTp) / totalPositives;
+		double totalFpRatio = ((double) totalFp) / totalPositives;		
+		double totalPositiveRatio = ((double) totalPositives) / totalPositives;				
+		
+		System.out.println();		
+		EvaluationResult evalRes = new EvaluationResult(precision, recall, f1, f05, totalTp, totalFp, totalPositives, totalTpRatio, totalFpRatio, totalPositiveRatio);
+		System.out.println(evalRes);
+		return evalRes;
+
+	}
+	
 	@Override
 	public String toString() {
 		return "SimpleGroundTruth [groundTruth=" + groundTruth.size() + " alignments]";
+	}
+	
+	private List<FeatureGroup> convertToFeatureGroup(
+			List<AlignmentRow> alignmentResult) {
+		List<FeatureGroup> tool = new ArrayList<FeatureGroup>();
+		int groupID = 1;
+		for (AlignmentRow row : alignmentResult) {
+			FeatureGroup group = new FeatureGroup(groupID);
+			groupID++;
+			Set<Feature> alignedFeatures = row.getFeatures();
+			for (Feature feature : alignedFeatures) {
+				feature.clearGroups();
+			}
+			group.addFeatures(alignedFeatures);
+			tool.add(group);
+		}
+		return tool;
 	}
 	
 	/**

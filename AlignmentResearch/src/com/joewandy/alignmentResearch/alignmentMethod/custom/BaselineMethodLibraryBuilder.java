@@ -11,6 +11,7 @@ import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
 import com.joewandy.alignmentResearch.objectModel.AlignmentEdge;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentLibrary;
+import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.AlignmentPair;
 import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
 import com.joewandy.alignmentResearch.objectModel.AlignmentVertex;
@@ -61,10 +62,11 @@ public class BaselineMethodLibraryBuilder implements Runnable, PairwiseLibraryBu
 		AlignmentMethodParam.Builder paramBuilder = new AlignmentMethodParam.Builder(massTolerance, rtTolerance);
 		AlignmentMethodParam param = paramBuilder.build();
 		AlignmentMethod pairwiseAligner = new BaselineAlignment(files, param);
-		List<AlignmentRow> rows = pairwiseAligner.align();
+		AlignmentList result = pairwiseAligner.align();
 
 		// TODO: hack .. mark all features as unaligned, necessary when doing the final alignment later
 		// since we're not processing any features that have been aligned
+		List<AlignmentRow> rows = result.getRows();
 		for (AlignmentRow row : rows) {
 			for (Feature f : row.getFeatures()) {
 				f.setAligned(false);
@@ -76,7 +78,7 @@ public class BaselineMethodLibraryBuilder implements Runnable, PairwiseLibraryBu
 		 */
 		
 		// add the edges to library
-		List<AlignmentEdge> edgeList = edgeConstructor.constructEdgeList(rows);
+		List<AlignmentEdge> edgeList = edgeConstructor.constructEdgeList(rows, massTolerance, rtTolerance);
 
 		final boolean multiGraph = false;
 		final int dataFileCount = 2;
@@ -127,6 +129,8 @@ public class BaselineMethodLibraryBuilder implements Runnable, PairwiseLibraryBu
 			List<AlignmentPair> pairs = e.getAlignmentPairs();
 			for (AlignmentPair pair : pairs) {
 
+				// TODO: use distance calculator, see WeightedRowVsRowScore
+				
 				Feature f1 = pair.getFeature1();
 				Feature f2 = pair.getFeature2();
 				

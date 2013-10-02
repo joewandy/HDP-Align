@@ -8,10 +8,12 @@ public class FeatureGroup {
 
 	protected int groupId;
 	protected Set<Feature> members;
+	private boolean deleted;
 	
 	public FeatureGroup(int groupId) {
 		this.groupId = groupId;
 		this.members = new HashSet<Feature>();
+		this.deleted = false;
 	}
 	
 	public int getGroupId() {
@@ -43,6 +45,14 @@ public class FeatureGroup {
 			feature.clearGroup(this.groupId);
 		}
 		this.members.clear();
+	}
+	
+	public boolean isDeleted() {
+		return deleted;
+	}
+
+	public void setDeleted(boolean deleted) {
+		this.deleted = deleted;
 	}
 	
 	@Override

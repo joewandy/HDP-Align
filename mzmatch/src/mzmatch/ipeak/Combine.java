@@ -271,7 +271,7 @@ public class Combine {
 			CombineMethod task = null;
 			if (AlignmentMethodFactory.ALIGNMENT_METHOD_GREEDY.equals(options.method)) {
 				task = new CombineGreedyMethod();
-			} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_CUSTOM_JOIN.equals(options.method)) {
+			} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_JOIN.equals(options.method)) {
 				task = new CombineCustomJoinMethod();
 			} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MZMINE_JOIN.equals(options.method)) {
 				task = new CombineMzMineJoinMethod();
@@ -279,7 +279,7 @@ public class Combine {
 				task = new CombineMzMineRANSACMethod();
 			} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_SIMA.equals(options.method)) {
 				task = new CombineSIMAMethod();				
-			} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_GROUPING_INFO.equals(options.method)) {
+			} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_STABLE_MARRIAGE.equals(options.method)) {
 				task = new CombineGroupingInfoMethod();				
 			}
 			task.process(options, header, peaksets, results, random, measure,

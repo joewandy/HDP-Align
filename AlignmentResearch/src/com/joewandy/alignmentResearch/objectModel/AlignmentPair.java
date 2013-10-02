@@ -25,10 +25,12 @@ public class AlignmentPair {
 	private Feature feature1;
 	private Feature feature2;
 	
-	private double score;
+	private double weight;
 	private boolean delete;
+	private double dmz;
+	private double drt;
 	
-	public AlignmentPair(IPeak peak1, IPeak peak2) {
+	public AlignmentPair(IPeak peak1, IPeak peak2, double dmz, double drt) {
 
 		this.peak1 = peak1;
 		this.peak2 = peak2;
@@ -48,10 +50,12 @@ public class AlignmentPair {
 		this.rt2 = peak2.getRetentionTime();	
 		
 		this.delete = false;
+		this.dmz = dmz;
+		this.drt = drt;
 		
 	}
 
-	public AlignmentPair(Feature feature1, Feature feature2) {
+	public AlignmentPair(Feature feature1, Feature feature2, double dmz, double drt) {
 
 		this.feature1 = feature1;
 		this.feature2 = feature2;
@@ -71,6 +75,8 @@ public class AlignmentPair {
 		this.rt2 = feature2.getRt();
 
 		this.delete = false;
+		this.dmz = dmz;
+		this.drt = drt;
 		
 	}
 	
@@ -139,11 +145,19 @@ public class AlignmentPair {
 	}
 
 	public double getScore() {
+		DistanceCalculator calc = new MahalanobisDistanceCalculator(dmz, drt);
+		double dist = calc.compute(mass1, mass2, rt1, rt2);		
+		double inverseDist = 1/dist;
+		double score = inverseDist * getWeight();
 		return score;
 	}
+	
+	public double getWeight() {
+		return weight;
+	}
 
-	public void setScore(double score) {
-		this.score = score;
+	public void setWeight(double weight) {
+		this.weight = weight;
 	}
 
 	public boolean isDelete() {
@@ -152,6 +166,8 @@ public class AlignmentPair {
 
 	public void setDelete(boolean delete) {
 		this.delete = delete;
+		this.feature1.setDelete(delete);
+		this.feature2.setDelete(delete);
 	}
 
 	@Override
@@ -226,7 +242,7 @@ public class AlignmentPair {
 		output += "sourcePeakSet2=" + sourcePeakSet2 + ", groupId2=" + groupId2 + ", peakId2=" + peakId2 + "\n";
 		output += "mass2=" + String.format("%.6f", mass2) + ", rt2=" + String.format("%4.2f", rt2) + ", intensity2=" + String.format("%10.2f", intensity2) + "\n";
 		output += "intensity square error = " + String.format("%10.2f", this.getRelativeIntensityError()) + "\n";
-		output += "score = " + String.format("%3.2f", this.getScore()) + "\n";
+		output += "weight = " + String.format("%3.2f", this.getWeight()) + " score = " + String.format("%3.2f", this.getScore()) + "\n";
 		return output;
 	}
 	

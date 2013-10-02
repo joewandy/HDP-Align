@@ -1,3 +1,6 @@
 java.lang.NullPointerException
-	at com.joewandy.alignmentResearch.main.FeatureXMLAlignment.runExperiment(FeatureXMLAlignment.java:369)
-	at com.joewandy.alignmentResearch.main.FeatureXMLAlignment.main(FeatureXMLAlignment.java:233)
+	at com.joewandy.alignmentResearch.filter.GraphAlignmentResultFilter.markRowForDelete(GraphAlignmentResultFilter.java:554)
+	at com.joewandy.alignmentResearch.filter.GraphAlignmentResultFilter.process(GraphAlignmentResultFilter.java:101)
+	at com.joewandy.alignmentResearch.alignmentMethod.BaseAlignment.align(BaseAlignment.java:65)
+	at com.joewandy.alignmentResearch.main.FeatureXMLAlignment.runExperiment(FeatureXMLAlignment.java:418)
+	at com.joewandy.alignmentResearch.main.FeatureXMLAlignment.main(FeatureXMLAlignment.java:267)

@@ -30,12 +30,7 @@ public class GreedyFeatureGrouping extends BaseFeatureGrouping implements Featur
 	public List<FeatureGroup> group(List<AlignmentFile> dataList) {
 
 		System.out.println("============ Grouping = " + dataList.size() + " files ============");
-		
-		for (AlignmentFile data : dataList) {
-			// order features by intensity
-			data.sortFeatures();
-		}
-		
+				
 		// the group ids must be unique across all input files 
 		int groupId = 1;
 		List<FeatureGroup> groups = new ArrayList<FeatureGroup>();

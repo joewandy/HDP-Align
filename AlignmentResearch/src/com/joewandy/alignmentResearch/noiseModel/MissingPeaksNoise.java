@@ -1,5 +1,6 @@
 package com.joewandy.alignmentResearch.noiseModel;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -30,18 +31,30 @@ public class MissingPeaksNoise implements AlignmentNoise {
 		for (AlignmentFile file : alignmentDataList) {
 
 			// shuffle and determine how many features to remove
-			List<Feature> features = file.getFeatures();
-			final int N = (int) (features.size() * removeFrac);
-			Collections.shuffle(features);
+			// TODO: don't change the original feature list !!!!
+			List<Feature> shuffledFeatures = new ArrayList<Feature>(file.getFeatures());
+			final int N = (int) (shuffledFeatures.size() * removeFrac);
+			Collections.shuffle(shuffledFeatures);
 			
 			// loop through features and remove the bottom N features
-			Iterator<Feature> it = features.iterator();
+			Iterator<Feature> it = shuffledFeatures.iterator();
 			int counter = 0;
 			while (it.hasNext() && counter < N) {
 				Feature example = it.next();
+				example.setDelete(true);
 				it.remove();
 				gt.clearFeature(example);
 				counter++;
+			}
+			it = file.getFeatures().iterator();
+			counter = 0;
+			while (it.hasNext()) {
+				Feature example = it.next();
+				if (example.isDelete()) {
+					it.remove();
+					gt.clearFeature(example);
+					counter++;					
+				}
 			}
 			// System.out.println("Removed " + counter + " features");
 			// System.out.println(file.getFilenameWithoutExtension() + " has " + file.getFeaturesCount() + " features");

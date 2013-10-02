@@ -1,5 +1,7 @@
 package com.joewandy.alignmentResearch.alignmentMethod.custom;
 
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,9 +30,23 @@ public class BaselineAlignment extends BaseAlignment implements AlignmentMethod 
 	@Override
 	protected AlignmentList matchFeatures() {
 		
+		// save to csv file for debugging
 		for (AlignmentFile data : dataList) {
-			// order features by intensity
-			data.sortFeatures();
+			PrintWriter out = null;
+			try {
+				out = new PrintWriter("/home/joewandy/"+ 
+						data.getFilenameWithoutExtension() + ".csv");
+				out.println(Feature.csvHeader());
+				for (Feature feature : data.getFeatures()) {
+					out.println(feature.csvForm());
+				}
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} finally {
+				if (out != null) {
+					out.close();
+				}
+			}
 		}
 		
 		AlignmentList alignedList = new AlignmentList("");
@@ -41,11 +57,11 @@ public class BaselineAlignment extends BaseAlignment implements AlignmentMethod 
 			AlignmentFile data = dataList.get(i);
 			System.out.println("Aligning #" + (i+1) + ": " + data);
 
-			for (Feature feature : data.getFeatures()) {
+			for (Feature feature : data.getSortedFeatures()) {
 
 				// process unaligned features
 				if (!feature.isAligned()) {
-					AlignmentRow row = new AlignmentRow(rowId);
+					AlignmentRow row = new AlignmentRow(alignedList, rowId);
 					Set<Feature> nearbyFeatures = findMatchingFeatures(i, feature);
 					nearbyFeatures.add(feature); // remember to add this current feature too
 					row.addAlignedFeatures(nearbyFeatures);

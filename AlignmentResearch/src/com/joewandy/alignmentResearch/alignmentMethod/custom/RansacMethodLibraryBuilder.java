@@ -13,6 +13,7 @@ import com.joewandy.alignmentResearch.alignmentMethod.external.SimaAlignment;
 import com.joewandy.alignmentResearch.objectModel.AlignmentEdge;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentLibrary;
+import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.AlignmentPair;
 import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
 import com.joewandy.alignmentResearch.objectModel.AlignmentVertex;
@@ -70,7 +71,7 @@ public class RansacMethodLibraryBuilder implements Runnable, PairwiseLibraryBuil
 		 */
 		
 		// add the edges to library
-		List<AlignmentEdge> edgeList = edgeConstructor.constructEdgeList(rows);
+		List<AlignmentEdge> edgeList = edgeConstructor.constructEdgeList(rows, massTolerance, rtTolerance);
 
 		final boolean multiGraph = false;
 		final int dataFileCount = 2;
@@ -121,6 +122,8 @@ public class RansacMethodLibraryBuilder implements Runnable, PairwiseLibraryBuil
 			List<AlignmentPair> pairs = e.getAlignmentPairs();
 			for (AlignmentPair pair : pairs) {
 
+				// TODO: use distance calculator, see WeightedRowVsRowScore
+				
 				Feature f1 = pair.getFeature1();
 				Feature f2 = pair.getFeature2();
 				
@@ -153,7 +156,8 @@ public class RansacMethodLibraryBuilder implements Runnable, PairwiseLibraryBuil
 	}
 
 	private List<AlignmentRow> getAlignedRows(AlignmentMethod aligner) {
-		List<AlignmentRow> rows = aligner.align();
+		AlignmentList result = aligner.align();
+		List<AlignmentRow> rows = result.getRows();
 		return rows;
 	}
 

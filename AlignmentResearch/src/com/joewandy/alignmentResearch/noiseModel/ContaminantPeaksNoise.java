@@ -106,15 +106,15 @@ public class ContaminantPeaksNoise implements AlignmentNoise {
 		for (AlignmentFile file : alignmentDataList) {
 			
 			// shuffle and determine how many features to remove
-			List<Feature> features = file.getFeatures();
-			final int N = (int) (features.size() * addFrac);
-			Collections.shuffle(features);
+			List<Feature> shuffledFeatures = new ArrayList<Feature>(file.getFeatures());
+			final int N = (int) (shuffledFeatures.size() * addFrac);
+			Collections.shuffle(shuffledFeatures);
 			
 			final int maxID = file.getMaxFeatureID();
 			
 			// loop through features and duplicate the bottom N features
 			List<Feature> contaminants = new ArrayList<Feature>();
-			Iterator<Feature> it = features.iterator();
+			Iterator<Feature> it = shuffledFeatures.iterator();
 			int counter = 0;
 			while (it.hasNext() && counter < N) {
 				Feature feature = it.next();

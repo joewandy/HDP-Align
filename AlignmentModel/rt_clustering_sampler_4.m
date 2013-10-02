@@ -1,4 +1,4 @@
-function [Z, ZZall, ZZprob] = rt_clustering_sampler_4(data, filename)
+function [bestZ, ZZall, ZZprob] = rt_clustering_sampler_4(data, filename)
 
 set(0, 'DefaulttextInterpreter', 'none')
 
@@ -9,13 +9,12 @@ set(0, 'DefaulttextInterpreter', 'none')
 N = length(data);
 
 %%% model parameters %%%
-mu_zero = 50; % mean hyper-parameter for mu
+param_rtwindow = 5;
+param_alpha = 1;
+mu_zero = mean(data);  % mean hyper-parameter for mu
 tau_zero = 5e-3; % precision hyper-parameter for mu
-rt_tol = 1; % fixed component precision
-alpha = 1; % DP concentration parameter
-
-mu_zero = mean(data);
-rt_tol = 1/50;
+rt_tol = 1/param_rtwindow;  % fixed component precision
+alpha = param_alpha; % DP concentration parameter
 
 %%% setup some fake data %%%
 % dstd = 2; 
@@ -51,6 +50,7 @@ AllNk = zeros(NSAMPS, 1); % K for each sample
 t1 = zeros(NSAMPS, 1); % time taken for each sample
 scores = zeros(NSAMPS, 1);
 ZZall = zeros(N);
+allZ = zeros(N,NSAMPS);
 
 % sampling starts here ..
 h = figure;
@@ -132,8 +132,29 @@ for s = 1:NSAMPS
     colorbar;
     drawnow;
     
+    % store all the samples
+    [r,c] = find(Z);
+    [r I] = sort(r,'ascend');
+    allZ(:,s) = c(I);
+        
 end % end sample
 
-dim = size(ZZall, 2);
-ZZprob = ZZall ./ repmat(max(ZZall, [], 2), 1, dim);
+% Find the least squares clustering
+bestsse = inf;
+bestZ = [];
+for s = 1:NSAMPS
+    % convert 1D vector allZ(:, s) into a 2D matrix again
+    tempZ = full(sparse([1:N]', allZ(:,s), 1));
+    tempZZ = tempZ*tempZ';
+    % compute SSE
+    sse(s) = sum(sum((tempZZ - ZZall).^2));
+    if sse(s) < bestsse
+        bestsse = sse(s);
+        bestZ = tempZ;
+    end
+end
+
+% dim = size(ZZall, 2);
+% ZZprob = ZZall ./ repmat(max(ZZall, [], 2), 1, dim);
+ZZprob = ZZall ./ NSAMPS;
 saveas(h, [filename '.clustering.png']);

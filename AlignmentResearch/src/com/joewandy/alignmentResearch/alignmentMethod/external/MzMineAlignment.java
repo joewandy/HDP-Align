@@ -174,7 +174,7 @@ public abstract class MzMineAlignment extends BaseAlignment implements
 			for (int i = 0; i < allRows.length; i++) {
 
 				PeakListRow plRow = allRows[i];
-				AlignmentRow alignedRow = new AlignmentRow(i);
+				AlignmentRow alignedRow = new AlignmentRow(alignmentResult, i);
 				alignmentResult.addRow(alignedRow);
 
 				for (AlignmentFile key : dataList) {

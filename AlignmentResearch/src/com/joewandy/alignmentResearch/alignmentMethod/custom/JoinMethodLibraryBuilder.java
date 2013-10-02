@@ -13,6 +13,7 @@ import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
 import com.joewandy.alignmentResearch.objectModel.AlignmentEdge;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentLibrary;
+import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.AlignmentPair;
 import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
 import com.joewandy.alignmentResearch.objectModel.AlignmentVertex;
@@ -62,9 +63,10 @@ public class JoinMethodLibraryBuilder implements Runnable, PairwiseLibraryBuilde
 
 		AlignmentMethodParam.Builder paramBuilder = new AlignmentMethodParam.Builder(massTolerance, rtTolerance);
 		AlignmentMethodParam param = paramBuilder.build();
-		AlignmentMethod pairwiseAligner = new CustomJoinAlignment(files, param);
-		List<AlignmentRow> rows = pairwiseAligner.align();
-
+		AlignmentMethod pairwiseAligner = new MyJoinAlignment(files, param);
+		AlignmentList result = pairwiseAligner.align();
+		List<AlignmentRow> rows = result.getRows();
+		
 		// TODO: hack .. mark all features as unaligned, necessary when doing the final alignment later
 		// since we're not processing any features that have been aligned
 		for (AlignmentRow row : rows) {
@@ -78,7 +80,7 @@ public class JoinMethodLibraryBuilder implements Runnable, PairwiseLibraryBuilde
 		 */
 		
 		// add the edges to library
-		List<AlignmentEdge> edgeList = edgeConstructor.constructEdgeList(rows);
+		List<AlignmentEdge> edgeList = edgeConstructor.constructEdgeList(rows, massTolerance, rtTolerance);
 
 		final boolean multiGraph = false;
 		final int dataFileCount = 2;
@@ -184,6 +186,8 @@ public class JoinMethodLibraryBuilder implements Runnable, PairwiseLibraryBuilde
 			double rtMean1, double rtStd1, double massMean2, double massStd2,
 			double rtMean2, double rtStd2, Feature f1, Feature f2) {
 
+		// TODO: use distance calculator, see WeightedRowVsRowScore
+		
 		double f1MassZScore = (f1.getMass() - massMean1) / massStd1;
 		double f2MassZScore = (f2.getMass() - massMean2) / massStd2;
 		double f1RtZScore = (f1.getRt() - rtMean1) / rtStd1;

@@ -14,10 +14,7 @@ import peakml.io.Header;
 import peakml.io.ParseResult;
 
 public interface CombineMethod {
-	
-	public static final String MATLAB_OUTPUT_FILENAME = "test-3-mini.mat";
-	public static final String MATLAB_OUTPUT_PATH = "/home/joewandy/Project/mixture_model";
-	
+		
 	public static final String GROUPING_GREEDY = "greedy_grouping";
 	public static final String GROUPING_MIXTURE = "corr_grouping";
 

@@ -52,11 +52,11 @@ public class CombineOptionsValidator {
 		}
 		
 		if (!AlignmentMethodFactory.ALIGNMENT_METHOD_GREEDY.equals(options.method)
-				&& !AlignmentMethodFactory.ALIGNMENT_METHOD_CUSTOM_JOIN.equals(options.method)
+				&& !AlignmentMethodFactory.ALIGNMENT_METHOD_MY_JOIN.equals(options.method)
 				&& !AlignmentMethodFactory.ALIGNMENT_METHOD_MZMINE_JOIN.equals(options.method)
 				&& !AlignmentMethodFactory.ALIGNMENT_METHOD_MZMINE_RANSAC.equals(options.method)
 				&& !AlignmentMethodFactory.ALIGNMENT_METHOD_SIMA.equals(options.method)
-				&& !AlignmentMethodFactory.ALIGNMENT_METHOD_GROUPING_INFO.equals(options.method)) {
+				&& !AlignmentMethodFactory.ALIGNMENT_METHOD_MY_STABLE_MARRIAGE.equals(options.method)) {
 			System.err
 					.println("[ERROR]: valid options for method are 'greedy', 'join', 'ransac', 'sima' or 'groupingInfo'.");
 			System.exit(1);

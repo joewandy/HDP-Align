@@ -93,7 +93,7 @@ public class ExtendedLibrary {
 			return 0;
 		}
 	}
-	
+		
 	public Set<ExtendedLibraryEntry> getEntriesByFiles(AlignmentFile file1, AlignmentFile file2) {
 		Set<ExtendedLibraryEntry> result = new HashSet<ExtendedLibraryEntry>();
 		for (ExtendedLibraryEntry entry : entries.values()) {

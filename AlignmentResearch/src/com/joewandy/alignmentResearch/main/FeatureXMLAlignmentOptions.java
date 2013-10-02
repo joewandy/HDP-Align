@@ -55,12 +55,18 @@ public class FeatureXMLAlignmentOptions {
 			+ "used to make the measurement (the LTQ-Orbitrap manages approximately 3 ppm).")
 	public double alignmentPpm = -1;
 
-	@Option(name = "alignmentRtwindow", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "The retention time window in seconds, defining the range where to look for matches.")
-	public double alignmentRtwindow = -1;
+	@Option(name = "alignmentRtWindow", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "The retention time window in seconds, defining the range where to look for matches.")
+	public double alignmentRtWindow = -1;
 
-	@Option(name = "groupingRtwindow", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "The retention time window in seconds, defining the range where to look for matches.")
-	public double groupingRtwindow = -1;
+	@Option(name = "groupingRtWindow", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "The retention time window in seconds, defining the range where to look for matches.")
+	public double groupingRtWindow = -1;
 
+	@Option(name = "groupingAlpha", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Alpha")
+	public double groupingAlpha = 1;
+
+	@Option(name = "groupingNSamples", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "No. of samples")
+	public int groupingNSamples = 100;
+	
 	@Option(name = "gt", param = "filename", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "The ground truth file for these data.")
 	public String gt = null;
 

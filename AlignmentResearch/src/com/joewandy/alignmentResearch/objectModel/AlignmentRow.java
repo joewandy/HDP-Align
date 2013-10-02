@@ -6,21 +6,27 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import ca.pfv.spmf.algorithms.associationrules.TopKRules_and_TNR.RuleG;
+
 public class AlignmentRow {
 
+	private AlignmentList parent;
 	private int rowId;
 	private Set<Feature> features;
 	private List<AlignmentPair> pairs;
 	private boolean aligned;
 	private boolean delete;
 	private double normalisedScore;
+	private List<RuleG> satisfiedRules;
 	
-	public AlignmentRow(int rowId) {
+	public AlignmentRow(AlignmentList parent, int rowId) {
+		this.parent = parent;
 		this.rowId = rowId;
 		this.features = new HashSet<Feature>();
 		this.pairs = new ArrayList<AlignmentPair>();
 		this.aligned = false;
 		this.delete = false;
+		this.satisfiedRules = new ArrayList<RuleG>();
 	}
 	
 	public int getRowId() {
@@ -49,6 +55,21 @@ public class AlignmentRow {
 
 	public Set<Feature> getFeatures() {
 		return features;
+	}
+	
+	public boolean contains(Feature f) {
+		if (features.contains(f)) {
+			return true;
+		}
+		return false;
+	}
+
+	public Set<Integer> getGroupIds() {
+		Set<Integer> groupIds = new HashSet<Integer>();
+		for (Feature f : features) {
+			groupIds.add(f.getFirstGroupID());
+		}
+		return groupIds;
 	}
 	
 	public Feature getFirstFeature() {
@@ -176,12 +197,16 @@ public class AlignmentRow {
 
 	public void setDelete(boolean delete) {
 		this.delete = delete;
+		for (Feature f : this.features) {
+			f.setDelete(true);
+		}
 	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
+		result = prime * result + ((parent == null) ? 0 : parent.hashCode());
 		result = prime * result + rowId;
 		return result;
 	}
@@ -195,6 +220,11 @@ public class AlignmentRow {
 		if (getClass() != obj.getClass())
 			return false;
 		AlignmentRow other = (AlignmentRow) obj;
+		if (parent == null) {
+			if (other.parent != null)
+				return false;
+		} else if (!parent.equals(other.parent))
+			return false;
 		if (rowId != other.rowId)
 			return false;
 		return true;
@@ -202,7 +232,7 @@ public class AlignmentRow {
 
 	@Override
 	public String toString() {
-		String output = "SimpleAlignmentRow [rowId=" + rowId + ", size=" + features.size() + ", featureIDs=";
+		String output = "SimpleAlignmentRow [parent=" + parent + ", rowId=" + rowId + ", size=" + features.size() + ", featureIDs=";
 		for (Feature f : this.features) {
 			output += f.getPeakID() + ",";
 		}
@@ -210,5 +240,19 @@ public class AlignmentRow {
 		output += "]";
 		return output;
 	}
-	
+
+	public List<RuleG> checkRules(List<RuleG> rulesToCheck) {
+		for (RuleG rule : rulesToCheck) {
+			Set<Integer> initialSet = rule.getGroupIds();
+			int initialCount = initialSet.size();
+			Set<Integer> intersection = new HashSet<Integer>(initialSet);
+			Set<Integer> mine = this.getGroupIds();
+			intersection.retainAll(mine);
+			if (initialCount == intersection.size()) {
+				satisfiedRules.add(rule);
+			}
+		}
+		return satisfiedRules;
+	}
+		
 }

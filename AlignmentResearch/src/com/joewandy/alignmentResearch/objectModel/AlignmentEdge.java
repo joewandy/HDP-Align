@@ -66,27 +66,31 @@ public class AlignmentEdge {
 		return allWeight;
 	}
 	
-	public void addWeight(double increment) {
-		this.weight += increment;
-	}
-
-	public void incrementWeight() {
-		this.addWeight(1);
-	}
-	
 	public void addAlignmentPair(List<AlignmentPair> pair) {
 		pairs.addAll(pair);
 	}
 
-	public void updateAlignmentPairScore() {
+	public void updateAlignmentPairWeight() {
+		DistanceCalculator calc = new EuclideanDistanceCalculator();
 		for (AlignmentPair pair : pairs) {
-			pair.setScore(this.getWeight());
+
+			double weight = this.getWeight();
+			pair.setWeight(weight);
+
+//			double mass1 = pair.getMass1();
+//			double mass2 = pair.getMass2();
+//			double rt1 = pair.getRt1();
+//			double rt2 = pair.getRt2();
+//			double dist = calc.compute(mass1, mass2, rt1, rt2);
+//			double sim = 1/dist;
+//			pair.setScore(sim * weight);		
+
 		}
 	}
 	
 	public List<AlignmentPair> getAlignmentPairs() {
 		for (AlignmentPair pair : pairs) {
-			pair.setScore(this.weight);
+			pair.setWeight(this.weight);
 		}
 		return pairs;
 	}

@@ -3,25 +3,38 @@ package com.joewandy.alignmentResearch.filter;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
 
 public class SizeAlignmentResultFilter implements AlignmentResultFilter {
 
 	private int threshold;
+	private List<AlignmentRow> accepted;
+	private List<AlignmentRow> rejected;
 	
 	public SizeAlignmentResultFilter(int threshold) {
 		this.threshold = threshold;
+		this.accepted = new ArrayList<AlignmentRow>();
+		this.rejected = new ArrayList<AlignmentRow>();
 	}
 
 	@Override
-	public List<AlignmentRow> filter(List<AlignmentRow> rows) {
-		List<AlignmentRow> filteredRows = new ArrayList<AlignmentRow>();
-		for (AlignmentRow row : rows) {
+	public void process(AlignmentList result) {
+		for (AlignmentRow row : result.getRows()) {
 			if (row.getFeatures().size() >= threshold) {
-				filteredRows.add(row);
+				accepted.add(row);
+			} else {
+				rejected.add(row);
 			}
 		}
-		return filteredRows;
+	}
+
+	public List<AlignmentRow> getAccepted() {
+		return accepted;
+	}
+
+	public List<AlignmentRow> getRejected() {
+		return rejected;
 	}
 
 	@Override

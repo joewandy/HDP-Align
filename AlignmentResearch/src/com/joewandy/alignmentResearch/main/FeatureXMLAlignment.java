@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import peakml.chemistry.PeriodicTable;
+
 import cmdline.CmdLineException;
 import cmdline.CmdLineParser;
 
@@ -47,14 +49,16 @@ import com.joewandy.alignmentResearch.noiseModel.LocalRetentionShiftNoise.LocalN
 import com.joewandy.alignmentResearch.noiseModel.MeasurementNoise;
 import com.joewandy.alignmentResearch.noiseModel.MeasurementNoise.MeasurementNoiseLevel;
 import com.joewandy.alignmentResearch.noiseModel.MissingPeaksNoise;
+import com.joewandy.alignmentResearch.noiseModel.PolynomialLocalRetentionShiftNoise;
+import com.joewandy.alignmentResearch.noiseModel.PolynomialLocalRetentionShiftNoise.PolynomialNoiseLevel;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
-import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
+import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.EvaluationResult;
 import com.joewandy.alignmentResearch.objectModel.FeatureGroup;
 import com.joewandy.alignmentResearch.objectModel.FeatureGrouping;
 import com.joewandy.alignmentResearch.objectModel.GreedyFeatureGrouping;
 import com.joewandy.alignmentResearch.objectModel.GroundTruth;
-import com.joewandy.alignmentResearch.objectModel.MatlabFeatureGrouping;
+import com.joewandy.alignmentResearch.objectModel.SavedMatlabFeatureGrouping;
 import com.joewandy.util.Tool;
 
 public class FeatureXMLAlignment {
@@ -66,8 +70,8 @@ public class FeatureXMLAlignment {
 	public static final int RTWINDOW_MULTIPLY = 1;
 	public static final boolean PARALLEL_LIBRARY_BUILD = false;
 
-	public static final boolean WEIGHT_USE_WEIGHTED_SCORE = false;
-	public static final boolean WEIGHT_USE_PROB_CLUSTERING_WEIGHT = false;
+	public static final boolean WEIGHT_USE_WEIGHTED_SCORE = true;
+	public static final boolean WEIGHT_USE_PROB_CLUSTERING_WEIGHT = true;
 	public static final boolean WEIGHT_USE_ALL_PEAKS = false;
 	
 	// public static final int ALIGNMENT_SCORE_THRESHOLD = 20;
@@ -75,13 +79,15 @@ public class FeatureXMLAlignment {
 	/*
 	 * PARAMETERS FOR NOISE & EXPERIMENT
 	 */
-	
+
+	private static final int EXPERIMENT_ITERATION = 1;
+
 	private static final String EXPERIMENT_TYPE_MISSING_PEAKS = "missingPeaks";
 	private static final String EXPERIMENT_TYPE_CONTAMINANT_PEAKS = "contaminantPeaks";
 	private static final String EXPERIMENT_TYPE_MEASUREMENT_NOISE = "measurementNoise";
 	private static final String EXPERIMENT_TYPE_GLOBAL_NOISE = "globalNoise";
 	private static final String EXPERIMENT_TYPE_LOCAL_NOISE = "localNoise";
-	private static final int EXPERIMENT_ITERATION = 1;
+	private static final String EXPERIMENT_TYPE_POLY_NOISE = "polyNoise";	
 	
 	private static final double [] NOISE_MISSING_PEAKS_FRACTIONS = { 0.0, 0.2, 0.4, 0.6 };
 	private static final double [] NOISE_CONTAMINANT_PEAKS_FRACTIONS = { 0.0, 0.2, 0.4, 0.6 };
@@ -100,11 +106,14 @@ public class FeatureXMLAlignment {
 	private static final LocalNoiseLevel [] NOISE_LOCAL_RT_DRIFTS = { 
 			LocalNoiseLevel.SUPER_HIGH
 	};
+	private static final PolynomialNoiseLevel [] NOISE_POLY_RT_DRIFTS = { 
+		PolynomialNoiseLevel.LOW
+};
 	
 	public static void main(String args[]) throws Exception {
 		try {
 
-			// parse the commandline options
+			// parse the commandline options									
 			Tool.init();
 			FeatureXMLAlignmentOptions options = parseCommandLine(args);
 
@@ -124,7 +133,8 @@ public class FeatureXMLAlignment {
 					
 					for (int i = 0; i < iteration; i++) {
 						EvaluationResult evalRes = runExperiment(options, true, 
-								noiseParam, 0, GlobalNoiseLevel.NONE, LocalNoiseLevel.NONE, MeasurementNoiseLevel.NONE);				
+								noiseParam, 0, GlobalNoiseLevel.NONE, LocalNoiseLevel.NONE, 
+								PolynomialNoiseLevel.NONE, MeasurementNoiseLevel.NONE);				
 						expResult.addResult(evalRes);
 					}
 					results.add(expResult);					
@@ -146,7 +156,8 @@ public class FeatureXMLAlignment {
 						
 						for (int i = 0; i < iteration; i++) {
 							EvaluationResult evalRes = runExperiment(options, true, 
-									0, noiseParam, GlobalNoiseLevel.NONE, LocalNoiseLevel.NONE, MeasurementNoiseLevel.NONE);				
+									0, noiseParam, GlobalNoiseLevel.NONE, LocalNoiseLevel.NONE, 
+									PolynomialNoiseLevel.NONE, MeasurementNoiseLevel.NONE);				
 							expResult.addResult(evalRes);
 						}
 						results.add(expResult);					
@@ -168,7 +179,8 @@ public class FeatureXMLAlignment {
 					
 					for (int i = 0; i < iteration; i++) {
 						EvaluationResult evalRes = runExperiment(options, true, 
-								0.0, 0.0, GlobalNoiseLevel.NONE, LocalNoiseLevel.NONE, noiseParam);				
+								0.0, 0.0, GlobalNoiseLevel.NONE, LocalNoiseLevel.NONE, 
+								PolynomialNoiseLevel.NONE, noiseParam);				
 						expResult.addResult(evalRes);
 					}
 					results.add(expResult);					
@@ -190,7 +202,8 @@ public class FeatureXMLAlignment {
 					
 					for (int i = 0; i < iteration; i++) {
 						EvaluationResult evalRes = runExperiment(options, true, 
-								0.0, 0.0, noiseParam, LocalNoiseLevel.NONE, MeasurementNoiseLevel.NONE);				
+								0.0, 0.0, noiseParam, LocalNoiseLevel.NONE, 
+								PolynomialNoiseLevel.NONE, MeasurementNoiseLevel.NONE);				
 						expResult.addResult(evalRes);
 					}
 					results.add(expResult);					
@@ -212,7 +225,31 @@ public class FeatureXMLAlignment {
 					
 					for (int i = 0; i < iteration; i++) {
 						EvaluationResult evalRes = runExperiment(options, true, 
-								0.0, 0.0, GlobalNoiseLevel.NONE, noiseParam, MeasurementNoiseLevel.NONE);				
+								0.0, 0.0, GlobalNoiseLevel.NONE, noiseParam, 
+								PolynomialNoiseLevel.NONE, MeasurementNoiseLevel.NONE);				
+						expResult.addResult(evalRes);
+					}
+					results.add(expResult);					
+
+					System.out.println("==================================================");
+					
+				}
+
+			} else if (FeatureXMLAlignment.EXPERIMENT_TYPE_POLY_NOISE.equals(options.experimentType)) {
+
+				for (PolynomialNoiseLevel noiseParam : FeatureXMLAlignment.NOISE_POLY_RT_DRIFTS) {
+
+					System.out.println("============ noiseParam: " + noiseParam + "============");
+
+					String msg = "" + noiseParam;			
+					String replaced = msg.replaceAll("\\.", "");
+					String label = options.method + "_poly_drift_" + replaced;
+					FeatureXMLAlignmentResult expResult = new FeatureXMLAlignmentResult(label);
+					
+					for (int i = 0; i < iteration; i++) {
+						EvaluationResult evalRes = runExperiment(options, true, 
+								0.0, 0.0, GlobalNoiseLevel.NONE, LocalNoiseLevel.NONE, 
+								noiseParam, MeasurementNoiseLevel.NONE);				
 						expResult.addResult(evalRes);
 					}
 					results.add(expResult);					
@@ -231,7 +268,8 @@ public class FeatureXMLAlignment {
 				
 				for (int i = 0; i < iteration; i++) {
 					EvaluationResult evalRes = runExperiment(options, false, 
-							0.0, 0.0, GlobalNoiseLevel.NONE, LocalNoiseLevel.NONE, MeasurementNoiseLevel.NONE);				
+							0.0, 0.0, GlobalNoiseLevel.NONE, LocalNoiseLevel.NONE, 
+							PolynomialNoiseLevel.NONE, MeasurementNoiseLevel.NONE);				
 					expResult.addResult(evalRes);
 				}
 				results.add(expResult);					
@@ -240,7 +278,7 @@ public class FeatureXMLAlignment {
 				
 			}
 						
-			printForMatlab(results);
+			 printForMatlab(results);
 			
 		} catch (Exception e) {
 			Tool.unexpectedError(e, FeatureXMLAlignmentOptions.APPLICATION);
@@ -278,6 +316,7 @@ public class FeatureXMLAlignment {
 			final double contaminantPeakFrac,
 			final com.joewandy.alignmentResearch.noiseModel.GlobalRetentionShiftNoise.GlobalNoiseLevel globalNoiseLevel,
 			final com.joewandy.alignmentResearch.noiseModel.LocalRetentionShiftNoise.LocalNoiseLevel localNoiseLevel,
+			final com.joewandy.alignmentResearch.noiseModel.PolynomialLocalRetentionShiftNoise.PolynomialNoiseLevel polyNoiseLevel,
 			final com.joewandy.alignmentResearch.noiseModel.MeasurementNoise.MeasurementNoiseLevel measurementNoiseLevel) {
 
 		if (options.useGtFeaturesOnly) {
@@ -297,6 +336,9 @@ public class FeatureXMLAlignment {
 		// add local RT drift
 		dataGenerator.addNoise(new LocalRetentionShiftNoise(localNoiseLevel));
 		
+		// add polynomial RT drift
+		dataGenerator.addNoise(new PolynomialLocalRetentionShiftNoise(polyNoiseLevel));
+
 		// add measurement noises
 		dataGenerator.addNoise(new MeasurementNoise(measurementNoiseLevel));
 
@@ -311,6 +353,7 @@ public class FeatureXMLAlignment {
 			final double contaminantPeakFrac,
 			final com.joewandy.alignmentResearch.noiseModel.GlobalRetentionShiftNoise.GlobalNoiseLevel globalNoiseLevel,
 			final com.joewandy.alignmentResearch.noiseModel.LocalRetentionShiftNoise.LocalNoiseLevel localNoiseLevel,
+			final com.joewandy.alignmentResearch.noiseModel.PolynomialLocalRetentionShiftNoise.PolynomialNoiseLevel polyNoiseLevel,
 			final com.joewandy.alignmentResearch.noiseModel.MeasurementNoise.MeasurementNoiseLevel measurementNoiseLevel) 
 		throws FileNotFoundException {
 
@@ -327,6 +370,7 @@ public class FeatureXMLAlignment {
 					contaminantPeakFrac, 
 					globalNoiseLevel, 
 					localNoiseLevel, 
+					polyNoiseLevel,
 					measurementNoiseLevel);						
 		}
 		
@@ -344,14 +388,15 @@ public class FeatureXMLAlignment {
 			if (!WEIGHT_USE_WEIGHTED_SCORE) {
 				// even without weighting, we still want to group .. 
 				// just to prevent null pointer exception
-				grouping = new GreedyFeatureGrouping(options.groupingRtwindow);		
+				grouping = new GreedyFeatureGrouping(options.groupingRtWindow);		
 			} else {
 				if (WEIGHT_USE_PROB_CLUSTERING_WEIGHT) {
-					// use probability weight scores
-					grouping = new MatlabFeatureGrouping(options.groupingRtwindow);									
+//					grouping = new MatlabFeatureGrouping(options.groupingRtWindow, 
+//							options.groupingAlpha, options.groupingNSamples);															
+					grouping = new SavedMatlabFeatureGrouping();															
 				} else {
 					// use greedy weight scores
-					grouping = new MatlabFeatureGrouping(options.groupingRtwindow);					
+					grouping = new GreedyFeatureGrouping(options.groupingRtWindow);					
 				}
 			}
 			List<FeatureGroup> groups = grouping.group(alignmentDataList);
@@ -360,21 +405,22 @@ public class FeatureXMLAlignment {
 
 		// pick alignment method
 		AlignmentMethodParam.Builder paramBuilder = new AlignmentMethodParam.Builder(
-				options.alignmentPpm, options.alignmentRtwindow);
+				options.alignmentPpm, options.alignmentRtWindow);
 		AlignmentMethod aligner = AlignmentMethodFactory.getAlignmentMethod(options.method, paramBuilder, data);
 
 		// setup some filters to prune alignment results later
 		if (options.grouping) {
-			AlignmentResultFilter sizeFilter = new SizeAlignmentResultFilter(FeatureXMLAlignment.ALIGNMENT_SIZE_THRESHOLD);
-			aligner.addFilter(sizeFilter);
+//			AlignmentResultFilter sizeFilter = new SizeAlignmentResultFilter(FeatureXMLAlignment.ALIGNMENT_SIZE_THRESHOLD);
+//			aligner.addFilter(sizeFilter);
+			// FIXME: maybe not correct to directly use alignmentPpm for mahalanobis distance calculation. Here we assume that it's an absolute value !
 			AlignmentResultFilter graphFilter = new GraphAlignmentResultFilter(alignmentDataList, 
-					options.graphFilter, options.th);
+					options.graphFilter, options.th, options.alignmentPpm, options.alignmentRtWindow);
 			aligner.addFilter(graphFilter);
 		}
 		
 		// actually do the alignment now, filtering of alignment results also happen inside align()
-		List<AlignmentRow> result = aligner.align();
-		System.out.println("Total " + result.size() + " rows aligned");
+		AlignmentList result = aligner.align();
+		System.out.println("Total " + result.getRowsCount() + " rows aligned");
 		
 		/*
 		 * OUTPUT & EVALUATION
@@ -390,7 +436,7 @@ public class FeatureXMLAlignment {
 		// do performance evaluation
 		EvaluationResult evalRes = null;
 		if (options.gt != null) {				
-			evalRes = gt.evaluate(Collections.unmodifiableList(result));				
+			evalRes = gt.evaluate2(Collections.unmodifiableList(result.getRows()));				
 		}
 					
 		// RetentionTimePrinter rtp = new RetentionTimePrinter();

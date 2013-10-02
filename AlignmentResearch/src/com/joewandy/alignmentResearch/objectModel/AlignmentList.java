@@ -41,7 +41,7 @@ public class AlignmentList {
 		// puts each feature inside data into a new row
 		int rowId = 0;
 		for (Feature f : data.getFeatures()) {
-			AlignmentRow row = new AlignmentRow(rowId);
+			AlignmentRow row = new AlignmentRow(this, rowId);
 			row.addFeature(f);
 			rowId++;
 			rows.add(row);
@@ -116,7 +116,7 @@ public class AlignmentList {
 			if (!firstLine && prevId != currentId) {
 
 				// starting a new alignment group, store the previously aligned features 
-				AlignmentRow row = new AlignmentRow(rowId);
+				AlignmentRow row = new AlignmentRow(this, rowId);
 				row.addAlignedFeatures(alignedFeatures);
 				rowId++;
 				this.addRow(row);
@@ -138,7 +138,7 @@ public class AlignmentList {
 		in.close();
 		
 		// store all the remaining aligned features in the final row
-		AlignmentRow row = new AlignmentRow(rowId);
+		AlignmentRow row = new AlignmentRow(this, rowId);
 		row.addAlignedFeatures(alignedFeatures);
 		this.addRow(row);		
 		
@@ -150,10 +150,22 @@ public class AlignmentList {
 		return rows;
 	}
 	
+	public void clearRows() {
+		rows.clear();
+	}
+	
 	public void addRow(AlignmentRow row) {
 		rows.add(row);
 	}
 
+	public void addRows(List<AlignmentRow> rows) {
+		this.rows.addAll(rows);
+	}
+	
+	public void setRows(List<AlignmentRow> rows) {
+		this.rows = rows;
+	}
+	
 	public int getRowsCount() {
 		return rows.size();
 	}
@@ -178,10 +190,10 @@ public class AlignmentList {
 			delta = massTol;			
 		}
 
-		double massLower = reference.getAverageMz() - delta;
-		double massUpper = reference.getAverageMz() + delta;
-		double rtLower = reference.getAverageRt() - rtTol;
-		double rtUpper = reference.getAverageRt() + rtTol;		
+		double massLower = reference.getAverageMz() - delta/2;
+		double massUpper = reference.getAverageMz() + delta/2;
+		double rtLower = reference.getAverageRt() - rtTol/2;
+		double rtUpper = reference.getAverageRt() + rtTol/2;		
 		
 		for (AlignmentRow toCheck : this.rows) {
 			double massToCheck = toCheck.getAverageMz();
@@ -220,8 +232,8 @@ public class AlignmentList {
 			delta = massTol;			
 		}
 
-		double massLower = reference.getAverageMz() - delta;
-		double massUpper = reference.getAverageMz() + delta;
+		double massLower = reference.getAverageMz() - delta/2;
+		double massUpper = reference.getAverageMz() + delta/2;
 		
 		for (AlignmentRow toCheck : this.rows) {
 			double massToCheck = toCheck.getAverageMz();

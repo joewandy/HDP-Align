@@ -5,14 +5,14 @@ import com.joewandy.alignmentResearch.main.FeatureXMLAlignment;
 public class AlignmentMethodParam {
 
 	// show setup dialog or not during MZMine alignment ?
-	public static final boolean SHOW_PARAM_SETUP_DIALOG = false;
+	public static final boolean SHOW_PARAM_SETUP_DIALOG = true;
 	
 	/** 
 	 * This value sets the range, in terms of retention time, to create the model 
 	 * using RANSAC and non-linear regression algorithm. 
 	 * Maximum allowed retention time difference
 	 */
-	public static final int PARAM_RT_TOLERANCE_BEFORE_CORRECTION = 300;
+	public static final int PARAM_RT_TOLERANCE_BEFORE_CORRECTION = 1000;
 
 	/**
 	 * Maximum number of iterations allowed in the algorithm to find the right model 
@@ -43,6 +43,11 @@ public class AlignmentMethodParam {
 	 */
 	public static final boolean PARAM_REQUIRE_SAME_CHARGE_STATE = false;	
 	
+	/**
+	 * Threshold for picking 'friends' for social stable matching
+	 */
+	public static final double PARAM_FRIENDLY_THRESHOLD = 1;
+	
 	private double massTolerance;
 	private double rtTolerance;
 	private boolean usePpm;
@@ -56,6 +61,9 @@ public class AlignmentMethodParam {
 	private double ransacThreshold;
 	private boolean ransacLinearModel;
 	private boolean ransacSameChargeRequired;
+	
+	// for grouping alignment
+	private double friendlyThreshold;
 
 	// variant of Builder pattern, as described in Effective Java 2nd Ed.
 	public static class Builder {
@@ -76,6 +84,9 @@ public class AlignmentMethodParam {
 		private double ransacThreshold;
 		private boolean ransacLinearModel;
 		private boolean ransacSameChargeRequired;
+
+		// for grouping alignment
+		private double friendlyThreshold;
 		
 		public Builder(double massTolerance, double rtTolerance) {
 
@@ -95,6 +106,9 @@ public class AlignmentMethodParam {
 			this.ransacThreshold = AlignmentMethodParam.PARAM_THRESHOLD_VALUE;
 			this.ransacLinearModel = AlignmentMethodParam.PARAM_LINEAR_MODEL;
 			this.ransacSameChargeRequired = AlignmentMethodParam.PARAM_REQUIRE_SAME_CHARGE_STATE;
+			
+			// set parameter for other alignment methods
+			this.friendlyThreshold = AlignmentMethodParam.PARAM_FRIENDLY_THRESHOLD;
 			
 		}
 
@@ -142,6 +156,11 @@ public class AlignmentMethodParam {
 			this.ransacSameChargeRequired = sameChargeRequired;
 			return this;
 		}
+		
+		public Builder friendlyThreshold(double threshold) {
+			this.friendlyThreshold = threshold;
+			return this;
+		}		
 
 		public AlignmentMethodParam build() {
 			return new AlignmentMethodParam(this);
@@ -161,6 +180,7 @@ public class AlignmentMethodParam {
 		this.ransacThreshold = builder.ransacThreshold;
 		this.ransacLinearModel = builder.ransacLinearModel;
 		this.ransacSameChargeRequired = builder.ransacSameChargeRequired;
+		this.friendlyThreshold = builder.friendlyThreshold;
 	}
 
 	public double getMassTolerance() {
@@ -205,6 +225,10 @@ public class AlignmentMethodParam {
 
 	public boolean isRansacSameChargeRequired() {
 		return ransacSameChargeRequired;
+	}
+
+	public double getFriendlyThreshold() {
+		return friendlyThreshold;
 	}
 	
 }
