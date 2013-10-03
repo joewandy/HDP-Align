@@ -34,7 +34,7 @@ public class BaselineAlignment extends BaseAlignment implements AlignmentMethod 
 		for (AlignmentFile data : dataList) {
 			PrintWriter out = null;
 			try {
-				out = new PrintWriter("/home/joewandy/"+ 
+				out = new PrintWriter("/home/joewandy/temp/"+ 
 						data.getFilenameWithoutExtension() + ".csv");
 				out.println(Feature.csvHeader());
 				for (Feature feature : data.getFeatures()) {

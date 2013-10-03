@@ -23,6 +23,7 @@ public class AlignmentExpResult {
 	private List<AlignmentEdge> alignmentEdges;
 	private List<AlignmentEdge> removedEdges;
 	private Set<Feature> features;
+	private double maxWeight;
 	
 	public AlignmentExpResult() {
 		this.degreeDistribution = new TreeBag<Integer>();
@@ -33,6 +34,7 @@ public class AlignmentExpResult {
 		this.alignmentEdges = new ArrayList<AlignmentEdge>();
 		this.removedEdges = new ArrayList<AlignmentEdge>();
 		this.features = new HashSet<Feature>();
+		this.maxWeight = 0;
 	}
 
 	public void increaseDegree(Integer degree) {
@@ -147,6 +149,14 @@ public class AlignmentExpResult {
 		this.features.addAll(features);
 	}
 	
+	public double getMaxWeight() {
+		return maxWeight;
+	}
+
+	public void setMaxWeight(double maxWeight) {
+		this.maxWeight = maxWeight;
+	}
+
 	public void collect(AlignmentExpResult iterResult) {
 		this.addDegreeDistribution(iterResult.getDegreeDistribution());
 		this.addEdgeWeightDistribution(iterResult.getEdgeWeightDistribution());

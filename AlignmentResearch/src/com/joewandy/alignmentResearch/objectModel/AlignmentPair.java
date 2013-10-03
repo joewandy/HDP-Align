@@ -1,5 +1,7 @@
 package com.joewandy.alignmentResearch.objectModel;
 
+import com.joewandy.alignmentResearch.main.FeatureXMLAlignment;
+
 import peakml.Annotation;
 import peakml.IPeak;
 
@@ -25,12 +27,13 @@ public class AlignmentPair {
 	private Feature feature1;
 	private Feature feature2;
 	
-	private double weight;
 	private boolean delete;
 	private double dmz;
 	private double drt;
+
+	private AlignmentEdge parent;
 	
-	public AlignmentPair(IPeak peak1, IPeak peak2, double dmz, double drt) {
+	public AlignmentPair(IPeak peak1, IPeak peak2, double dmz, double drt, AlignmentEdge parent) {
 
 		this.peak1 = peak1;
 		this.peak2 = peak2;
@@ -52,10 +55,11 @@ public class AlignmentPair {
 		this.delete = false;
 		this.dmz = dmz;
 		this.drt = drt;
+		this.parent = parent;
 		
 	}
 
-	public AlignmentPair(Feature feature1, Feature feature2, double dmz, double drt) {
+	public AlignmentPair(Feature feature1, Feature feature2, double dmz, double drt, AlignmentEdge parent) {
 
 		this.feature1 = feature1;
 		this.feature2 = feature2;
@@ -77,7 +81,9 @@ public class AlignmentPair {
 		this.delete = false;
 		this.dmz = dmz;
 		this.drt = drt;
-		
+
+		this.parent = parent;
+
 	}
 	
 	public int getSourcePeakSet1() {
@@ -148,18 +154,32 @@ public class AlignmentPair {
 		DistanceCalculator calc = new MahalanobisDistanceCalculator(dmz, drt);
 		double dist = calc.compute(mass1, mass2, rt1, rt2);		
 		double inverseDist = 1/dist;
-		double score = inverseDist * getWeight();
+		double weight = 0;
+		if (FeatureXMLAlignment.WEIGHT_USE_ALL_PEAKS) {
+			weight = getProbWeight();
+		} else {
+			weight = getWeight();
+		}
+		double score = weight * inverseDist;
 		return score;
 	}
 	
 	public double getWeight() {
-		return weight;
+		if (parent != null) {
+			return parent.getWeight();			
+		} else {
+			return 1;
+		}
 	}
 
-	public void setWeight(double weight) {
-		this.weight = weight;
+	public double getProbWeight() {
+		if (parent != null) {
+			return parent.getProbWeight(feature1, feature2);			
+		} else {
+			return 1;
+		}
 	}
-
+	
 	public boolean isDelete() {
 		return delete;
 	}

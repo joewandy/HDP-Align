@@ -58,7 +58,6 @@ import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.UndirectedGraph;
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;
 import edu.uci.ics.jung.graph.UndirectedSparseMultigraph;
-import edu.uci.ics.jung.graph.util.EdgeType;
 import edu.uci.ics.jung.io.PajekNetWriter;
 import edu.uci.ics.jung.visualization.GraphZoomScrollPane;
 import edu.uci.ics.jung.visualization.RenderContext;
@@ -137,8 +136,7 @@ public class CombineGraphView {
 				AlignmentEdge existing = alignmentGraph.findEdge(
 						e.getLeft(), e.getRight());
 				if (existing != null) {
-					existing.addAlignmentPair(e.getAlignmentPairs());
-					existing.updateAlignmentPairWeight();
+					existing.addAlignmentPairs(e.getAlignmentPairs());
 				} else {				
 					alignmentGraph.addVertex(e.getLeft());
 					alignmentGraph.addVertex(e.getRight());
@@ -236,16 +234,21 @@ public class CombineGraphView {
 		}
 
 		// compute edge weight distribution
+		double maxWeight = 0;
 		for (AlignmentEdge e : alignmentGraph.getEdges()) {
+			if (e.getWeight() > maxWeight) {
+				maxWeight = e.getWeight();
+			}
 			expResult.increaseEdgeWeight(e.getWeight());
 			expResult.increaseIntensity(e.getWeight(), e.getIntensitySumSquareError());
 			expResult.increaseGroupSize(e.getWeight(), e.getTotalGroupSize());
 			expResult.addAlignmentPairs(e.getAlignmentPairs());
 			expResult.addAlignmentEdge(e);
 		}
+		expResult.setMaxWeight(maxWeight);
 		
-		// List<AlignmentEdge> removedEdges = this.clusterEdges();
-		// expResult.addRemovedEdges(removedEdges);
+//		List<AlignmentEdge> removedEdges = this.clusterEdges();
+//		expResult.addRemovedEdges(removedEdges);
 		
 		Set<Feature> allFeatures = new HashSet<Feature>();
 		for (AlignmentPair pair : expResult.getAlignmentPairs()) {

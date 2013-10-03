@@ -12,10 +12,16 @@ public class EvaluationResult {
 	private double totalTpRatio;
 	private double totalFpRatio;
 	private double totalPositivesRatio;
+	private double medSdrt;
+	private double meanSdrt;
+	private double medMdrt;
+	private double meanMdrt;
+	private double coverage;
 
 	public EvaluationResult(double precision, double recall, double f1,
 			double f05, double totalTp, double totalFp, double totalPositives,
-			double totalTpRatio, double totalFpRatio, double totalPositivesRatio) {
+			double totalTpRatio, double totalFpRatio, double totalPositivesRatio,
+			double medSdrt, double meanSdrt, double medMdrt, double meanMdrt, double coverage) {
 		super();
 		this.precision = precision;
 		this.recall = recall;
@@ -27,6 +33,11 @@ public class EvaluationResult {
 		this.totalTpRatio = totalTpRatio;
 		this.totalFpRatio = totalFpRatio;
 		this.totalPositivesRatio = totalPositivesRatio;
+		this.medSdrt = medSdrt;
+		this.meanSdrt = meanSdrt;
+		this.medMdrt = medMdrt;
+		this.meanMdrt = meanMdrt;
+		this.coverage = coverage;
 	}
 
 	public double getPrecision() {
@@ -69,6 +80,26 @@ public class EvaluationResult {
 		return totalPositivesRatio;
 	}
 
+	public double getMedSdrt() {
+		return medSdrt;
+	}
+
+	public double getMeanSdrt() {
+		return meanSdrt;
+	}
+
+	public double getMedMdrt() {
+		return medMdrt;
+	}
+
+	public double getMeanMdrt() {
+		return meanMdrt;
+	}
+
+	public double getCoverage() {
+		return coverage;
+	}
+
 	@Override
 	public String toString() {
 		
@@ -79,6 +110,11 @@ public class EvaluationResult {
 		String totalTpRatioStr = String.format("%.3f", totalTpRatio);
 		String totalFpRatioStr = String.format("%.3f", totalFpRatio);
 		String totalPositivesRatioStr = String.format("%.3f", totalPositivesRatio);
+		String medSdrtStr = String.format("%.3f", medSdrt);
+		String meanSdrtStr = String.format("%.3f", meanSdrt);
+		String medMdrtStr = String.format("%.3f", medMdrt);
+		String meanMdrtStr = String.format("%.3f", meanMdrt);
+		String coverageStr = String.format("%.3f", coverage);
 		
 		// human readable
 		String output = "";
@@ -89,12 +125,20 @@ public class EvaluationResult {
 		output += "Total TP = " + totalTp + " (" + totalTpRatioStr + ")" + "\n";
 		output += "Total FP = " + totalFp + " (" + totalFpRatioStr + ")" + "\n";
 		output += "Total positives = " + totalPositives + " (" + totalPositivesRatioStr + ")"  + "\n";
+		output += "Median SDRT = " + medSdrtStr + "\n";
+		output += "Mean SDRT = " + meanSdrtStr + "\n";
+		output += "Median MDRT = " + medMdrtStr + "\n";
+		output += "Mean MDRT = " + meanMdrtStr + "\n";
+		output += "Coverage = " + coverageStr + "\n";
 
 		// for parsing in CSV format
 		output += "!OUTPUT," + precStr + ", " + recallStr + ", " + f1Str + ", " + f05Str + ", " + 
 				totalTp + ", " + totalTpRatioStr + ", " + 
 				totalFp + ", " + totalFpRatioStr + ", " +
-				totalPositives + ", " + totalPositivesRatioStr;
+				totalPositives + ", " + totalPositivesRatioStr + 
+				medSdrtStr + ", " + meanSdrtStr + ", " + 
+				medMdrtStr + ", " + meanMdrtStr + ", " +
+				coverageStr;
 
 		return output;
 		

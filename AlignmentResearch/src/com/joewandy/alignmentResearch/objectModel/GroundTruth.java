@@ -6,6 +6,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.math3.stat.descriptive.moment.Mean;
+import org.apache.commons.math3.stat.descriptive.moment.Variance;
+import org.apache.commons.math3.stat.descriptive.rank.Max;
+import org.apache.commons.math3.stat.descriptive.rank.Median;
+import org.apache.commons.math3.stat.descriptive.rank.Min;
+
 
 public class GroundTruth {
 
@@ -70,7 +76,7 @@ public class GroundTruth {
 		}
 	}
 
-	public EvaluationResult evaluate(List<AlignmentRow> alignmentResult) {
+	public EvaluationResult evaluate(List<AlignmentRow> alignmentResult, int noOfFiles) {
 		
 		List<FeatureGroup> tool = convertToFeatureGroup(alignmentResult);
 		
@@ -163,14 +169,64 @@ public class GroundTruth {
 		double totalFpRatio = ((double) totalFp) / totalPositives;		
 		double totalPositiveRatio = ((double) totalPositives) / totalPositives;				
 		
+		/*
+		 * More calculations here
+		 */
+		
+		int coverageCount = 0;		
+		List<Double> sdrtList = new ArrayList<Double>();
+		List<Double> mdrtList = new ArrayList<Double>();		
+		for (AlignmentRow row : alignmentResult) {
+			
+			if (row.getFeaturesCount() > noOfFiles/2) {
+				coverageCount++;
+			}
+			
+			double[] rts = row.getFeatureRts();
+			Variance variance = new Variance();
+			double var = variance.evaluate(rts);
+			double sdrt = Math.sqrt(var);
+			sdrtList.add(sdrt);
+			
+			Min min = new Min();
+			Max max = new Max();
+			double minValue = min.evaluate(rts);
+			double maxValue = max.evaluate(rts);
+			double mdrt = maxValue - minValue;
+			mdrtList.add(mdrt);
+			
+		}
+
+		double[] sdrtArr = listToArray(sdrtList);
+		double[] mdrtArr = listToArray(mdrtList);
+		
+		// compute median & mean SDRT
+		Median med1 = new Median();
+		Mean mean1 = new Mean();
+		double medSdrt = med1.evaluate(sdrtArr);
+		double meanSdrt = mean1.evaluate(sdrtArr);
+
+		// compute median & mean MDRT
+		Median med2 = new Median();
+		Mean mean2 = new Mean();
+		double medMdrt = med2.evaluate(mdrtArr);
+		double meanMdrt = mean2.evaluate(mdrtArr);
+		
+		// compute coverage
+		double coverage = (double)coverageCount / alignmentResult.size();
+		
 		System.out.println();		
-		EvaluationResult evalRes = new EvaluationResult(precision, recall, f1, f05, totalTp, totalFp, totalPositives, totalTpRatio, totalFpRatio, totalPositiveRatio);
+		EvaluationResult evalRes = new EvaluationResult(
+				precision, recall, f1, f05, 
+				totalTp, totalFp, totalPositives, totalTpRatio, totalFpRatio, totalPositiveRatio,
+				medSdrt, meanSdrt, medMdrt, meanMdrt, coverage);
 		System.out.println(evalRes);
+		
 		return evalRes;
 
 	}
 
-	public EvaluationResult evaluate2(List<AlignmentRow> alignmentResult) {
+	public EvaluationResult evaluate2(List<AlignmentRow> alignmentResult, int noOfFiles) {
 		
 		// convert alignmentResult to feature groups
 		List<FeatureGroup> tool = convertToFeatureGroup(alignmentResult);		
@@ -219,8 +275,8 @@ public class GroundTruth {
 			int tCount = t.getFeatureCount();
 			int fp = tCount - intersectCount;
 			int tp = intersectCount;
-			precision += ((double) intersectCount / tCount);
-			recall += ((double) intersectCount / gTildeCount);
+//			precision += ((double) intersectCount / tCount);
+//			recall += ((double) intersectCount / gTildeCount);
 
 			totalTp += tp;
 			totalFp += fp;
@@ -245,9 +301,59 @@ public class GroundTruth {
 		double totalFpRatio = ((double) totalFp) / totalPositives;		
 		double totalPositiveRatio = ((double) totalPositives) / totalPositives;				
 		
+		/*
+		 * More calculations here
+		 */
+		
+		int coverageCount = 0;		
+		List<Double> sdrtList = new ArrayList<Double>();
+		List<Double> mdrtList = new ArrayList<Double>();		
+		for (AlignmentRow row : alignmentResult) {
+			
+			if (row.getFeaturesCount() > noOfFiles/2) {
+				coverageCount++;
+			}
+			
+			double[] rts = row.getFeatureRts();
+			Variance variance = new Variance();
+			double var = variance.evaluate(rts);
+			double sdrt = Math.sqrt(var);
+			sdrtList.add(sdrt);
+			
+			Min min = new Min();
+			Max max = new Max();
+			double minValue = min.evaluate(rts);
+			double maxValue = max.evaluate(rts);
+			double mdrt = maxValue - minValue;
+			mdrtList.add(mdrt);
+			
+		}
+
+		double[] sdrtArr = listToArray(sdrtList);
+		double[] mdrtArr = listToArray(mdrtList);
+		
+		// compute median & mean SDRT
+		Median med1 = new Median();
+		Mean mean1 = new Mean();
+		double medSdrt = med1.evaluate(sdrtArr);
+		double meanSdrt = mean1.evaluate(sdrtArr);
+
+		// compute median & mean MDRT
+		Median med2 = new Median();
+		Mean mean2 = new Mean();
+		double medMdrt = med2.evaluate(mdrtArr);
+		double meanMdrt = mean2.evaluate(mdrtArr);
+		
+		// compute coverage
+		double coverage = (double)coverageCount / alignmentResult.size();
+		
 		System.out.println();		
-		EvaluationResult evalRes = new EvaluationResult(precision, recall, f1, f05, totalTp, totalFp, totalPositives, totalTpRatio, totalFpRatio, totalPositiveRatio);
+		EvaluationResult evalRes = new EvaluationResult(
+				precision, recall, f1, f05, 
+				totalTp, totalFp, totalPositives, totalTpRatio, totalFpRatio, totalPositiveRatio,
+				medSdrt, meanSdrt, medMdrt, meanMdrt, coverage);
 		System.out.println(evalRes);
+		
 		return evalRes;
 
 	}
@@ -272,6 +378,16 @@ public class GroundTruth {
 			tool.add(group);
 		}
 		return tool;
+	}
+	
+	private double[] listToArray(List<Double> list) {
+		double[] arr = new double[list.size()];
+		int counter = 0;
+		for (Double value : list) {
+			arr[counter] = value;
+			counter++;
+		}
+		return arr;
 	}
 	
 	/**

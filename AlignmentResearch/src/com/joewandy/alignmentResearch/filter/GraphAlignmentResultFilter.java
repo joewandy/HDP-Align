@@ -86,7 +86,8 @@ public class GraphAlignmentResultFilter implements AlignmentResultFilter {
 		
 		// remove alignment of 1 peak only
 
-		RemovalMethod removalMethod = new PairRemovalMethod(allAlignmentPairs, removedAlignmentPairs);
+		double maxWeight = graphResult.getMaxWeight();
+		RemovalMethod removalMethod = new PairRemovalMethod(allAlignmentPairs, removedAlignmentPairs, maxWeight);
 		// RemovalMethod removalMethod = new FeatureRemovalMethod(allAlignmentPairs);
 		// RemovalMethod removalMethod = new RowRemovalMethod(rows);
 		remRes = remove(alignmentList, graphResult, label, removalMethod);

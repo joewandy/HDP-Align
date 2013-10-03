@@ -26,8 +26,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import peakml.chemistry.PeriodicTable;
-
 import cmdline.CmdLineException;
 import cmdline.CmdLineParser;
 
@@ -39,7 +37,6 @@ import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodFactory;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
 import com.joewandy.alignmentResearch.filter.AlignmentResultFilter;
 import com.joewandy.alignmentResearch.filter.GraphAlignmentResultFilter;
-import com.joewandy.alignmentResearch.filter.SizeAlignmentResultFilter;
 import com.joewandy.alignmentResearch.noiseModel.ContaminantPeaksNoise;
 import com.joewandy.alignmentResearch.noiseModel.GlobalRetentionShiftNoise;
 import com.joewandy.alignmentResearch.noiseModel.GlobalRetentionShiftNoise.GlobalNoiseLevel;
@@ -435,8 +432,9 @@ public class FeatureXMLAlignment {
 
 		// do performance evaluation
 		EvaluationResult evalRes = null;
-		if (options.gt != null) {				
-			evalRes = gt.evaluate2(Collections.unmodifiableList(result.getRows()));				
+		if (options.gt != null) {			
+			int noOfFiles = data.getNoOfFiles();
+			evalRes = gt.evaluate2(Collections.unmodifiableList(result.getRows()), noOfFiles);				
 		}
 					
 		// RetentionTimePrinter rtp = new RetentionTimePrinter();

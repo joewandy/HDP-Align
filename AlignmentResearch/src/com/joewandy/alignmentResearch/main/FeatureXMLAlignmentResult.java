@@ -66,6 +66,51 @@ public class FeatureXMLAlignmentResult {
 		}
 		System.out.println(" ]';");		
 		
+		System.out.print(label + "_medSdrt = [ ");
+		for (EvaluationResult result : results) {
+			if (result == null) {
+				continue;
+			}
+			System.out.print(String.format("%.3f,", result.getMedSdrt()));
+		}
+		System.out.println(" ]';");		
+
+		System.out.print(label + "_meanSdrt = [ ");
+		for (EvaluationResult result : results) {
+			if (result == null) {
+				continue;
+			}
+			System.out.print(String.format("%.3f,", result.getMeanSdrt()));
+		}
+		System.out.println(" ]';");		
+
+		System.out.print(label + "_medMdrt = [ ");
+		for (EvaluationResult result : results) {
+			if (result == null) {
+				continue;
+			}
+			System.out.print(String.format("%.3f,", result.getMedMdrt()));
+		}
+		System.out.println(" ]';");		
+
+		System.out.print(label + "_meanMdrt = [ ");
+		for (EvaluationResult result : results) {
+			if (result == null) {
+				continue;
+			}
+			System.out.print(String.format("%.3f,", result.getMeanMdrt()));
+		}
+		System.out.println(" ]';");		
+
+		System.out.print(label + "_coverage = [ ");
+		for (EvaluationResult result : results) {
+			if (result == null) {
+				continue;
+			}
+			System.out.print(String.format("%.3f,", result.getCoverage()));
+		}
+		System.out.println(" ]';");		
+		
 	}
 	
 }

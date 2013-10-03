@@ -75,7 +75,7 @@ public class RowRemovalMethod extends BaseRemovalMethod implements
 		} else if ("association".equals(filterMethod)) {
 
 			PrintWriter out = null;
-			String filename = "/home/joewandy/temp.txt";
+			String filename = "/home/joewandy/temp/temp.txt";
 			List<String[]> itemSet = new ArrayList<String[]>();
 
 			try {
@@ -116,7 +116,7 @@ public class RowRemovalMethod extends BaseRemovalMethod implements
 			// AlgoApriori apriori = new AlgoApriori();
 			// try {
 			// apriori.runAlgorithm(minsup, filename,
-			// "/home/joewandy/output.txt");
+			// "/home/joewandy/temp/output.txt");
 			// apriori.printStats();
 			// } catch (IOException e) {
 			// e.printStackTrace();

@@ -75,10 +75,9 @@ public class GraphEdgeConstructor {
 
 					// NEW: don't link the features aligned but from the same files
 					if (f1.getData() != f2.getData() && !v1.equals(v2)) {
-						// here we also create the alignment pair between f1 & f2 
-						// (inside the constructor of AlignmentEdge)
-						AlignmentPair pair = new AlignmentPair(f1, f2, dmz, drt);
-						AlignmentEdge edge = new AlignmentEdge(v1, v2, pair);
+						AlignmentEdge edge = new AlignmentEdge(v1, v2);
+						AlignmentPair pair = new AlignmentPair(f1, f2, dmz, drt, edge);
+						edge.addAlignmentPair(pair);
 						edgeList.add(edge);		
 						// also store this alignment pair inside the row itself
 						row.addPair(pair);

@@ -23,11 +23,13 @@ public class PairRemovalMethod extends BaseRemovalMethod implements RemovalMetho
 
 	List<AlignmentPair> allAlignmentPairs;
 	List<AlignmentPair> removedAlignmentPairs;
+	double maxWeight;
 	
 	public PairRemovalMethod(List<AlignmentPair> allAlignmentPairs,
-			List<AlignmentPair> removedAlignmentPairs) {
+			List<AlignmentPair> removedAlignmentPairs, double maxWeight) {
 		this.allAlignmentPairs = allAlignmentPairs;
 		this.removedAlignmentPairs = removedAlignmentPairs;
+		this.maxWeight = maxWeight;
 	}
 
 	@Override
@@ -47,18 +49,6 @@ public class PairRemovalMethod extends BaseRemovalMethod implements RemovalMetho
 						}
 			});
 			
-			// skip very low-scoring pair
-//			int removed = 0;
-//			for (AlignmentPair pair : allAlignmentPairs) {
-//				if (pair.getScore() == 1 || pair.getScore() == 2) {
-//					pair.setDelete(true);
-//					removed++;
-//				} else {
-//					scoreQueue.add(pair);												
-//				}
-//			}
-//			int n = (int) (threshold * (allAlignmentPairs.size()-removed));
-
 			for (AlignmentPair pair : allAlignmentPairs) {
 				scoreQueue.add(pair);												
 			}
@@ -68,50 +58,13 @@ public class PairRemovalMethod extends BaseRemovalMethod implements RemovalMetho
 			int counter = 0;
 			while (counter < n) {
 				AlignmentPair pair = scoreQueue.poll();
+				double score = pair.getScore();
 				pair.setDelete(true);
 				counter++;
 			}			
 			final String percent = String.format("%.2f", (threshold * 100));
 			System.out.println(counter + " (" + percent + "%) alignment pairs marked for deletion by scores");
 
-		} else if ("graphAbsolute".equals(filterMethod)) {
-
-			// construct a priority queue of alignment pairs, ordered by scores ascending
-			PriorityQueue<AlignmentPair> scoreQueue = new PriorityQueue<AlignmentPair>(allAlignmentPairs.size(), 
-					new Comparator<AlignmentPair>() {
-						@Override
-						public int compare(AlignmentPair arg0,
-								AlignmentPair arg1) {
-							return Double.compare(arg0.getScore(), arg1.getScore());
-						}
-			});
-
-			// skip very low-scoring pair
-//			for (AlignmentPair pair : allAlignmentPairs) {
-//				if (pair.getScore() == 1 || pair.getScore() == 2) {
-//					pair.setDelete(true);
-//				} else {
-//					scoreQueue.add(pair);												
-//				}
-//			}
-			for (AlignmentPair pair : allAlignmentPairs) {
-				scoreQueue.add(pair);												
-			}
-
-			// remove the bottom results, up to threshold
-			int counter = 0;
-			double total = scoreQueue.size();
-			while (!scoreQueue.isEmpty()) {
-				AlignmentPair pair = scoreQueue.poll();
-				if (pair.getScore() > threshold) {
-					break;
-				}
-				pair.setDelete(true);
-				counter++;
-			}			
-			final String percent = String.format("%.2f", (counter / total * 100));
-			System.out.println(counter + " (" + percent + "%) alignment pairs marked for deletion by absolute scores");
-			
 		} else if ("intensity".equals(filterMethod)) {
 
 			// construct a priority queue of alignment pairs, ordered by scores ascending
@@ -124,18 +77,6 @@ public class PairRemovalMethod extends BaseRemovalMethod implements RemovalMetho
 									arg1.getRelativeIntensityErrorScore());
 						}
 			});
-
-			// skip very low-scoring pair
-//			int removed = 0;
-//			for (AlignmentPair pair : allAlignmentPairs) {
-//				if (pair.getScore() == 1 || pair.getScore() == 2) {
-//					pair.setDelete(true);
-//					removed++;
-//				} else {
-//					intenseQueue.add(pair);												
-//				}
-//			}
-//			int n = (int) (threshold * (allAlignmentPairs.size()-removed));
 
 			for (AlignmentPair pair : allAlignmentPairs) {
 				intenseQueue.add(pair);												
@@ -155,18 +96,6 @@ public class PairRemovalMethod extends BaseRemovalMethod implements RemovalMetho
 		} else if ("random".equals(filterMethod)) {
 
 			List<AlignmentPair> shuffledList = new ArrayList<AlignmentPair>();
-			
-			// skip very low-scoring pair
-//			int removed = 0;
-//			for (AlignmentPair pair : allAlignmentPairs) {
-//				if (pair.getScore() == 1 || pair.getScore() == 2) {
-//					pair.setDelete(true);
-//					removed++;
-//				} else {
-//					shuffledList.add(pair);
-//				}
-//			}
-//			int n = (int) (threshold * (allAlignmentPairs.size()-removed));
 
 			for (AlignmentPair pair : allAlignmentPairs) {
 				shuffledList.add(pair);
@@ -280,7 +209,7 @@ public class PairRemovalMethod extends BaseRemovalMethod implements RemovalMetho
 				}
 			}
 			
-			if (rowId % 1000 == 0) {
+			if (rowId != 0 && rowId % 1000 == 0) {
 				System.out.print(".");
 			}
 						

@@ -6,23 +6,20 @@ import java.util.List;
 
 public class AlignmentEdge {
 
-	private double weight;
 	private AlignmentVertex left;
 	private AlignmentVertex right;
 	private String leftId;
 	private String rightId;
 	private List<AlignmentPair> pairs;
 	
-	public AlignmentEdge(AlignmentVertex vertexLeft, AlignmentVertex vertexRight, AlignmentPair pair) {
+	public AlignmentEdge(AlignmentVertex vertexLeft, AlignmentVertex vertexRight) {
 		
 		this.left = vertexLeft;
 		this.right = vertexRight;
-		this.weight = 1;
 		this.leftId = left.getId();
 		this.rightId = right.getId();
 		
 		pairs = new ArrayList<AlignmentPair>();
-		pairs.add(pair);
 
 	}
 	
@@ -31,9 +28,9 @@ public class AlignmentEdge {
 	}
 	
 	public double getWeight() {
-		return weight;
+		return pairs.size();
 	}
-	
+		
 	public double getProbWeight(Feature f1, Feature f2) {
 
 		assert(f1.getData() != f2.getData());
@@ -63,38 +60,23 @@ public class AlignmentEdge {
 			allWeight += pairWeight;
 			
 		}
+		
+		allWeight = allWeight / pairs.size();
 		return allWeight;
 	}
 	
-	public void addAlignmentPair(List<AlignmentPair> pair) {
-		pairs.addAll(pair);
+	public void addAlignmentPairs(List<AlignmentPair> newPairs) {
+		pairs.addAll(newPairs);
 	}
 
-	public void updateAlignmentPairWeight() {
-		DistanceCalculator calc = new EuclideanDistanceCalculator();
-		for (AlignmentPair pair : pairs) {
-
-			double weight = this.getWeight();
-			pair.setWeight(weight);
-
-//			double mass1 = pair.getMass1();
-//			double mass2 = pair.getMass2();
-//			double rt1 = pair.getRt1();
-//			double rt2 = pair.getRt2();
-//			double dist = calc.compute(mass1, mass2, rt1, rt2);
-//			double sim = 1/dist;
-//			pair.setScore(sim * weight);		
-
-		}
+	public void addAlignmentPair(AlignmentPair newPair) {
+		pairs.add(newPair);
 	}
 	
 	public List<AlignmentPair> getAlignmentPairs() {
-		for (AlignmentPair pair : pairs) {
-			pair.setWeight(this.weight);
-		}
 		return pairs;
 	}
-	
+		
 	public AlignmentVertex getLeft() {
 		return left;
 	}
@@ -174,7 +156,7 @@ public class AlignmentEdge {
 
 	@Override
 	public String toString() {
-		return "E" + "[weight=" + weight + ":" + left.toString() + "-" + right.toString() + "]";
+		return "E" + "[weight=" + this.getWeight() + ":" + left.toString() + "-" + right.toString() + "]";
 	}
 	
 }

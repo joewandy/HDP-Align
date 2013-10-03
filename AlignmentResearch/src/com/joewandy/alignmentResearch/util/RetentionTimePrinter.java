@@ -36,7 +36,7 @@ public class RetentionTimePrinter {
 			Feature feature1 = row.getFeaturesFromFile(firstFile.getFilenameWithoutExtension());
 			Feature feature2 = row.getFeaturesFromFile(secondFile.getFilenameWithoutExtension());
 			if (feature1 != null && feature2 != null) {
-				AlignmentPair aligned = new AlignmentPair(feature1, feature2, dmz, drt);
+				AlignmentPair aligned = new AlignmentPair(feature1, feature2, dmz, drt, null);
 				aligned.print();
 			}
 		}

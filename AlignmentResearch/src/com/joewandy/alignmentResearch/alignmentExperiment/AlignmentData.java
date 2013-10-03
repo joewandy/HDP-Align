@@ -42,4 +42,8 @@ public class AlignmentData {
 		return groundTruth;
 	}	
 	
+	public int getNoOfFiles() {
+		return alignmentDataList.size();
+	}
+	
 }

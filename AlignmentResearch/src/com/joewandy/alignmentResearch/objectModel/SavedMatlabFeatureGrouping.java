@@ -10,6 +10,7 @@ import java.util.Set;
 
 import com.jmatio.io.MatFileReader;
 import com.jmatio.types.MLDouble;
+import com.joewandy.alignmentResearch.main.FeatureXMLAlignment;
 
 public class SavedMatlabFeatureGrouping extends BaseFeatureGrouping implements FeatureGrouping {
 
@@ -28,6 +29,7 @@ public class SavedMatlabFeatureGrouping extends BaseFeatureGrouping implements F
 		int groupId = 1;
 		List<FeatureGroup> groups = new ArrayList<FeatureGroup>();
 		final String dataPath = "/home/joewandy/workspace/AlignmentModel/";
+		System.out.println("Loading .mat from " + dataPath);
 		for (AlignmentFile data : dataList) {
 
 			System.out.print("Grouping " + data.getFilename() + " ");
@@ -82,23 +84,24 @@ public class SavedMatlabFeatureGrouping extends BaseFeatureGrouping implements F
 			System.out.println("groupedCount = " + groupedCount);
 			System.out.println("ungroupedCount = " + ungroupedCount);
 
-			System.out.print("Getting cluster co-ocurrence probabilities of peaks for " + data.getFilename() + " ");
-			mfr = null;
-			try {
-				mfr = new MatFileReader(dataPath + data.getFilenameWithoutExtension() + ".csv.ZZprob.mat");
-			} catch (IOException e) {
-				e.printStackTrace();
-				System.exit(1);
-			}
-			
-			if (mfr != null) {
-
-				final double[][] ZZprob = ((MLDouble)mfr.getMLArray("ZZprob")).getArray();
-				System.out.println("ZZprob = " + ZZprob.length + "x" + ZZprob[0].length);
-				data.setZZProb(ZZprob);
+			if (FeatureXMLAlignment.WEIGHT_USE_ALL_PEAKS) {
+				System.out.print("Getting cluster co-ocurrence probabilities of peaks for " + data.getFilename() + " ");
+				mfr = null;
+				try {
+					mfr = new MatFileReader(dataPath + data.getFilenameWithoutExtension() + ".csv.ZZprob.mat");
+				} catch (IOException e) {
+					e.printStackTrace();
+					System.exit(1);
+				}
 				
-			}
+				if (mfr != null) {
 
+					final double[][] ZZprob = ((MLDouble)mfr.getMLArray("ZZprob")).getArray();
+					System.out.println("ZZprob = " + ZZprob.length + "x" + ZZprob[0].length);
+					data.setZZProb(ZZprob);
+					
+				}				
+			}
 			
 		}
 		

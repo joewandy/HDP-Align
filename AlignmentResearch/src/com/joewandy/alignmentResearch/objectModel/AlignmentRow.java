@@ -81,6 +81,16 @@ public class AlignmentRow {
 		return features.size();
 	}
 	
+	public double[] getFeatureRts() {
+		double[] rts = new double[features.size()];
+		int counter = 0;
+		for (Feature f : features) {
+			rts[counter] = f.getRt();
+			counter++;
+		}
+		return rts;
+	}
+	
 	public Feature getFeaturesFromFile(String fileName) {
 		Feature feature = null;
 		for (Feature f : this.features) {

@@ -14,6 +14,7 @@ import matlabcontrol.MatlabProxyFactoryOptions;
 
 import com.jmatio.io.MatFileReader;
 import com.jmatio.types.MLDouble;
+import com.joewandy.alignmentResearch.main.FeatureXMLAlignment;
 
 import dk.ange.octave.OctaveEngine;
 import dk.ange.octave.OctaveEngineFactory;
@@ -131,23 +132,25 @@ public class MatlabFeatureGrouping extends BaseFeatureGrouping implements Featur
 			System.out.println("groupedCount = " + groupedCount);
 			System.out.println("ungroupedCount = " + ungroupedCount);
 
-			System.out.print("Getting cluster co-ocurrence probabilities of peaks for " + data.getFilename() + " ");
-			mfr = null;
-			try {
-				mfr = new MatFileReader(MATLAB_SCRIPT_PATH + "/temp.ZZprob.mat");
-			} catch (IOException e) {
-				e.printStackTrace();
-				System.exit(1);
+			if (FeatureXMLAlignment.WEIGHT_USE_ALL_PEAKS) {
+				System.out.print("Getting cluster co-ocurrence probabilities of peaks for " + data.getFilename() + " ");
+				mfr = null;
+				try {
+					mfr = new MatFileReader(MATLAB_SCRIPT_PATH + "/temp.ZZprob.mat");
+				} catch (IOException e) {
+					e.printStackTrace();
+					System.exit(1);
+				}
+				
+				if (mfr != null) {
+
+					final double[][] ZZprob = ((MLDouble)mfr.getMLArray("ZZprob")).getArray();
+					System.out.println("ZZprob = " + ZZprob.length + "x" + ZZprob[0].length);
+					data.setZZProb(ZZprob);
+					
+				}	
 			}
 			
-			if (mfr != null) {
-
-				final double[][] ZZprob = ((MLDouble)mfr.getMLArray("ZZprob")).getArray();
-				System.out.println("ZZprob = " + ZZprob.length + "x" + ZZprob[0].length);
-				data.setZZProb(ZZprob);
-				
-			}
-		    
 		}
 		
 		if (proxy != null) {
@@ -245,21 +248,23 @@ public class MatlabFeatureGrouping extends BaseFeatureGrouping implements Featur
 			System.out.println("groupedCount = " + groupedCount);
 			System.out.println("ungroupedCount = " + ungroupedCount);
 
-			System.out.print("Getting cluster co-ocurrence probabilities of peaks for " + data.getFilename() + " ");
-			mfr = null;
-			try {
-				mfr = new MatFileReader(MATLAB_SCRIPT_PATH + data.getFilenameWithoutExtension() + ".csv.ZZprob.mat");
-			} catch (IOException e) {
-				e.printStackTrace();
-				System.exit(1);
-			}
-			
-			if (mfr != null) {
-
-				final double[][] ZZprob = ((MLDouble)mfr.getMLArray("ZZprob")).getArray();
-				System.out.println("ZZprob = " + ZZprob.length + "x" + ZZprob[0].length);
-				data.setZZProb(ZZprob);
+			if (FeatureXMLAlignment.WEIGHT_USE_ALL_PEAKS) {
+				System.out.print("Getting cluster co-ocurrence probabilities of peaks for " + data.getFilename() + " ");
+				mfr = null;
+				try {
+					mfr = new MatFileReader(MATLAB_SCRIPT_PATH + data.getFilenameWithoutExtension() + ".csv.ZZprob.mat");
+				} catch (IOException e) {
+					e.printStackTrace();
+					System.exit(1);
+				}
 				
+				if (mfr != null) {
+
+					final double[][] ZZprob = ((MLDouble)mfr.getMLArray("ZZprob")).getArray();
+					System.out.println("ZZprob = " + ZZprob.length + "x" + ZZprob[0].length);
+					data.setZZProb(ZZprob);
+					
+				}				
 			}
 			
 		}
