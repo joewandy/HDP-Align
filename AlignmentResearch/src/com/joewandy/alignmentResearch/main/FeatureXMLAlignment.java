@@ -55,7 +55,7 @@ import com.joewandy.alignmentResearch.objectModel.FeatureGroup;
 import com.joewandy.alignmentResearch.objectModel.FeatureGrouping;
 import com.joewandy.alignmentResearch.objectModel.GreedyFeatureGrouping;
 import com.joewandy.alignmentResearch.objectModel.GroundTruth;
-import com.joewandy.alignmentResearch.objectModel.SavedMatlabFeatureGrouping;
+import com.joewandy.alignmentResearch.objectModel.MatlabFeatureGrouping;
 import com.joewandy.util.Tool;
 
 public class FeatureXMLAlignment {
@@ -67,8 +67,13 @@ public class FeatureXMLAlignment {
 	public static final int RTWINDOW_MULTIPLY = 1;
 	public static final boolean PARALLEL_LIBRARY_BUILD = false;
 
-	public static final boolean WEIGHT_USE_WEIGHTED_SCORE = true;
-	public static final boolean WEIGHT_USE_PROB_CLUSTERING_WEIGHT = true;
+	// use weighting when scoring peaks ?
+	public static final boolean WEIGHT_USE_WEIGHTED_SCORE = false;
+
+	// use mixture model clustering vs. greedy clustering ?
+	public static final boolean WEIGHT_USE_PROB_CLUSTERING_WEIGHT = false;
+
+	// use posterior probability of all peaks ?
 	public static final boolean WEIGHT_USE_ALL_PEAKS = false;
 	
 	// public static final int ALIGNMENT_SCORE_THRESHOLD = 20;
@@ -77,7 +82,7 @@ public class FeatureXMLAlignment {
 	 * PARAMETERS FOR NOISE & EXPERIMENT
 	 */
 
-	private static final int EXPERIMENT_ITERATION = 1;
+	private static final double[] EXPERIMENT_THRESHOLDS = { 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.99 };
 
 	private static final String EXPERIMENT_TYPE_MISSING_PEAKS = "missingPeaks";
 	private static final String EXPERIMENT_TYPE_CONTAMINANT_PEAKS = "contaminantPeaks";
@@ -115,7 +120,7 @@ public class FeatureXMLAlignment {
 			FeatureXMLAlignmentOptions options = parseCommandLine(args);
 
 			List<FeatureXMLAlignmentResult> results = new ArrayList<FeatureXMLAlignmentResult>();
-			final int iteration = FeatureXMLAlignment.EXPERIMENT_ITERATION;
+			final int iteration = options.experimentIter;
 
 			if (FeatureXMLAlignment.EXPERIMENT_TYPE_MISSING_PEAKS.equals(options.experimentType)) {
 			
@@ -263,14 +268,29 @@ public class FeatureXMLAlignment {
 
 				FeatureXMLAlignmentResult expResult = new FeatureXMLAlignmentResult("no_noise");
 				
-				for (int i = 0; i < iteration; i++) {
-					EvaluationResult evalRes = runExperiment(options, false, 
-							0.0, 0.0, GlobalNoiseLevel.NONE, LocalNoiseLevel.NONE, 
-							PolynomialNoiseLevel.NONE, MeasurementNoiseLevel.NONE);				
-					expResult.addResult(evalRes);
+				double[] ths = FeatureXMLAlignment.EXPERIMENT_THRESHOLDS;
+				if (options.autoTh) {
+					for (int j = 0; j < ths.length; j++) {
+						for (int i = 0; i < iteration; i++) {
+							options.th = ths[j];
+							System.out.println("==================================================");
+							System.out.println("threshold = " + options.th);
+							System.out.println("==================================================");
+							EvaluationResult evalRes = runExperiment(options, false, 
+									0.0, 0.0, GlobalNoiseLevel.NONE, LocalNoiseLevel.NONE, 
+									PolynomialNoiseLevel.NONE, MeasurementNoiseLevel.NONE);				
+							expResult.addResult(evalRes);						
+						}
+					}
+				} else {
+					for (int i = 0; i < iteration; i++) {
+						EvaluationResult evalRes = runExperiment(options, false, 
+								0.0, 0.0, GlobalNoiseLevel.NONE, LocalNoiseLevel.NONE, 
+								PolynomialNoiseLevel.NONE, MeasurementNoiseLevel.NONE);				
+						expResult.addResult(evalRes);						
+					}					
 				}
-				results.add(expResult);					
-
+				results.add(expResult);										
 				System.out.println("==================================================");
 				
 			}
@@ -379,30 +399,36 @@ public class FeatureXMLAlignment {
 		 * GROUPING & ALIGNMENT
 		 */
 
-		// do grouping before aligning
-		if (options.grouping) {
-			FeatureGrouping grouping = null;
-			if (!WEIGHT_USE_WEIGHTED_SCORE) {
-				// even without weighting, we still want to group .. 
-				// just to prevent null pointer exception
-				grouping = new GreedyFeatureGrouping(options.groupingRtWindow);		
+		// do grouping before aligning ?
+		FeatureGrouping grouping = null;
+		if ("sima".equals(options.method) || "join".equals(options.method) || 
+				"ransac".equals(options.method)) {
+			grouping = new GreedyFeatureGrouping(options.groupingRtWindow);					
+		} else if (options.grouping) {
+			if (WEIGHT_USE_PROB_CLUSTERING_WEIGHT) {
+					grouping = new MatlabFeatureGrouping(options.groupingRtWindow, 
+							options.groupingAlpha, options.groupingNSamples);															
+//				grouping = new SavedMatlabFeatureGrouping();															
 			} else {
-				if (WEIGHT_USE_PROB_CLUSTERING_WEIGHT) {
-//					grouping = new MatlabFeatureGrouping(options.groupingRtWindow, 
-//							options.groupingAlpha, options.groupingNSamples);															
-					grouping = new SavedMatlabFeatureGrouping();															
-				} else {
-					// use greedy weight scores
-					grouping = new GreedyFeatureGrouping(options.groupingRtWindow);					
-				}
+				// use greedy weight scores
+				grouping = new GreedyFeatureGrouping(options.groupingRtWindow);					
 			}
-			List<FeatureGroup> groups = grouping.group(alignmentDataList);
-			grouping.filterGroups(groups); // remove groups that are too small ?
 		}	
+		List<FeatureGroup> groups = grouping.group(alignmentDataList);
+		grouping.filterGroups(groups); // remove groups that are too small ?
 
 		// pick alignment method
 		AlignmentMethodParam.Builder paramBuilder = new AlignmentMethodParam.Builder(
 				options.alignmentPpm, options.alignmentRtWindow);
+		paramBuilder.usePpm(FeatureXMLAlignment.ALIGN_BY_RELATIVE_MASS_TOLERANCE);
+		paramBuilder.ransacRtToleranceBefore(options.ransacRtToleranceBeforeCorrection);
+		paramBuilder.ransacRtToleranceAfter(options.alignmentRtWindow);
+		paramBuilder.ransacIteration(options.ransacIteration);
+		paramBuilder.ransacNMinPoints(options.ransacNMinPoints);
+		paramBuilder.ransacThreshold(options.ransacThreshold);
+		paramBuilder.ransacLinearModel(options.ransacLinearModel);
+		paramBuilder.ransacSameChargeRequired(options.ransacSameChargeRequired);
+		paramBuilder.openMsMzPairMaxDistance(options.openMsMzPairMaxDistance);
 		AlignmentMethod aligner = AlignmentMethodFactory.getAlignmentMethod(options.method, paramBuilder, data);
 
 		// setup some filters to prune alignment results later
@@ -434,8 +460,11 @@ public class FeatureXMLAlignment {
 		EvaluationResult evalRes = null;
 		if (options.gt != null) {			
 			int noOfFiles = data.getNoOfFiles();
-			evalRes = gt.evaluate2(Collections.unmodifiableList(result.getRows()), noOfFiles);				
-		}
+			evalRes = gt.evaluate3(Collections.unmodifiableList(result.getRows()), noOfFiles, 
+					options.alignmentPpm, options.alignmentRtWindow);				
+		}		
+		evalRes.setTh(options.th);
+		System.out.println(evalRes);
 					
 		// RetentionTimePrinter rtp = new RetentionTimePrinter();
 		// rtp.printRt1(alignmentDataList.get(0), alignmentDataList.get(1));

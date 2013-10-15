@@ -154,13 +154,33 @@ public class AlignmentPair {
 		DistanceCalculator calc = new MahalanobisDistanceCalculator(dmz, drt);
 		double dist = calc.compute(mass1, mass2, rt1, rt2);		
 		double inverseDist = 1/dist;
-		double weight = 0;
-		if (FeatureXMLAlignment.WEIGHT_USE_ALL_PEAKS) {
-			weight = getProbWeight();
-		} else {
-			weight = getWeight();
+		double weight = 1;
+		if (FeatureXMLAlignment.WEIGHT_USE_WEIGHTED_SCORE) {
+			if (FeatureXMLAlignment.WEIGHT_USE_ALL_PEAKS) {
+				weight = getProbWeight();
+			} else {
+				weight = getWeight();
+			}			
 		}
 		double score = weight * inverseDist;
+		return score;
+	}
+
+	public double getScore(double maxWeight, double maxDist, double weightCoeff, double distCoeff) {
+		DistanceCalculator calc = new MahalanobisDistanceCalculator(dmz, drt);
+		double dist = calc.compute(mass1, mass2, rt1, rt2);		
+		dist = dist / maxDist;
+		double weight = 1;
+		if (FeatureXMLAlignment.WEIGHT_USE_WEIGHTED_SCORE) {
+			if (FeatureXMLAlignment.WEIGHT_USE_ALL_PEAKS) {
+				weight = getProbWeight();
+			} else {
+				weight = getWeight();
+			}			
+		}
+		weight = weight / maxWeight;
+		double score = weightCoeff*weight + distCoeff*dist;
+		score = 1/score;
 		return score;
 	}
 	
@@ -178,6 +198,12 @@ public class AlignmentPair {
 		} else {
 			return 1;
 		}
+	}
+	
+	public double getDist() {
+		DistanceCalculator calc = new MahalanobisDistanceCalculator(dmz, drt);
+		double dist = calc.compute(mass1, mass2, rt1, rt2);		
+		return dist;
 	}
 	
 	public boolean isDelete() {

@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import peakml.chemistry.PeriodicTable;
+
 import ca.pfv.spmf.algorithms.associationrules.TopKRules_and_TNR.RuleG;
 
 public class AlignmentRow {
@@ -18,6 +20,10 @@ public class AlignmentRow {
 	private boolean delete;
 	private double normalisedScore;
 	private List<RuleG> satisfiedRules;
+	private double avgMz;
+	private double avgRt;
+	private double absoluteRtDiff;
+	private double minRt;
 	
 	public AlignmentRow(AlignmentList parent, int rowId) {
 		this.parent = parent;
@@ -27,6 +33,7 @@ public class AlignmentRow {
 		this.aligned = false;
 		this.delete = false;
 		this.satisfiedRules = new ArrayList<RuleG>();
+		recomputeStats();
 	}
 	
 	public int getRowId() {
@@ -36,6 +43,7 @@ public class AlignmentRow {
 	public void addAlignedFeature(Feature feature) {
 		feature.setAligned(true);
 		this.features.add(feature);
+		recomputeStats();
 	}
 
 	public void addAlignedFeatures(Set<Feature> features) {
@@ -43,14 +51,17 @@ public class AlignmentRow {
 			f.setAligned(true);
 		}
 		this.features.addAll(features);
+		recomputeStats();
 	}
 	
 	public void addFeature(Feature feature) {
 		this.features.add(feature);
+		recomputeStats();
 	}
 
 	public void addFeatures(Set<Feature> features) {
 		this.features.addAll(features);
+		recomputeStats();
 	}
 
 	public Set<Feature> getFeatures() {
@@ -101,46 +112,7 @@ public class AlignmentRow {
 		}
 		return feature;
 	}
-	
-	public double getAverageRt() {
-		double sum = 0;
-		for (Feature f : features) {
-			sum += f.getRt();
-		}
-		return sum / getFeaturesCount();
-	}
-	
-	public double getMinRt() {
-		double min = 0;
-		for (Feature f : features) {
-			if (f.getRt() > min) {
-				min = f.getRt();
-			}
-		}
-		return min;
-	}
-	
-	public double getAbsoluteRtDiff() {
-		if (features.size() < 2) {
-			return 0;
-		} else {
-			double diff = 0;
-			double mean = getAverageRt();
-			for (Feature f : features) {
-				diff += Math.abs(f.getRt()-mean);
-			}
-			return diff;
-		}
-	}
-
-	public double getAverageMz() {
-		double sum = 0;
-		for (Feature f : features) {
-			sum += f.getMass();
-		}
-		return sum / getFeaturesCount();
-	}
-	
+		
 	public double getPairGraphScore() {
 
 		double sum = 0;
@@ -148,14 +120,6 @@ public class AlignmentRow {
 			sum += pair.getScore();
 		}
 		return sum / pairs.size();
-		
-//		double max = Double.MIN_VALUE;
-//		for (AlignmentPair pair : this.pairs) {
-//			if (pair.getScore() > max) {
-//				max = pair.getScore();
-//			}
-//		}
-//		return max;
 		
 	}
 
@@ -212,6 +176,22 @@ public class AlignmentRow {
 		}
 	}
 
+	public double getAverageMz() {
+		return avgMz;
+	}
+
+	public double getAverageRt() {
+		return avgRt;
+	}
+
+	public double getAbsoluteRtDiff() {
+		return absoluteRtDiff;
+	}
+
+	public double getMinRt() {
+		return minRt;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -263,6 +243,101 @@ public class AlignmentRow {
 			}
 		}
 		return satisfiedRules;
+	}
+	
+	public boolean rowInRange(AlignmentRow another, double massTol, double rtTol, 
+			boolean usePpm) {
+
+		double delta = 0;
+		if (usePpm) {
+			delta = PeriodicTable.PPM(this.getAverageMz(), massTol);			
+		} else {
+			delta = massTol;			
+		}
+
+		double massLower = this.getAverageMz() - delta/2;
+		double massUpper = this.getAverageMz() + delta/2;
+		double rtLower = this.getAverageRt() - rtTol/2;
+		double rtUpper = this.getAverageRt() + rtTol/2;	
+		
+		double massToCheck = another.getAverageMz();
+		double rtToCheck = another.getAverageRt();
+		if (inRange(massToCheck, massLower, massUpper)) {
+
+			// in the mass range
+			if (rtTol != -1) {
+				
+				// and in retention time range
+				if (inRange(rtToCheck, rtLower, rtUpper)) {
+					return true;
+				}
+				 
+			} else {
+
+				// not using retention time check
+				return true;
+			
+			}
+			
+		}
+		
+		return false;
+
+	}
+	
+	private boolean inRange(double toCheck, double lowerRange, double upperRange) {
+		// TODO: double comparison ?
+		if (toCheck > lowerRange && toCheck < upperRange) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	private void recomputeStats() {
+		this.avgMz = this.computeAverageMz();
+		this.avgRt = this.computeAverageRt();
+		this.absoluteRtDiff = this.computeAbsoluteRtDiff();
+		this.minRt = this.computeMinRt();		
+	}
+
+	private double computeAverageMz() {
+		double sum = 0;
+		for (Feature f : features) {
+			sum += f.getMass();
+		}
+		return sum / getFeaturesCount();
+	}
+	
+	private double computeAverageRt() {
+		double sum = 0;
+		for (Feature f : features) {
+			sum += f.getRt();
+		}
+		return sum / getFeaturesCount();
+	}
+	
+	private double computeMinRt() {
+		double min = 0;
+		for (Feature f : features) {
+			if (f.getRt() > min) {
+				min = f.getRt();
+			}
+		}
+		return min;
+	}
+	
+	private double computeAbsoluteRtDiff() {
+		if (features.size() < 2) {
+			return 0;
+		} else {
+			double diff = 0;
+			double mean = computeAverageRt();
+			for (Feature f : features) {
+				diff += Math.abs(f.getRt()-mean);
+			}
+			return diff;
+		}
 	}
 		
 }

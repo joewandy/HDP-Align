@@ -123,11 +123,13 @@ for s = 1:NSAMPS
     end
 end
 
+Z = bestZ;
+
 % dim = size(ZZall, 2);
 % ZZprob = ZZall ./ repmat(max(ZZall, [], 2), 1, dim);
 ZZprob = ZZall ./ NSAMPS;
 
-save('-v6', 'temp.mat');
-save('-v6', 'temp.Z.mat', 'bestZ');
-save('-v6', 'temp.ZZall.mat', 'ZZall');
+% save('-v6', 'temp.mat');
+save('-v6', 'temp.Z.mat', 'Z');
+% save('-v6', 'temp.ZZall.mat', 'ZZall');
 save('-v6', 'temp.ZZprob.mat', 'ZZprob');

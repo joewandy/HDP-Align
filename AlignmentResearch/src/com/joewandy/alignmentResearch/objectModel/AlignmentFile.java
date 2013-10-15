@@ -1,5 +1,6 @@
 package com.joewandy.alignmentResearch.objectModel;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -17,15 +18,11 @@ public class AlignmentFile {
 	
 	private int id;
 	private String filename;
+	private File file;
 	private List<Feature> features;
 	private List<Feature> sortedFeatures; // sorted by intensity descending
 	private double[][] ZZProb;
-	
-	public AlignmentFile(int id, String filename) {
-		this.id = id;
-		this.filename = filename;
-	}
-	
+		
 	public AlignmentFile(int id, String filename, List<Feature> features) {
 		this.id = id;
 		this.filename = filename;		
@@ -36,13 +33,22 @@ public class AlignmentFile {
 		this.sortedFeatures = new ArrayList<Feature>(features);
 		Collections.sort(this.sortedFeatures, new FeatureIntensityComparator());
 	}
-			
+
+	public AlignmentFile(int id, File file, List<Feature> features) {
+		this(id, file.getName(), features);
+		this.file = file;
+	}
+	
 	public int getId() {
 		return id;
 	}
 
 	public String getFilename() {
 		return filename;
+	}
+	
+	public File getFile() {
+		return file;
 	}
 	
 	public double[][] getZZProb() {

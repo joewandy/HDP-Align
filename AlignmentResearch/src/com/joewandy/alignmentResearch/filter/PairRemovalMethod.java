@@ -38,7 +38,15 @@ public class PairRemovalMethod extends BaseRemovalMethod implements RemovalMetho
 		Set<Feature> allFeatures = new HashSet<Feature>();
 		System.out.println("Total alignment pairs = " + allAlignmentPairs.size());
 		if ("graph".equals(filterMethod)) {
-		
+
+			double temp = 0;
+			for (AlignmentPair pair : allAlignmentPairs) {
+				if (pair.getDist() > temp) {
+					temp = pair.getDist();
+				}
+			}
+			final double maxDist = temp;
+			
 			// construct a priority queue of alignment pairs, ordered by scores ascending
 			PriorityQueue<AlignmentPair> scoreQueue = new PriorityQueue<AlignmentPair>(11, 
 					new Comparator<AlignmentPair>() {

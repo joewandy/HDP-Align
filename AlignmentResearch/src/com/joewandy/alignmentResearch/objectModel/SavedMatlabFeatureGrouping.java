@@ -28,7 +28,7 @@ public class SavedMatlabFeatureGrouping extends BaseFeatureGrouping implements F
 		// the group ids must be unique across all input files 
 		int groupId = 1;
 		List<FeatureGroup> groups = new ArrayList<FeatureGroup>();
-		final String dataPath = "/home/joewandy/workspace/AlignmentModel/";
+		final String dataPath = "/home/joewandy/workspace/AlignmentModel/mat/";
 		System.out.println("Loading .mat from " + dataPath);
 		for (AlignmentFile data : dataList) {
 

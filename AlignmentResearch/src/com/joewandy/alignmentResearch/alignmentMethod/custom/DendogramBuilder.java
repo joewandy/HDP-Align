@@ -47,7 +47,7 @@ public class DendogramBuilder {
 				double score = 0;
 				// skip if the same files
 				if (i != j) {
-					score = library.getScoreByFiles(file1, file2);					
+					score = library.getScoresByFiles(file1, file2);					
 				}
 				scores[i][j] = score;
 
@@ -55,7 +55,7 @@ public class DendogramBuilder {
 		}
 
 		// find the max score, used to normalise score to (0, 1)
-		double maxScore = Double.MIN_VALUE;
+		double maxScore = 0;
 		for (int i = 0; i < n; i++) {
 			for (int j = 0; j < n; j++) {
 				if (scores[i][j] > maxScore) { 

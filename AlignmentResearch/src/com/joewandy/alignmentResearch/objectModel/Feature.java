@@ -24,6 +24,7 @@ public class Feature {
 	private double totalIntensityError;
 	private int noPairs;
 	private boolean delete;
+	private AlignmentVertex vertex;
 	
 	public Feature(int peakID, double mass, double rt, double intensity) {
 		super();
@@ -126,6 +127,14 @@ public class Feature {
 		return false;
 	}
 	
+	public AlignmentVertex getVertex() {
+		return vertex;
+	}
+
+	public void setVertex(AlignmentVertex vertex) {
+		this.vertex = vertex;
+	}
+
 	public double[][] getZZProb() {
 		return data.getZZProb();
 	}

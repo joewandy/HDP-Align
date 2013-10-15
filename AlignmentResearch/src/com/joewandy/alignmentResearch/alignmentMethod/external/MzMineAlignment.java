@@ -51,6 +51,8 @@ import com.joewandy.alignmentResearch.objectModel.Feature;
 public abstract class MzMineAlignment extends BaseAlignment implements
 		AlignmentMethod, TaskListener {
 
+	public static boolean INIT = false;
+	
 	// the value is set inside matchFeatures(), used by statusChanged()
 	private Task alignerTask;
 	
@@ -74,7 +76,15 @@ public abstract class MzMineAlignment extends BaseAlignment implements
 		super(dataList, param);
 		dataMap = new HashMap<AlignmentFile, RawDataFile>();
 		resultQueue = new ArrayBlockingQueue<AlignmentList>(1);
-		
+
+		if (MzMineAlignment.INIT == false) {
+			// launch mzmine
+			String[] args = {};
+			MZmineCore.main(args);
+			// just to this once
+			MzMineAlignment.INIT = true;
+		}
+				
 	}
 
 	/**
@@ -83,10 +93,6 @@ public abstract class MzMineAlignment extends BaseAlignment implements
 	 * @return
 	 */
 	public AlignmentList matchFeatures() {
-
-		// launch mzmine
-		String[] args = {};
-		MZmineCore.main(args);
 
 		System.out.println("Hiding main window");
 		Desktop desktop = MZmineCore.getDesktop();
@@ -153,6 +159,11 @@ public abstract class MzMineAlignment extends BaseAlignment implements
 //		mainFrame.dispose();
 		mainFrame = null; // for gc
 
+		PeakList[] allPeakLists = currentProject.getPeakLists();
+		for (PeakList pl : allPeakLists) {
+			currentProject.removePeakList(pl);
+		}
+		
 		return alignmentResult;
 
 	}

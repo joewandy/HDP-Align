@@ -65,7 +65,7 @@ public class SimaAlignment extends BaseAlignment implements AlignmentMethod {
 			final String tempDirPath = writeTempFiles();			
 			runSima(tempDirPath);
 			
-			// read back the output from simaDir/results/result.csv
+			// read back the output from simaDir/results/result.txt
 			final String outputPath = SimaAlignment.SIMA_BASE + SimaAlignment.SIMA_OUTPUT;
 			alignedList = new AlignmentList(outputPath, dataList, "");
 						

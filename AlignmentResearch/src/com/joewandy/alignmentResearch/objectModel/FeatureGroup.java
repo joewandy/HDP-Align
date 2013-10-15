@@ -57,8 +57,16 @@ public class FeatureGroup {
 	
 	@Override
 	public String toString() {
-		return "FeatureGroup [groupId=" + groupId + ", features=" + this.getFeatureCount()
+		return "FeatureGroup [groupId=" + groupId + ", features=" + this.getFeatureIDs()
 				+ "]";
+	}
+	
+	private String getFeatureIDs() {
+		String output = "";
+		for (Feature f : this.getFeatures()) {
+			output += f.getPeakID() + ", ";
+		}
+		return output;
 	}
 	
 }

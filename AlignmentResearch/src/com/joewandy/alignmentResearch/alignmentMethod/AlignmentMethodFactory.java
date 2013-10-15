@@ -10,6 +10,7 @@ import com.joewandy.alignmentResearch.alignmentMethod.custom.MyJoinAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.custom.MyStableMarriageAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.external.MzMineJoinAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.external.MzMineRansacAlignment;
+import com.joewandy.alignmentResearch.alignmentMethod.external.OpenMSAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.external.SimaAlignment;
 import com.joewandy.alignmentResearch.main.FeatureXMLAlignment;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
@@ -36,6 +37,9 @@ public class AlignmentMethodFactory {
 	// calls SIMA alignment
 	public static final String ALIGNMENT_METHOD_SIMA = "sima";
 
+	// calls OpenMS alignment
+	public static final String ALIGNMENT_METHOD_OPENMS = "openMS";
+	
 	// calls consistency-based alignment
 	public static final String ALIGNMENT_METHOD_CONSISTENCY = "consistency";
 	
@@ -60,6 +64,8 @@ public class AlignmentMethodFactory {
 			aligner = new MzMineJoinAlignment(alignmentDataList, param);
 		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_SIMA.equals(method)) {
 			aligner = new SimaAlignment(alignmentDataList, param);
+		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_OPENMS.equals(method)) {
+			aligner = new OpenMSAlignment(alignmentDataList, param);
 		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_CONSISTENCY.equals(method)) {
 			aligner = new ConsistencyAlignment(alignmentDataList, param);
 		}

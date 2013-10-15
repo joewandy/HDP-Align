@@ -30,7 +30,15 @@ public class AlignmentEdge {
 	public double getWeight() {
 		return pairs.size();
 	}
-		
+
+	public double getWeight(double maxWeight, double maxDist, double weightCoeff, double distCoeff) {
+		double totalWeight = 0;
+		for (AlignmentPair pair : pairs) {
+			totalWeight += pair.getScore(maxWeight, maxDist, weightCoeff, distCoeff);
+		}
+		return totalWeight;
+	}
+	
 	public double getProbWeight(Feature f1, Feature f2) {
 
 		assert(f1.getData() != f2.getData());

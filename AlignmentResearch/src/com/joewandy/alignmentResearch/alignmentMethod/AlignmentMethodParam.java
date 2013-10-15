@@ -5,14 +5,14 @@ import com.joewandy.alignmentResearch.main.FeatureXMLAlignment;
 public class AlignmentMethodParam {
 
 	// show setup dialog or not during MZMine alignment ?
-	public static final boolean SHOW_PARAM_SETUP_DIALOG = true;
+	public static final boolean SHOW_PARAM_SETUP_DIALOG = false;
 	
 	/** 
 	 * This value sets the range, in terms of retention time, to create the model 
 	 * using RANSAC and non-linear regression algorithm. 
 	 * Maximum allowed retention time difference
 	 */
-	public static final int PARAM_RT_TOLERANCE_BEFORE_CORRECTION = 1000;
+	public static final int PARAM_RT_TOLERANCE_BEFORE_CORRECTION = 300;
 
 	/**
 	 * Maximum number of iterations allowed in the algorithm to find the right model 
@@ -28,10 +28,10 @@ public class AlignmentMethodParam {
 	public static final double PARAM_MINIMUM_NO_OF_POINTS = 0.10;
 
 	/**
-	 * Threshold value (minutes) for determining when a data 
+	 * Threshold value (seconds) for determining when a data 
 	 * point fits a model (t)
 	 */
-	public static final int PARAM_THRESHOLD_VALUE = 15;
+	public static final double PARAM_THRESHOLD_VALUE = 15;
 	
 	/**
 	 * Switch between polynomial model or lineal model
@@ -46,7 +46,13 @@ public class AlignmentMethodParam {
 	/**
 	 * Threshold for picking 'friends' for social stable matching
 	 */
-	public static final double PARAM_FRIENDLY_THRESHOLD = 1;
+	public static final double PARAM_FRIENDLY_THRESHOLD = 0.75;
+	public static final int PARAM_TOP_K_FRIENDS = 10;
+	
+	/**
+	 * OpenMS parameter
+	 */
+	public static final double PARAM_MZ_PAIR_MAX_DISTANCE = 0.5;
 	
 	private double massTolerance;
 	private double rtTolerance;
@@ -61,6 +67,9 @@ public class AlignmentMethodParam {
 	private double ransacThreshold;
 	private boolean ransacLinearModel;
 	private boolean ransacSameChargeRequired;
+	
+	// for openms
+	private double openMsMzPairMaxDistance;
 	
 	// for grouping alignment
 	private double friendlyThreshold;
@@ -84,6 +93,9 @@ public class AlignmentMethodParam {
 		private double ransacThreshold;
 		private boolean ransacLinearModel;
 		private boolean ransacSameChargeRequired;
+		
+		// for OpenMS alignment
+		private double openMsMzPairMaxDistance;
 
 		// for grouping alignment
 		private double friendlyThreshold;
@@ -103,9 +115,12 @@ public class AlignmentMethodParam {
 			this.ransacRtToleranceAfterMinute = this.rtTolerance / 60.0;
 			this.ransacIteration = AlignmentMethodParam.PARAM_RANSAC_ITERATION;
 			this.ransacNMinPoints = AlignmentMethodParam.PARAM_MINIMUM_NO_OF_POINTS / 100.0;
-			this.ransacThreshold = AlignmentMethodParam.PARAM_THRESHOLD_VALUE;
+			this.ransacThreshold = AlignmentMethodParam.PARAM_THRESHOLD_VALUE / 60.0;
 			this.ransacLinearModel = AlignmentMethodParam.PARAM_LINEAR_MODEL;
 			this.ransacSameChargeRequired = AlignmentMethodParam.PARAM_REQUIRE_SAME_CHARGE_STATE;
+			
+			// for openms
+			this.openMsMzPairMaxDistance = AlignmentMethodParam.PARAM_MZ_PAIR_MAX_DISTANCE;
 			
 			// set parameter for other alignment methods
 			this.friendlyThreshold = AlignmentMethodParam.PARAM_FRIENDLY_THRESHOLD;
@@ -161,6 +176,11 @@ public class AlignmentMethodParam {
 			this.friendlyThreshold = threshold;
 			return this;
 		}		
+		
+		public Builder openMsMzPairMaxDistance(double dist) {
+			this.openMsMzPairMaxDistance = dist;
+			return this;
+		}
 
 		public AlignmentMethodParam build() {
 			return new AlignmentMethodParam(this);
@@ -180,6 +200,7 @@ public class AlignmentMethodParam {
 		this.ransacThreshold = builder.ransacThreshold;
 		this.ransacLinearModel = builder.ransacLinearModel;
 		this.ransacSameChargeRequired = builder.ransacSameChargeRequired;
+		this.openMsMzPairMaxDistance = builder.openMsMzPairMaxDistance;
 		this.friendlyThreshold = builder.friendlyThreshold;
 	}
 
@@ -225,6 +246,10 @@ public class AlignmentMethodParam {
 
 	public boolean isRansacSameChargeRequired() {
 		return ransacSameChargeRequired;
+	}
+	
+	public double getOpenMsMzPairMaxDistance() {
+		return openMsMzPairMaxDistance;
 	}
 
 	public double getFriendlyThreshold() {

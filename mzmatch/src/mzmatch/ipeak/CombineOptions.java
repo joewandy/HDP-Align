@@ -110,9 +110,9 @@ public class CombineOptions {
 					"Valid options are greedy, join, ransac, sima and groupingInfo (experimental).")
 	public String method = "greedy";
 	
-	@Option(name = "ransacRtToleranceBeforeMinute", param = "float", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, 
+	@Option(name = "ransacRtToleranceBeforeCorrection", param = "float", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, 
 			usage = "Ransac parameter.")
-	public double ransacRtToleranceBeforeMinute = AlignmentMethodParam.PARAM_RT_TOLERANCE_BEFORE_CORRECTION;
+	public double ransacRtToleranceBeforeCorrection = AlignmentMethodParam.PARAM_RT_TOLERANCE_BEFORE_CORRECTION;
 
 	@Option(name = "ransacIteration", param = "int", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, 
 			usage = "Ransac parameter.")

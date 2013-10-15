@@ -32,7 +32,7 @@ public class CombineMzMineRANSACMethod extends CombineBaseMethod implements Comb
 				options.ppm, options.rtwindow);
 		
 		paramBuilder.usePpm(true);
-		paramBuilder.ransacRtToleranceBefore(options.ransacRtToleranceBeforeMinute);
+		paramBuilder.ransacRtToleranceBefore(options.ransacRtToleranceBeforeCorrection);
 		paramBuilder.ransacRtToleranceAfter(options.rtwindow);
 		paramBuilder.ransacIteration(options.ransacIteration);
 		paramBuilder.ransacNMinPoints(options.ransacNMinPoints);

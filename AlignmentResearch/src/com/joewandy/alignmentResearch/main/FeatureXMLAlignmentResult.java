@@ -65,6 +65,15 @@ public class FeatureXMLAlignmentResult {
 			System.out.print(String.format("%d,", (int) result.getTotalFp()));
 		}
 		System.out.println(" ]';");		
+
+		System.out.print(label + "_total_fn = [ ");
+		for (EvaluationResult result : results) {
+			if (result == null) {
+				continue;
+			}
+			System.out.print(String.format("%d,", (int) result.getTotalFn()));
+		}
+		System.out.println(" ]';");		
 		
 		System.out.print(label + "_medSdrt = [ ");
 		for (EvaluationResult result : results) {

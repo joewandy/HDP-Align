@@ -2,12 +2,15 @@ package com.joewandy.alignmentResearch.objectModel;
 
 public class EvaluationResult {
 
+	private double dmz;
+	private double drt;
 	private double precision;
 	private double recall;
 	private double f1;
 	private double f05;
 	private double totalTp;
 	private double totalFp;
+	private double totalFn;
 	private double totalPositives;
 	private double totalTpRatio;
 	private double totalFpRatio;
@@ -17,18 +20,22 @@ public class EvaluationResult {
 	private double medMdrt;
 	private double meanMdrt;
 	private double coverage;
+	private double th;
 
-	public EvaluationResult(double precision, double recall, double f1,
-			double f05, double totalTp, double totalFp, double totalPositives,
+	public EvaluationResult(double dmz, double drt, double precision, double recall, double f1,
+			double f05, double totalTp, double totalFp, double totalFn, double totalPositives,
 			double totalTpRatio, double totalFpRatio, double totalPositivesRatio,
 			double medSdrt, double meanSdrt, double medMdrt, double meanMdrt, double coverage) {
 		super();
+		this.dmz = dmz;
+		this.drt = drt;
 		this.precision = precision;
 		this.recall = recall;
 		this.f1 = f1;
 		this.f05 = f05;
 		this.totalTp = totalTp;
 		this.totalFp = totalFp;
+		this.totalFn = totalFn;
 		this.totalPositives = totalPositives;
 		this.totalTpRatio = totalTpRatio;
 		this.totalFpRatio = totalFpRatio;
@@ -62,6 +69,10 @@ public class EvaluationResult {
 
 	public double getTotalFp() {
 		return totalFp;
+	}
+	
+	public double getTotalFn() {
+		return totalFn;
 	}
 
 	public double getTotalPositives() {
@@ -100,6 +111,30 @@ public class EvaluationResult {
 		return coverage;
 	}
 
+	public double getTh() {
+		return th;
+	}
+
+	public void setTh(double th) {
+		this.th = th;
+	}
+
+	public double getDmz() {
+		return dmz;
+	}
+
+	public void setDmz(double dmz) {
+		this.dmz = dmz;
+	}
+
+	public double getDrt() {
+		return drt;
+	}
+
+	public void setDrt(double drt) {
+		this.drt = drt;
+	}
+
 	@Override
 	public String toString() {
 		
@@ -124,6 +159,7 @@ public class EvaluationResult {
 		output += "F0.5 = " + f05Str + "\n";
 		output += "Total TP = " + totalTp + " (" + totalTpRatioStr + ")" + "\n";
 		output += "Total FP = " + totalFp + " (" + totalFpRatioStr + ")" + "\n";
+		output += "Total FN = " + totalFn + "\n";		
 		output += "Total positives = " + totalPositives + " (" + totalPositivesRatioStr + ")"  + "\n";
 		output += "Median SDRT = " + medSdrtStr + "\n";
 		output += "Mean SDRT = " + meanSdrtStr + "\n";
@@ -132,10 +168,11 @@ public class EvaluationResult {
 		output += "Coverage = " + coverageStr + "\n";
 
 		// for parsing in CSV format
-		output += "!OUTPUT," + precStr + ", " + recallStr + ", " + f1Str + ", " + f05Str + ", " + 
+		output += "!OUTPUT," + dmz + ", " + drt + ", " + th + ", " + precStr + ", " + recallStr + ", " + f1Str + ", " + f05Str + ", " + 
 				totalTp + ", " + totalTpRatioStr + ", " + 
 				totalFp + ", " + totalFpRatioStr + ", " +
-				totalPositives + ", " + totalPositivesRatioStr + 
+				totalFn + ", " + 
+				totalPositives + ", " + totalPositivesRatioStr + ", " + 
 				medSdrtStr + ", " + meanSdrtStr + ", " + 
 				medMdrtStr + ", " + meanMdrtStr + ", " +
 				coverageStr;

@@ -182,38 +182,10 @@ public class AlignmentList {
 			boolean usePpm) {
 		
 		Set<AlignmentRow> result = new HashSet<AlignmentRow>();
-
-		double delta = 0;
-		if (usePpm) {
-			delta = PeriodicTable.PPM(reference.getAverageMz(), massTol);			
-		} else {
-			delta = massTol;			
-		}
-
-		double massLower = reference.getAverageMz() - delta/2;
-		double massUpper = reference.getAverageMz() + delta/2;
-		double rtLower = reference.getAverageRt() - rtTol/2;
-		double rtUpper = reference.getAverageRt() + rtTol/2;		
 		
 		for (AlignmentRow toCheck : this.rows) {
-			double massToCheck = toCheck.getAverageMz();
-			double rtToCheck = toCheck.getAverageRt();
-			if (inRange(massToCheck, massLower, massUpper)) {
-
-				// in the mass range
-				if (rtTol != -1) {
-					
-					// not in retention time range
-					 if (inRange(rtToCheck, rtLower, rtUpper)) {
-							result.add(toCheck);
-					 }
-					 
-				} else {
-
-					// not using retention time check
-					result.add(toCheck);					
-				
-				}
+			if (reference.rowInRange(toCheck, massTol, rtTol, usePpm)) {
+				result.add(toCheck);				
 			}
 		}
 
@@ -223,25 +195,7 @@ public class AlignmentList {
 
 	public Set<AlignmentRow> getRowsInRange(AlignmentRow reference, double massTol, boolean usePpm) {
 		
-		Set<AlignmentRow> result = new HashSet<AlignmentRow>();
-
-		double delta = 0;
-		if (usePpm) {
-			delta = PeriodicTable.PPM(reference.getAverageMz(), massTol);			
-		} else {
-			delta = massTol;			
-		}
-
-		double massLower = reference.getAverageMz() - delta/2;
-		double massUpper = reference.getAverageMz() + delta/2;
-		
-		for (AlignmentRow toCheck : this.rows) {
-			double massToCheck = toCheck.getAverageMz();
-			if (inRange(massToCheck, massLower, massUpper)) {
-				result.add(toCheck);					
-			}
-		}
-
+		Set<AlignmentRow> result = getRowsInRange(reference, massTol, -1, usePpm);
 		return result;
 		
 	}
@@ -284,15 +238,6 @@ public class AlignmentList {
 		} else if (!id.equals(other.id))
 			return false;
 		return true;
-	}
-
-	private boolean inRange(double toCheck, double lowerRange, double upperRange) {
-		// TODO: double comparison ?
-		if (toCheck > lowerRange && toCheck < upperRange) {
-			return true;
-		} else {
-			return false;
-		}
 	}
 
 }

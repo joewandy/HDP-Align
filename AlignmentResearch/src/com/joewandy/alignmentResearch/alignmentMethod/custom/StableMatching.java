@@ -1,5 +1,8 @@
 package com.joewandy.alignmentResearch.alignmentMethod.custom;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -9,14 +12,18 @@ import java.util.Map.Entry;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
+import com.jmatio.io.MatFileWriter;
+import com.jmatio.types.MLArray;
+import com.jmatio.types.MLDouble;
+import com.joewandy.alignmentResearch.main.FeatureXMLAlignment;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
-import com.joewandy.alignmentResearch.objectModel.DistanceCalculator;
-import com.joewandy.alignmentResearch.objectModel.EuclideanDistanceCalculator;
 import com.joewandy.alignmentResearch.objectModel.ExtendedLibrary;
+import com.joewandy.alignmentResearch.objectModel.WeightedRowVsRowScore;
 
 public class StableMatching implements FeatureMatching {
 
+	private static final int LIMIT = 1;
 	private AlignmentList masterList;
 	private AlignmentList childList;
 	private ExtendedLibrary library;
@@ -44,20 +51,12 @@ public class StableMatching implements FeatureMatching {
 		
 		// do stable matching here ...
 		System.out.println("Running stable matching on " + listId);
-		List<AlignmentRow> men = null;
-		List<AlignmentRow> women = null;
-		if (masterList.getRowsCount() > childList.getRowsCount()) {
-			men = masterList.getRows();
-			women = childList.getRows();			
-			System.out.println("\tmasterList " + masterList.getId() + " = " + masterList.getRowsCount() + " (men)");
-			System.out.println("\tchildList " + childList.getId() + " = " + childList.getRowsCount() + " (women)");		
-		} else {
-			men = childList.getRows();
-			women = masterList.getRows();						
-			System.out.println("\tmasterList " + masterList.getId() + " = " + masterList.getRowsCount() + " (women)");
-			System.out.println("\tchildList " + childList.getId() + " = " + childList.getRowsCount() + " (men)");		
-		}
-
+		List<AlignmentRow> men = masterList.getRows();
+		List<AlignmentRow> women = childList.getRows();			
+//		List<AlignmentRow> men = childList.getRows();
+//		List<AlignmentRow> women = masterList.getRows();			
+		System.out.println("\tmasterList " + masterList.getId() + " = " + masterList.getRowsCount() + " (men)");
+		System.out.println("\tchildList " + childList.getId() + " = " + childList.getRowsCount() + " (women)");		
 		Map<AlignmentRow, AlignmentRow> stableMatch = match(men, women);
 		
 		// construct a new list and merge the matched entries together
@@ -69,15 +68,7 @@ public class StableMatching implements FeatureMatching {
 
 			AlignmentRow row1 = match.getKey();
 			AlignmentRow row2 = match.getValue();
-			
-			// TODO: quick hack. if the matched rows average mass or RT is more than tolerance, ignore this matching 
-//			double massDiff = Math.abs(row1.getAverageMz() - row2.getAverageMz());
-//			double rtDiff = Math.abs(row1.getAverageRt() - row2.getAverageRt());
-//			if (massDiff > massTol) {
-//				rejectedCount++;
-//				continue;
-//			}
-			
+						
 			row1.setAligned(true);
 			row2.setAligned(true);
 			
@@ -119,25 +110,27 @@ public class StableMatching implements FeatureMatching {
 
 	}
 	
-    private Map<AlignmentRow, AlignmentRow> match(List<AlignmentRow> men, List<AlignmentRow> women) {
+    private Map<AlignmentRow, AlignmentRow> match(List<AlignmentRow> men, final List<AlignmentRow> women) {
 
         Queue<RowPreference> freemen = new LinkedList<RowPreference>();
 
         // Create a free list of men (and use it to store their proposals)
+        double[][] scoreMatrix = computeScoreMatrix(men, women);
+        
     	System.out.print("\tCreating prefs ");
-        int counter = 0;
-
-        for (AlignmentRow man : men) {
-            Queue<PreferenceItem> prefs = getPrefs(man, women);
-            freemen.add(new RowPreference(man, prefs));
-            prefs = null;
-            counter++;
-            if (counter % 1000 == 0) {
+        for (int i = 0; i < men.size(); i++) {
+        	
+        	Queue<PreferenceItem> sorted = getSortedPrefs(women, scoreMatrix, i);
+        	AlignmentRow man = men.get(i);
+        	freemen.add(new RowPreference(man, sorted));
+            
+        	if (i % 1000 == 0) {
             	System.out.print('.');
             }
+        	
         }
         System.out.println();
-
+        
         // Create an initially empty map of engagements
         Map<AlignmentRow, RowPreference> engagements = new HashMap<AlignmentRow, RowPreference>();
 
@@ -161,42 +154,52 @@ public class StableMatching implements FeatureMatching {
             // for unequal m and w size. no more w to propose to ?
             if (preferredWoman != null) {
 
-            	AlignmentRow w = preferredWoman.entry;
+            	int rowIdx = preferredWoman.rowIdx;
+            	AlignmentRow w = women.get(rowIdx);
             	
-                // if w is free
-                if (!engagements.containsKey(w)) {
-
-                	// (m, w) become engaged
-                    engagements.put(w, m);
-                
-                } else {
-                	
-                    // some pair (m', w) already exists
-                    RowPreference mPrime = engagements.get(w);
-                    AlignmentRow mPrimeRow = mPrime.row;
-                    AlignmentRow mRow = m.row;
-                    WomanPreferenceComparator womanPreference = new WomanPreferenceComparator(w);
-                    int compareRes = womanPreference.compare(mPrimeRow, mRow);
-                    
-                    // w prefers m to m'
-                    if (compareRes < 0) {
-
-                        // (m, w) become engaged
-                        engagements.put(w, m);
-
-                        // m' becomes free
-                        assert(!freemen.contains(mPrime));
-                        freemen.add(mPrime);                        	
-
-                    } else {
-                    	
-                        // (m', w) remain engaged, m remains free
-                        assert(!freemen.contains(m));
-                    	freemen.add(m);
-
-                    }
-
-                }
+            	// FIXME: hard cut-off here improves precision & recall quite a lot
+            	// can we do better than this ?
+//            	double dist = preferredWoman.dist;
+//            	if (dist > LIMIT) {
+//            		// no partner for him
+//            	} else {            	
+            	
+	                // if w is free
+	                if (!engagements.containsKey(w)) {
+	
+	                	// (m, w) become engaged
+	                    engagements.put(w, m);
+	                
+	                } else {
+	                	
+	                    // some pair (m', w) already exists
+	                    RowPreference mPrime = engagements.get(w);
+	                    AlignmentRow mPrimeRow = mPrime.row;
+	                    AlignmentRow mRow = m.row;
+	                    WomanPreferenceComparator womanPreference = new WomanPreferenceComparator(w);
+	                    int compareRes = womanPreference.compare(mPrimeRow, mRow);
+	                    
+	                    // w prefers m to m'
+	                    if (compareRes < 0) {
+	
+	                        // (m, w) become engaged
+	                        engagements.put(w, m);
+	
+	                        // m' becomes free
+	                        assert(!freemen.contains(mPrime));
+	                        freemen.add(mPrime);                        	
+	
+	                    } else {
+	                    	
+	                        // (m', w) remain engaged, m remains free
+	                        assert(!freemen.contains(m));
+	                    	freemen.add(m);
+	
+	                    }
+	
+	                }
+	                
+//            	}
             	
             } else {
 
@@ -217,47 +220,51 @@ public class StableMatching implements FeatureMatching {
         
     }
 
-	private Queue<PreferenceItem> getPrefs(AlignmentRow man, final List<AlignmentRow> women) {
-		Queue<PreferenceItem> prefs = new PriorityQueue<PreferenceItem>(women.size(), new ManPreferenceComparator());
-		for (AlignmentRow woman : women) {
-//			if (library.exist(man, woman)) {
-//				double score = computeLibraryScore(man, woman);
-//				PreferenceItem pref = new PreferenceItem(woman, score);
-//				prefs.add(pref);				
-//			}
-			double mass1 = man.getAverageMz();
-			double mass2 = woman.getAverageMz();
-			if (Math.abs(mass1-mass2) > this.massTol) {
-				continue;
-			}
-			double rt1 = man.getAverageRt();
-			double rt2 = woman.getAverageRt();
-			double score = computeSimilarity(mass1, mass2, rt1, rt2);
-			PreferenceItem pref = new PreferenceItem(woman, score);
-			prefs.add(pref);							
-		}
-		return prefs;
-//		return new LinkedList<AlignmentRow>(women);
-	}
-
-	private double computeLibraryScore(AlignmentRow row1, AlignmentRow row2) {
-		double score = 0;
-		if (library.exist(row1, row2)) {
-			score = library.computeWeightedRowScore(row1, row2);
-//			score = library.computeRowScore(row1, row2);
-		}
-		return score;
-	}
+	private Queue<PreferenceItem> getSortedPrefs(List<AlignmentRow> women,
+			double[][] scoreMatrix, int i) {
 		
-	private double computeSimilarity(double mass1, double mass2, double rt1, double rt2) {
+		double[] womenScore = scoreMatrix[i];
+		List<PreferenceItem> prefs = new ArrayList<PreferenceItem>();
+		for (int j = 0; j < womenScore.length; j++) {
+			double score = womenScore[j];
+			PreferenceItem pref = new PreferenceItem(j, score);
+			prefs.add(pref);
+		}
+		Queue<PreferenceItem> sorted = new PriorityQueue<PreferenceItem>(prefs.size(), new ManPreferenceComparator());
+		sorted.addAll(prefs);
+		return sorted;
 
-		DistanceCalculator calc = new EuclideanDistanceCalculator();
-		double dist = calc.compute(mass1, mass2, rt1, rt2);		
-		double similarity = 1/dist;
-		return similarity;
-	
 	}
-    	
+
+	private double[][] computeScoreMatrix(List<AlignmentRow> men,
+			List<AlignmentRow> women) {
+
+    	System.out.print("\tComputing score matrix ");
+		double[][] scoreMatrix = new double[men.size()][women.size()];
+		for (int i = 0; i < men.size(); i++) {
+			
+			for (int j = 0; j < women.size(); j++) {
+				AlignmentRow man = men.get(i);
+				AlignmentRow woman = women.get(j);
+				double score = 0;
+				if (FeatureXMLAlignment.WEIGHT_USE_WEIGHTED_SCORE) {
+					score = library.computeWeightedRowScore(man, woman);					
+				} else {
+					score = library.computeRowScore(man, woman);
+				}
+				scoreMatrix[i][j] = score;				
+			}
+			
+            if (i % 1000 == 0) {
+            	System.out.print('.');
+            }
+			
+		}
+		System.out.println();
+		
+		return scoreMatrix;
+	}
+	
     private class RowPreference {
         
     	private final AlignmentRow row;
@@ -276,18 +283,18 @@ public class StableMatching implements FeatureMatching {
     }
     
     private class PreferenceItem {
-    	
-    	private final AlignmentRow entry;
+
+    	private int rowIdx;
     	private final double score;
     	
-    	public PreferenceItem(AlignmentRow preferredRow, double score) {
-    		this.entry = preferredRow;
+    	public PreferenceItem(int idx, double score) {
+    		this.rowIdx = idx;
     		this.score = score;
     	}
 
 		@Override
 		public String toString() {
-			return "PreferenceItem [entry=" + entry + ", score=" + score + "]";
+			return "PreferenceItem [entry=" + rowIdx + ", score=" + score + "]";
 		}
     	
     }
@@ -311,12 +318,16 @@ public class StableMatching implements FeatureMatching {
     	}
 
     	@Override
-    	public int compare(AlignmentRow row1, AlignmentRow row2) {
-    		double score1 = computeLibraryScore(reference, row1);
-    		double score2 = computeLibraryScore(reference, row2);
+    	public int compare(AlignmentRow candidate1, AlignmentRow candidate2) {
+    		WeightedRowVsRowScore rowScore1 = new WeightedRowVsRowScore(
+    				reference, candidate1, library, massTol, rtTol);
+    		WeightedRowVsRowScore rowScore2 = new WeightedRowVsRowScore(
+    				reference, candidate2, library, massTol, rtTol);
+    		double score1 = rowScore1.getScore();
+    		double score2 = rowScore2.getScore();
     		return Double.compare(score1, score2);
     	}
     	
-    }    
+    }        
 
 }

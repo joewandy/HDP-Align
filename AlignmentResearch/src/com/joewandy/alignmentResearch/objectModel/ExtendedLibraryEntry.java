@@ -32,6 +32,10 @@ public class ExtendedLibraryEntry implements Comparable<ExtendedLibraryEntry> {
 	public double getScore() {
 		return score;
 	}
+	
+	public double getDist() {
+		return 1/score;
+	}
 
 	public double getWeight() {
 		return weight;

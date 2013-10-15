@@ -69,17 +69,20 @@ import edu.uci.ics.jung.visualization.picking.PickedState;
 import edu.uci.ics.jung.visualization.renderers.Renderer.VertexLabel.Position;
 
 public class CombineGraphView {
-
+	
 	public static final int TOP_N_EDGES_FOR_GRAPH = Integer.MAX_VALUE;
-	private static final double WEIGHT_THRESHOLD = 20;
-	private static final double VERTEX_SIZE_THRESHOLD = 30;
-
 	public static final String LAYOUT_KK = "kk";
 	public static final String LAYOUT_FR = "fr";
 	public static final String LAYOUT_ISOM = "isom";
 	public static final String LAYOUT_SPRING = "spring";
 	public static final String LAYOUT_CIRCLE = "circle";
 
+	private static final double WEIGHT_THRESHOLD = 20;
+	private static final double VERTEX_SIZE_THRESHOLD = 30;
+	
+	private static final int BETWEENESS_CLUSTER_WEIGHT_COEFF = 1;
+	private static final int BETWEENESS_PEAK_DIST_COEFF = 10;
+	
 	private UndirectedGraph<AlignmentVertex, AlignmentEdge> alignmentGraph;
 	private UndirectedGraph<AlignmentVertex, AlignmentEdge> prevAlignmentGraph;
 	private Map<AlignmentVertex, Integer> degreeScores;
@@ -104,8 +107,9 @@ public class CombineGraphView {
 	
 	private boolean isolating;
 	private double clusterThreshold;
+	private String graphFilter;
 
-	public CombineGraphView(List<AlignmentEdge> edgeList, boolean multi, int dataFileCount, double clusterThreshold) {
+	public CombineGraphView(List<AlignmentEdge> edgeList, boolean multi, int dataFileCount, double clusterThreshold, String graphFilter) {
 
 		// TODO: use factories for vertex & edges here
 		UndirectedGraph<AlignmentVertex, AlignmentEdge> alignmentGraph = null;
@@ -172,6 +176,7 @@ public class CombineGraphView {
 		this.output.setFont(new Font("Courier", Font.PLAIN, 10));
 		
 		this.clusterThreshold = clusterThreshold;
+		this.graphFilter = graphFilter;
 		
 	}
 
@@ -198,23 +203,6 @@ public class CombineGraphView {
 		return edges;
 	}	
 	
-	public List<AlignmentEdge> clusterEdges() {
-
-		int numEdgesToRemove = (int) (this.alignmentGraph.getEdgeCount() * this.clusterThreshold);
-		System.out.println("Running edge betweeness clustering with numEdgesToRemove=" + numEdgesToRemove);
-		
-		EdgeBetweennessClusterer<AlignmentVertex, AlignmentEdge> clusterer = 
-				new EdgeBetweennessClusterer<AlignmentVertex, AlignmentEdge>(numEdgesToRemove);
-		Set<Set<AlignmentVertex>> clusterSet = clusterer.transform(this.alignmentGraph);
-		List<AlignmentEdge> edges = clusterer.getEdgesRemoved();
-		
-		System.out.println(clusterSet.size() + " edges clustered");
-		System.out.println(edges.size() + " edges removed");
-		
-		return edges;
-		
-	}
-
 	public AlignmentExpResult computeStatistics() {
 
 		AlignmentExpResult expResult = new AlignmentExpResult();
@@ -247,8 +235,10 @@ public class CombineGraphView {
 		}
 		expResult.setMaxWeight(maxWeight);
 		
-//		List<AlignmentEdge> removedEdges = this.clusterEdges();
-//		expResult.addRemovedEdges(removedEdges);
+		if ("between".equals(graphFilter)) {
+			List<AlignmentEdge> removedEdges = this.clusterEdges();
+			expResult.addRemovedEdges(removedEdges);			
+		}
 		
 		Set<Feature> allFeatures = new HashSet<Feature>();
 		for (AlignmentPair pair : expResult.getAlignmentPairs()) {
@@ -416,6 +406,44 @@ public class CombineGraphView {
 			}
 		}
 
+	}
+	
+	private List<AlignmentEdge> clusterEdges() {
+
+		int numEdgesToRemove = (int) (this.alignmentGraph.getEdgeCount() * this.clusterThreshold);
+		System.out.println("Running edge betweeness clustering with numEdgesToRemove=" + numEdgesToRemove);
+
+		double maxWeight = 0;
+		double maxDist = 0;
+		for (AlignmentEdge e : alignmentGraph.getEdges()) {
+			if (e.getWeight() > maxWeight) {
+				maxWeight = e.getWeight();
+			}
+			for (AlignmentPair pair : e.getAlignmentPairs()) {
+				if (pair.getDist() > maxDist) {
+					maxDist = pair.getDist();
+				}
+			}
+		}
+		
+		final double weightCoeff = BETWEENESS_CLUSTER_WEIGHT_COEFF;
+		final double distCoeff = BETWEENESS_PEAK_DIST_COEFF;
+		Map<AlignmentEdge, Double> weightMap = new HashMap<AlignmentEdge, Double>();
+		for (AlignmentEdge e : alignmentGraph.getEdges()) {
+			weightMap.put(e, e.getWeight(maxWeight, maxDist, weightCoeff, distCoeff));
+		}
+		
+		CustomEdgeBetweennessClusterer<AlignmentVertex, AlignmentEdge> clusterer = 
+				new CustomEdgeBetweennessClusterer<AlignmentVertex, AlignmentEdge>(
+						numEdgesToRemove, weightMap);
+		Set<Set<AlignmentVertex>> clusterSet = clusterer.transform(this.alignmentGraph);
+		List<AlignmentEdge> edges = clusterer.getEdgesRemoved();
+		
+		System.out.println(clusterSet.size() + " edges clustered");
+		System.out.println(edges.size() + " edges removed");
+		
+		return edges;
+		
 	}
 
 	private void setTransformers() {

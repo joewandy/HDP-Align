@@ -72,14 +72,14 @@ public class ExtendedLibraryBuilder {
 				 */
 				AlignmentFile data1 = combination.getValue(0);
 				AlignmentFile data2 = combination.getValue(1);	
+				Runnable builder = new StableMarriageLibraryBuilder(libraryQueue, libraryID, massTolerance, tol, data1, data2);
 
 				if (FeatureXMLAlignment.PARALLEL_LIBRARY_BUILD) {
-					Thread t = new Thread(new MultipleMatchesLibraryBuilder(libraryQueue, libraryID, massTolerance, tol, data1, data2));
+					Thread t = new Thread(builder);
 					t.start();					
 				} else {
-					PairwiseLibraryBuilder builder = new MultipleMatchesLibraryBuilder(
-							libraryQueue, libraryID, massTolerance, tol, data1, data2);
-					AlignmentLibrary library = builder.producePairwiseLibrary();
+					PairwiseLibraryBuilder pb = (PairwiseLibraryBuilder) builder;
+					AlignmentLibrary library = pb.producePairwiseLibrary();
 					try {
 						libraryQueue.put(library);
 					} catch (InterruptedException e) {
@@ -134,7 +134,7 @@ public class ExtendedLibraryBuilder {
 		
 		System.out.println("COMBINING PRIMARY LIBRARIES");
 	
-		ExtendedLibrary combinedLibrary = new ExtendedLibrary();
+		ExtendedLibrary combinedLibrary = new ExtendedLibrary(massTolerance, rtTolerance);
 		
 		// for every retention time tolerance and its associated primary libraries ..
 		for (Entry<Double, List<AlignmentLibrary>> entry : metaLibraries.entrySet()) {
@@ -156,6 +156,9 @@ public class ExtendedLibraryBuilder {
 					
 				}
 				
+				// add the graph too
+				combinedLibrary.add(library.getGraph());
+				
 			}
 			
 		}
@@ -170,7 +173,8 @@ public class ExtendedLibraryBuilder {
 		System.out.println("CONSTRUCTING LIBRARY EXTENSION");
 		
 		// library now contains all pairwise alignments from two files
-		ExtendedLibrary extendedLibrary = new ExtendedLibrary(combinedLibrary);
+		ExtendedLibrary extendedLibrary = new ExtendedLibrary(combinedLibrary,
+				massTolerance, rtTolerance);
 		
 		// now extend to triplets
 		// Create the initial vector
@@ -201,8 +205,8 @@ public class ExtendedLibraryBuilder {
 					AlignmentFile data1 = permutation.getValue(0);
 					AlignmentFile data2 = permutation.getValue(1);
 					AlignmentFile data3 = permutation.getValue(2);
-					Thread t = new Thread(new TripletLibraryBuilder(libraryQueue, combinedLibrary, 
-							noOfThreads, data1, data2, data3));
+					Thread t = new Thread(new ExtensionLibraryBuilder(libraryQueue, combinedLibrary, 
+							noOfThreads, data1, data2, data3, massTolerance, rtTolerance));
 					t.start();
 					noOfThreads++;
 					

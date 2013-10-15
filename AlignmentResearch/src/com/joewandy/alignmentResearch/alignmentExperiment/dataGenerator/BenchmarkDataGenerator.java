@@ -75,7 +75,7 @@ public class BenchmarkDataGenerator extends BaseDataGenerator implements Alignme
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-				AlignmentFile alignmentData = new AlignmentFile(i, filename, features);
+				AlignmentFile alignmentData = new AlignmentFile(i, myFile, features);
 				System.out.println("Load " + filename + " with " + alignmentData.getFeaturesCount() + " features");
 				alignmentDataList.add(alignmentData);
 				allFeatures.addAll(alignmentData.getFeatures());
@@ -199,6 +199,7 @@ public class BenchmarkDataGenerator extends BaseDataGenerator implements Alignme
 		}
 
 		System.out.println("Ground truth loaded = " + groundTruthEntries.size() + " rows");
+
 		Iterator<GroundTruthFeatureGroup> it = groundTruthEntries.iterator();
 		while (it.hasNext()) {
 			GroundTruthFeatureGroup gg = it.next();
@@ -206,7 +207,7 @@ public class BenchmarkDataGenerator extends BaseDataGenerator implements Alignme
 				it.remove();
 			}
 		}
-		System.out.println("Retaining only entries size > 2 = " + groundTruthEntries.size() + " rows");
+		System.out.println("Retaining only entries size >= 2 = " + groundTruthEntries.size() + " rows");
 		
 		GroundTruth groundTruth = new GroundTruth(groundTruthEntries);
 		return groundTruth;

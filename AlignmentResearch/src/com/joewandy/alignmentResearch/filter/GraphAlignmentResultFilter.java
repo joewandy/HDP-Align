@@ -69,7 +69,7 @@ public class GraphAlignmentResultFilter implements AlignmentResultFilter {
 		int dataFileCount = alignmentDataList.size();
 		System.out.println("Creating graph view");
 		CombineGraphView combineGraphView = new CombineGraphView(edgeList,
-				false, dataFileCount, this.threshold);
+				false, dataFileCount, this.threshold, this.graphFilter);
 
 		System.out.println("Computing graph result");
 		AlignmentExpResult graphResult = combineGraphView.computeStatistics();

@@ -53,6 +53,7 @@ public class GraphEdgeConstructor {
 						feature.getIntensity()	// peak intensity
 				);
 				AlignmentVertex current = buildVertex(currEntry, group, allVertices);
+				feature.setVertex(current);
 
 				// store vertices created for this row
 				vertices.add(current);	

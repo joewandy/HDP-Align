@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import edu.uci.ics.jung.graph.Graph;
+
 public class AlignmentLibrary {
 
 	private int libraryID;
@@ -14,6 +16,7 @@ public class AlignmentLibrary {
 	private Map<AlignmentEdge, AlignmentEdge> entries;
 	private double avgWeight;
 	private List<ExtendedLibraryEntry> aligned;
+	private Graph<AlignmentVertex, AlignmentEdge> graph;
 	
 	public AlignmentLibrary(int id, AlignmentFile data1, AlignmentFile data2) {
 		
@@ -23,11 +26,12 @@ public class AlignmentLibrary {
 	
 	}	
 	
-	public AlignmentLibrary(int id, AlignmentFile data1, AlignmentFile data2, List<AlignmentEdge> entryList) {
+	public AlignmentLibrary(int id, AlignmentFile data1, AlignmentFile data2, List<AlignmentEdge> entryList, Graph<AlignmentVertex, AlignmentEdge> graph) {
 		
 		this.libraryID = id;
 		this.data1 = data1;
 		this.data2 = data2;
+		this.graph = graph;
 		
 		entries = new HashMap<AlignmentEdge, AlignmentEdge>();
 		aligned = new ArrayList<ExtendedLibraryEntry>();
@@ -61,6 +65,10 @@ public class AlignmentLibrary {
 		return entries;
 	}
 	
+	public Graph<AlignmentVertex, AlignmentEdge> getGraph() {
+		return graph;
+	}
+
 	public void addAlignedPair(Feature f1, Feature f2, double score, double weight) {
 		ExtendedLibraryEntry entry = new ExtendedLibraryEntry(f1, f2, score, weight);
 		aligned.add(entry);

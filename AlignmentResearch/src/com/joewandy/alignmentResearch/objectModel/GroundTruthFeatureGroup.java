@@ -78,11 +78,5 @@ public class GroundTruthFeatureGroup extends FeatureGroup {
 			return false;
 		}
 	}
-	
-	@Override
-	public String toString() {
-		return "GroundTruthFeatureGroup [groupId=" + groupId + ", features=" + this.getFeatureCount()
-				+ "]";
-	}
-	
+			
 }

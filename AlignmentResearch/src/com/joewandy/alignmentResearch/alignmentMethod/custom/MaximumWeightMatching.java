@@ -8,7 +8,9 @@ import java.util.Map.Entry;
 import com.joewandy.alignmentResearch.main.FeatureXMLAlignment;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
+import com.joewandy.alignmentResearch.objectModel.DistanceCalculator;
 import com.joewandy.alignmentResearch.objectModel.ExtendedLibrary;
+import com.joewandy.alignmentResearch.objectModel.MahalanobisDistanceCalculator;
 
 public class MaximumWeightMatching implements FeatureMatching {
 
@@ -134,7 +136,13 @@ public class MaximumWeightMatching implements FeatureMatching {
 				AlignmentRow row2 = rows2.get(j);
 				double score = 0;
 				if (FeatureXMLAlignment.WEIGHT_USE_WEIGHTED_SCORE) {
-					score = library.computeWeightedRowScore(row1, row2);					
+					double mass1 = row1.getAverageMz();
+					double mass2 = row2.getAverageMz();
+					double rt1 = row1.getAverageRt();
+					double rt2 = row2.getAverageRt();
+					DistanceCalculator calc = new MahalanobisDistanceCalculator(massTol, rtTol);
+					double dist = calc.compute(mass1, mass2, rt1, rt2);						
+					 score = library.computeWeightedRowScore(row1, row2);
 				} else {
 					score = library.computeRowScore(row1, row2);										
 				}

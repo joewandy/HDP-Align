@@ -1,6 +1,8 @@
 package com.joewandy.alignmentResearch.alignmentMethod.custom;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,6 +13,9 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 
+import com.jmatio.io.MatFileWriter;
+import com.jmatio.types.MLArray;
+import com.jmatio.types.MLDouble;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
 import com.joewandy.alignmentResearch.alignmentMethod.BaseAlignment;
@@ -20,10 +25,12 @@ import com.joewandy.alignmentResearch.objectModel.AlignmentLibrary;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
 import com.joewandy.alignmentResearch.objectModel.ExtendedLibrary;
+import com.joewandy.alignmentResearch.objectModel.MatchingScorer;
 import com.joewandy.alignmentResearch.objectModel.WeightedRowVsRowScore;
 
 public class MyStableMarriageAlignment extends BaseAlignment implements AlignmentMethod {
 
+	private static final int LIMIT = 1;
 	private List<AlignmentList> featureList;
 	private ExtendedLibrary library;
 	
@@ -34,7 +41,8 @@ public class MyStableMarriageAlignment extends BaseAlignment implements Alignmen
 	 * @param rtTolerance Retention time tolerance in seconds
 	 * @param rtDrift 
 	 */
-	public MyStableMarriageAlignment(List<AlignmentFile> dataList, AlignmentMethodParam param, boolean useWeightedScore) {
+	public MyStableMarriageAlignment(List<AlignmentFile> dataList, AlignmentMethodParam param, 
+			boolean useWeightedScore) {
 
 		super(dataList, param);
 		
@@ -73,6 +81,10 @@ public class MyStableMarriageAlignment extends BaseAlignment implements Alignmen
 			AlignmentList peakList = featureList.get(i);
 			System.out.println("Aligning #" + (i+1) + ": " + peakList);
 			
+			List<AlignmentRow> peaks = peakList.getRows();
+	        double[][] scoreMatrix = computeScoreMatrix(peaks);
+	        saveToMatlab(peakList.getId(), scoreMatrix);	        
+						
 			/*
 			 * 1. Calculate scores for every entry in this peaklist against our master list.
 			 */
@@ -94,17 +106,13 @@ public class MyStableMarriageAlignment extends BaseAlignment implements Alignmen
             	 * candidateRows in the master list.
             	 */
             	Set<AlignmentRow> candidateRows = masterList.getRowsInRange(reference, 
-            			this.massTolerance, this.rtTolerance, this.usePpm);
+            			this.massTolerance, this.usePpm);
             	for (AlignmentRow candidate : candidateRows) {
             		WeightedRowVsRowScore score = null; 
             		if (!FeatureXMLAlignment.WEIGHT_USE_WEIGHTED_SCORE) {
-            			score = new WeightedRowVsRowScore(reference, candidate, false, null, this.massTolerance, this.rtTolerance);
+            			score = new WeightedRowVsRowScore(reference, candidate, null, this.massTolerance, this.rtTolerance);
             		} else {
-            			if (!FeatureXMLAlignment.WEIGHT_USE_PROB_CLUSTERING_WEIGHT) {
-                			score = new WeightedRowVsRowScore(reference, candidate, false, this.library, this.massTolerance, this.rtTolerance);            				
-            			} else {
-                			score = new WeightedRowVsRowScore(reference, candidate, true, this.library, this.massTolerance, this.rtTolerance);
-            			}
+            			score = new WeightedRowVsRowScore(reference, candidate, this.library, this.massTolerance, this.rtTolerance);            				
             		}
             		scoreList.add(score);
             	}
@@ -145,6 +153,19 @@ public class MyStableMarriageAlignment extends BaseAlignment implements Alignmen
 		return masterList;
 		
 	}
+
+	private void saveToMatlab(String name, double[][] scoreMatrix) {
+		MLDouble matlab = new MLDouble("dist", scoreMatrix);
+		final Collection<MLArray> output = new ArrayList<MLArray>();
+		output.add(matlab);
+		final MatFileWriter writer = new MatFileWriter();
+		try {
+			writer.write("/home/joewandy/" + name + ".mat", output);
+			System.out.println("Written to " + name + ".mat");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 	
 	protected Map<AlignmentRow, AlignmentRow> mapping(
 			List<WeightedRowVsRowScore> scoreList) {
@@ -177,6 +198,31 @@ public class MyStableMarriageAlignment extends BaseAlignment implements Alignmen
 		
 		return stableMatch;
 
+	}
+	
+	private double[][] computeScoreMatrix(List<AlignmentRow> peaks) {
+
+    	System.out.print("\tComputing score matrix ");
+    	MatchingScorer scorer = new MatchingScorer(massTolerance, rtTolerance);
+		double[][] scoreMatrix = new double[peaks.size()][peaks.size()];
+		for (int i = 0; i < peaks.size(); i++) {
+			AlignmentRow peak1 = peaks.get(i);				
+			
+			for (int j = 0; j < peaks.size(); j++) {
+				AlignmentRow peak2 = peaks.get(j);				
+				double score = scorer.computeDist(peak1, peak2);
+				scoreMatrix[i][j] = score;				
+			}
+			
+            if (i % 1000 == 0) {
+            	System.out.print('.');
+            }
+			
+		}
+		System.out.println();
+		
+		return scoreMatrix;
+		
 	}
 	
     private Map<AlignmentRow, AlignmentRow> match(List<AlignmentRow> men, List<AlignmentRow> women, 
@@ -222,45 +268,53 @@ public class MyStableMarriageAlignment extends BaseAlignment implements Alignmen
             // for unequal m and w size. no more w to propose to ?
             if (preferredWoman != null) {
 
+        		// check if most preferred peak is too far away
             	AlignmentRow w = preferredWoman.entry;
+            	WeightedRowVsRowScore rowScore = new WeightedRowVsRowScore(
+            			m.row, w, null, this.massTolerance, this.rtTolerance);
+            	if (rowScore.getDist() > LIMIT) {
+            		// no partner for him
+            	} else {
             	
-                // if w is free
-                if (!engagements.containsKey(w)) {
+                    // if w is free
+                    if (!engagements.containsKey(w)) {
 
-                	// (m, w) become engaged
-                    engagements.put(w, m);
-                
-                } else {
-                	
-                    // some pair (m', w) already exists
-                    RowPreference mPrime = engagements.get(w);
-                    AlignmentRow mPrimeRow = mPrime.row;
-                    AlignmentRow mRow = m.row;
-                    WomanPreferenceComparator womanPreference = new WomanPreferenceComparator(w);
-                    
-                    // compares the score (1/distance), not distance. Higher is better.
-                    int compareRes = womanPreference.compare(mPrimeRow, mRow); 
-                    
-                    // w prefers m to m'
-                    if (compareRes < 0) {
-
-                        // (m, w) become engaged
+                    	// (m, w) become engaged
                         engagements.put(w, m);
-
-                        // m' becomes free
-                        assert(!freemen.contains(mPrime));
-                        freemen.add(mPrime);                        	
-
+                    
                     } else {
                     	
-                        // (m', w) remain engaged, m remains free
-                        assert(!freemen.contains(m));
-                    	freemen.add(m);
+                        // some pair (m', w) already exists
+                        RowPreference mPrime = engagements.get(w);
+                        AlignmentRow mPrimeRow = mPrime.row;
+                        AlignmentRow mRow = m.row;
+                        WomanPreferenceComparator womanPreference = new WomanPreferenceComparator(w);
+                        
+                        // compares the score (1/distance), not distance. Higher is better.
+                        int compareRes = womanPreference.compare(mPrimeRow, mRow); 
+                        
+                        // w prefers m to m'
+                        if (compareRes < 0) {
+
+                            // (m, w) become engaged
+                            engagements.put(w, m);
+
+                            // m' becomes free
+                            assert(!freemen.contains(mPrime));
+                            freemen.add(mPrime);                        	
+
+                        } else {
+                        	
+                            // (m', w) remain engaged, m remains free
+                            assert(!freemen.contains(m));
+                        	freemen.add(m);
+
+                        }
 
                     }
-
-                }
-            	
+            		
+            	}
+            	            	
             } else {
 
             	// this man has been refused by all women in his preferences
@@ -293,6 +347,10 @@ public class MyStableMarriageAlignment extends BaseAlignment implements Alignmen
 			}
 		}
 		return prefs;
+	}
+	
+	private boolean checkInDistance(AlignmentRow row1, AlignmentRow row2, double limit) {
+		return true;
 	}
 		    	
     private class RowPreference {
@@ -350,9 +408,9 @@ public class MyStableMarriageAlignment extends BaseAlignment implements Alignmen
     	@Override
     	public int compare(AlignmentRow candidate1, AlignmentRow candidate2) {
     		WeightedRowVsRowScore rowScore1 = new WeightedRowVsRowScore(
-    				reference, candidate1, FeatureXMLAlignment.WEIGHT_USE_WEIGHTED_SCORE, library, massTolerance, rtTolerance);
+    				reference, candidate1, library, massTolerance, rtTolerance);
     		WeightedRowVsRowScore rowScore2 = new WeightedRowVsRowScore(
-    				reference, candidate2, FeatureXMLAlignment.WEIGHT_USE_WEIGHTED_SCORE, library, massTolerance, rtTolerance);
+    				reference, candidate2, library, massTolerance, rtTolerance);
     		double score1 = rowScore1.getScore();
     		double score2 = rowScore2.getScore();
     		return Double.compare(score1, score2);

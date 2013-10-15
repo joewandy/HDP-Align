@@ -1,9 +1,11 @@
 package com.joewandy.alignmentResearch.objectModel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
@@ -11,15 +13,80 @@ import org.apache.commons.math3.stat.descriptive.moment.Variance;
 import org.apache.commons.math3.stat.descriptive.rank.Max;
 import org.apache.commons.math3.stat.descriptive.rank.Median;
 import org.apache.commons.math3.stat.descriptive.rank.Min;
+import org.paukov.combinatorics.Factory;
+import org.paukov.combinatorics.Generator;
+import org.paukov.combinatorics.ICombinatoricsVector;
 
 
 public class GroundTruth {
 
 	private final static double EPSILON = 0.0001;
 	private List<GroundTruthFeatureGroup> groundTruth;
+	private List<GroundTruthPair> pairwiseGroundTruth;	
+	private Set<Feature> G;
 	
 	public GroundTruth(List<GroundTruthFeatureGroup> groundTruthEntries) {		
+		
 		this.groundTruth = groundTruthEntries;
+		Map<Integer, Integer> sizeMap = new HashMap<Integer, Integer>();
+		
+		this.G = new HashSet<Feature>();
+		G.addAll(this.getAllUniqueFeatures());
+				
+		// convert ground truth entries into a pairwise of aligned features
+		this.pairwiseGroundTruth = new ArrayList<GroundTruthPair>();
+		int groupID = 1;
+		System.out.print("Generating all positive pairwise combinations ");
+		for (GroundTruthFeatureGroup g : this.groundTruth) {
+
+			// skip single entry ground truth
+			int size = g.getFeatureCount();
+			if (size < 2) {
+				continue;
+			}
+			
+			if (sizeMap.containsKey(size)) {
+				int count = sizeMap.get(size);
+				sizeMap.put(size, count+1);
+			} else {
+				sizeMap.put(size, 1);
+			}
+			
+			// Create a simple combination generator to generate 2-combinations of
+			// the initial vector
+			Set<Feature> features = g.getFeatures();			
+			Generator<Feature> gen = nChoose2(features);
+			for (ICombinatoricsVector<Feature> combination : gen) {
+				Feature f1 = combination.getValue(0);
+				Feature f2 = combination.getValue(1);	
+				GroundTruthPair pairwise = getGroundTruthPair(f1, f2);
+				pairwiseGroundTruth.add(pairwise);
+				groupID++;
+			}
+						
+		}		
+		System.out.println();
+		System.out.println("Total pairwise ground truth combinations = " + pairwiseGroundTruth.size());
+		System.out.println(sizeMap);
+		
+	}
+
+	private GroundTruthPair getGroundTruthPair(Feature f1, Feature f2) {
+		GroundTruthPair pairwise = null;
+		if (f1.getPeakID() == f2.getPeakID()) {
+			if (f1.getData().getId() < f2.getData().getId()) {
+				pairwise = new GroundTruthPair(f1, f2);
+			} else {
+				pairwise = new GroundTruthPair(f2, f1);					
+			}
+		} else {
+			if (f1.getPeakID() < f2.getPeakID()) {
+				pairwise = new GroundTruthPair(f1, f2);
+			} else {
+				pairwise = new GroundTruthPair(f2, f1);					
+			}			
+		}
+		return pairwise;
 	}
 		
 	public Set<Feature> getAllUniqueFeatures() {
@@ -76,7 +143,7 @@ public class GroundTruth {
 		}
 	}
 
-	public EvaluationResult evaluate(List<AlignmentRow> alignmentResult, int noOfFiles) {
+	public EvaluationResult evaluate(List<AlignmentRow> alignmentResult, int noOfFiles, double dmz, double drt) {
 		
 		List<FeatureGroup> tool = convertToFeatureGroup(alignmentResult);
 		
@@ -173,60 +240,15 @@ public class GroundTruth {
 		 * More calculations here
 		 */
 		
-		int coverageCount = 0;		
-		List<Double> sdrtList = new ArrayList<Double>();
-		List<Double> mdrtList = new ArrayList<Double>();		
-		for (AlignmentRow row : alignmentResult) {
-			
-			if (row.getFeaturesCount() > noOfFiles/2) {
-				coverageCount++;
-			}
-			
-			double[] rts = row.getFeatureRts();
-			Variance variance = new Variance();
-			double var = variance.evaluate(rts);
-			double sdrt = Math.sqrt(var);
-			sdrtList.add(sdrt);
-			
-			Min min = new Min();
-			Max max = new Max();
-			double minValue = min.evaluate(rts);
-			double maxValue = max.evaluate(rts);
-			double mdrt = maxValue - minValue;
-			mdrtList.add(mdrt);
-			
-		}
-
-		double[] sdrtArr = listToArray(sdrtList);
-		double[] mdrtArr = listToArray(mdrtList);
-		
-		// compute median & mean SDRT
-		Median med1 = new Median();
-		Mean mean1 = new Mean();
-		double medSdrt = med1.evaluate(sdrtArr);
-		double meanSdrt = mean1.evaluate(sdrtArr);
-
-		// compute median & mean MDRT
-		Median med2 = new Median();
-		Mean mean2 = new Mean();
-		double medMdrt = med2.evaluate(mdrtArr);
-		double meanMdrt = mean2.evaluate(mdrtArr);
-		
-		// compute coverage
-		double coverage = (double)coverageCount / alignmentResult.size();
-		
-		System.out.println();		
-		EvaluationResult evalRes = new EvaluationResult(
-				precision, recall, f1, f05, 
-				totalTp, totalFp, totalPositives, totalTpRatio, totalFpRatio, totalPositiveRatio,
-				medSdrt, meanSdrt, medMdrt, meanMdrt, coverage);
-		System.out.println(evalRes);
+		EvaluationResult evalRes = computeAdditional(alignmentResult,
+				noOfFiles, precision, recall, totalTp, totalFp, 0, totalPositives,
+				f1, f05, totalTpRatio, totalFpRatio, totalPositiveRatio, dmz, drt);
 		
 		return evalRes;
 
 	}
 
-	public EvaluationResult evaluate2(List<AlignmentRow> alignmentResult, int noOfFiles) {
+	public EvaluationResult evaluate2(List<AlignmentRow> alignmentResult, int noOfFiles, double dmz, double drt) {
 		
 		// convert alignmentResult to feature groups
 		List<FeatureGroup> tool = convertToFeatureGroup(alignmentResult);		
@@ -305,6 +327,143 @@ public class GroundTruth {
 		 * More calculations here
 		 */
 		
+		EvaluationResult evalRes = computeAdditional(alignmentResult,
+				noOfFiles, precision, recall, totalTp, totalFp, 0, totalPositives,
+				f1, f05, totalTpRatio, totalFpRatio, totalPositiveRatio, dmz, drt);
+		
+		return evalRes;
+
+	}
+
+	public EvaluationResult evaluate3(List<AlignmentRow> alignmentResult, int noOfFiles, double dmz, double drt) {
+				
+		// construct G+, the set of positive pairwise ground truth ==> things that should be aligned together
+		List<GroundTruthPair> gPlus = this.pairwiseGroundTruth;				
+		
+		// convert tool output into t = a set of pairwise alignments as well
+		List<GroundTruthPair> t = convertToPairwiseFeatureGroup(alignmentResult);		
+	
+		// TP = should be aligned & are aligned = G+ intersect t
+		System.out.println("Computing TP");		
+		List<GroundTruthPair> intersect = new ArrayList<GroundTruthPair>(gPlus);
+		intersect.retainAll(t);
+		int TP = intersect.size();
+		
+		// FN = should be aligned & aren't aligned = G+ \ t
+		System.out.println("Computing FN");		
+		List<GroundTruthPair> diff1 = new ArrayList<GroundTruthPair>(gPlus);
+		diff1.removeAll(t);
+		int FN = diff1.size();
+						
+		// FP = shouldn't be aligned & are aligned = t \ G+
+		System.out.println("Computing FP");
+		List<GroundTruthPair> diff2 = new ArrayList<GroundTruthPair>(t);
+		diff2.removeAll(gPlus);
+		int FP = diff2.size();
+		
+		int totalPositives = t.size();
+		System.out.println("TP = " + TP);
+		System.out.println("FP = " + FP);
+		System.out.println("totalPositives = " + totalPositives);
+		System.out.println("totalPositives-TP = " + (totalPositives-TP));
+		// assert(FP == (totalPositives-TP));
+
+		// TN = big number, don't compute
+		
+		double precision = (double)TP/(TP+FP);
+		double recall = (double)TP/(TP+FN);
+		
+		double f1 = (2*precision*recall) / (precision + recall);
+		double f05 = (1.25*precision*recall) / ((0.25*precision) + recall);
+		
+		double totalTpRatio = (double)TP / totalPositives;
+		double totalFpRatio = (double)FP / totalPositives;		
+		double totalPositiveRatio = (double)totalPositives / totalPositives;				
+				
+		EvaluationResult evalRes = computeAdditional(alignmentResult,
+				noOfFiles, precision, recall, TP, FP, FN, totalPositives,
+				f1, f05, totalTpRatio, totalFpRatio, totalPositiveRatio, dmz, drt);
+		
+		return evalRes;
+
+	}
+	
+	@Override
+	public String toString() {
+		return "SimpleGroundTruth [groundTruth=" + groundTruth.size() + " alignments]";
+	}
+	
+	private List<FeatureGroup> convertToFeatureGroup(
+			List<AlignmentRow> alignmentResult) {
+		
+		List<FeatureGroup> tool = new ArrayList<FeatureGroup>();
+		int groupID = 1;
+		for (AlignmentRow row : alignmentResult) {
+
+			Set<Feature> alignedFeatures = row.getFeatures();
+			for (Feature feature : alignedFeatures) {
+				feature.clearGroups();
+			}
+			
+			FeatureGroup group = new FeatureGroup(groupID);
+			groupID++;
+			group.addFeatures(alignedFeatures);
+			tool.add(group);
+
+		}
+		return tool;
+	
+	}
+	
+	private List<GroundTruthPair> convertToPairwiseFeatureGroup(
+			List<AlignmentRow> alignmentResult) {
+	
+		List<GroundTruthPair> tool = new ArrayList<GroundTruthPair>();
+		for (AlignmentRow row : alignmentResult) {
+
+			// skip single entry row
+			if (row.getFeaturesCount() < 2) {
+				continue;
+			}
+			
+			Set<Feature> alignedFeatures = row.getFeatures();
+			for (Feature feature : alignedFeatures) {
+				feature.clearGroups();
+			}
+			
+			// Create a simple combination generator to generate 2-combinations of
+			// the initial vector
+			Set<Feature> features = row.getFeatures();			
+			Generator<Feature> gen = nChoose2(features);
+			for (ICombinatoricsVector<Feature> combination : gen) {
+				Feature f1 = combination.getValue(0);
+				Feature f2 = combination.getValue(1);
+				
+				// only add into tool if either feature is present in G ?
+				if (G.contains(f1) || G.contains(f2)) {
+					GroundTruthPair pairwise = getGroundTruthPair(f1, f2);
+					tool.add(pairwise);					
+				}
+								
+			}
+		
+		}
+		return tool;
+	
+	}
+	
+	private Generator<Feature> nChoose2(Set<Feature> features) {
+		ICombinatoricsVector<Feature> initialVector = Factory.createVector(features);
+		Generator<Feature> gen = Factory.createSimpleCombinationGenerator(
+				initialVector, 2);
+		return gen;
+	}
+
+	private EvaluationResult computeAdditional(
+			List<AlignmentRow> alignmentResult, int noOfFiles,
+			double precision, double recall, int totalTp, int totalFp, int totalFn,
+			int totalPositives, double f1, double f05, double totalTpRatio,
+			double totalFpRatio, double totalPositiveRatio, double dmz, double drt) {
 		int coverageCount = 0;		
 		List<Double> sdrtList = new ArrayList<Double>();
 		List<Double> mdrtList = new ArrayList<Double>();		
@@ -349,35 +508,11 @@ public class GroundTruth {
 		
 		System.out.println();		
 		EvaluationResult evalRes = new EvaluationResult(
+				dmz, drt,
 				precision, recall, f1, f05, 
-				totalTp, totalFp, totalPositives, totalTpRatio, totalFpRatio, totalPositiveRatio,
+				totalTp, totalFp, totalFn, totalPositives, totalTpRatio, totalFpRatio, totalPositiveRatio,
 				medSdrt, meanSdrt, medMdrt, meanMdrt, coverage);
-		System.out.println(evalRes);
-		
 		return evalRes;
-
-	}
-	
-	@Override
-	public String toString() {
-		return "SimpleGroundTruth [groundTruth=" + groundTruth.size() + " alignments]";
-	}
-	
-	private List<FeatureGroup> convertToFeatureGroup(
-			List<AlignmentRow> alignmentResult) {
-		List<FeatureGroup> tool = new ArrayList<FeatureGroup>();
-		int groupID = 1;
-		for (AlignmentRow row : alignmentResult) {
-			FeatureGroup group = new FeatureGroup(groupID);
-			groupID++;
-			Set<Feature> alignedFeatures = row.getFeatures();
-			for (Feature feature : alignedFeatures) {
-				feature.clearGroups();
-			}
-			group.addFeatures(alignedFeatures);
-			tool.add(group);
-		}
-		return tool;
 	}
 	
 	private double[] listToArray(List<Double> list) {
