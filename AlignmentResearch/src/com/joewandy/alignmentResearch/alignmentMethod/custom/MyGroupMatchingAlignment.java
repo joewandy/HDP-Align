@@ -1,19 +1,16 @@
 package com.joewandy.alignmentResearch.alignmentMethod.custom;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
-
-import peakml.chemistry.PeriodicTable;
 
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
@@ -21,7 +18,10 @@ import com.joewandy.alignmentResearch.alignmentMethod.BaseAlignment;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
-import com.joewandy.alignmentResearch.objectModel.Feature;
+import com.joewandy.alignmentResearch.objectModel.DistanceCalculator;
+import com.joewandy.alignmentResearch.objectModel.FeatureGroup;
+import com.joewandy.alignmentResearch.objectModel.MahalanobisDistanceCalculator;
+import com.joewandy.alignmentResearch.objectModel.MatchingScorer;
 import com.joewandy.alignmentResearch.objectModel.SocialGraph;
 import com.joewandy.alignmentResearch.objectModel.SocialGraphEdge;
 import com.joewandy.alignmentResearch.objectModel.WeightedRowVsRowScore;
@@ -61,49 +61,57 @@ public class MyGroupMatchingAlignment extends BaseAlignment implements Alignment
 				masterList = alignedList;
 				continue;
 			}
-						
-			/*
-			 * 1a. Calculate scores for every entry in this peaklist against our master list.
-			 * Scores are calculated for the pairs that are within tolerance windows. Each entries
-			 * form an acceptable pair of rows that can potentially be matched.
-			 * 
-             * 1b. Construct a social graph of pairs that are 'connected' across the two lists.
-             * This forms the list of acquainted pairs, sharing some form of relationships outside the matching.
-             * Acquainted pairs are given higher priority in the matching, and they can form 
-             * socially stable blocking pairs.
-			 */
-	        List<WeightedRowVsRowScore> acceptablePairsList = createAcceptablePairsList(masterList, alignedList);
-	        SocialGraph socialGraph = createSocialGraph(masterList, alignedList, acceptablePairsList);
-            
-            /*
-             * 2. Finally, create the 3/2-approximately maximum social stable matching
-             */
-            
-		    // men is master list
-    		List<AlignmentRow> men = masterList.getRows();
-		    // women is aligned list
-    		List<AlignmentRow> women = alignedList.getRows();
-    		
-    		// do stable matching
-    		System.out.println("Running maximum socially stable matching");
-    		System.out.println("\tmen size = " + men.size());
-    		System.out.println("\twomen size = " + women.size());
-    		System.out.println("\tacceptable pairs = " + acceptablePairsList.size());
-    		System.out.println("\tsocial graph = " + socialGraph.getEdgeCount() + " edges");
-    		
-    		Map<AlignmentRow, AlignmentRow> alignmentMapping = approxSmiss(men, women, 
-    				acceptablePairsList, socialGraph);
+			
+			Map<AlignmentRow, AlignmentRow> allMapping = new HashMap<AlignmentRow, AlignmentRow>();
+			Map<FeatureGroup, FeatureGroup> seenBefore = new HashMap<FeatureGroup, FeatureGroup>();
+			List<FeatureGroup> masterGroups = masterList.getGroups();
+			List<FeatureGroup> alignedGroups = alignedList.getGroups();
+			int unmatchedMasterGroupsCount = masterList.getUnmatchedGroupsCount();
+			int unmatchedAlignedGroupsCount = alignedList.getUnmatchedGroupsCount();
 
+			if (unmatchedMasterGroupsCount == 0 || unmatchedAlignedGroupsCount == 0) {
+				break;
+			}
+			
+			// match group vs group				
+			Map<FeatureGroup, FeatureGroup> result = matchGroups(masterGroups, alignedGroups, seenBefore);
+			seenBefore.putAll(result);
+
+			// create acceptable pairs within matched groups
+//		        List<WeightedRowVsRowScore> acceptablePairsList = createAcceptablePairsList(masterList, alignedList, result);
+//		        SocialGraph socialGraph = new SocialGraph();
+            
+            // call 3/2-approximately maximum social stable matching	            
+//	    		List<AlignmentRow> men = masterList.getUnalignedRows();
+//	    		List<AlignmentRow> women = alignedList.getUnalignedRows();	    		
+//	    		Map<AlignmentRow, AlignmentRow> alignmentMapping = approxSmiss(men, women, 
+//	    				acceptablePairsList, socialGraph);
+	        
+			Map<AlignmentRow, AlignmentRow> alignmentMapping = new HashMap<AlignmentRow, AlignmentRow>();
+			List<AlignmentRow> masterRows = masterList.getUnalignedRows();
+			List<AlignmentRow> alignedRows = alignedList.getUnalignedRows();
+			for (AlignmentRow masterRow : masterRows) {
+				FeatureGroup masterGroup = masterRow.getFirstFeature().getFirstGroup();
+				FeatureGroup preferred = result.get(masterGroup);
+				AlignmentRow bestMatch = findBestMatch(masterRow, alignedRows, preferred);
+				if (bestMatch != null) {
+					alignmentMapping.put(masterRow, bestMatch);						
+				}
+			}
+			
+			System.out.println("alignmentMapping.size() = " + alignmentMapping.size());
+    		allMapping.putAll(alignmentMapping);
+    		setFlag(allMapping);
+			
             /*
              * 3. Here, we actually construct the row alignments using the mapping created above.
              * if we cannot find the mapping, then add this row 
              */
             
             // Align all rows using mapping
-    		List<AlignmentRow> alignedRows = alignedList.getRows();
             for (AlignmentRow alignedRow : alignedRows) {
             	
-            	AlignmentRow masterListRow = alignmentMapping.get(alignedRow);
+            	AlignmentRow masterListRow = allMapping.get(alignedRow);
             	
                 // If we have no mapping for this row, add as new entry to masterList
                 if (masterListRow == null) {
@@ -116,245 +124,189 @@ public class MyGroupMatchingAlignment extends BaseAlignment implements Alignment
                 masterListRow.addFeatures(alignedRow.getFeatures());
             	
             }
-            
+			
 		}
 		
 		return masterList;
 		
 	}
 
-	private List<WeightedRowVsRowScore> createAcceptablePairsList(AlignmentList masterList,
-			AlignmentList alignedList) {
+	private AlignmentRow findBestMatch(AlignmentRow masterRow, List<AlignmentRow> alignedRows,
+			FeatureGroup preferred) {
 
-        List<AlignmentRow> alignedRows = alignedList.getRows();
+		// consider only unaligned rows inside preferred and within mass tolerance
+		List<AlignmentRow> reduced = new ArrayList<AlignmentRow>(alignedRows);
+		Iterator<AlignmentRow> it = reduced.iterator();
+		while (it.hasNext()) {
+			AlignmentRow candidate = it.next();
+			Set<Integer> candidateIds = candidate.getGroupIds();
+			if (candidate.isAligned()) {
+				// has been aligned before ?
+				it.remove();
+			} else if (!candidateIds.contains(preferred.getGroupId())) {
+				// not in matched group ?
+				it.remove();
+			} else if (!masterRow.rowInRange(candidate, massTolerance, -1, usePpm)) {
+				// not within mass tolerance ?
+				it.remove();
+			}
+		}
+		
+		// find the one with minimum mass distance
+		MatchingScorer scorer = new MatchingScorer(massTolerance, Double.MAX_VALUE);
+		double minDist = Double.MAX_VALUE;
+		AlignmentRow closest = null;
+		for (AlignmentRow candidate : reduced) {
+			double dist = scorer.computeDist(masterRow, candidate);
+			if (dist < minDist) {
+				minDist = dist;
+				closest = candidate;
+			}
+		}
+		return closest;
+		
+	}
+
+	private void setFlag(Map<AlignmentRow, AlignmentRow> allMapping) {
+
+		// mark all rows & groups inside allMapping as aligned & matched
+		for (Entry<AlignmentRow, AlignmentRow> entry : allMapping.entrySet()) {
+
+			AlignmentRow masterRow = entry.getKey();
+			masterRow.setAligned(true);
+			
+			AlignmentRow alignedRow = entry.getValue();
+			alignedRow.setAligned(true);		
+			
+			FeatureGroup masterGroup = masterRow.getFirstFeature().getFirstGroup();
+			masterGroup.setMatched(true);
+
+			FeatureGroup alignedGroup = alignedRow.getFirstFeature().getFirstGroup();
+			alignedGroup.setMatched(true);
+			
+		}
+		
+	}
+
+	private Map<FeatureGroup, FeatureGroup> matchGroups(
+			List<FeatureGroup> masterGroups, List<FeatureGroup> alignedGroups, Map<FeatureGroup, FeatureGroup> seenBefore) {
+		
+		DistanceCalculator calc = new MahalanobisDistanceCalculator(massTolerance, Double.MAX_VALUE);
+		int unmatchedMaster = masterGroups.size();
+		int unmatchedAligned = alignedGroups.size();
+
+		double[][] distMatrix = new double[unmatchedMaster][unmatchedAligned];
+		for (int m = 0; m < masterGroups.size(); m++) {
+			for (int n = 0; n < alignedGroups.size(); n++) {
+				
+				FeatureGroup masterGroup = masterGroups.get(m);
+				FeatureGroup alignedGroup = alignedGroups.get(n);
+			
+				if (seenBefore.get(masterGroup) != null && seenBefore.get(masterGroup).equals(alignedGroup)) {
+					distMatrix[m][n] = Double.MAX_VALUE;
+				} else {
+					double mass1 = masterGroup.getAverageMz();
+					double mass2 = alignedGroup.getAverageMz();
+					double rt1 = masterGroup.getAverageRt();
+					double rt2 = alignedGroup.getAverageRt();
+					double mzDist = calc.compute(mass1, mass2, rt1, rt2);
+					distMatrix[m][n] = mzDist;
+//					double sizeDiff = Math.abs(masterGroup.getFeatureCount() - alignedGroup.getFeatureCount());
+//					distMatrix[m][n] = sizeDiff * mzDist;	
+				}
+				
+			}
+		}
+		
+		// find the minimum weighted matching
+		System.out.print("\tRunning matching ");
+		HungarianAlgorithm algo = new HungarianAlgorithm(distMatrix);
+		int[] res = algo.execute();
+		System.out.println();
+		
+		// store the result
+		Map<FeatureGroup, FeatureGroup> result = new HashMap<FeatureGroup, FeatureGroup>();
+		for (int m=0; m<masterGroups.size(); m++) {
+			int matchIndex = res[m];
+			// if there's a match
+			if (matchIndex != -1) {
+				FeatureGroup masterGroup = masterGroups.get(m);
+				FeatureGroup alignedGroup = alignedGroups.get(matchIndex);
+				assert(masterGroup != null);
+				assert(alignedGroup != null);
+				result.put(masterGroup, alignedGroup);
+			}
+		}
+
+		return result;
+		
+	}
+
+	private List<WeightedRowVsRowScore> createAcceptablePairsList(AlignmentList masterList,
+			AlignmentList alignedList, Map<FeatureGroup, FeatureGroup> result) {
+
+        List<AlignmentRow> masterRows = masterList.getUnalignedRows();
         List<WeightedRowVsRowScore> acceptablePairsList = new ArrayList<WeightedRowVsRowScore>();
 
-        System.out.println("\talignedRows.size() = " + alignedRows.size());		
+        System.out.println("\tmasterRows.size() = " + masterRows.size());		
 		System.out.print("\tCreating acceptable pairs list ");
 		int counter = 0;
-		for (AlignmentRow aligned : alignedRows) {
+		for (AlignmentRow masterRow : masterRows) {
 
 			if (counter % 1000 == 0) {
 				System.out.print('.');
 			}
 			counter++;
+						
+			// Get all rows of the aligned peaklist within parameter limits AND matched groups
+			FeatureGroup preferredGroup = null;
+			if (result != null) {
+				FeatureGroup masterGroup = masterRow.getFirstFeature().getFirstGroup();
+				preferredGroup = result.get(masterGroup);
+				assert(masterGroup != null);
+				if (preferredGroup == null) {
+					continue;
+				}				
+			}
 			
-			// Get all rows of the aligned peaklist within parameter limits,
-			Set<AlignmentRow> candidateRows = masterList.getRowsInRange(aligned, 
-					this.massTolerance, this.rtTolerance, this.usePpm);
+			Set<AlignmentRow> candidateRows = alignedList.getUnalignedRowsInRange(masterRow, 
+					this.massTolerance, this.usePpm);
 			for (AlignmentRow candidate : candidateRows) {
+
+				if (candidate.isAligned()) {
+					continue;
+				}
+				
+				FeatureGroup alignedGroup = candidate.getFirstFeature().getFirstGroup();
+				if (result != null && preferredGroup.getGroupId() != alignedGroup.getGroupId()) {
+					continue;
+				}
 				
 				// calculate score and add them to the list of acceptable pairs
-				WeightedRowVsRowScore score = new WeightedRowVsRowScore(aligned, candidate, massTolerance, rtTolerance);
-				acceptablePairsList.add(score);
+				WeightedRowVsRowScore acceptable = new WeightedRowVsRowScore(candidate, masterRow, massTolerance, Double.MAX_VALUE);
+				acceptablePairsList.add(acceptable);
 				
 			}
 			
 		}
 		System.out.println();
+		System.out.println("acceptablePairsList.size() = " + acceptablePairsList.size());
 		
 		return acceptablePairsList;
 	
 	}
-
-	private SocialGraph createSocialGraph(AlignmentList masterList,
-			AlignmentList alignedList, List<WeightedRowVsRowScore> acceptablePairsList) {
-
-        SocialGraph socialGraph = new SocialGraph();
-
-        System.out.println("\talignedList.getRowsCount() = " + alignedList.getRowsCount());		
-        
-        System.out.print("\tCreating social graph from aligned -> master ");
-		int counter = 0;
-		for (AlignmentRow alignedRow : alignedList.getRows()) {
-
-			// find the top few nearest match in the other list
-			List<WeightedRowVsRowScore> selectedSub = findNearestMasterRowMatch(alignedRow, acceptablePairsList, 
-					AlignmentMethodParam.PARAM_TOP_K_FRIENDS);
-
-			// find this candidate row's 'friends'
-			Set<AlignmentRow> candidateFriends = new HashSet<AlignmentRow>();
-
-			for (WeightedRowVsRowScore nearestMatch : selectedSub) {
-
-				AlignmentRow candidate = nearestMatch.getMasterListCandidate();
-				
-				if (counter % 1000 == 0) {
-					System.out.print('.');
-				}
-				counter++;
-				
-				// remember to add this current row too
-				candidateFriends.add(candidate);
-				
-				// loop through all the features in this row
-				for (Feature feature : candidate.getFeatures()) { 
-					
-					// find all friends above threshold and within mass tolerance
-					Set<Feature> friends = getFriends(feature);            			
-					for (Feature friend : friends) {
-						
-						// find all rows containing this friendly feature
-		    			AlignmentRow friendRow = masterList.getRowContaining(friend);
-		    			
-		    			// store the rows
-		    			candidateFriends.add(friendRow);            				
-		    			
-					}
-					
-				}
-				
-			}									
 			
-			// create social links in our graph from aligned row to candidate rows + friends
-			for (AlignmentRow candidateFriend : candidateFriends) {
-				SocialGraphEdge friendEdge = new SocialGraphEdge(candidateFriend, alignedRow);
-				socialGraph.addEdge(friendEdge);
-			}
-
-		}				
-		System.out.println();
-
-        System.out.print("\tCreating social graph from aligned <- master ");
-		counter = 0;
-		for (AlignmentRow masterRow : masterList.getRows()) {
-
-			// find the top few nearest match in the other list
-			List<WeightedRowVsRowScore> selectedSub = findNearestAlignedRowMatch(masterRow, acceptablePairsList, 
-					AlignmentMethodParam.PARAM_TOP_K_FRIENDS);
-
-			// find this aligned row's 'friends'
-			Set<AlignmentRow> alignedFriends = new HashSet<AlignmentRow>();
-
-			for (WeightedRowVsRowScore nearestMatch : selectedSub) {
-
-				AlignmentRow aligned = nearestMatch.getAligned();
-				
-				if (counter % 1000 == 0) {
-					System.out.print('.');
-				}
-				counter++;
-				
-				// remember to add this current row too
-				alignedFriends.add(aligned);
-				
-				// loop through all the features in this row
-				for (Feature feature : aligned.getFeatures()) { 
-					
-					// find all friends above threshold and within mass tolerance
-					Set<Feature> friends = getFriends(feature);            			
-					for (Feature friend : friends) {
-						
-						// find all rows containing this friendly feature
-		    			AlignmentRow friendRow = masterList.getRowContaining(friend);
-		    			
-		    			// store the rows
-		    			alignedFriends.add(friendRow);            				
-		    			
-					}
-					
-				}
-				
-			}									
-			
-			// create social links in our graph from aligned row to candidate rows + friends
-			for (AlignmentRow alignedFriend : alignedFriends) {
-				SocialGraphEdge friendEdge = new SocialGraphEdge(masterRow, alignedFriend);
-				socialGraph.addEdge(friendEdge);
-			}
-
-		}				
-		System.out.println();
-		
-		return socialGraph;
-		
-	}
-	
-	private List<WeightedRowVsRowScore> findNearestMasterRowMatch(
-			AlignmentRow alignedRow, List<WeightedRowVsRowScore> acceptablePairsList, int limit) {
-	
-		List<WeightedRowVsRowScore> selected = new ArrayList<WeightedRowVsRowScore>();
-		for (WeightedRowVsRowScore acceptable : acceptablePairsList) {
-			if (acceptable.getAligned().equals(alignedRow)) {
-				selected.add(acceptable);
-			}
-		}
-		
-		Collections.sort(selected, Collections.reverseOrder());
-		int min = Math.min(limit, selected.size());
-		List<WeightedRowVsRowScore> selectedSub = selected.subList(0, min);
-		
-		return selectedSub;
-
-	}
-
-	private List<WeightedRowVsRowScore> findNearestAlignedRowMatch(
-			AlignmentRow masterRow, List<WeightedRowVsRowScore> acceptablePairsList, int limit) {
-	
-		List<WeightedRowVsRowScore> selected = new ArrayList<WeightedRowVsRowScore>();
-		for (WeightedRowVsRowScore acceptable : acceptablePairsList) {
-			if (acceptable.getMasterListCandidate().equals(masterRow)) {
-				selected.add(acceptable);
-			}
-		}
-		
-		Collections.sort(selected, Collections.reverseOrder());
-		int min = Math.min(limit, selected.size());
-		List<WeightedRowVsRowScore> selectedSub = selected.subList(0, min);
-		
-		return selectedSub;
-
-	}
-	
-	private Set<Feature> getFriends(Feature feature) {
-
-		Set<Feature> friends = new HashSet<Feature>();		
-		AlignmentFile file = feature.getData();
-		double[][] zzProb = feature.getZZProb();
-		
-		if (zzProb == null) {
-			return friends;
-		}
-		
-		int i = feature.getPeakID();		
-		double[] probArray = zzProb[i];
-				
-		for (int j = 0; j < probArray.length; j++) {
-			double prob = probArray[j];
-			if (prob >= threshold) {
-				
-				Feature friend = file.getFeatureByIndex(j);				
-				boolean inRange = checkInMassRange(feature, friend);				
-				if (inRange) {
-					friends.add(friend);					
-				}
-				
-			}
-		}
-		return friends;
-
-	}
-
-	private boolean checkInMassRange(Feature feature, Feature friend) {
-		boolean inRange = false;
-		double delta = 0;
-		if (usePpm) {
-			delta = PeriodicTable.PPM(feature.getMass(), massTolerance);			
-		} else {
-			delta = massTolerance;			
-		}
-		double massLower = feature.getMass() - delta/2;
-		double massUpper = feature.getMass() + delta/2;
-		if (friend.getMass() > massLower && friend.getMass() < massUpper) {
-			inRange = true;
-		}
-		return inRange;
-	}
-		
 	private Map<AlignmentRow, AlignmentRow> approxSmiss(
 			List<AlignmentRow> men, List<AlignmentRow> women,
 			List<WeightedRowVsRowScore> acceptablePairsList, 
 			SocialGraph socialGraph) {
+		
+		// do stable matching
+		System.out.println("Running maximum socially stable matching");
+		System.out.println("\tmen size = " + men.size());
+		System.out.println("\twomen size = " + women.size());
+		System.out.println("\tacceptable pairs = " + acceptablePairsList.size());
+		System.out.println("\tsocial graph = " + socialGraph.getEdgeCount() + " edges");
 		
 		Queue<PreferenceItem> freeMen = new LinkedList<PreferenceItem>();
 
@@ -430,9 +382,9 @@ public class MyGroupMatchingAlignment extends BaseAlignment implements Alignment
 		Queue<ManPreference> prefs = new PriorityQueue<ManPreference>(11, new ManPreferenceComparator());
 		for (WeightedRowVsRowScore acceptablePair : acceptablePairsList) {
 			if (acceptablePair.getMasterListCandidate().equals(man)) {
-				double score = acceptablePair.getScore();
+				double dist = acceptablePair.getDist();
 				AlignmentRow woman = acceptablePair.getAligned();
-				ManPreference pref = new ManPreference(woman, score);
+				ManPreference pref = new ManPreference(woman, dist);
 				prefs.add(pref);				
 			}
 		}
@@ -610,16 +562,16 @@ public class MyGroupMatchingAlignment extends BaseAlignment implements Alignment
     private class ManPreference {
     	
     	private final AlignmentRow entry;
-    	private final double score;
+    	private final double dist;
     	
-    	public ManPreference(AlignmentRow preferredRow, double score) {
+    	public ManPreference(AlignmentRow preferredRow, double dist) {
     		this.entry = preferredRow;
-    		this.score = score;
+    		this.dist = dist;
     	}
     	
 		@Override
 		public String toString() {
-			return "PreferenceItem [entry=" + entry + ", score=" + score + "]";
+			return "PreferenceItem [entry=" + entry + ", dist=" + dist + "]";
 		}
     	
     }
@@ -628,8 +580,13 @@ public class MyGroupMatchingAlignment extends BaseAlignment implements Alignment
 
     	@Override
     	public int compare(ManPreference item1, ManPreference item2) {
+    	
     		// higher score is now preferred, so invert the sign
-    		return - Double.compare(item1.score, item2.score);
+//    		return - Double.compare(item1.score, item2.score);
+
+    		// prefer lower distance
+    		return Double.compare(item1.dist, item2.dist);
+    	
     	}
     	
     }    
@@ -661,11 +618,11 @@ public class MyGroupMatchingAlignment extends BaseAlignment implements Alignment
     	public int compare(PreferenceItem mi, PreferenceItem mk) {
     		AlignmentRow candidate1 = mi.getRow();
     		AlignmentRow candidate2 = mk.getRow();
-    		WeightedRowVsRowScore rowScore1 = new WeightedRowVsRowScore(woman, candidate1, massTolerance, rtTolerance);
-    		WeightedRowVsRowScore rowScore2 = new WeightedRowVsRowScore(woman, candidate2, massTolerance, rtTolerance);
-    		double score1 = rowScore1.getScore();
-    		double score2 = rowScore2.getScore();
-    		return Double.compare(score1, score2);
+    		WeightedRowVsRowScore rowScore1 = new WeightedRowVsRowScore(woman, candidate1, massTolerance, Double.MAX_VALUE);
+    		WeightedRowVsRowScore rowScore2 = new WeightedRowVsRowScore(woman, candidate2, massTolerance, Double.MAX_VALUE);
+    		double dist1 = rowScore1.getDist();
+    		double dist2 = rowScore2.getDist();
+    		return Double.compare(dist1, dist2);
     	}
     	    	
     }      

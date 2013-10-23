@@ -163,6 +163,9 @@ public class AlignmentRow {
 
 	public void setAligned(boolean aligned) {
 		this.aligned = aligned;
+		for (Feature f : this.features) {
+			f.setAligned(true);
+		}
 	}
 
 	public boolean isDelete() {
@@ -255,10 +258,10 @@ public class AlignmentRow {
 			delta = massTol;			
 		}
 
-		double massLower = this.getAverageMz() - delta/2;
-		double massUpper = this.getAverageMz() + delta/2;
-		double rtLower = this.getAverageRt() - rtTol/2;
-		double rtUpper = this.getAverageRt() + rtTol/2;	
+		double massLower = this.getAverageMz() - delta;
+		double massUpper = this.getAverageMz() + delta;
+		double rtLower = this.getAverageRt() - rtTol;
+		double rtUpper = this.getAverageRt() + rtTol;	
 		
 		double massToCheck = another.getAverageMz();
 		double rtToCheck = another.getAverageRt();

@@ -23,7 +23,7 @@ import edu.uci.ics.jung.graph.Graph;
 
 public class BaselineAlignment extends BaseAlignment implements AlignmentMethod {
 
-	private ExtendedLibrary library;
+//	private ExtendedLibrary library;
 	
 	/**
 	 * Creates a simple aligner
@@ -34,9 +34,9 @@ public class BaselineAlignment extends BaseAlignment implements AlignmentMethod 
 	 */
 	public BaselineAlignment(List<AlignmentFile> dataList, AlignmentMethodParam param) {		
 		super(dataList, param);
-		ExtendedLibraryBuilder builder = new ExtendedLibraryBuilder(dataList, massTolerance, rtTolerance, 1);		
-		Map<Double, List<AlignmentLibrary>> metaLibraries = builder.buildPrimaryLibrary();
-		this.library = builder.combineLibraries(metaLibraries);			
+//		ExtendedLibraryBuilder builder = new ExtendedLibraryBuilder(dataList, massTolerance, rtTolerance, 1);		
+//		Map<Double, List<AlignmentLibrary>> metaLibraries = builder.buildPrimaryLibrary();
+//		this.library = builder.combineLibraries(metaLibraries);			
 	}
 	
 	@Override
@@ -131,20 +131,19 @@ public class BaselineAlignment extends BaseAlignment implements AlignmentMethod 
 	protected Feature findHighestClusterSim(Feature feature,
 			Set<Feature> nearbyFeatures) {
 
-		Graph<AlignmentVertex, AlignmentEdge> graph = library.getGraph();
-		MatchingScorer scorer = library.getScorer();
+		MatchingScorer scorer = new MatchingScorer(massTolerance, rtTolerance);
 		
 		double maxScore = 0;
 		Feature closest = null;
 		for (Feature neighbour : nearbyFeatures) {
 			double score = 0;
-			if (FeatureXMLAlignment.WEIGHT_USE_PROB_CLUSTERING_WEIGHT) {
-				score = scorer.computeGraphScore(feature, neighbour, graph);
-			} else if (FeatureXMLAlignment.WEIGHT_USE_ALL_PEAKS) {
-				score = scorer.computeProbScore(feature, neighbour);
-			} else {
+//			if (FeatureXMLAlignment.WEIGHT_USE_PROB_CLUSTERING_WEIGHT) {
+//				score = scorer.computeGraphScore(feature, neighbour, graph);
+//			} else if (FeatureXMLAlignment.WEIGHT_USE_ALL_PEAKS) {
+//				score = scorer.computeProbScore(feature, neighbour);
+//			} else {
 				score = scorer.computeScore(feature, neighbour);
-			}
+//			}
 			if (score > maxScore) {
 				maxScore = score;
 				closest = neighbour;

@@ -36,6 +36,8 @@ public class GreedyFeatureGrouping extends BaseFeatureGrouping implements Featur
 		List<FeatureGroup> groups = new ArrayList<FeatureGroup>();
 		for (AlignmentFile data : dataList) {
 
+			List<FeatureGroup> fileGroups = new ArrayList<FeatureGroup>();
+			
 			System.out.print("Grouping " + data.getFilename() + " ");
 			for (Feature feature : data.getFeatures()) {
 
@@ -47,7 +49,7 @@ public class GreedyFeatureGrouping extends BaseFeatureGrouping implements Featur
 						group.addFeatures(nearbyFeatures);
 					} 
 					groupId++;
-					groups.add(group);
+					fileGroups.add(group);
 				}
 				
 				if (groupId % 1000 == 0) {
@@ -56,20 +58,29 @@ public class GreedyFeatureGrouping extends BaseFeatureGrouping implements Featur
 				
 			}				
 			System.out.println();
+			System.out.println("fileGroups.size() = " + fileGroups.size());
+
+			groups.addAll(fileGroups);
+			
+			// create assignment matrix
+			double[][] Z = new double[data.getFeaturesCount()][fileGroups.size()];
+			for (int j = 0; j < fileGroups.size(); j++) {
+				FeatureGroup group = fileGroups.get(j);
+				for (Feature f : group.getFeatures()) {
+					int i = f.getPeakID(); // starts from 0
+					Z[i][j] = 1;
+				}
+			}
+			data.setZ(Z);
 			
 			int groupedCount = 0;
-			int ungroupedCount = 0;
 			for (Feature feature : data.getFeatures()) {
-				// System.out.println(feature.getPeakID() + "\t" + feature.getGroup().getGroupId());
 				if (feature.isGrouped()) {
 					groupedCount++;
-				} else {
-					ungroupedCount++;
 				}
 			}			
 			System.out.println("groupedCount = " + groupedCount);
-//			System.out.println("ungroupedCount = " + ungroupedCount);
-
+			
 		}
 		
 		return groups;

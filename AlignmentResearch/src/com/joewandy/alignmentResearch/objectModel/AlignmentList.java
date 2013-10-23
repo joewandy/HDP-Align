@@ -5,12 +5,11 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
-
-import peakml.chemistry.PeriodicTable;
 
 
 public class AlignmentList {
@@ -149,6 +148,16 @@ public class AlignmentList {
 	public List<AlignmentRow> getRows() {
 		return rows;
 	}
+
+	public List<AlignmentRow> getUnalignedRows() {
+		List<AlignmentRow> result = new ArrayList<AlignmentRow>();
+		for (AlignmentRow row : rows) {
+			if (!row.isAligned()) {
+				result.add(row);
+			}
+		}
+		return result;
+	}
 	
 	public void clearRows() {
 		rows.clear();
@@ -193,9 +202,31 @@ public class AlignmentList {
 		
 	}
 
+	public Set<AlignmentRow> getUnalignedRowsInRange(AlignmentRow reference, double massTol, double rtTol, 
+			boolean usePpm) {
+		
+		Set<AlignmentRow> result = new HashSet<AlignmentRow>();
+		
+		for (AlignmentRow toCheck : this.rows) {
+			if (reference.rowInRange(toCheck, massTol, rtTol, usePpm) && !toCheck.isAligned()) {
+				result.add(toCheck);				
+			}
+		}
+
+		return result;
+		
+	}
+	
 	public Set<AlignmentRow> getRowsInRange(AlignmentRow reference, double massTol, boolean usePpm) {
 		
 		Set<AlignmentRow> result = getRowsInRange(reference, massTol, -1, usePpm);
+		return result;
+		
+	}
+
+	public Set<AlignmentRow> getUnalignedRowsInRange(AlignmentRow reference, double massTol, boolean usePpm) {
+		
+		Set<AlignmentRow> result = getUnalignedRowsInRange(reference, massTol, -1, usePpm);
 		return result;
 		
 	}
@@ -208,6 +239,46 @@ public class AlignmentList {
 			}
 		}
 		return null;
+	}
+	
+	public List<FeatureGroup> getGroups() {
+		Set<FeatureGroup> groups = new HashSet<FeatureGroup>();
+		for (AlignmentRow row : this.rows) {
+			Feature feature = row.getFirstFeature();
+			FeatureGroup group = feature.getFirstGroup();
+			groups.add(group);
+		}
+		List<FeatureGroup> groupsList = new ArrayList<FeatureGroup>(groups);
+		return groupsList;
+	}
+
+	public int getGroupsCount() {
+		return this.getGroups().size();
+	}
+	
+	public List<FeatureGroup> getUnmatchedGroups() {
+		Set<FeatureGroup> groups = new HashSet<FeatureGroup>();
+		for (AlignmentRow row : this.rows) {
+			Feature feature = row.getFirstFeature();
+			FeatureGroup group = feature.getFirstGroup();
+			if (!group.isMatched()) {
+				groups.add(group);				
+			}
+		}
+		List<FeatureGroup> groupsList = new ArrayList<FeatureGroup>(groups);
+		return groupsList;
+	}
+	
+	public int getUnmatchedGroupsCount() {
+		return this.getUnmatchedGroups().size();
+	}
+	
+	public boolean hasUnmatchedGroup() {
+		if (this.getUnmatchedGroupsCount() > 0) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 	
 	@Override

@@ -7,6 +7,7 @@ import com.joewandy.alignmentResearch.alignmentMethod.custom.BaselineAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.custom.ConsistencyAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.custom.MyGroupMatchingAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.custom.MyJoinAlignment;
+import com.joewandy.alignmentResearch.alignmentMethod.custom.MySocialStableMarriageAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.custom.MyStableMarriageAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.external.MzMineJoinAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.external.MzMineRansacAlignment;
@@ -26,6 +27,7 @@ public class AlignmentMethodFactory {
 	// my own aligners
 	public static final String ALIGNMENT_METHOD_MY_JOIN = "myJoin";
 	public static final String ALIGNMENT_METHOD_MY_STABLE_MARRIAGE = "myStableMarriage";
+	public static final String ALIGNMENT_METHOD_MY_SOCIAL_STABLE_MARRIAGE = "mySocialStableMarriage";
 	public static final String ALIGNMENT_METHOD_MY_GROUP_MATCHING = "myGroupMatching";
 	
 	// calls mzMine Join aligner
@@ -56,6 +58,8 @@ public class AlignmentMethodFactory {
 			aligner = new MyJoinAlignment(alignmentDataList, param);
 		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_STABLE_MARRIAGE.equals(method)) {
 			aligner = new MyStableMarriageAlignment(alignmentDataList, param, FeatureXMLAlignment.WEIGHT_USE_WEIGHTED_SCORE);
+		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_SOCIAL_STABLE_MARRIAGE.equals(method)) {
+			aligner = new MySocialStableMarriageAlignment(alignmentDataList, param);
 		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_GROUP_MATCHING.equals(method)) {
 			aligner = new MyGroupMatchingAlignment(alignmentDataList, param);
 		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MZMINE_RANSAC.equals(method)) {

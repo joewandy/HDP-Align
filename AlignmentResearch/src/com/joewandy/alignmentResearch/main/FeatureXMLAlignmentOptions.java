@@ -94,13 +94,13 @@ public class FeatureXMLAlignmentOptions {
 	public double alignmentRtWindow = -1;
 
 	@Option(name = "groupingRtWindow", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "The retention time window in seconds, defining the range where to look for matches.")
-	public double groupingRtWindow = -1;
+	public double groupingRtWindow = 10;
 
 	@Option(name = "groupingAlpha", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Alpha")
-	public double groupingAlpha = 1;
+	public double groupingAlpha = 10;
 
 	@Option(name = "groupingNSamples", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "No. of samples")
-	public int groupingNSamples = 20;
+	public int groupingNSamples = 1;
 	
 	@Option(name = "gt", param = "filename", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "The ground truth file for these data.")
 	public String gt = null;

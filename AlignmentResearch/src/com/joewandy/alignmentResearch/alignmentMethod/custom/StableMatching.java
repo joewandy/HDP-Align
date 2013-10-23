@@ -12,24 +12,30 @@ import java.util.Map.Entry;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
+import org.jblas.DoubleMatrix;
+
+import com.jmatio.io.MatFileReader;
 import com.jmatio.io.MatFileWriter;
 import com.jmatio.types.MLArray;
 import com.jmatio.types.MLDouble;
 import com.joewandy.alignmentResearch.main.FeatureXMLAlignment;
+import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
 import com.joewandy.alignmentResearch.objectModel.ExtendedLibrary;
-import com.joewandy.alignmentResearch.objectModel.WeightedRowVsRowScore;
+import com.joewandy.alignmentResearch.objectModel.MatchingScorer;
 
 public class StableMatching implements FeatureMatching {
 
-	private static final int LIMIT = 1;
 	private AlignmentList masterList;
 	private AlignmentList childList;
-	private ExtendedLibrary library;
 	private String listId;
 	private double massTol;
 	private double rtTol;	
+	private MatchingScorer scorer;
+	private double[][] distArr;
+	private double[][] scoreArr;
+	private double[][] binaryScoreArr;
 	
 	public StableMatching(String listId, AlignmentList masterList, AlignmentList childList,
 			ExtendedLibrary library,
@@ -37,9 +43,12 @@ public class StableMatching implements FeatureMatching {
 		this.listId = listId;
 		this.masterList = masterList;
 		this.childList = childList;
-		this.library = library;
 		this.massTol = massTol;
 		this.rtTol = rtTol;		
+		this.scorer = new MatchingScorer(this.massTol, this.rtTol);
+		this.scoreArr = null;
+		this.distArr = null;
+		this.binaryScoreArr = null;
 	}
 
 	public AlignmentList getMatchedList() {
@@ -51,13 +60,7 @@ public class StableMatching implements FeatureMatching {
 		
 		// do stable matching here ...
 		System.out.println("Running stable matching on " + listId);
-		List<AlignmentRow> men = masterList.getRows();
-		List<AlignmentRow> women = childList.getRows();			
-//		List<AlignmentRow> men = childList.getRows();
-//		List<AlignmentRow> women = masterList.getRows();			
-		System.out.println("\tmasterList " + masterList.getId() + " = " + masterList.getRowsCount() + " (men)");
-		System.out.println("\tchildList " + childList.getId() + " = " + childList.getRowsCount() + " (women)");		
-		Map<AlignmentRow, AlignmentRow> stableMatch = match(men, women);
+		Map<AlignmentRow, AlignmentRow> stableMatch = match(masterList, childList);
 		
 		// construct a new list and merge the matched entries together
 		System.out.println("\tMerging matched results = " + stableMatch.size() + " entries");
@@ -83,7 +86,7 @@ public class StableMatching implements FeatureMatching {
 		// add everything else that's unmatched
 		int menMatchedCount = 0;
 		int menUnmatchedCount = 0;
-		for (AlignmentRow row : men) {
+		for (AlignmentRow row : getMen(masterList, childList)) {
 			if (!row.isAligned()) {
 				matchedList.addRow(row);
 				menUnmatchedCount++;
@@ -93,7 +96,7 @@ public class StableMatching implements FeatureMatching {
 		}
 		int womenMatchedCount = 0;
 		int womenUnmatchedCount = 0;
-		for (AlignmentRow row : women) {
+		for (AlignmentRow row : getWomen(masterList, childList)) {
 			if (!row.isAligned()) {
 				matchedList.addRow(row);
 				womenUnmatchedCount++;
@@ -110,19 +113,144 @@ public class StableMatching implements FeatureMatching {
 
 	}
 	
-    private Map<AlignmentRow, AlignmentRow> match(List<AlignmentRow> men, final List<AlignmentRow> women) {
+	private List<AlignmentRow> getMen(AlignmentList masterList, AlignmentList childList) {
+		List<AlignmentRow> men = masterList.getRows();
+		return men;
+	}
 
-        Queue<RowPreference> freemen = new LinkedList<RowPreference>();
+	private List<AlignmentRow> getWomen(AlignmentList masterList, AlignmentList childList) {
+		List<AlignmentRow> women = childList.getRows();			
+		return women;
+	}
+
+	private double[][] getMenClustering(AlignmentList masterList, AlignmentList childList) {
+		if (FeatureXMLAlignment.WEIGHT_USE_WEIGHTED_SCORE) {
+			if (FeatureXMLAlignment.WEIGHT_USE_ALL_PEAKS) {
+				return masterList.getData().getZZProb();
+			} else {				
+				return masterList.getData().getZ();						
+			}
+		} else {
+			AlignmentFile data = masterList.getData();
+			if (data != null) {
+				int n = data.getFeaturesCount();
+				return new double[n][n];				
+			} else {
+				return null;
+			}
+		}
+	}
+
+	private double[][] getWomenClustering(AlignmentList masterList, AlignmentList childList) {
+		if (FeatureXMLAlignment.WEIGHT_USE_WEIGHTED_SCORE) {
+			if (FeatureXMLAlignment.WEIGHT_USE_ALL_PEAKS) {
+				return childList.getData().getZZProb();
+			} else {				
+				return childList.getData().getZ();						
+			}
+		} else {
+			AlignmentFile data = childList.getData();
+			if (data != null) {
+				int n = data.getFeaturesCount();
+				return new double[n][n];				
+			} else {
+				return null;
+			}
+		}
+	}
+	
+    private Map<AlignmentRow, AlignmentRow> match(AlignmentList masterList, AlignmentList childList) {
+
+		System.out.println("\tmasterList " + masterList.getId());
+		System.out.println("\tchildList " + childList.getId());		
+    	
+		// compute score here
+		List<AlignmentRow> men = getMen(masterList, childList);
+		List<AlignmentRow> women = getWomen(masterList, childList);
+		double[][] clusteringMen = getMenClustering(masterList, childList);
+		double[][] clusteringWomen = getWomenClustering(masterList, childList);
+//        computeScores(men, women, clusteringMen, clusteringWomen);
+//        saveToMatlab(masterList.getData().getParentPath());
+
+        if (FeatureXMLAlignment.WEIGHT_USE_WEIGHTED_SCORE) {
+//			combineScore(clusteringMen, clusteringWomen);				
+        	loadScore();
+		}
+        
+        Map<AlignmentRow, AlignmentRow> matches = glMatching(men, women);        
+//        Map<AlignmentRow, AlignmentRow> matches = hungarianMatching(men, women);
+    	
+        return matches;
+        
+    }
+    
+	
+	private void saveToMatlab(String path) {
+		MLDouble scoreMat = new MLDouble("W", scoreArr);
+		MLDouble inRangeMat = new MLDouble("Q", binaryScoreArr);
+		final Collection<MLArray> output = new ArrayList<MLArray>();
+		output.add(scoreMat);
+		output.add(inRangeMat);
+		final MatFileWriter writer = new MatFileWriter();
+		try {
+			String fullPath = path + "/mat/WQ.mat";
+			writer.write(fullPath, output);
+			System.out.println("Written to " + fullPath);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private Map<AlignmentRow, AlignmentRow> hungarianMatching(
+			List<AlignmentRow> men, List<AlignmentRow> women) {
+		
+		// find max score
+        double maxScore = 0;
+    	for (int i = 0; i < men.size(); i++) {
+    		for (int j = 0; j < women.size(); j++) {
+    			if (scoreArr[i][j] > maxScore) {
+    				maxScore = scoreArr[i][j];
+    			}
+    		}
+    	}
+    	// normalise 
+    	for (int i = 0; i < men.size(); i++) {
+    		for (int j = 0; j < women.size(); j++) {
+    			scoreArr[i][j] = maxScore - scoreArr[i][j];
+    		}
+    	}
+		// running matching
+		System.out.print("\tRunning matching ");
+		HungarianAlgorithm algo = new HungarianAlgorithm(scoreArr);
+		int[] res = algo.execute();
+		System.out.println();
+		
+		// store the result
+		Map<AlignmentRow, AlignmentRow> matches = new HashMap<AlignmentRow, AlignmentRow>();
+		for (int i=0; i<men.size(); i++) {
+			int matchIndex = res[i];
+			// if there's a match
+			if (matchIndex != -1) {
+				AlignmentRow row1 = men.get(i);
+				AlignmentRow row2 = women.get(matchIndex);
+				matches.put(row1, row2);
+			}
+		}
+		return matches;
+
+	}
+
+	private Map<AlignmentRow, AlignmentRow> glMatching(List<AlignmentRow> men, 
+			List<AlignmentRow> women) {
 
         // Create a free list of men (and use it to store their proposals)
-        double[][] scoreMatrix = computeScoreMatrix(men, women);
-        
     	System.out.print("\tCreating prefs ");
-        for (int i = 0; i < men.size(); i++) {
-        	
-        	Queue<PreferenceItem> sorted = getSortedPrefs(women, scoreMatrix, i);
+        Queue<RowPreference> freeMen = new LinkedList<RowPreference>();
+    	for (int i = 0; i < men.size(); i++) {
+
         	AlignmentRow man = men.get(i);
-        	freemen.add(new RowPreference(man, sorted));
+        	Queue<PreferenceItem> sorted = getSortedPrefs(man, women, scoreArr, i);
+        	freeMen.add(new RowPreference(man, sorted));
             
         	if (i % 1000 == 0) {
             	System.out.print('.');
@@ -130,8 +258,24 @@ public class StableMatching implements FeatureMatching {
         	
         }
         System.out.println();
+		
+		// call GS algorithm
+        Map<AlignmentRow, RowPreference> engagements = galeShapley(freeMen, women);
+
+        // Convert internal data structure to mapping
+        Map<AlignmentRow, AlignmentRow> matches = new HashMap<AlignmentRow, AlignmentRow>();
+        for (Map.Entry<AlignmentRow, RowPreference> entry : engagements.entrySet()) {
+            matches.put(entry.getValue().row, entry.getKey());
+        }
         
-        // Create an initially empty map of engagements
+        return matches;
+
+	}
+
+	private Map<AlignmentRow, RowPreference> galeShapley(
+			Queue<RowPreference> freemen, List<AlignmentRow> women) {
+		
+		// Create an initially empty map of engagements
         Map<AlignmentRow, RowPreference> engagements = new HashMap<AlignmentRow, RowPreference>();
 
         // As per wikipedia algorithm
@@ -209,50 +353,50 @@ public class StableMatching implements FeatureMatching {
             }
             
         }
-        
-        freemen = null;
+		return engagements;
+	}
 
-        // Convert internal data structure to mapping
-        Map<AlignmentRow, AlignmentRow> matches = new HashMap<AlignmentRow, AlignmentRow>();
-        for (Map.Entry<AlignmentRow, RowPreference> entry : engagements.entrySet())
-            matches.put(entry.getValue().row, entry.getKey());
-        return matches;
-        
-    }
-
-	private Queue<PreferenceItem> getSortedPrefs(List<AlignmentRow> women,
+	private Queue<PreferenceItem> getSortedPrefs(AlignmentRow man, List<AlignmentRow> women,
 			double[][] scoreMatrix, int i) {
 		
 		double[] womenScore = scoreMatrix[i];
 		List<PreferenceItem> prefs = new ArrayList<PreferenceItem>();
 		for (int j = 0; j < womenScore.length; j++) {
-			double score = womenScore[j];
-			PreferenceItem pref = new PreferenceItem(j, score);
-			prefs.add(pref);
+			AlignmentRow woman = women.get(j);
+			if (man.rowInRange(woman, massTol, -1, FeatureXMLAlignment.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
+				double score = womenScore[j];
+				PreferenceItem pref = new PreferenceItem(j, score);
+				prefs.add(pref);				
+			}
 		}
-		Queue<PreferenceItem> sorted = new PriorityQueue<PreferenceItem>(prefs.size(), new ManPreferenceComparator());
+		Queue<PreferenceItem> sorted = new PriorityQueue<PreferenceItem>(11, new ManPreferenceComparator());
 		sorted.addAll(prefs);
 		return sorted;
 
 	}
 
-	private double[][] computeScoreMatrix(List<AlignmentRow> men,
-			List<AlignmentRow> women) {
+	private void computeScores(List<AlignmentRow> men,
+			List<AlignmentRow> women, double[][] clusteringMen, double[][] clusteringWomen) {
 
-    	System.out.print("\tComputing score matrix ");
-		double[][] scoreMatrix = new double[men.size()][women.size()];
+    	System.out.print("\tComputing scores ");
+    	double maxDist = 0;
+		distArr = new double[men.size()][women.size()];
+		binaryScoreArr = new double[men.size()][women.size()];
 		for (int i = 0; i < men.size(); i++) {
 			
 			for (int j = 0; j < women.size(); j++) {
 				AlignmentRow man = men.get(i);
 				AlignmentRow woman = women.get(j);
-				double score = 0;
-				if (FeatureXMLAlignment.WEIGHT_USE_WEIGHTED_SCORE) {
-					score = library.computeWeightedRowScore(man, woman);					
-				} else {
-					score = library.computeRowScore(man, woman);
+				if (man.rowInRange(woman, massTol, -1, FeatureXMLAlignment.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
+					double dist = scorer.computeDist(man, woman);
+					if (dist > maxDist) {
+						maxDist = dist;
+					}
+					distArr[i][j] = dist;				
+//					if (man.rowInRange(woman, massTol, -1, FeatureXMLAlignment.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
+						binaryScoreArr[i][j] = 1;
+//					}
 				}
-				scoreMatrix[i][j] = score;				
 			}
 			
             if (i % 1000 == 0) {
@@ -262,7 +406,77 @@ public class StableMatching implements FeatureMatching {
 		}
 		System.out.println();
 		
-		return scoreMatrix;
+		double maxScore = 0;
+		scoreArr = new double[men.size()][women.size()];
+		for (int i = 0; i < men.size(); i++) {	
+			for (int j = 0; j < women.size(); j++) {
+				AlignmentRow man = men.get(i);
+				AlignmentRow woman = women.get(j);
+				if (man.rowInRange(woman, massTol, -1, FeatureXMLAlignment.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
+					double dist = distArr[i][j];
+					double score = 1-(dist/maxDist);
+					scoreArr[i][j] = score;
+					if (score > maxScore) {
+						maxScore = score;
+					}
+				}
+			}
+		}
+
+		// normalise score to 0 .. 1
+		normaliseScoreArr(men, women, maxScore);
+			        						
+	}
+
+	private void normaliseScoreArr(List<AlignmentRow> men,
+			List<AlignmentRow> women, double maxScore) {
+		for (int i = 0; i < men.size(); i++) {	
+			for (int j = 0; j < women.size(); j++) {
+				scoreArr[i][j] = scoreArr[i][j] / maxScore;
+			}
+		}
+	}
+
+	private void combineScore(double[][] clusteringMen,
+			double[][] clusteringWomen) {
+		
+		DoubleMatrix A = new DoubleMatrix(clusteringMen);
+		A = A.mmul(A.transpose());
+		System.out.println("\tA = " + A.rows + "x" + A.columns);
+		 
+		DoubleMatrix B = new DoubleMatrix(clusteringWomen);
+		B = B.mmul(B.transpose());
+		System.out.println("\tB = " + B.rows + "x" + B.columns);
+		
+		DoubleMatrix hA = A.sub(DoubleMatrix.eye(A.rows));
+		DoubleMatrix hB = B.sub(DoubleMatrix.eye(B.rows));
+
+		DoubleMatrix W = new DoubleMatrix(scoreArr);
+		System.out.println("\tW = " + W.rows + "x" + W.columns);
+					
+		System.out.println("\tAW");
+		DoubleMatrix hAW = hA.mmul(W);
+		System.out.println("\tD=AWB");
+		DoubleMatrix D = hAW.mmul(hB);
+		System.out.println("\tZ = W + (Q.*D)");
+		DoubleMatrix Q = new DoubleMatrix(binaryScoreArr);
+		DoubleMatrix Z = W.add(D.muli(Q));	        
+		
+		scoreArr = Z.toArray2();
+		
+	}
+
+	private void loadScore() {
+		System.out.println("Loading precomputed matlab");
+		// load from matlab
+		MatFileReader mfr = null;
+		try {
+			mfr = new MatFileReader("/home/joewandy/Dropbox/Project/real_datasets/P2/source_features_000_test/mat/Z_out.mat");
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+		scoreArr = ((MLDouble)mfr.getMLArray("Z_out")).getArray();
 	}
 	
     private class RowPreference {
@@ -311,20 +525,19 @@ public class StableMatching implements FeatureMatching {
     
     private class WomanPreferenceComparator implements Comparator<AlignmentRow>{
 
-    	private AlignmentRow reference;
+    	private AlignmentRow woman;
     	
-    	public WomanPreferenceComparator(AlignmentRow reference) {
-    		this.reference = reference;
+    	public WomanPreferenceComparator(AlignmentRow woman) {
+    		this.woman = woman;
     	}
 
     	@Override
     	public int compare(AlignmentRow candidate1, AlignmentRow candidate2) {
-    		WeightedRowVsRowScore rowScore1 = new WeightedRowVsRowScore(
-    				reference, candidate1, library, massTol, rtTol);
-    		WeightedRowVsRowScore rowScore2 = new WeightedRowVsRowScore(
-    				reference, candidate2, library, massTol, rtTol);
-    		double score1 = rowScore1.getScore();
-    		double score2 = rowScore2.getScore();
+    		int myIndex = woman.getRowId();
+    		int can1Index = candidate1.getRowId();
+    		int can2Index = candidate2.getRowId();
+    		double score1 = scoreArr[can1Index][myIndex];
+    		double score2 = scoreArr[can2Index][myIndex];
     		return Double.compare(score1, score2);
     	}
     	

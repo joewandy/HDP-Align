@@ -1,14 +1,10 @@
 package com.joewandy.alignmentResearch.objectModel;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import peakml.chemistry.PeriodicTable;
 
-import com.joewandy.alignmentResearch.alignmentMethod.custom.FeaturePairKey;
-import com.joewandy.alignmentResearch.alignmentMethod.custom.RowPairKey;
 import com.joewandy.alignmentResearch.main.FeatureXMLAlignment;
 
 import edu.uci.ics.jung.graph.Graph;

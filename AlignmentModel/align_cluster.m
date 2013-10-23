@@ -91,6 +91,8 @@ function out = align_cluster(filename1, filename2, sigma, num_samples)
     # computer tpr, fpr, f1
     precision = out.tp / (out.tp + out.fp);
     recall = out.tp / (out.tp + out.fn);
+    out.precision = precision;
+    out.recall = recall;
     out.tpr = recall;
     out.fpr = out.fp / (out.fp + out.tn);
     out.f1 = 2 * ( (precision * recall) / (precision + recall) ); 

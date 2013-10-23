@@ -210,24 +210,26 @@ public class ExtendedLibrary {
 		
 	public double computeWeightedRowScore(AlignmentRow row1, AlignmentRow row2) {
 
-		Set<Feature> features1 = row1.getFeatures();
-		Set<Feature> features2 = row2.getFeatures();
-		double allScore = 0;
-		int counter = 0;
-		for (Feature fi : features1) {
-			for (Feature fj : features2) {
-				if (!FeatureXMLAlignment.WEIGHT_USE_ALL_PEAKS) {
-					double weightedScore = scorer.computeGraphScore(fi, fj, graph);
-					allScore += weightedScore;					
-				} else {
-					double weightedScore = scorer.computeProbScore(fi, fj);
-					allScore += weightedScore;					
-				}
-				counter++;
-			}
-		}
-		return allScore / counter;				
-	
+//		Set<Feature> features1 = row1.getFeatures();
+//		Set<Feature> features2 = row2.getFeatures();
+//		double allScore = 0;
+//		int counter = 0;
+//		for (Feature fi : features1) {
+//			for (Feature fj : features2) {
+//				if (!FeatureXMLAlignment.WEIGHT_USE_ALL_PEAKS) {
+//					double weightedScore = scorer.computeGraphScore(fi, fj, graph);
+//					allScore += weightedScore;					
+//				} else {
+//					double weightedScore = scorer.computeProbScore(fi, fj);
+//					allScore += weightedScore;					
+//				}
+//				counter++;
+//			}
+//		}
+//		return allScore / counter;				
+
+		return scorer.computeScore(row1, row2);
+		
 	}
 
 	public Graph<AlignmentVertex, AlignmentEdge> getGraph() {

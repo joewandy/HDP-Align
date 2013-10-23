@@ -86,7 +86,8 @@ public final class MZmineCore {
 			logMan.readConfiguration(loggingProperties);
 			loggingProperties.close();
 		} catch (Exception e) {
-			e.printStackTrace();
+//			e.printStackTrace();
+			System.out.println(e.getMessage());
 		}
 
 		logger.info("Starting MZmine " + getMZmineVersion());

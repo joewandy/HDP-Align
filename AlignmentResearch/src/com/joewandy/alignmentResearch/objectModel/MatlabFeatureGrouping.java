@@ -94,6 +94,9 @@ public class MatlabFeatureGrouping extends BaseFeatureGrouping implements Featur
 			if (mfr != null) {
 
 				double[][] dz = ((MLDouble)mfr.getMLArray("Z")).getArray();
+				data.setZ(dz);
+
+				// convert to feature group objects
 				int m = dz.length;
 				int n = dz[0].length;
 				int[][] Z = new int[m][n];

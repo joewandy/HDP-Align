@@ -35,8 +35,6 @@ import com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.Alignmen
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodFactory;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
-import com.joewandy.alignmentResearch.filter.AlignmentResultFilter;
-import com.joewandy.alignmentResearch.filter.GraphAlignmentResultFilter;
 import com.joewandy.alignmentResearch.noiseModel.ContaminantPeaksNoise;
 import com.joewandy.alignmentResearch.noiseModel.GlobalRetentionShiftNoise;
 import com.joewandy.alignmentResearch.noiseModel.GlobalRetentionShiftNoise.GlobalNoiseLevel;
@@ -55,7 +53,7 @@ import com.joewandy.alignmentResearch.objectModel.FeatureGroup;
 import com.joewandy.alignmentResearch.objectModel.FeatureGrouping;
 import com.joewandy.alignmentResearch.objectModel.GreedyFeatureGrouping;
 import com.joewandy.alignmentResearch.objectModel.GroundTruth;
-import com.joewandy.alignmentResearch.objectModel.MatlabFeatureGrouping;
+import com.joewandy.alignmentResearch.objectModel.SavedMatlabFeatureGrouping;
 import com.joewandy.util.Tool;
 
 public class FeatureXMLAlignment {
@@ -68,17 +66,17 @@ public class FeatureXMLAlignment {
 	public static final boolean PARALLEL_LIBRARY_BUILD = false;
 
 	// use weighting when scoring peaks ?
-	public static final boolean WEIGHT_USE_WEIGHTED_SCORE = false;
+	public static final boolean WEIGHT_USE_WEIGHTED_SCORE = true;
 
 	// use mixture model clustering vs. greedy clustering ?
-	public static final boolean WEIGHT_USE_PROB_CLUSTERING_WEIGHT = false;
+	public static final boolean WEIGHT_USE_PROB_CLUSTERING_WEIGHT = true;
 
 	// use posterior probability of all peaks ?
 	public static final boolean WEIGHT_USE_ALL_PEAKS = false;
 	
 	// public static final int ALIGNMENT_SCORE_THRESHOLD = 20;
 	
-	/*
+	/*																																														
 	 * PARAMETERS FOR NOISE & EXPERIMENT
 	 */
 
@@ -109,7 +107,7 @@ public class FeatureXMLAlignment {
 			LocalNoiseLevel.SUPER_HIGH
 	};
 	private static final PolynomialNoiseLevel [] NOISE_POLY_RT_DRIFTS = { 
-		PolynomialNoiseLevel.LOW
+		PolynomialNoiseLevel.HIGH
 };
 	
 	public static void main(String args[]) throws Exception {
@@ -406,16 +404,16 @@ public class FeatureXMLAlignment {
 			grouping = new GreedyFeatureGrouping(options.groupingRtWindow);					
 		} else if (options.grouping) {
 			if (WEIGHT_USE_PROB_CLUSTERING_WEIGHT) {
-					grouping = new MatlabFeatureGrouping(options.groupingRtWindow, 
-							options.groupingAlpha, options.groupingNSamples);															
-//				grouping = new SavedMatlabFeatureGrouping();															
+//				grouping = new MatlabFeatureGrouping(options.groupingRtWindow, 
+//						options.groupingAlpha, options.groupingNSamples);															
+				grouping = new SavedMatlabFeatureGrouping();															
 			} else {
 				// use greedy weight scores
 				grouping = new GreedyFeatureGrouping(options.groupingRtWindow);					
 			}
 		}	
 		List<FeatureGroup> groups = grouping.group(alignmentDataList);
-		grouping.filterGroups(groups); // remove groups that are too small ?
+//		grouping.filterGroups(groups); // remove groups that are too small ?
 
 		// pick alignment method
 		AlignmentMethodParam.Builder paramBuilder = new AlignmentMethodParam.Builder(
@@ -436,9 +434,9 @@ public class FeatureXMLAlignment {
 //			AlignmentResultFilter sizeFilter = new SizeAlignmentResultFilter(FeatureXMLAlignment.ALIGNMENT_SIZE_THRESHOLD);
 //			aligner.addFilter(sizeFilter);
 			// FIXME: maybe not correct to directly use alignmentPpm for mahalanobis distance calculation. Here we assume that it's an absolute value !
-			AlignmentResultFilter graphFilter = new GraphAlignmentResultFilter(alignmentDataList, 
-					options.graphFilter, options.th, options.alignmentPpm, options.alignmentRtWindow);
-			aligner.addFilter(graphFilter);
+//			AlignmentResultFilter graphFilter = new GraphAlignmentResultFilter(alignmentDataList, 
+//					options.graphFilter, options.th, options.alignmentPpm, options.alignmentRtWindow);
+//			aligner.addFilter(graphFilter);
 		}
 		
 		// actually do the alignment now, filtering of alignment results also happen inside align()

@@ -1,4 +1,4 @@
-function gmm_dp_sampler(data, param_rtwindow, param_alpha, param_nsamps)
+function [Z, ZZprob] = gmm_dp_sampler(data, param_rtwindow, param_alpha, param_nsamps)
 
 % graphics_toolkit ("fltk");
 N = length(data);
@@ -86,7 +86,8 @@ for s = 1:NSAMPS
         end
         
     end
-       
+      
+    % plot Z, ZZ
     t1(s) = toc;
     AllNk(s,1) = K;
     subplot(121)

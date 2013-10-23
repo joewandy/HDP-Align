@@ -21,6 +21,7 @@ public class AlignmentFile {
 	private File file;
 	private List<Feature> features;
 	private List<Feature> sortedFeatures; // sorted by intensity descending
+	private double[][] Z;
 	private double[][] ZZProb;
 		
 	public AlignmentFile(int id, String filename, List<Feature> features) {
@@ -47,10 +48,22 @@ public class AlignmentFile {
 		return filename;
 	}
 	
+	public String getParentPath() {
+		return file.getParent();
+	}
+	
 	public File getFile() {
 		return file;
 	}
 	
+	public double[][] getZ() {
+		return Z;
+	}
+
+	public void setZ(double[][] z) {
+		Z = z;
+	}
+
 	public double[][] getZZProb() {
 		return ZZProb;
 	}
