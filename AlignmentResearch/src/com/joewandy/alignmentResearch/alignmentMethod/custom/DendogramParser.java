@@ -13,6 +13,7 @@ public class DendogramParser {
 	private ExtendedLibrary library;
 	private double massTol;
 	private double rtTol;
+	private double alpha;
 
 	// TODO: ugly hack. Map between the filename (without extension) and the file object. 
 	// should rewrite the hierarchical clustering code ourselves to deal with the alignment file object directly
@@ -20,12 +21,13 @@ public class DendogramParser {
 	private Map<String, AlignmentFile> dataMap;
 
 	public DendogramParser(Cluster cluster, Map<String, AlignmentFile> dataMap, 
-			ExtendedLibrary library, double massTol, double rtTol) {
+			ExtendedLibrary library, double massTol, double rtTol, double alpha) {
 		this.cluster = cluster;
 		this.dataMap = dataMap;
 		this.library = library;
 		this.massTol = massTol;
 		this.rtTol = rtTol;
+		this.alpha = alpha;
 	}
 
 	public String traverse(int indent) {
@@ -45,7 +47,7 @@ public class DendogramParser {
 		output += "\n";
 		for (Cluster child : cluster.getChildren()) {
 			DendogramParser parser = new DendogramParser(child, dataMap, 
-					library, massTol, rtTol);
+					library, massTol, rtTol, alpha);
 			output += parser.traverse(indent + 1);
 		}
 		return output;
@@ -70,11 +72,11 @@ public class DendogramParser {
 			for (Cluster child : cluster.getChildren()) {
 
 				DendogramParser parser = new DendogramParser(child, dataMap, 
-						library, massTol, rtTol);
+						library, massTol, rtTol, alpha);
 				AlignmentList childList = parser.buildAlignment();
 
 				FeatureMatching matcher = new StableMatching(clusterName, alignedList, childList, 
-						library, massTol, rtTol);
+						library, massTol, rtTol, alpha);
 //				FeatureMatching matcher = new MaximumWeightMatching(clusterName, alignedList, childList, 
 //						library, massTol, rtTol);
 //				FeatureMatching matcher = new DynamicProgrammingMatching(clusterName, alignedList, childList, 

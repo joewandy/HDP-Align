@@ -18,6 +18,7 @@ public class ConsistencyAlignment extends BaseAlignment implements AlignmentMeth
 
 	private GraphEdgeConstructor edgeConstructor;
 	private int windowMultiply;
+	private double alpha;
 	
 	/**
 	 * Creates a simple aligner
@@ -29,6 +30,7 @@ public class ConsistencyAlignment extends BaseAlignment implements AlignmentMeth
 	public ConsistencyAlignment(List<AlignmentFile> dataList, AlignmentMethodParam param) {		
 		super(dataList, param);
 		this.windowMultiply = param.getRtWindowMultiply();
+		this.alpha = param.getAlpha();
 	}
 	
 	@Override
@@ -90,7 +92,7 @@ public class ConsistencyAlignment extends BaseAlignment implements AlignmentMeth
 	
 		// using guide tree and maximum bipartite matching
 		DendogramBuilder builder = new DendogramBuilder(dataList, 
-				extendedLibrary, massTolerance, rtTolerance);
+				extendedLibrary, massTolerance, rtTolerance, alpha);
 		alignedList = builder.align();
 
 		// bad idea .. ?

@@ -48,6 +48,7 @@ public class AlignmentMethodParam {
 	 */
 	public static final double PARAM_FRIENDLY_THRESHOLD = 0.75;
 	public static final int PARAM_TOP_K_FRIENDS = 10;
+	public static final double PARAM_ALPHA = 0;
 	
 	/**
 	 * OpenMS parameter
@@ -58,6 +59,7 @@ public class AlignmentMethodParam {
 	private double rtTolerance;
 	private boolean usePpm;
 	private int rtWindowMultiply;
+	private double alpha;
 	
 	// for ransac alignment
 	private double ransacRtToleranceBeforeMinute;
@@ -84,6 +86,7 @@ public class AlignmentMethodParam {
 		// optional parameters
 		private boolean usePpm;
 		private int rtWindowMultiply;
+		private double alpha;
 
 		// for ransac alignment
 		private double ransacRtToleranceBeforeMinute;
@@ -124,6 +127,7 @@ public class AlignmentMethodParam {
 			
 			// set parameter for other alignment methods
 			this.friendlyThreshold = AlignmentMethodParam.PARAM_FRIENDLY_THRESHOLD;
+			this.alpha = AlignmentMethodParam.PARAM_ALPHA;
 			
 		}
 
@@ -136,6 +140,11 @@ public class AlignmentMethodParam {
 			this.rtWindowMultiply = rtWindowMultiply;
 			return this;
 		}
+		
+		public Builder alpha(double alpha) {
+			this.alpha = alpha;
+			return this;
+		}		
 
 		public Builder ransacRtToleranceBefore(double rtToleranceBefore) {
 			this.ransacRtToleranceBeforeMinute = rtToleranceBefore / 60.0;
@@ -193,6 +202,7 @@ public class AlignmentMethodParam {
 		this.rtTolerance = builder.rtTolerance;
 		this.usePpm = builder.usePpm;
 		this.rtWindowMultiply = builder.rtWindowMultiply;
+		this.alpha = builder.alpha;
 		this.ransacRtToleranceBeforeMinute = builder.ransacRtToleranceBeforeMinute;
 		this.ransacRtToleranceAfterMinute = builder.ransacRtToleranceAfterMinute;
 		this.ransacIteration = builder.ransacIteration;
@@ -218,6 +228,10 @@ public class AlignmentMethodParam {
 
 	public int getRtWindowMultiply() {
 		return rtWindowMultiply;
+	}
+	
+	public double getAlpha() {
+		return alpha;
 	}
 
 	public double getRansacRtToleranceBeforeMinute() {

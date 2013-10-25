@@ -33,13 +33,14 @@ public class SavedMatlabFeatureGrouping extends BaseFeatureGrouping implements F
 			System.out.println("Grouping " + data.getFilename() + " ");
 
 //			final String dataPath = "/home/joewandy/workspace/AlignmentModel/mat/";
+			String filename = data.getFilenameWithoutExtension() + ".csv.Z.mat";
 			final String dataPath = data.getParentPath() + "/mat/";
-			System.out.println("Loading .mat from " + dataPath);
+			System.out.println("Loading " + dataPath + filename);
 			
 			// load from matlab
 			MatFileReader mfr = null;
 			try {
-				mfr = new MatFileReader(dataPath + data.getFilenameWithoutExtension() + ".csv.Z.mat");
+				mfr = new MatFileReader(dataPath + filename);
 			} catch (IOException e) {
 				e.printStackTrace();
 				System.exit(1);
@@ -71,7 +72,7 @@ public class SavedMatlabFeatureGrouping extends BaseFeatureGrouping implements F
 					FeatureGroup group = groupMap.get(k);
 					group.addFeature(feature);
 				}
-				System.out.println(groupMap.size() + " groups created");
+//				System.out.println(groupMap.size() + " groups created");
 				
 			}			
 			
@@ -85,14 +86,15 @@ public class SavedMatlabFeatureGrouping extends BaseFeatureGrouping implements F
 					ungroupedCount++;
 				}
 			}			
-			System.out.println("groupedCount = " + groupedCount);
-			System.out.println("ungroupedCount = " + ungroupedCount);
+//			System.out.println("groupedCount = " + groupedCount);
+//			System.out.println("ungroupedCount = " + ungroupedCount);
 
 			if (FeatureXMLAlignment.WEIGHT_USE_ALL_PEAKS) {
-				System.out.print("Getting cluster co-ocurrence probabilities of peaks for " + data.getFilename() + " ");
+				filename = data.getFilenameWithoutExtension() + ".csv.ZZprob.mat";
+				System.out.println("Loading " + dataPath + filename);				
 				mfr = null;
 				try {
-					mfr = new MatFileReader(dataPath + data.getFilenameWithoutExtension() + ".csv.ZZprob.mat");
+					mfr = new MatFileReader(dataPath + filename);
 				} catch (IOException e) {
 					e.printStackTrace();
 					System.exit(1);
@@ -101,7 +103,7 @@ public class SavedMatlabFeatureGrouping extends BaseFeatureGrouping implements F
 				if (mfr != null) {
 
 					final double[][] ZZprob = ((MLDouble)mfr.getMLArray("ZZprob")).getArray();
-					System.out.println("ZZprob = " + ZZprob.length + "x" + ZZprob[0].length);
+//					System.out.println("ZZprob = " + ZZprob.length + "x" + ZZprob[0].length);
 					data.setZZProb(ZZprob);
 					
 				}				

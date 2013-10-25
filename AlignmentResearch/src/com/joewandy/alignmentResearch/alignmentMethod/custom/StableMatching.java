@@ -12,6 +12,8 @@ import java.util.Map.Entry;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
+import org.apache.commons.math3.linear.OpenMapRealMatrix;
+import org.apache.commons.math3.linear.RealMatrix;
 import org.jblas.DoubleMatrix;
 
 import com.jmatio.io.MatFileReader;
@@ -36,10 +38,11 @@ public class StableMatching implements FeatureMatching {
 	private double[][] distArr;
 	private double[][] scoreArr;
 	private double[][] binaryScoreArr;
+	private double alpha;
 	
 	public StableMatching(String listId, AlignmentList masterList, AlignmentList childList,
 			ExtendedLibrary library,
-			double massTol, double rtTol) {			
+			double massTol, double rtTol, double alpha) {			
 		this.listId = listId;
 		this.masterList = masterList;
 		this.childList = childList;
@@ -49,6 +52,7 @@ public class StableMatching implements FeatureMatching {
 		this.scoreArr = null;
 		this.distArr = null;
 		this.binaryScoreArr = null;
+		this.alpha = alpha;
 	}
 
 	public AlignmentList getMatchedList() {
@@ -169,16 +173,18 @@ public class StableMatching implements FeatureMatching {
 		List<AlignmentRow> women = getWomen(masterList, childList);
 		double[][] clusteringMen = getMenClustering(masterList, childList);
 		double[][] clusteringWomen = getWomenClustering(masterList, childList);
-//        computeScores(men, women, clusteringMen, clusteringWomen);
+        computeScores(men, women, clusteringMen, clusteringWomen);
 //        saveToMatlab(masterList.getData().getParentPath());
 
         if (FeatureXMLAlignment.WEIGHT_USE_WEIGHTED_SCORE) {
-//			combineScore(clusteringMen, clusteringWomen);				
-        	loadScore();
+			combineScoreJBlas(clusteringMen, clusteringWomen);				
+//			combineScoreCommonsMath(clusteringMen, clusteringWomen);				
+//        	loadScore();
 		}
         
         Map<AlignmentRow, AlignmentRow> matches = glMatching(men, women);        
 //        Map<AlignmentRow, AlignmentRow> matches = hungarianMatching(men, women);
+//        Map<AlignmentRow, AlignmentRow> matches = approxMaxMatching(men, women);
     	
         return matches;
         
@@ -186,6 +192,7 @@ public class StableMatching implements FeatureMatching {
     
 	
 	private void saveToMatlab(String path) {
+		System.out.println("Saving scores to matlab");
 		MLDouble scoreMat = new MLDouble("W", scoreArr);
 		MLDouble inRangeMat = new MLDouble("Q", binaryScoreArr);
 		final Collection<MLArray> output = new ArrayList<MLArray>();
@@ -204,15 +211,8 @@ public class StableMatching implements FeatureMatching {
 	private Map<AlignmentRow, AlignmentRow> hungarianMatching(
 			List<AlignmentRow> men, List<AlignmentRow> women) {
 		
-		// find max score
-        double maxScore = 0;
-    	for (int i = 0; i < men.size(); i++) {
-    		for (int j = 0; j < women.size(); j++) {
-    			if (scoreArr[i][j] > maxScore) {
-    				maxScore = scoreArr[i][j];
-    			}
-    		}
-    	}
+        double maxScore = findMax(scoreArr);
+        
     	// normalise 
     	for (int i = 0; i < men.size(); i++) {
     		for (int j = 0; j < women.size(); j++) {
@@ -240,6 +240,30 @@ public class StableMatching implements FeatureMatching {
 
 	}
 
+	private Map<AlignmentRow, AlignmentRow> approxMaxMatching(List<AlignmentRow> men, 
+			List<AlignmentRow> women) {
+		
+		// running matching
+		System.out.print("\tRunning matching ");
+		GreedyApprox algo = new GreedyApprox(scoreArr);
+		int[] res = algo.execute();
+		System.out.println();
+		
+		// store the result
+		Map<AlignmentRow, AlignmentRow> matches = new HashMap<AlignmentRow, AlignmentRow>();
+		for (int i=0; i<men.size(); i++) {
+			int matchIndex = res[i];
+			// if there's a match
+			if (matchIndex != -1) {
+				AlignmentRow row1 = men.get(i);
+				AlignmentRow row2 = women.get(matchIndex);
+				matches.put(row1, row2);
+			}
+		}
+		return matches;
+		
+	}
+	
 	private Map<AlignmentRow, AlignmentRow> glMatching(List<AlignmentRow> men, 
 			List<AlignmentRow> women) {
 
@@ -291,6 +315,7 @@ public class StableMatching implements FeatureMatching {
         	
             // The next free man who has a woman to propose to
             RowPreference m = freemen.poll();
+            AlignmentRow mRow = m.row;
 
             // m's highest ranked woman whom he has not proposed to yet
             PreferenceItem preferredWoman = m.prefs.poll();
@@ -303,8 +328,8 @@ public class StableMatching implements FeatureMatching {
             	
             	// FIXME: hard cut-off here improves precision & recall quite a lot
             	// can we do better than this ?
-//            	double dist = preferredWoman.dist;
-//            	if (dist > LIMIT) {
+//            	double score = preferredWoman.score;
+//            	if (score < 0.5) {
 //            		// no partner for him
 //            	} else {            	
             	
@@ -319,7 +344,6 @@ public class StableMatching implements FeatureMatching {
 	                    // some pair (m', w) already exists
 	                    RowPreference mPrime = engagements.get(w);
 	                    AlignmentRow mPrimeRow = mPrime.row;
-	                    AlignmentRow mRow = m.row;
 	                    WomanPreferenceComparator womanPreference = new WomanPreferenceComparator(w);
 	                    int compareRes = womanPreference.compare(mPrimeRow, mRow);
 	                    
@@ -363,7 +387,7 @@ public class StableMatching implements FeatureMatching {
 		List<PreferenceItem> prefs = new ArrayList<PreferenceItem>();
 		for (int j = 0; j < womenScore.length; j++) {
 			AlignmentRow woman = women.get(j);
-			if (man.rowInRange(woman, massTol, -1, FeatureXMLAlignment.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
+			if (man.rowInRange(woman, massTol, rtTol, FeatureXMLAlignment.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
 				double score = womenScore[j];
 				PreferenceItem pref = new PreferenceItem(j, score);
 				prefs.add(pref);				
@@ -378,13 +402,16 @@ public class StableMatching implements FeatureMatching {
 	private void computeScores(List<AlignmentRow> men,
 			List<AlignmentRow> women, double[][] clusteringMen, double[][] clusteringWomen) {
 
+		int m = men.size();
+		int n = women.size();
+		
     	System.out.print("\tComputing scores ");
     	double maxDist = 0;
-		distArr = new double[men.size()][women.size()];
-		binaryScoreArr = new double[men.size()][women.size()];
-		for (int i = 0; i < men.size(); i++) {
+		distArr = new double[m][n];
+		binaryScoreArr = new double[m][n];
+		for (int i = 0; i < m; i++) {
 			
-			for (int j = 0; j < women.size(); j++) {
+			for (int j = 0; j < n; j++) {
 				AlignmentRow man = men.get(i);
 				AlignmentRow woman = women.get(j);
 				if (man.rowInRange(woman, massTol, -1, FeatureXMLAlignment.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
@@ -393,9 +420,7 @@ public class StableMatching implements FeatureMatching {
 						maxDist = dist;
 					}
 					distArr[i][j] = dist;				
-//					if (man.rowInRange(woman, massTol, -1, FeatureXMLAlignment.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
-						binaryScoreArr[i][j] = 1;
-//					}
+					binaryScoreArr[i][j] = 1;
 				}
 			}
 			
@@ -405,78 +430,198 @@ public class StableMatching implements FeatureMatching {
 			
 		}
 		System.out.println();
-		
+
+//    	// score = 1-(dist/maxDist)
+//		DoubleMatrix distMat = new DoubleMatrix(distArr);
+//		distMat.divi(maxDist);
+//		DoubleMatrix scoreMat = DoubleMatrix.ones(men.size(), women.size());
+//		scoreMat.subi(distMat);
+//		
+//		// get rid of those score values not within mass tolerance
+//		DoubleMatrix binMat = new DoubleMatrix(binaryScoreArr);
+//		scoreMat.muli(binMat);
+//
+//		// normalise score to 0..1
+//		double maxScore = scoreMat.max();
+//		scoreMat.divi(maxScore);
+//		scoreArr = scoreMat.toArray2();
+
+		scoreArr = new double[m][n];
 		double maxScore = 0;
-		scoreArr = new double[men.size()][women.size()];
-		for (int i = 0; i < men.size(); i++) {	
-			for (int j = 0; j < women.size(); j++) {
-				AlignmentRow man = men.get(i);
-				AlignmentRow woman = women.get(j);
-				if (man.rowInRange(woman, massTol, -1, FeatureXMLAlignment.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
+		for (int i = 0; i < m; i++) {
+			for (int j = 0; j < n; j++) {
+				if (binaryScoreArr[i][j] > 0) {
 					double dist = distArr[i][j];
 					double score = 1-(dist/maxDist);
-					scoreArr[i][j] = score;
+					scoreArr[i][j] = score;					
 					if (score > maxScore) {
 						maxScore = score;
 					}
 				}
 			}
 		}
-
-		// normalise score to 0 .. 1
-		normaliseScoreArr(men, women, maxScore);
-			        						
-	}
-
-	private void normaliseScoreArr(List<AlignmentRow> men,
-			List<AlignmentRow> women, double maxScore) {
-		for (int i = 0; i < men.size(); i++) {	
-			for (int j = 0; j < women.size(); j++) {
+		for (int i = 0; i < m; i++) {
+			for (int j = 0; j < n; j++) {
 				scoreArr[i][j] = scoreArr[i][j] / maxScore;
 			}
 		}
+			
 	}
 
-	private void combineScore(double[][] clusteringMen,
+	private void combineScoreJBlas(double[][] clusteringMen,
 			double[][] clusteringWomen) {
-		
-		DoubleMatrix A = new DoubleMatrix(clusteringMen);
-		A = A.mmul(A.transpose());
-		System.out.println("\tA = " + A.rows + "x" + A.columns);
-		 
-		DoubleMatrix B = new DoubleMatrix(clusteringWomen);
-		B = B.mmul(B.transpose());
-		System.out.println("\tB = " + B.rows + "x" + B.columns);
-		
-		DoubleMatrix hA = A.sub(DoubleMatrix.eye(A.rows));
-		DoubleMatrix hB = B.sub(DoubleMatrix.eye(B.rows));
+
+    	System.out.println("\tCombining scores ");
+		long startTime = System.nanoTime();
 
 		DoubleMatrix W = new DoubleMatrix(scoreArr);
-		System.out.println("\tW = " + W.rows + "x" + W.columns);
-					
-		System.out.println("\tAW");
-		DoubleMatrix hAW = hA.mmul(W);
-		System.out.println("\tD=AWB");
-		DoubleMatrix D = hAW.mmul(hB);
-		System.out.println("\tZ = W + (Q.*D)");
-		DoubleMatrix Q = new DoubleMatrix(binaryScoreArr);
-		DoubleMatrix Z = W.add(D.muli(Q));	        
+		double maxScore = W.max();
+		W.divi(maxScore);
+		System.out.println("\t\tW = " + W.rows + "x" + W.columns);
 		
-		scoreArr = Z.toArray2();
+		DoubleMatrix A = new DoubleMatrix(clusteringMen);
+		if (!FeatureXMLAlignment.WEIGHT_USE_ALL_PEAKS) {
+			A = A.mmul(A.transpose());			
+		}
+		A.subi(DoubleMatrix.diag(A.diag())); // A = A - diag(diag(A));
+		System.out.println("\t\tA = " + A.rows + "x" + A.columns);
+		 
+		DoubleMatrix B = new DoubleMatrix(clusteringWomen);
+		if (!FeatureXMLAlignment.WEIGHT_USE_ALL_PEAKS) {
+			B = B.mmul(B.transpose());
+		}
+		B.subi(DoubleMatrix.diag(B.diag())); // B = B - diag(diag(B));
+		System.out.println("\t\tB = " + B.rows + "x" + B.columns);
+
+		// D = (A*W)*B;
+		System.out.println("\t\tComputing D=(AW)B");
+		DoubleMatrix D = A.mmul(W);
+
+		D.mmuli(B);
+
+		// D = Q .* D;
+		System.out.println("\t\tComputing D.*Q");
+		DoubleMatrix Q = new DoubleMatrix(binaryScoreArr);
+		D.muli(Q);
+		
+		// D = D ./ max(max(D));
+		maxScore = D.max();
+		D.divi(maxScore);
+
+		// Wp = (alpha .* W) + ((1-alpha) .* D);
+		System.out.println("\t\tComputing W'=(alpha.*W)+((1-alpha).*D)");
+		W.muli(alpha);
+		D.muli(1-alpha);
+		DoubleMatrix Wp = W.add(D);
+		
+		long elapsedTime = (System.nanoTime()-startTime)/1000000000;
+		System.out.println("\tElapsed time = " + elapsedTime + "s");
+		scoreArr = Wp.toArray2();
 		
 	}
 
+	private void combineScoreCommonsMath(double[][] clusteringMen,
+			double[][] clusteringWomen) {
+
+    	System.out.println("\tCombining scores ");
+		long startTime = System.nanoTime();
+
+		int m = scoreArr.length;
+		int n = scoreArr[0].length;
+		RealMatrix W = getSparseMatrix(scoreArr);
+		double maxScore = findMax(scoreArr);
+		W = W.scalarMultiply(1/maxScore);
+		System.out.println("\t\tW = " + W.getRowDimension() + "x" + W.getColumnDimension());
+		
+		RealMatrix A = getSparseMatrix(clusteringMen);
+		if (!FeatureXMLAlignment.WEIGHT_USE_ALL_PEAKS) {
+			A = A.multiply(A.transpose());			
+		}
+		RealMatrix dA = getDiagonal(A);
+		A = A.subtract(dA);
+		System.out.println("\t\tA = " + A.getRowDimension() + "x" + A.getColumnDimension());
+		 
+		RealMatrix B = getSparseMatrix(clusteringWomen);
+		if (!FeatureXMLAlignment.WEIGHT_USE_ALL_PEAKS) {
+			B = B.multiply(B.transpose());			
+		}
+		RealMatrix dB = getDiagonal(B);
+		B = B.subtract(dB);
+		System.out.println("\t\tB = " + B.getRowDimension() + "x" + B.getColumnDimension());
+
+		// D = (A*W)*B;
+		System.out.println("\t\tComputing D=(AW)B");
+		RealMatrix D = A.multiply(W);
+		D = D.multiply(B);
+
+		// D = Q .* D;
+		System.out.println("\t\tComputing D.*Q");
+		RealMatrix Q = getSparseMatrix(binaryScoreArr);
+		D = D.multiply(Q);
+		
+		// D = D ./ max(max(D));
+		maxScore = findMax(D.getData());
+		D = D.scalarMultiply(1/maxScore);
+
+		// Wp = (alpha .* W) + ((1-alpha) .* D);
+		System.out.println("\t\tComputing W'=(alpha.*W)+((1-alpha).*D)");
+		W = W.scalarMultiply(alpha);
+		D = D.scalarMultiply(1-alpha);
+		RealMatrix Wp = W.add(D);
+		
+		long elapsedTime = (System.nanoTime()-startTime)/1000000000;
+		System.out.println("\tElapsed time = " + elapsedTime + "s");
+		scoreArr = Wp.getData();
+		
+	}
+
+	private RealMatrix getDiagonal(RealMatrix matrix) {
+		int m = matrix.getRowDimension();
+		RealMatrix sparse = new OpenMapRealMatrix(m, m);
+		for (int i = 0; i < m; i++) {
+			double val = matrix.getEntry(i, i);
+			sparse.setEntry(i, i, val);
+		}
+		return sparse;		
+	}
+
+	private double findMax(double[][] array) {
+		double maxScore = 0;
+		int m = array.length;
+		int n = array[0].length;
+		for (int i = 0; i < m; i++) {
+			for (int j = 0; j < n; j++) {
+				if (array[i][j] > maxScore) {
+					maxScore = array[i][j];
+				}
+			}
+		}
+		return maxScore;
+	}
+
+	private RealMatrix getSparseMatrix(double[][] array) {
+		int row = array.length;
+		int col = array[0].length;
+		RealMatrix sparse = new OpenMapRealMatrix(row, col);
+		for (int i = 0; i < row; i++) {
+			for (int j = 0; j < col; j++) {
+				sparse.setEntry(i, j, array[i][j]);
+			}
+		}
+		return sparse;
+	}
+	
 	private void loadScore() {
-		System.out.println("Loading precomputed matlab");
+		System.out.println("\tLoading precomputed matlab scores");
 		// load from matlab
 		MatFileReader mfr = null;
 		try {
-			mfr = new MatFileReader("/home/joewandy/Dropbox/Project/real_datasets/P2/source_features_000_test/mat/Z_out.mat");
+			mfr = new MatFileReader("/home/joewandy/Dropbox/Project/real_datasets/P2/source_features_000_test/mat/Wp.mat");
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(1);
 		}
-		scoreArr = ((MLDouble)mfr.getMLArray("Z_out")).getArray();
+		scoreArr = ((MLDouble)mfr.getMLArray("Wp")).getArray();
 	}
 	
     private class RowPreference {

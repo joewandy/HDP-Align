@@ -72,7 +72,7 @@ public class FeatureXMLAlignment {
 	public static final boolean WEIGHT_USE_PROB_CLUSTERING_WEIGHT = true;
 
 	// use posterior probability of all peaks ?
-	public static final boolean WEIGHT_USE_ALL_PEAKS = false;
+	public static final boolean WEIGHT_USE_ALL_PEAKS = true;
 	
 	// public static final int ALIGNMENT_SCORE_THRESHOLD = 20;
 	
@@ -270,7 +270,7 @@ public class FeatureXMLAlignment {
 				if (options.autoTh) {
 					for (int j = 0; j < ths.length; j++) {
 						for (int i = 0; i < iteration; i++) {
-							options.th = ths[j];
+							options.alpha = ths[j];
 							System.out.println("==================================================");
 							System.out.println("threshold = " + options.th);
 							System.out.println("==================================================");
@@ -427,6 +427,7 @@ public class FeatureXMLAlignment {
 		paramBuilder.ransacLinearModel(options.ransacLinearModel);
 		paramBuilder.ransacSameChargeRequired(options.ransacSameChargeRequired);
 		paramBuilder.openMsMzPairMaxDistance(options.openMsMzPairMaxDistance);
+		paramBuilder.alpha(options.alpha);
 		AlignmentMethod aligner = AlignmentMethodFactory.getAlignmentMethod(options.method, paramBuilder, data);
 
 		// setup some filters to prune alignment results later
@@ -461,7 +462,7 @@ public class FeatureXMLAlignment {
 			evalRes = gt.evaluate3(Collections.unmodifiableList(result.getRows()), noOfFiles, 
 					options.alignmentPpm, options.alignmentRtWindow);				
 		}		
-		evalRes.setTh(options.th);
+		evalRes.setTh(options.alpha);
 		System.out.println(evalRes);
 					
 		// RetentionTimePrinter rtp = new RetentionTimePrinter();

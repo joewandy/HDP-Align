@@ -19,6 +19,7 @@ public class MyStableMarriageAlignment extends BaseAlignment implements Alignmen
 
 	private List<AlignmentList> featureList;
 	private ExtendedLibrary library;
+	private double alpha;
 	
 	public MyStableMarriageAlignment(List<AlignmentFile> dataList, AlignmentMethodParam param, 
 			boolean useWeightedScore) {
@@ -31,6 +32,7 @@ public class MyStableMarriageAlignment extends BaseAlignment implements Alignmen
 			AlignmentList newList = new AlignmentList(data);
 			featureList.add(newList);
 		}
+		alpha = param.getAlpha();
 		
 	}
 	
@@ -44,7 +46,7 @@ public class MyStableMarriageAlignment extends BaseAlignment implements Alignmen
 			System.out.println("Aligning #" + (i+1) + ": " + peakList);
 
 			FeatureMatching matcher = new StableMatching(masterList.getId() + ", " + peakList.getId(), masterList, peakList, 
-					library, massTolerance, rtTolerance);
+					library, massTolerance, rtTolerance, alpha);
 			masterList = matcher.getMatchedList();			
             
 		}

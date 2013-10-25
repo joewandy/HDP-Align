@@ -75,7 +75,11 @@ public class FeatureXMLAlignmentOptions {
 	@Option(name = "mzPairMaxDistance", param = "float", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, 
 			usage = "OpenMS parameter.")
 	public double openMsMzPairMaxDistance = AlignmentMethodParam.PARAM_MZ_PAIR_MAX_DISTANCE;
-		
+
+	@Option(name = "alpha", param = "float", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, 
+			usage = "Stable marriage parameter.")
+	public double alpha = AlignmentMethodParam.PARAM_ALPHA;
+	
 	@Option(name = "graphFilter", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Graph filter method of matched peaks.")
 	public String graphFilter = null;
 
