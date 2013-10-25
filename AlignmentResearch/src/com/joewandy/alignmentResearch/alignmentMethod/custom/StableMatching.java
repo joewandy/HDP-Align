@@ -35,9 +35,9 @@ public class StableMatching implements FeatureMatching {
 	private double massTol;
 	private double rtTol;	
 	private MatchingScorer scorer;
-	private double[][] distArr;
-	private double[][] scoreArr;
-	private double[][] binaryScoreArr;
+	private DoubleMatrix distArr;
+	private DoubleMatrix scoreArr;
+	private DoubleMatrix binaryScoreArr;
 	private double alpha;
 	
 	public StableMatching(String listId, AlignmentList masterList, AlignmentList childList,
@@ -178,7 +178,6 @@ public class StableMatching implements FeatureMatching {
 
         if (FeatureXMLAlignment.WEIGHT_USE_WEIGHTED_SCORE) {
 			combineScoreJBlas(clusteringMen, clusteringWomen);				
-//			combineScoreCommonsMath(clusteringMen, clusteringWomen);				
 //        	loadScore();
 		}
         
@@ -193,8 +192,8 @@ public class StableMatching implements FeatureMatching {
 	
 	private void saveToMatlab(String path) {
 		System.out.println("Saving scores to matlab");
-		MLDouble scoreMat = new MLDouble("W", scoreArr);
-		MLDouble inRangeMat = new MLDouble("Q", binaryScoreArr);
+		MLDouble scoreMat = new MLDouble("W", scoreArr.toArray2());
+		MLDouble inRangeMat = new MLDouble("Q", binaryScoreArr.toArray2());
 		final Collection<MLArray> output = new ArrayList<MLArray>();
 		output.add(scoreMat);
 		output.add(inRangeMat);
@@ -211,17 +210,17 @@ public class StableMatching implements FeatureMatching {
 	private Map<AlignmentRow, AlignmentRow> hungarianMatching(
 			List<AlignmentRow> men, List<AlignmentRow> women) {
 		
-        double maxScore = findMax(scoreArr);
+        double maxScore = scoreArr.max();
         
     	// normalise 
     	for (int i = 0; i < men.size(); i++) {
     		for (int j = 0; j < women.size(); j++) {
-    			scoreArr[i][j] = maxScore - scoreArr[i][j];
+    			scoreArr.put(i, j, maxScore - scoreArr.get(i, j));
     		}
     	}
 		// running matching
 		System.out.print("\tRunning matching ");
-		HungarianAlgorithm algo = new HungarianAlgorithm(scoreArr);
+		HungarianAlgorithm algo = new HungarianAlgorithm(scoreArr.toArray2());
 		int[] res = algo.execute();
 		System.out.println();
 		
@@ -245,7 +244,7 @@ public class StableMatching implements FeatureMatching {
 		
 		// running matching
 		System.out.print("\tRunning matching ");
-		GreedyApprox algo = new GreedyApprox(scoreArr);
+		GreedyApprox algo = new GreedyApprox(scoreArr.toArray2());
 		int[] res = algo.execute();
 		System.out.println();
 		
@@ -381,14 +380,14 @@ public class StableMatching implements FeatureMatching {
 	}
 
 	private Queue<PreferenceItem> getSortedPrefs(AlignmentRow man, List<AlignmentRow> women,
-			double[][] scoreMatrix, int i) {
+			DoubleMatrix scoreMatrix, int i) {
 		
-		double[] womenScore = scoreMatrix[i];
+		DoubleMatrix womenScore = scoreMatrix.getRow(i);
 		List<PreferenceItem> prefs = new ArrayList<PreferenceItem>();
 		for (int j = 0; j < womenScore.length; j++) {
 			AlignmentRow woman = women.get(j);
 			if (man.rowInRange(woman, massTol, rtTol, FeatureXMLAlignment.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
-				double score = womenScore[j];
+				double score = womenScore.get(j);
 				PreferenceItem pref = new PreferenceItem(j, score);
 				prefs.add(pref);				
 			}
@@ -407,8 +406,8 @@ public class StableMatching implements FeatureMatching {
 		
     	System.out.print("\tComputing scores ");
     	double maxDist = 0;
-		distArr = new double[m][n];
-		binaryScoreArr = new double[m][n];
+		distArr = new DoubleMatrix(m, n);
+		binaryScoreArr = new DoubleMatrix(m, n);
 		for (int i = 0; i < m; i++) {
 			
 			for (int j = 0; j < n; j++) {
@@ -419,8 +418,8 @@ public class StableMatching implements FeatureMatching {
 					if (dist > maxDist) {
 						maxDist = dist;
 					}
-					distArr[i][j] = dist;				
-					binaryScoreArr[i][j] = 1;
+					distArr.put(i, j, dist);				
+					binaryScoreArr.put(i, j, 1);
 				}
 			}
 			
@@ -431,40 +430,17 @@ public class StableMatching implements FeatureMatching {
 		}
 		System.out.println();
 
-//    	// score = 1-(dist/maxDist)
-//		DoubleMatrix distMat = new DoubleMatrix(distArr);
-//		distMat.divi(maxDist);
-//		DoubleMatrix scoreMat = DoubleMatrix.ones(men.size(), women.size());
-//		scoreMat.subi(distMat);
-//		
-//		// get rid of those score values not within mass tolerance
-//		DoubleMatrix binMat = new DoubleMatrix(binaryScoreArr);
-//		scoreMat.muli(binMat);
-//
-//		// normalise score to 0..1
-//		double maxScore = scoreMat.max();
-//		scoreMat.divi(maxScore);
-//		scoreArr = scoreMat.toArray2();
+    	// score = 1-(dist/maxDist)
+		distArr.divi(maxDist);
+		scoreArr = DoubleMatrix.ones(men.size(), women.size());
+		scoreArr.subi(distArr);
+		
+		// get rid of those score values not within mass tolerance
+		scoreArr.muli(binaryScoreArr);
 
-		scoreArr = new double[m][n];
-		double maxScore = 0;
-		for (int i = 0; i < m; i++) {
-			for (int j = 0; j < n; j++) {
-				if (binaryScoreArr[i][j] > 0) {
-					double dist = distArr[i][j];
-					double score = 1-(dist/maxDist);
-					scoreArr[i][j] = score;					
-					if (score > maxScore) {
-						maxScore = score;
-					}
-				}
-			}
-		}
-		for (int i = 0; i < m; i++) {
-			for (int j = 0; j < n; j++) {
-				scoreArr[i][j] = scoreArr[i][j] / maxScore;
-			}
-		}
+		// normalise score to 0..1
+		double maxScore = scoreArr.max();
+		scoreArr.divi(maxScore);
 			
 	}
 
@@ -474,7 +450,7 @@ public class StableMatching implements FeatureMatching {
     	System.out.println("\tCombining scores ");
 		long startTime = System.nanoTime();
 
-		DoubleMatrix W = new DoubleMatrix(scoreArr);
+		DoubleMatrix W = scoreArr;
 		double maxScore = W.max();
 		W.divi(maxScore);
 		System.out.println("\t\tW = " + W.rows + "x" + W.columns);
@@ -501,7 +477,7 @@ public class StableMatching implements FeatureMatching {
 
 		// D = Q .* D;
 		System.out.println("\t\tComputing D.*Q");
-		DoubleMatrix Q = new DoubleMatrix(binaryScoreArr);
+		DoubleMatrix Q = binaryScoreArr;
 		D.muli(Q);
 		
 		// D = D ./ max(max(D));
@@ -516,99 +492,7 @@ public class StableMatching implements FeatureMatching {
 		
 		long elapsedTime = (System.nanoTime()-startTime)/1000000000;
 		System.out.println("\tElapsed time = " + elapsedTime + "s");
-		scoreArr = Wp.toArray2();
 		
-	}
-
-	private void combineScoreCommonsMath(double[][] clusteringMen,
-			double[][] clusteringWomen) {
-
-    	System.out.println("\tCombining scores ");
-		long startTime = System.nanoTime();
-
-		int m = scoreArr.length;
-		int n = scoreArr[0].length;
-		RealMatrix W = getSparseMatrix(scoreArr);
-		double maxScore = findMax(scoreArr);
-		W = W.scalarMultiply(1/maxScore);
-		System.out.println("\t\tW = " + W.getRowDimension() + "x" + W.getColumnDimension());
-		
-		RealMatrix A = getSparseMatrix(clusteringMen);
-		if (!FeatureXMLAlignment.WEIGHT_USE_ALL_PEAKS) {
-			A = A.multiply(A.transpose());			
-		}
-		RealMatrix dA = getDiagonal(A);
-		A = A.subtract(dA);
-		System.out.println("\t\tA = " + A.getRowDimension() + "x" + A.getColumnDimension());
-		 
-		RealMatrix B = getSparseMatrix(clusteringWomen);
-		if (!FeatureXMLAlignment.WEIGHT_USE_ALL_PEAKS) {
-			B = B.multiply(B.transpose());			
-		}
-		RealMatrix dB = getDiagonal(B);
-		B = B.subtract(dB);
-		System.out.println("\t\tB = " + B.getRowDimension() + "x" + B.getColumnDimension());
-
-		// D = (A*W)*B;
-		System.out.println("\t\tComputing D=(AW)B");
-		RealMatrix D = A.multiply(W);
-		D = D.multiply(B);
-
-		// D = Q .* D;
-		System.out.println("\t\tComputing D.*Q");
-		RealMatrix Q = getSparseMatrix(binaryScoreArr);
-		D = D.multiply(Q);
-		
-		// D = D ./ max(max(D));
-		maxScore = findMax(D.getData());
-		D = D.scalarMultiply(1/maxScore);
-
-		// Wp = (alpha .* W) + ((1-alpha) .* D);
-		System.out.println("\t\tComputing W'=(alpha.*W)+((1-alpha).*D)");
-		W = W.scalarMultiply(alpha);
-		D = D.scalarMultiply(1-alpha);
-		RealMatrix Wp = W.add(D);
-		
-		long elapsedTime = (System.nanoTime()-startTime)/1000000000;
-		System.out.println("\tElapsed time = " + elapsedTime + "s");
-		scoreArr = Wp.getData();
-		
-	}
-
-	private RealMatrix getDiagonal(RealMatrix matrix) {
-		int m = matrix.getRowDimension();
-		RealMatrix sparse = new OpenMapRealMatrix(m, m);
-		for (int i = 0; i < m; i++) {
-			double val = matrix.getEntry(i, i);
-			sparse.setEntry(i, i, val);
-		}
-		return sparse;		
-	}
-
-	private double findMax(double[][] array) {
-		double maxScore = 0;
-		int m = array.length;
-		int n = array[0].length;
-		for (int i = 0; i < m; i++) {
-			for (int j = 0; j < n; j++) {
-				if (array[i][j] > maxScore) {
-					maxScore = array[i][j];
-				}
-			}
-		}
-		return maxScore;
-	}
-
-	private RealMatrix getSparseMatrix(double[][] array) {
-		int row = array.length;
-		int col = array[0].length;
-		RealMatrix sparse = new OpenMapRealMatrix(row, col);
-		for (int i = 0; i < row; i++) {
-			for (int j = 0; j < col; j++) {
-				sparse.setEntry(i, j, array[i][j]);
-			}
-		}
-		return sparse;
 	}
 	
 	private void loadScore() {
@@ -621,7 +505,7 @@ public class StableMatching implements FeatureMatching {
 			e.printStackTrace();
 			System.exit(1);
 		}
-		scoreArr = ((MLDouble)mfr.getMLArray("Wp")).getArray();
+		scoreArr = new DoubleMatrix(((MLDouble)mfr.getMLArray("Wp")).getArray());
 	}
 	
     private class RowPreference {
@@ -681,8 +565,8 @@ public class StableMatching implements FeatureMatching {
     		int myIndex = woman.getRowId();
     		int can1Index = candidate1.getRowId();
     		int can2Index = candidate2.getRowId();
-    		double score1 = scoreArr[can1Index][myIndex];
-    		double score2 = scoreArr[can2Index][myIndex];
+    		double score1 = scoreArr.get(can1Index, myIndex);
+    		double score2 = scoreArr.get(can2Index, myIndex);
     		return Double.compare(score1, score2);
     	}
     	
