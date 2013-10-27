@@ -2,14 +2,10 @@ package com.joewandy.alignmentResearch.objectModel;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
-import com.joewandy.alignmentResearch.main.FeatureXMLAlignment;
-import com.joewandy.alignmentResearch.util.PrettyPrintGroupSize;
+import org.jblas.DoubleMatrix;
 
 public class GreedyFeatureGrouping extends BaseFeatureGrouping implements FeatureGrouping {
 
@@ -63,12 +59,12 @@ public class GreedyFeatureGrouping extends BaseFeatureGrouping implements Featur
 			groups.addAll(fileGroups);
 			
 			// create assignment matrix
-			double[][] Z = new double[data.getFeaturesCount()][fileGroups.size()];
+			DoubleMatrix Z = new DoubleMatrix(data.getFeaturesCount(), fileGroups.size());
 			for (int j = 0; j < fileGroups.size(); j++) {
 				FeatureGroup group = fileGroups.get(j);
 				for (Feature f : group.getFeatures()) {
 					int i = f.getPeakID(); // starts from 0
-					Z[i][j] = 1;
+					Z.put(i, j, 1);
 				}
 			}
 			data.setZ(Z);

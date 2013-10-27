@@ -3,6 +3,8 @@ package com.joewandy.alignmentResearch.objectModel;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jblas.DoubleMatrix;
+
 
 public class AlignmentEdge {
 
@@ -44,8 +46,8 @@ public class AlignmentEdge {
 		assert(f1.getData() != f2.getData());
 
 		double allWeight = 0;
-		double[][] ZZProb1 = f1.getZZProb();
-		double[][] ZZProb2 = f2.getZZProb();
+		DoubleMatrix ZZProb1 = f1.getZZProb();
+		DoubleMatrix ZZProb2 = f2.getZZProb();
 		int f1Idx = f1.getPeakID();
 		int f2Idx = f2.getPeakID();
 		for (AlignmentPair pair : pairs) {
@@ -62,8 +64,8 @@ public class AlignmentEdge {
 			
 			int n1Idx = n1.getPeakID();
 			int n2Idx = n2.getPeakID();
-			double prob1 = ZZProb1[f1Idx][n1Idx];
-			double prob2 = ZZProb2[f2Idx][n2Idx];
+			double prob1 = ZZProb1.get(f1Idx, n1Idx);
+			double prob2 = ZZProb2.get(f2Idx, n2Idx);
 			double pairWeight = prob1 * prob2;
 			allWeight += pairWeight;
 			

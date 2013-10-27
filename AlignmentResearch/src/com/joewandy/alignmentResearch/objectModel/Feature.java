@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.jblas.DoubleMatrix;
+
 
 /**
  * Represents a feature being aligned
@@ -135,7 +137,7 @@ public class Feature {
 		this.vertex = vertex;
 	}
 
-	public double[][] getZZProb() {
+	public DoubleMatrix getZZProb() {
 		return data.getZZProb();
 	}
 

@@ -3,10 +3,13 @@ package com.joewandy.alignmentResearch.objectModel;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+
+import org.jblas.DoubleMatrix;
+
+import cern.colt.matrix.tdouble.DoubleMatrix2D;
+import cern.colt.matrix.tdouble.impl.SparseDoubleMatrix2D;
 
 import com.jmatio.io.MatFileReader;
 import com.jmatio.types.MLDouble;
@@ -48,15 +51,15 @@ public class SavedMatlabFeatureGrouping extends BaseFeatureGrouping implements F
 
 			if (mfr != null) {
 
-				double[][] dz = ((MLDouble)mfr.getMLArray("Z")).getArray();
+				DoubleMatrix dz = new DoubleMatrix(((MLDouble)mfr.getMLArray("Z")).getArray());
 				data.setZ(dz);
 
-				int m = dz.length;
-				int n = dz[0].length;
+				int m = dz.rows;
+				int n = dz.columns;
 				int[][] Z = new int[m][n];
 				for (int i = 0; i < m; i++) {
 					for (int j = 0; j < n; j++) {
-						Z[i][j] = (int) dz[i][j];
+						Z[i][j] = (int) dz.get(i, j);
 					}
 				}
 				Map<Integer, FeatureGroup> groupMap = new HashMap<Integer, FeatureGroup>();
@@ -102,9 +105,10 @@ public class SavedMatlabFeatureGrouping extends BaseFeatureGrouping implements F
 				
 				if (mfr != null) {
 
-					final double[][] ZZprob = ((MLDouble)mfr.getMLArray("ZZprob")).getArray();
-//					System.out.println("ZZprob = " + ZZprob.length + "x" + ZZprob[0].length);
+					DoubleMatrix ZZprob = new DoubleMatrix(((MLDouble)mfr.getMLArray("ZZprob")).getArray());
 					data.setZZProb(ZZprob);
+//					System.out.println("ZZprob = " + ZZprob.rows + "x" + ZZprob.columns);
+//					System.out.println("ZZprob(4693, 4693) = " + ZZprob.get(4693, 4693));
 					
 				}				
 			}

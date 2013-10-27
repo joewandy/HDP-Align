@@ -12,8 +12,6 @@ import java.util.Map.Entry;
 import java.util.PriorityQueue;
 import java.util.Queue;
 
-import org.apache.commons.math3.linear.OpenMapRealMatrix;
-import org.apache.commons.math3.linear.RealMatrix;
 import org.jblas.DoubleMatrix;
 
 import com.jmatio.io.MatFileReader;
@@ -25,6 +23,7 @@ import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
 import com.joewandy.alignmentResearch.objectModel.ExtendedLibrary;
+import com.joewandy.alignmentResearch.objectModel.Feature;
 import com.joewandy.alignmentResearch.objectModel.MatchingScorer;
 
 public class StableMatching implements FeatureMatching {
@@ -127,40 +126,90 @@ public class StableMatching implements FeatureMatching {
 		return women;
 	}
 
-	private double[][] getMenClustering(AlignmentList masterList, AlignmentList childList) {
+	private DoubleMatrix getMenClustering(AlignmentList masterList, AlignmentList childList) {
 		if (FeatureXMLAlignment.WEIGHT_USE_WEIGHTED_SCORE) {
-			if (FeatureXMLAlignment.WEIGHT_USE_ALL_PEAKS) {
-				return masterList.getData().getZZProb();
-			} else {				
-				return masterList.getData().getZ();						
-			}
-		} else {
 			AlignmentFile data = masterList.getData();
 			if (data != null) {
-				int n = data.getFeaturesCount();
-				return new double[n][n];				
+				// for list produced from initial file
+				return getProb(data);				
 			} else {
-				return null;
+				// for list produced from merging files
+				List<AlignmentRow> rows = masterList.getRows();
+				int n = rows.size();
+				DoubleMatrix mat = new DoubleMatrix(n, n);
+				for (int i = 0; i < n; i++) {
+					for (int j = 0; j < n; j++) {
+						AlignmentRow row1 = rows.get(i);
+						AlignmentRow row2 = rows.get(j);
+						double score = scoreRow(row1, row2);
+						mat.put(i, j, score);
+					}
+				}
+				return mat;
 			}
+		} else {
+			// for the case when we don't use the weight
+			List<AlignmentRow> rows = masterList.getRows();
+			int n = rows.size();
+			return new DoubleMatrix(n, n);				
 		}
 	}
 
-	private double[][] getWomenClustering(AlignmentList masterList, AlignmentList childList) {
+	private DoubleMatrix getWomenClustering(AlignmentList masterList, AlignmentList childList) {
 		if (FeatureXMLAlignment.WEIGHT_USE_WEIGHTED_SCORE) {
-			if (FeatureXMLAlignment.WEIGHT_USE_ALL_PEAKS) {
-				return childList.getData().getZZProb();
-			} else {				
-				return childList.getData().getZ();						
-			}
-		} else {
 			AlignmentFile data = childList.getData();
 			if (data != null) {
-				int n = data.getFeaturesCount();
-				return new double[n][n];				
+				// for list produced from initial file
+				return getProb(data);				
 			} else {
-				return null;
+				// for list produced from merging files
+				List<AlignmentRow> rows = childList.getRows();
+				int n = rows.size();
+				DoubleMatrix mat = new DoubleMatrix(n, n);
+				for (int i = 0; i < n; i++) {
+					for (int j = 0; j < n; j++) {
+						AlignmentRow row1 = rows.get(i);
+						AlignmentRow row2 = rows.get(j);
+						double score = scoreRow(row1, row2);
+						mat.put(i, j, score);
+					}
+				}
+				return mat;
+			}
+		} else {
+			// for the case when we don't use the weight
+			List<AlignmentRow> rows = childList.getRows();
+			int n = rows.size();
+			return new DoubleMatrix(n, n);	
+		}
+	}
+	
+	private DoubleMatrix getProb(AlignmentFile data) {
+		if (FeatureXMLAlignment.WEIGHT_USE_ALL_PEAKS) {
+			return data.getZZProb();
+		} else {				
+			return data.getZ();						
+		}
+	}
+
+	private double scoreRow(AlignmentRow row1, AlignmentRow row2) {
+		
+		double total = 0;
+		int counter = 0;
+		for (Feature f1 : row1.getFeatures()) {
+			for (Feature f2 : row2.getFeatures()) {
+				if (f1.getData().equals(f2.getData())) {
+					DoubleMatrix prob = getProb(f1.getData());
+					int idx1 = f1.getPeakID();
+					int idx2 = f2.getPeakID();
+					total += prob.get(idx1, idx2);
+					counter++;
+				}
 			}
 		}
+		double avg = total / counter;		
+		return avg;
+		
 	}
 	
     private Map<AlignmentRow, AlignmentRow> match(AlignmentList masterList, AlignmentList childList) {
@@ -171,8 +220,8 @@ public class StableMatching implements FeatureMatching {
 		// compute score here
 		List<AlignmentRow> men = getMen(masterList, childList);
 		List<AlignmentRow> women = getWomen(masterList, childList);
-		double[][] clusteringMen = getMenClustering(masterList, childList);
-		double[][] clusteringWomen = getWomenClustering(masterList, childList);
+		DoubleMatrix clusteringMen = getMenClustering(masterList, childList);
+		DoubleMatrix clusteringWomen = getWomenClustering(masterList, childList);
         computeScores(men, women, clusteringMen, clusteringWomen);
 //        saveToMatlab(masterList.getData().getParentPath());
 
@@ -399,7 +448,7 @@ public class StableMatching implements FeatureMatching {
 	}
 
 	private void computeScores(List<AlignmentRow> men,
-			List<AlignmentRow> women, double[][] clusteringMen, double[][] clusteringWomen) {
+			List<AlignmentRow> women, DoubleMatrix clusteringMen, DoubleMatrix clusteringWomen) {
 
 		int m = men.size();
 		int n = women.size();
@@ -444,8 +493,8 @@ public class StableMatching implements FeatureMatching {
 			
 	}
 
-	private void combineScoreJBlas(double[][] clusteringMen,
-			double[][] clusteringWomen) {
+	private void combineScoreJBlas(DoubleMatrix clusteringMen,
+			DoubleMatrix clusteringWomen) {
 
     	System.out.println("\tCombining scores ");
 		long startTime = System.nanoTime();
@@ -455,14 +504,14 @@ public class StableMatching implements FeatureMatching {
 		W.divi(maxScore);
 		System.out.println("\t\tW = " + W.rows + "x" + W.columns);
 		
-		DoubleMatrix A = new DoubleMatrix(clusteringMen);
+		DoubleMatrix A = clusteringMen.dup();
 		if (!FeatureXMLAlignment.WEIGHT_USE_ALL_PEAKS) {
 			A = A.mmul(A.transpose());			
 		}
 		A.subi(DoubleMatrix.diag(A.diag())); // A = A - diag(diag(A));
 		System.out.println("\t\tA = " + A.rows + "x" + A.columns);
 		 
-		DoubleMatrix B = new DoubleMatrix(clusteringWomen);
+		DoubleMatrix B = clusteringWomen.dup();
 		if (!FeatureXMLAlignment.WEIGHT_USE_ALL_PEAKS) {
 			B = B.mmul(B.transpose());
 		}

@@ -1,8 +1,5 @@
-java.lang.NullPointerException
-	at com.joewandy.alignmentResearch.alignmentMethod.custom.StableMatching.combineScoreJBlas(StableMatching.java:454)
-	at com.joewandy.alignmentResearch.alignmentMethod.custom.StableMatching.match(StableMatching.java:180)
-	at com.joewandy.alignmentResearch.alignmentMethod.custom.StableMatching.getMatchedList(StableMatching.java:67)
-	at com.joewandy.alignmentResearch.alignmentMethod.custom.MyStableMarriageAlignment.matchFeatures(MyStableMarriageAlignment.java:50)
-	at com.joewandy.alignmentResearch.alignmentMethod.BaseAlignment.align(BaseAlignment.java:51)
-	at com.joewandy.alignmentResearch.main.FeatureXMLAlignment.runExperiment(FeatureXMLAlignment.java:444)
+java.lang.ArrayIndexOutOfBoundsException: 17809935
+	at org.jblas.DoubleMatrix.get(DoubleMatrix.java:1223)
+	at com.joewandy.alignmentResearch.objectModel.SavedMatlabFeatureGrouping.group(SavedMatlabFeatureGrouping.java:108)
+	at com.joewandy.alignmentResearch.main.FeatureXMLAlignment.runExperiment(FeatureXMLAlignment.java:415)
 	at com.joewandy.alignmentResearch.main.FeatureXMLAlignment.main(FeatureXMLAlignment.java:285)

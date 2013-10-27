@@ -53,7 +53,7 @@ import com.joewandy.alignmentResearch.objectModel.FeatureGroup;
 import com.joewandy.alignmentResearch.objectModel.FeatureGrouping;
 import com.joewandy.alignmentResearch.objectModel.GreedyFeatureGrouping;
 import com.joewandy.alignmentResearch.objectModel.GroundTruth;
-import com.joewandy.alignmentResearch.objectModel.SavedMatlabFeatureGrouping;
+import com.joewandy.alignmentResearch.objectModel.MatlabFeatureGrouping;
 import com.joewandy.util.Tool;
 
 public class FeatureXMLAlignment {
@@ -404,9 +404,9 @@ public class FeatureXMLAlignment {
 			grouping = new GreedyFeatureGrouping(options.groupingRtWindow);					
 		} else if (options.grouping) {
 			if (WEIGHT_USE_PROB_CLUSTERING_WEIGHT) {
-//				grouping = new MatlabFeatureGrouping(options.groupingRtWindow, 
-//						options.groupingAlpha, options.groupingNSamples);															
-				grouping = new SavedMatlabFeatureGrouping();															
+				grouping = new MatlabFeatureGrouping(options.groupingRtWindow, 
+						options.groupingAlpha, options.groupingNSamples);															
+//				grouping = new SavedMatlabFeatureGrouping();															
 			} else {
 				// use greedy weight scores
 				grouping = new GreedyFeatureGrouping(options.groupingRtWindow);					

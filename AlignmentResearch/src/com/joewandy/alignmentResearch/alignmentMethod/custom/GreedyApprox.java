@@ -1,15 +1,31 @@
 package com.joewandy.alignmentResearch.alignmentMethod.custom;
 
+import java.util.List;
+
+import com.joewandy.alignmentResearch.main.FeatureXMLAlignment;
+import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
+
 public class GreedyApprox {
 	
+	private List<AlignmentRow> men;
+	private List<AlignmentRow> women;
 	private double[][] E;
 	private int nRows;
 	private int nCols;
+	private double massTol;
+	private double rtTol;
 	
 	public GreedyApprox(double[][] scoreArr) {
-		this.E = scoreArr.clone();
+
 		this.nRows = scoreArr.length;
 		this.nCols = scoreArr[0].length;
+		this.E = scoreArr.clone();
+		
+		this.men = men;
+		this.women = women;
+		this.massTol = massTol;
+		this.rtTol = rtTol;
+	
 	}
 	
 	public int[] execute() {
@@ -24,6 +40,7 @@ public class GreedyApprox {
 			
 			// let e be the heaviest edge in E
 			e = findMax(E);	
+			
 			System.out.println(e);
 
 			// add e to M			
@@ -34,7 +51,7 @@ public class GreedyApprox {
 			for (int j = 0; j < nCols; j++) {
 				E[e.row][j] = 0;
 			}
-			
+						
 		} while (e.value > 0);
 
 		return M;

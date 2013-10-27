@@ -3,6 +3,8 @@ package com.joewandy.alignmentResearch.objectModel;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.jblas.DoubleMatrix;
+
 import peakml.chemistry.PeriodicTable;
 
 import com.joewandy.alignmentResearch.main.FeatureXMLAlignment;
@@ -88,8 +90,8 @@ public class MatchingScorer {
 		double weight = 0;
 		int fiIdx = fi.getPeakID();
 		int fjIdx = fj.getPeakID();
-		double[][] ZZProb1 = fi.getZZProb();
-		double[][] ZZProb2 = fj.getZZProb();
+		DoubleMatrix ZZProb1 = fi.getZZProb();
+		DoubleMatrix ZZProb2 = fj.getZZProb();
 
 		for (Feature fm : getNearbyFeatures(fi, dmz)) {
 			for (Feature fn : getNearbyFeatures(fj, dmz)) {
@@ -97,8 +99,8 @@ public class MatchingScorer {
 				int fmIdx = fm.getPeakID();
 				int fnIdx = fn.getPeakID();
 				
-				double prob1 = ZZProb1[fiIdx][fmIdx];
-				double prob2 = ZZProb2[fjIdx][fnIdx];
+				double prob1 = ZZProb1.get(fiIdx, fmIdx);
+				double prob2 = ZZProb2.get(fjIdx, fnIdx);
 				double pairWeight = prob1 * prob2;
 				weight += pairWeight;
 

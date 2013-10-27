@@ -8,6 +8,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.jblas.DoubleMatrix;
+
 import peakml.chemistry.PeriodicTable;
 
 import com.joewandy.alignmentResearch.comparator.FeatureIntensityComparator;
@@ -21,8 +23,8 @@ public class AlignmentFile {
 	private File file;
 	private List<Feature> features;
 	private List<Feature> sortedFeatures; // sorted by intensity descending
-	private double[][] Z;
-	private double[][] ZZProb;
+	private DoubleMatrix Z;
+	private DoubleMatrix ZZProb;
 		
 	public AlignmentFile(int id, String filename, List<Feature> features) {
 		this.id = id;
@@ -56,22 +58,22 @@ public class AlignmentFile {
 		return file;
 	}
 	
-	public double[][] getZ() {
+	public DoubleMatrix getZ() {
 		return Z;
 	}
 
-	public void setZ(double[][] z) {
+	public void setZ(DoubleMatrix z) {
 		Z = z;
 	}
 
-	public double[][] getZZProb() {
+	public DoubleMatrix getZZProb() {
 		return ZZProb;
 	}
 
-	public void setZZProb(double[][] zZProb) {
+	public void setZZProb(DoubleMatrix zZProb) {
 		ZZProb = zZProb;
 	}
-	
+
 	public String getFilenameWithoutExtension() {
 		String fileNameWithOutExt = AlignmentFile.removeExtension(this.filename);
 		return fileNameWithOutExt;

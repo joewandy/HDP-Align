@@ -12,6 +12,11 @@ import matlabcontrol.MatlabProxy;
 import matlabcontrol.MatlabProxyFactory;
 import matlabcontrol.MatlabProxyFactoryOptions;
 
+import org.jblas.DoubleMatrix;
+
+import cern.colt.matrix.tdouble.DoubleMatrix2D;
+import cern.colt.matrix.tdouble.impl.SparseDoubleMatrix2D;
+
 import com.jmatio.io.MatFileReader;
 import com.jmatio.types.MLDouble;
 import com.joewandy.alignmentResearch.main.FeatureXMLAlignment;
@@ -20,7 +25,6 @@ import dk.ange.octave.OctaveEngine;
 import dk.ange.octave.OctaveEngineFactory;
 import dk.ange.octave.type.Octave;
 import dk.ange.octave.type.OctaveDouble;
-import dk.ange.octave.type.matrix.DoubleMatrix;
 
 public class MatlabFeatureGrouping extends BaseFeatureGrouping implements FeatureGrouping {
 
@@ -93,16 +97,15 @@ public class MatlabFeatureGrouping extends BaseFeatureGrouping implements Featur
 
 			if (mfr != null) {
 
-				double[][] dz = ((MLDouble)mfr.getMLArray("Z")).getArray();
+				DoubleMatrix dz = new DoubleMatrix(((MLDouble)mfr.getMLArray("Z")).getArray());
 				data.setZ(dz);
 
-				// convert to feature group objects
-				int m = dz.length;
-				int n = dz[0].length;
+				int m = dz.rows;
+				int n = dz.columns;
 				int[][] Z = new int[m][n];
 				for (int i = 0; i < m; i++) {
 					for (int j = 0; j < n; j++) {
-						Z[i][j] = (int) dz[i][j];
+						Z[i][j] = (int) dz.get(i, j);
 					}
 				}
 				Map<Integer, FeatureGroup> groupMap = new HashMap<Integer, FeatureGroup>();
@@ -147,8 +150,8 @@ public class MatlabFeatureGrouping extends BaseFeatureGrouping implements Featur
 				
 				if (mfr != null) {
 
-					final double[][] ZZprob = ((MLDouble)mfr.getMLArray("ZZprob")).getArray();
-					System.out.println("ZZprob = " + ZZprob.length + "x" + ZZprob[0].length);
+					DoubleMatrix ZZprob = new DoubleMatrix(((MLDouble)mfr.getMLArray("ZZprob")).getArray());
+//					System.out.println("ZZprob = " + ZZprob.length + "x" + ZZprob[0].length);
 					data.setZZProb(ZZprob);
 					
 				}	
@@ -263,8 +266,8 @@ public class MatlabFeatureGrouping extends BaseFeatureGrouping implements Featur
 				
 				if (mfr != null) {
 
-					final double[][] ZZprob = ((MLDouble)mfr.getMLArray("ZZprob")).getArray();
-					System.out.println("ZZprob = " + ZZprob.length + "x" + ZZprob[0].length);
+					DoubleMatrix ZZprob = new DoubleMatrix(((MLDouble)mfr.getMLArray("ZZprob")).getArray());
+//					System.out.println("ZZprob = " + ZZprob.length + "x" + ZZprob[0].length);
 					data.setZZProb(ZZprob);
 					
 				}				
@@ -303,32 +306,6 @@ public class MatlabFeatureGrouping extends BaseFeatureGrouping implements Featur
 		}
 		// never happens
 		return -1;
-	}
-	
-	private static double[][] convertMatrix(DoubleMatrix matlabMatrix) {
-
-		int[] sizes = matlabMatrix.getSize();
-		int n = sizes[0];
-		int k = sizes[1];
-
-//		System.out.println();
-//		System.out.println("=======================");
-//		System.out.println("Clustering result");
-//		System.out.println("=======================");
-//		System.out.println("sizes = " + Arrays.toString(sizes));
-
-		// reshape 1d array of size 1 by (n*k) into a 2d array of size n by k
-		double[] data = matlabMatrix.getData();
-		double[][] javaMatrix = new double[n][k];
-		for (int i = 0; i < n; i++) {
-			for (int j = 0; j < k; j++) {
-				int idx = k*i + j;
-				javaMatrix[i][j] = data[idx];
-			}
-		}
-//		System.out.println("data = " + Arrays.toString(data));
-		return javaMatrix;
-
 	}
 	
 }

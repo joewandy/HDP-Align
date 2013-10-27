@@ -13,7 +13,10 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 
+import org.jblas.DoubleMatrix;
+
 import peakml.chemistry.PeriodicTable;
+import cern.colt.matrix.tdouble.DoubleMatrix1D;
 
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
@@ -310,17 +313,17 @@ public class MySocialStableMarriageAlignment extends BaseAlignment implements Al
 
 		Set<Feature> friends = new HashSet<Feature>();		
 		AlignmentFile file = feature.getData();
-		double[][] zzProb = feature.getZZProb();
+		DoubleMatrix zzProb = feature.getZZProb();
 		
 		if (zzProb == null) {
 			return friends;
 		}
 		
-		int i = feature.getPeakID();		
-		double[] probArray = zzProb[i];
+		int i = feature.getPeakID();
+		DoubleMatrix probArray = zzProb.getRow(i);
 				
 		for (int j = 0; j < probArray.length; j++) {
-			double prob = probArray[j];
+			double prob = probArray.get(j);
 			if (prob >= threshold) {
 				
 				Feature friend = file.getFeatureByIndex(j);				

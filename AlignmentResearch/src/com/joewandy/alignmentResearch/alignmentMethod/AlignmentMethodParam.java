@@ -36,7 +36,7 @@ public class AlignmentMethodParam {
 	/**
 	 * Switch between polynomial model or lineal model
 	 */
-	public static final boolean PARAM_LINEAR_MODEL = false;
+	public static final boolean PARAM_LINEAR_MODEL = true;
 	
 	/**
 	 * If checked, only rows having same charge state can be aligned
