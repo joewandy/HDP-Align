@@ -367,6 +367,18 @@ public class GroundTruth {
 		System.out.println("totalPositives = " + totalPositives);
 		System.out.println("totalPositives-TP = " + (totalPositives-TP));
 		// assert(FP == (totalPositives-TP));
+		
+		// how many ground truth entries are aligned ?
+		System.out.println("Ground truth entries = ");
+		System.out.print('[');
+		for (GroundTruthPair entry : gPlus) {
+			if (t.contains(entry)) {
+				System.out.print("1, ");
+			} else {
+				System.out.print("0, ");
+			}
+		}
+		System.out.println("];");
 
 		// TN = big number, don't compute
 		

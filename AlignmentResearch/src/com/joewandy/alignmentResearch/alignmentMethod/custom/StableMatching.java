@@ -2,21 +2,22 @@ package com.joewandy.alignmentResearch.alignmentMethod.custom;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.Random;
+import java.util.Set;
 
 import org.jblas.DoubleMatrix;
 
 import com.jmatio.io.MatFileReader;
-import com.jmatio.io.MatFileWriter;
-import com.jmatio.types.MLArray;
 import com.jmatio.types.MLDouble;
 import com.joewandy.alignmentResearch.main.FeatureXMLAlignment;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
@@ -34,9 +35,6 @@ public class StableMatching implements FeatureMatching {
 	private double massTol;
 	private double rtTol;	
 	private MatchingScorer scorer;
-	private DoubleMatrix distArr;
-	private DoubleMatrix scoreArr;
-	private DoubleMatrix binaryScoreArr;
 	private double alpha;
 	
 	public StableMatching(String listId, AlignmentList masterList, AlignmentList childList,
@@ -48,9 +46,6 @@ public class StableMatching implements FeatureMatching {
 		this.massTol = massTol;
 		this.rtTol = rtTol;		
 		this.scorer = new MatchingScorer(this.massTol, this.rtTol);
-		this.scoreArr = null;
-		this.distArr = null;
-		this.binaryScoreArr = null;
 		this.alpha = alpha;
 	}
 
@@ -202,7 +197,11 @@ public class StableMatching implements FeatureMatching {
 					DoubleMatrix prob = getProb(f1.getData());
 					int idx1 = f1.getPeakID();
 					int idx2 = f2.getPeakID();
-					total += prob.get(idx1, idx2);
+					if (idx1 == idx2) {
+						total += 1;
+					} else {
+						total += prob.get(idx1, idx2);						
+					}
 					counter++;
 				}
 			}
@@ -216,47 +215,89 @@ public class StableMatching implements FeatureMatching {
 
 		System.out.println("\tmasterList " + masterList.getId());
 		System.out.println("\tchildList " + childList.getId());		
-    	
-		// compute score here
 		List<AlignmentRow> men = getMen(masterList, childList);
 		List<AlignmentRow> women = getWomen(masterList, childList);
-		DoubleMatrix clusteringMen = getMenClustering(masterList, childList);
-		DoubleMatrix clusteringWomen = getWomenClustering(masterList, childList);
-        computeScores(men, women, clusteringMen, clusteringWomen);
-//        saveToMatlab(masterList.getData().getParentPath());
-
-        if (FeatureXMLAlignment.WEIGHT_USE_WEIGHTED_SCORE) {
-			combineScoreJBlas(clusteringMen, clusteringWomen);				
-//        	loadScore();
-		}
-        
-        Map<AlignmentRow, AlignmentRow> matches = glMatching(men, women);        
-//        Map<AlignmentRow, AlignmentRow> matches = hungarianMatching(men, women);
-//        Map<AlignmentRow, AlignmentRow> matches = approxMaxMatching(men, women);
     	
+        Map<AlignmentRow, AlignmentRow> matches = new HashMap<AlignmentRow, AlignmentRow>();
+        if (FeatureXMLAlignment.BAGGING) {
+        	
+    		MatchesResult result = new MatchesResult();
+            for (int i = 0; i < FeatureXMLAlignment.BAGGING_ITER; i++) {
+            	System.out.println("Iteration #" + (i+1));
+            	List<AlignmentRow> sampledMen = new ArrayList<AlignmentRow>(sample(men));
+            	List<AlignmentRow> sampledWomen = new ArrayList<AlignmentRow>(sample(women));
+            	// must readjust the position index
+            	// NOTE: no longer using row id for this kind of purpose
+            	for (int j = 0; j < sampledMen.size(); j++) {
+            		AlignmentRow row = sampledMen.get(j);
+            		row.setPos(j);
+            	}
+            	for (int j = 0; j < sampledWomen.size(); j++) {
+            		AlignmentRow row = sampledWomen.get(j);
+            		row.setPos(j);
+            	}
+            	DoubleMatrix scoreArr = computeScores(sampledMen, sampledWomen);
+            	Map<AlignmentRow, AlignmentRow> match = glMatching(scoreArr, sampledMen, sampledWomen);
+            	result.addMatch(match);
+            }
+            
+            matches = result.getConsensus();        
+
+        } else if (FeatureXMLAlignment.ENSEMBLE) {
+
+    		DoubleMatrix scoreArr = computeScores(men, women);
+    		MatchesResult result = new MatchesResult();
+            
+        	Map<AlignmentRow, AlignmentRow> match = glMatching(scoreArr, men, women);
+        	result.addMatch(match);
+        	
+        	match = approxMaxMatching(scoreArr, men, women);
+        	result.addMatch(match);
+
+        	match = hungarianMatching(scoreArr, men, women);
+        	result.addMatch(match);
+        	
+        	matches = result.getConsensus();        	
+            
+        } else {
+        	
+            DoubleMatrix scoreArr = computeScores(men, women);
+//          saveToMatlab(masterList.getData().getParentPath());
+
+            if (FeatureXMLAlignment.WEIGHT_USE_WEIGHTED_SCORE) {
+        		DoubleMatrix clusteringMen = getMenClustering(masterList, childList);
+        		DoubleMatrix clusteringWomen = getWomenClustering(masterList, childList);
+            	combineScoreJBlas(scoreArr, clusteringMen, clusteringWomen);				
+//            	scoreArr = loadScore();
+    		}
+        	
+        	matches = glMatching(scoreArr, men, women);        	
+
+        }
+        
         return matches;
         
     }
     
 	
-	private void saveToMatlab(String path) {
-		System.out.println("Saving scores to matlab");
-		MLDouble scoreMat = new MLDouble("W", scoreArr.toArray2());
-		MLDouble inRangeMat = new MLDouble("Q", binaryScoreArr.toArray2());
-		final Collection<MLArray> output = new ArrayList<MLArray>();
-		output.add(scoreMat);
-		output.add(inRangeMat);
-		final MatFileWriter writer = new MatFileWriter();
-		try {
-			String fullPath = path + "/mat/WQ.mat";
-			writer.write(fullPath, output);
-			System.out.println("Written to " + fullPath);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+//	private void saveToMatlab(String path) {
+//		System.out.println("Saving scores to matlab");
+//		MLDouble scoreMat = new MLDouble("W", scoreArr.toArray2());
+//		MLDouble inRangeMat = new MLDouble("Q", binaryScoreArr.toArray2());
+//		final Collection<MLArray> output = new ArrayList<MLArray>();
+//		output.add(scoreMat);
+//		output.add(inRangeMat);
+//		final MatFileWriter writer = new MatFileWriter();
+//		try {
+//			String fullPath = path + "/mat/WQ.mat";
+//			writer.write(fullPath, output);
+//			System.out.println("Written to " + fullPath);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//	}
 
-	private Map<AlignmentRow, AlignmentRow> hungarianMatching(
+	private Map<AlignmentRow, AlignmentRow> hungarianMatching(DoubleMatrix scoreArr,
 			List<AlignmentRow> men, List<AlignmentRow> women) {
 		
         double maxScore = scoreArr.max();
@@ -268,7 +309,7 @@ public class StableMatching implements FeatureMatching {
     		}
     	}
 		// running matching
-		System.out.print("\tRunning matching ");
+		System.out.print("\tRunning maximum weighted matching ");
 		HungarianAlgorithm algo = new HungarianAlgorithm(scoreArr.toArray2());
 		int[] res = algo.execute();
 		System.out.println();
@@ -288,11 +329,12 @@ public class StableMatching implements FeatureMatching {
 
 	}
 
-	private Map<AlignmentRow, AlignmentRow> approxMaxMatching(List<AlignmentRow> men, 
+	private Map<AlignmentRow, AlignmentRow> approxMaxMatching(DoubleMatrix scoreArr, 
+			List<AlignmentRow> men, 
 			List<AlignmentRow> women) {
 		
 		// running matching
-		System.out.print("\tRunning matching ");
+		System.out.print("\tRunning approximately maximum greedy matching ");
 		GreedyApprox algo = new GreedyApprox(scoreArr.toArray2());
 		int[] res = algo.execute();
 		System.out.println();
@@ -311,8 +353,22 @@ public class StableMatching implements FeatureMatching {
 		return matches;
 		
 	}
-	
-	private Map<AlignmentRow, AlignmentRow> glMatching(List<AlignmentRow> men, 
+		
+	private Set<AlignmentRow> sample(List<AlignmentRow> items) {
+		Set<AlignmentRow> sampled = new HashSet<AlignmentRow>();
+		Random rg = new Random();
+		int counter = 0;
+		while (counter < items.size()) {
+			int pos = rg.nextInt(items.size());
+			AlignmentRow selected = items.get(pos);
+			sampled.add(selected);
+			counter++;
+		}
+		return sampled;
+	}
+
+	private Map<AlignmentRow, AlignmentRow> glMatching(DoubleMatrix scoreArr, 
+			List<AlignmentRow> men, 
 			List<AlignmentRow> women) {
 
         // Create a free list of men (and use it to store their proposals)
@@ -332,7 +388,7 @@ public class StableMatching implements FeatureMatching {
         System.out.println();
 		
 		// call GS algorithm
-        Map<AlignmentRow, RowPreference> engagements = galeShapley(freeMen, women);
+        Map<AlignmentRow, RowPreference> engagements = galeShapley(scoreArr, freeMen, women);
 
         // Convert internal data structure to mapping
         Map<AlignmentRow, AlignmentRow> matches = new HashMap<AlignmentRow, AlignmentRow>();
@@ -345,6 +401,7 @@ public class StableMatching implements FeatureMatching {
 	}
 
 	private Map<AlignmentRow, RowPreference> galeShapley(
+			DoubleMatrix scoreArr, 
 			Queue<RowPreference> freemen, List<AlignmentRow> women) {
 		
 		// Create an initially empty map of engagements
@@ -371,8 +428,8 @@ public class StableMatching implements FeatureMatching {
             // for unequal m and w size. no more w to propose to ?
             if (preferredWoman != null) {
 
-            	int rowIdx = preferredWoman.rowIdx;
-            	AlignmentRow w = women.get(rowIdx);
+            	int pos = preferredWoman.pos;
+            	AlignmentRow w = women.get(pos);
             	
             	// FIXME: hard cut-off here improves precision & recall quite a lot
             	// can we do better than this ?
@@ -392,7 +449,7 @@ public class StableMatching implements FeatureMatching {
 	                    // some pair (m', w) already exists
 	                    RowPreference mPrime = engagements.get(w);
 	                    AlignmentRow mPrimeRow = mPrime.row;
-	                    WomanPreferenceComparator womanPreference = new WomanPreferenceComparator(w);
+	                    WomanPreferenceComparator womanPreference = new WomanPreferenceComparator(w, scoreArr);
 	                    int compareRes = womanPreference.compare(mPrimeRow, mRow);
 	                    
 	                    // w prefers m to m'
@@ -447,16 +504,15 @@ public class StableMatching implements FeatureMatching {
 
 	}
 
-	private void computeScores(List<AlignmentRow> men,
-			List<AlignmentRow> women, DoubleMatrix clusteringMen, DoubleMatrix clusteringWomen) {
+	private DoubleMatrix computeScores(List<AlignmentRow> men, List<AlignmentRow> women) {
 
 		int m = men.size();
 		int n = women.size();
+		DoubleMatrix scoreArr = new DoubleMatrix(m, n);
 		
     	System.out.print("\tComputing scores ");
     	double maxDist = 0;
-		distArr = new DoubleMatrix(m, n);
-		binaryScoreArr = new DoubleMatrix(m, n);
+		DoubleMatrix distArr = new DoubleMatrix(m, n);
 		for (int i = 0; i < m; i++) {
 			
 			for (int j = 0; j < n; j++) {
@@ -468,7 +524,6 @@ public class StableMatching implements FeatureMatching {
 						maxDist = dist;
 					}
 					distArr.put(i, j, dist);				
-					binaryScoreArr.put(i, j, 1);
 				}
 			}
 			
@@ -479,21 +534,27 @@ public class StableMatching implements FeatureMatching {
 		}
 		System.out.println();
 
-    	// score = 1-(dist/maxDist)
-		distArr.divi(maxDist);
-		scoreArr = DoubleMatrix.ones(men.size(), women.size());
-		scoreArr.subi(distArr);
+		scoreArr = new DoubleMatrix(m, n);
+		for (int i = 0; i < m; i++) {			
+			for (int j = 0; j < n; j++) {
+				double dist = distArr.get(i, j);
+				if (dist > 0) {
+					double score = 1-(dist/maxDist);
+					scoreArr.put(i, j, score);
+				}
+			}
+		}
+		distArr = null;
 		
-		// get rid of those score values not within mass tolerance
-		scoreArr.muli(binaryScoreArr);
-
 		// normalise score to 0..1
 		double maxScore = scoreArr.max();
 		scoreArr.divi(maxScore);
+		
+		return scoreArr;
 			
 	}
 
-	private void combineScoreJBlas(DoubleMatrix clusteringMen,
+	private void combineScoreJBlas(DoubleMatrix scoreArr, DoubleMatrix clusteringMen,
 			DoubleMatrix clusteringWomen) {
 
     	System.out.println("\tCombining scores ");
@@ -504,30 +565,34 @@ public class StableMatching implements FeatureMatching {
 		W.divi(maxScore);
 		System.out.println("\t\tW = " + W.rows + "x" + W.columns);
 		
-		DoubleMatrix A = clusteringMen.dup();
-		if (!FeatureXMLAlignment.WEIGHT_USE_ALL_PEAKS) {
-			A = A.mmul(A.transpose());			
+		DoubleMatrix A = clusteringMen;
+		for (int i = 0; i < A.rows; i++) {
+			A.put(i, i, 0);
 		}
-		A.subi(DoubleMatrix.diag(A.diag())); // A = A - diag(diag(A));
 		System.out.println("\t\tA = " + A.rows + "x" + A.columns);
 		 
-		DoubleMatrix B = clusteringWomen.dup();
-		if (!FeatureXMLAlignment.WEIGHT_USE_ALL_PEAKS) {
-			B = B.mmul(B.transpose());
+		DoubleMatrix B = clusteringWomen;
+		for (int i = 0; i < B.rows; i++) {
+			B.put(i, i, 0);
 		}
-		B.subi(DoubleMatrix.diag(B.diag())); // B = B - diag(diag(B));
 		System.out.println("\t\tB = " + B.rows + "x" + B.columns);
 
 		// D = (A*W)*B;
 		System.out.println("\t\tComputing D=(AW)B");
 		DoubleMatrix D = A.mmul(W);
-
 		D.mmuli(B);
 
 		// D = Q .* D;
 		System.out.println("\t\tComputing D.*Q");
-		DoubleMatrix Q = binaryScoreArr;
-		D.muli(Q);
+		for (int i = 0; i < scoreArr.rows; i++) {			
+			for (int j = 0; j < scoreArr.columns; j++) {
+				if (scoreArr.get(i, j) > 0) {
+					// leave as it is
+				} else {
+					D.put(i, j, 0);
+				}
+			}
+		}
 		
 		// D = D ./ max(max(D));
 		maxScore = D.max();
@@ -537,14 +602,14 @@ public class StableMatching implements FeatureMatching {
 		System.out.println("\t\tComputing W'=(alpha.*W)+((1-alpha).*D)");
 		W.muli(alpha);
 		D.muli(1-alpha);
-		DoubleMatrix Wp = W.add(D);
+		scoreArr = W.add(D);
 		
 		long elapsedTime = (System.nanoTime()-startTime)/1000000000;
 		System.out.println("\tElapsed time = " + elapsedTime + "s");
 		
 	}
 	
-	private void loadScore() {
+	private DoubleMatrix loadScore() {
 		System.out.println("\tLoading precomputed matlab scores");
 		// load from matlab
 		MatFileReader mfr = null;
@@ -554,7 +619,8 @@ public class StableMatching implements FeatureMatching {
 			e.printStackTrace();
 			System.exit(1);
 		}
-		scoreArr = new DoubleMatrix(((MLDouble)mfr.getMLArray("Wp")).getArray());
+		DoubleMatrix scoreArr = new DoubleMatrix(((MLDouble)mfr.getMLArray("Wp")).getArray());
+		return scoreArr;
 	}
 	
     private class RowPreference {
@@ -576,17 +642,17 @@ public class StableMatching implements FeatureMatching {
     
     private class PreferenceItem {
 
-    	private int rowIdx;
+    	private int pos;
     	private final double score;
     	
     	public PreferenceItem(int idx, double score) {
-    		this.rowIdx = idx;
+    		this.pos = idx;
     		this.score = score;
     	}
 
 		@Override
 		public String toString() {
-			return "PreferenceItem [entry=" + rowIdx + ", score=" + score + "]";
+			return "PreferenceItem [entry=" + pos + ", score=" + score + "]";
 		}
     	
     }
@@ -604,21 +670,173 @@ public class StableMatching implements FeatureMatching {
     private class WomanPreferenceComparator implements Comparator<AlignmentRow>{
 
     	private AlignmentRow woman;
+    	private DoubleMatrix scoreArr;
     	
-    	public WomanPreferenceComparator(AlignmentRow woman) {
+    	public WomanPreferenceComparator(AlignmentRow woman, DoubleMatrix scoreArr) {
     		this.woman = woman;
+    		this.scoreArr = scoreArr;
     	}
 
     	@Override
     	public int compare(AlignmentRow candidate1, AlignmentRow candidate2) {
-    		int myIndex = woman.getRowId();
-    		int can1Index = candidate1.getRowId();
-    		int can2Index = candidate2.getRowId();
+    		int myIndex = woman.getPos();
+    		int can1Index = candidate1.getPos();
+    		int can2Index = candidate2.getPos();
     		double score1 = scoreArr.get(can1Index, myIndex);
     		double score2 = scoreArr.get(can2Index, myIndex);
     		return Double.compare(score1, score2);
     	}
     	
-    }        
+    }   
+    
+    private class MatchesResult {
+    	
+        private List<AlignmentMatch> matches;
+
+        public MatchesResult() {
+        	this.matches = new ArrayList<AlignmentMatch>();
+        }
+        
+        public void addMatch(Map<AlignmentRow, AlignmentRow> mapping) {
+        	for (Entry<AlignmentRow, AlignmentRow> entry : mapping.entrySet()) {
+        		AlignmentRow from = entry.getKey();
+        		AlignmentRow to = entry.getValue();
+        		if (from == null || to == null) {
+        			continue;
+        		}
+        		boolean found = false;
+            	for (AlignmentMatch match : matches) {
+            		if (match.exist(from, to)) {
+            			match.increaseFreq();
+            			found = true;
+            		}
+            	}
+            	if (!found) {
+            		AlignmentMatch newMatch = new AlignmentMatch(from, to);
+            		matches.add(newMatch);
+            	}
+        	}
+        }
+        
+        public Map<AlignmentRow, AlignmentRow> getConsensus() {
+        	Map<AlignmentRow, AlignmentRow> consensus = new HashMap<AlignmentRow, AlignmentRow>();
+        	Queue<AlignmentMatch> matchQueue = new PriorityQueue<AlignmentMatch>(11, new AlignmentMatchComparator());
+        	matchQueue.addAll(matches);
+        	int counter = 0;
+        	while (!matchQueue.isEmpty()) {
+        		AlignmentMatch match = matchQueue.poll();
+        		if (match.isDeleted()) {
+        			continue;
+        		}
+        		if (counter < 20) {
+        			System.out.println(match);
+        		}
+        		counter++;
+        		List<AlignmentMatch> remaining = findNotDeleted(match);
+        		Collections.sort(remaining, new AlignmentMatchComparator());
+        		AlignmentMatch best = remaining.get(0);
+        		consensus.put(best.from, best.to);
+        		for (int i = 0; i < remaining.size(); i++) {
+    				AlignmentMatch rem = remaining.get(i);
+    				rem.setDeleted(true);
+        		}
+        	}
+        	return consensus;
+        }
+
+		private List<AlignmentMatch> findNotDeleted(
+				AlignmentMatch match) {
+			List<AlignmentMatch> result = new ArrayList<AlignmentMatch>();
+			for (AlignmentMatch other : matches) {
+				if (other.isDeleted()) {
+					continue;
+				}
+				Set<Feature> intersection = match.intersect(other);
+				if (!intersection.isEmpty()) {
+					result.add(other);
+				}
+			}
+			return result;
+		}
+            	
+    }
+    
+    private class AlignmentMatch {
+
+    	private AlignmentRow from;
+    	private AlignmentRow to;
+    	private Set<Feature> aligned;
+    	private int freq;
+    	private boolean deleted;
+    	
+		public AlignmentMatch(AlignmentRow from, AlignmentRow to) {
+			this.deleted = false;
+			this.aligned = new HashSet<Feature>();
+			add(from, to);
+		}
+    	
+		public void add(AlignmentRow from, AlignmentRow to) {
+			this.from = from;
+			this.to = to;
+			Set<Feature> fromFeatures = from.getFeatures();
+			Set<Feature> toFeatures = to.getFeatures();
+			this.aligned.addAll(fromFeatures);
+			this.aligned.addAll(toFeatures);			
+			this.freq = 1;
+		}
+		
+		public boolean exist(AlignmentRow from, AlignmentRow to) {
+			for (Feature f : from.getFeatures()) {
+				if (!aligned.contains(f)) {
+					return false;
+				}
+			}
+			for (Feature f : to.getFeatures()) {
+				if (!aligned.contains(f)) {
+					return false;
+				}
+			}
+			return true;
+		}
+		
+		public void increaseFreq() {
+			this.freq++;
+		}
+		
+		public boolean isDeleted() {
+			return deleted;
+		}
+
+		public void setDeleted(boolean deleted) {
+			this.deleted = deleted;
+		}
+		
+		public Set<Feature> intersect(AlignmentMatch another) {
+			Set<Feature> anotherFeatures = another.aligned;
+			Set<Feature> intersection = new HashSet<Feature>(this.aligned);
+			intersection.retainAll(anotherFeatures);
+			return intersection;
+		}
+
+		@Override
+		public String toString() {
+			return "AlignmentMatch [freq=" + freq + ", aligned=" + aligned
+					+ "]";
+		}
+    	
+    }
+    
+    private class AlignmentMatchComparator implements Comparator<AlignmentMatch>{
+
+    	@Override
+    	public int compare(AlignmentMatch item1, AlignmentMatch item2) {
+    	
+    		// higher score is now preferred, so invert the sign
+    		return - Double.compare(item1.freq, item2.freq);
+   	
+    	}
+    	
+    }    
+
 
 }

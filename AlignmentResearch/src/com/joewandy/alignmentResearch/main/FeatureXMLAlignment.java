@@ -53,7 +53,7 @@ import com.joewandy.alignmentResearch.objectModel.FeatureGroup;
 import com.joewandy.alignmentResearch.objectModel.FeatureGrouping;
 import com.joewandy.alignmentResearch.objectModel.GreedyFeatureGrouping;
 import com.joewandy.alignmentResearch.objectModel.GroundTruth;
-import com.joewandy.alignmentResearch.objectModel.MatlabFeatureGrouping;
+import com.joewandy.alignmentResearch.objectModel.SavedMatlabFeatureGrouping;
 import com.joewandy.util.Tool;
 
 public class FeatureXMLAlignment {
@@ -66,13 +66,20 @@ public class FeatureXMLAlignment {
 	public static final boolean PARALLEL_LIBRARY_BUILD = false;
 
 	// use weighting when scoring peaks ?
-	public static final boolean WEIGHT_USE_WEIGHTED_SCORE = true;
+	public static final boolean WEIGHT_USE_WEIGHTED_SCORE = false;
 
 	// use mixture model clustering vs. greedy clustering ?
-	public static final boolean WEIGHT_USE_PROB_CLUSTERING_WEIGHT = true;
+	public static final boolean WEIGHT_USE_PROB_CLUSTERING_WEIGHT = false;
 
 	// use posterior probability of all peaks ?
-	public static final boolean WEIGHT_USE_ALL_PEAKS = true;
+	public static final boolean WEIGHT_USE_ALL_PEAKS = false;
+	
+	// use bagging ?
+	public static final boolean BAGGING = false;
+	public static final int BAGGING_ITER = 10;
+
+	// ensemble of alignment methods ?
+	public static final boolean ENSEMBLE = false;
 	
 	// public static final int ALIGNMENT_SCORE_THRESHOLD = 20;
 	
@@ -80,7 +87,7 @@ public class FeatureXMLAlignment {
 	 * PARAMETERS FOR NOISE & EXPERIMENT
 	 */
 
-	private static final double[] EXPERIMENT_THRESHOLDS = { 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.95, 0.99 };
+	private static final double[] EXPERIMENT_THRESHOLDS = { 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1 };
 
 	private static final String EXPERIMENT_TYPE_MISSING_PEAKS = "missingPeaks";
 	private static final String EXPERIMENT_TYPE_CONTAMINANT_PEAKS = "contaminantPeaks";
@@ -404,9 +411,9 @@ public class FeatureXMLAlignment {
 			grouping = new GreedyFeatureGrouping(options.groupingRtWindow);					
 		} else if (options.grouping) {
 			if (WEIGHT_USE_PROB_CLUSTERING_WEIGHT) {
-				grouping = new MatlabFeatureGrouping(options.groupingRtWindow, 
-						options.groupingAlpha, options.groupingNSamples);															
-//				grouping = new SavedMatlabFeatureGrouping();															
+//				grouping = new MatlabFeatureGrouping(options.groupingRtWindow, 
+//						options.groupingAlpha, options.groupingNSamples);															
+				grouping = new SavedMatlabFeatureGrouping();															
 			} else {
 				// use greedy weight scores
 				grouping = new GreedyFeatureGrouping(options.groupingRtWindow);					
@@ -463,6 +470,7 @@ public class FeatureXMLAlignment {
 					options.alignmentPpm, options.alignmentRtWindow);				
 		}		
 		evalRes.setTh(options.alpha);
+		evalRes.setDrtBefore(options.ransacRtToleranceBeforeCorrection);
 		System.out.println(evalRes);
 					
 		// RetentionTimePrinter rtp = new RetentionTimePrinter();

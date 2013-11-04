@@ -21,6 +21,7 @@ public class EvaluationResult {
 	private double meanMdrt;
 	private double coverage;
 	private double th;
+	private double drtBefore;
 
 	public EvaluationResult(double dmz, double drt, double precision, double recall, double f1,
 			double f05, double totalTp, double totalFp, double totalFn, double totalPositives,
@@ -135,6 +136,14 @@ public class EvaluationResult {
 		this.drt = drt;
 	}
 
+	public double getDrtBefore() {
+		return drtBefore;
+	}
+
+	public void setDrtBefore(double drtBefore) {
+		this.drtBefore = drtBefore;
+	}
+
 	@Override
 	public String toString() {
 		
@@ -175,7 +184,7 @@ public class EvaluationResult {
 				totalPositives + ", " + totalPositivesRatioStr + ", " + 
 				medSdrtStr + ", " + meanSdrtStr + ", " + 
 				medMdrtStr + ", " + meanMdrtStr + ", " +
-				coverageStr;
+				coverageStr + ", " + drtBefore;
 
 		return output;
 		

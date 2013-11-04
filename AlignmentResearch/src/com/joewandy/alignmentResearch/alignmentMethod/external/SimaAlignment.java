@@ -30,17 +30,14 @@ import com.joewandy.alignmentResearch.objectModel.Feature;
  */
 public class SimaAlignment extends BaseAlignment implements AlignmentMethod {
 
-	// base directory that contains sima
-	private static final String SIMA_BASE = "/home/joewandy/Dropbox/Project/real_datasets/SIMA_full";
+	// the executable name of SIMA
+	private static final String SIMA_EXEC = "/home/joewandy/Dropbox/Project/real_datasets/SIMA_full/SIMA";
 
-	// the executable name inside SIMA_BASE
-	private static final String SIMA_EXEC = "SIMA";
-
-	// temporary directory inside SIMA_BASE used to put our input files
-	private static final String SIMA_INPUT_DIR = "/temp";
+	// temporary directory to put our input files
+	private static final String TEMP_INPUT_DIR = "/home/joewandy/temp/SIMA";
 	
 	// the output to read after running SIMA_EXEC
-	private static final String SIMA_OUTPUT = "/temp/results/result.txt";
+	private static final String SIMA_OUTPUT = "/home/joewandy/temp/SIMA/results/result.txt";
 	
 	// Enable MTS correction using PARAMETER linepoints. Recommendation: 50-100 linepoints.
 	private double mtsCorrection; // any other options to include here ?
@@ -66,7 +63,7 @@ public class SimaAlignment extends BaseAlignment implements AlignmentMethod {
 			runSima(tempDirPath);
 			
 			// read back the output from simaDir/results/result.txt
-			final String outputPath = SimaAlignment.SIMA_BASE + SimaAlignment.SIMA_OUTPUT;
+			final String outputPath = SimaAlignment.SIMA_OUTPUT;
 			alignedList = new AlignmentList(outputPath, dataList, "");
 						
 		} catch (IOException e) {
@@ -81,7 +78,7 @@ public class SimaAlignment extends BaseAlignment implements AlignmentMethod {
 	private String writeTempFiles() throws IOException, FileNotFoundException {
 	
 		// create temporary directory to hold our intermediate input files
-		final String tempDirPath = SimaAlignment.SIMA_BASE + SimaAlignment.SIMA_INPUT_DIR;
+		final String tempDirPath = SimaAlignment.TEMP_INPUT_DIR;
 		final File tempDir = new File(tempDirPath);
 		if (!tempDir.exists() && !tempDir.mkdirs()) {
 		    throw new IOException("Unable to create " + tempDir.getAbsolutePath());
@@ -92,7 +89,7 @@ public class SimaAlignment extends BaseAlignment implements AlignmentMethod {
 
 		// put all spectra files inside SIMA_INPUT_DIR
 		for (AlignmentFile data : dataList) {
-			String out = SimaAlignment.SIMA_BASE + SimaAlignment.SIMA_INPUT_DIR + "/" + 
+			String out = SimaAlignment.TEMP_INPUT_DIR + "/" + 
 					data.getFilenameWithoutExtension() + ".csv";
 			PrintWriter pw = new PrintWriter(new FileOutputStream(out));
 			for (Feature feature : data.getFeatures()) {
@@ -116,8 +113,7 @@ public class SimaAlignment extends BaseAlignment implements AlignmentMethod {
 		System.out.println(map);
 		
 		// for non-blocking version, see http://commons.apache.org/proper/commons-exec/tutorial.html
-		final String execPath = SimaAlignment.SIMA_BASE + "/" + SimaAlignment.SIMA_EXEC;
-		// final String execPath = "/usr/local/bin/examples/" + SimaAlignment.SIMA_EXEC;
+		final String execPath = SimaAlignment.SIMA_EXEC;
 		CommandLine cmdLine = new CommandLine(execPath);
 		cmdLine.addArgument("-R");
 		cmdLine.addArgument("${rt}");

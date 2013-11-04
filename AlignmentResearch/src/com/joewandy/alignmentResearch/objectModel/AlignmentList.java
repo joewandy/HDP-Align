@@ -47,7 +47,7 @@ public class AlignmentList {
 		}
 		
 	}
-	
+		
 	/**
 	 * Constructs a new simple alignment list from entries inside inputFilePath
 	 * Currently used for reading back the results from running SIMA as an external process

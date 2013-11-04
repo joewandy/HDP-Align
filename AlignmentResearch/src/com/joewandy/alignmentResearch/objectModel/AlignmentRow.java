@@ -13,6 +13,7 @@ import ca.pfv.spmf.algorithms.associationrules.TopKRules_and_TNR.RuleG;
 public class AlignmentRow {
 
 	private AlignmentList parent;
+	private int pos;
 	private int rowId;
 	private Set<Feature> features;
 	private List<AlignmentPair> pairs;
@@ -38,6 +39,18 @@ public class AlignmentRow {
 	
 	public int getRowId() {
 		return rowId;
+	}
+	
+	public void setRowId(int rowId) {
+		this.rowId = rowId;
+	}
+
+	public int getPos() {
+		return pos;
+	}
+
+	public void setPos(int pos) {
+		this.pos = pos;
 	}
 
 	public void addAlignedFeature(Feature feature) {
@@ -73,6 +86,12 @@ public class AlignmentRow {
 			return true;
 		}
 		return false;
+	}
+	
+	public Set<Feature> intersect(Set<Feature> another) {
+		Set<Feature> intersection = new HashSet<Feature>(this.features);
+		intersection.retainAll(another);
+		return intersection;
 	}
 
 	public Set<Integer> getGroupIds() {
@@ -225,7 +244,7 @@ public class AlignmentRow {
 
 	@Override
 	public String toString() {
-		String output = "SimpleAlignmentRow [parent=" + parent + ", rowId=" + rowId + ", size=" + features.size() + ", featureIDs=";
+		String output = "SimpleAlignmentRow [parent=" + parent.getId() + ", rowId=" + rowId + ", size=" + features.size() + ", featureIDs=";
 		for (Feature f : this.features) {
 			output += f.getPeakID() + ",";
 		}

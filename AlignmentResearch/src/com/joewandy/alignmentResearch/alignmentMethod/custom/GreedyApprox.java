@@ -36,12 +36,16 @@ public class GreedyApprox {
 		}
 		
 		MaxValue e = new MaxValue();
+		int counter = 0;
 		do {
 			
 			// let e be the heaviest edge in E
 			e = findMax(E);	
-			
-			System.out.println(e);
+
+			if (counter % 1000 == 0) {
+				System.out.print('.');
+			}
+			counter++;
 
 			// add e to M			
 			M[e.row] = e.col;
@@ -53,7 +57,8 @@ public class GreedyApprox {
 			}
 						
 		} while (e.value > 0);
-
+		System.out.println();
+		
 		return M;
 	
 	}
