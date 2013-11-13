@@ -1,5 +1,7 @@
 package com.joewandy.alignmentResearch.alignmentMethod.custom;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import com.apporiented.algorithm.clustering.Cluster;
@@ -67,9 +69,25 @@ public class DendogramParser {
 		
 		} else {
 		
-			// non-terminal node, merge the result with children then return
+			// non-terminal node, merge the result from aligning children into this alignedList
 			AlignmentList alignedList = new AlignmentList(cluster.getName());
-			for (Cluster child : cluster.getChildren()) {
+			
+			// first, reorder children to place the intermediate results in front ahead of the leaf nodes
+			List<Cluster> children = cluster.getChildren();
+			List<Cluster> reordered = new ArrayList<Cluster>();
+			for (Cluster child : children) {
+				if (!child.isLeaf()) {
+					reordered.add(child);
+				}
+			}
+			for (Cluster child : children) {
+				if (child.isLeaf()) {
+					reordered.add(child);
+				}
+			}
+			
+			// now then actually do the merging
+			for (Cluster child : reordered) {
 
 				DendogramParser parser = new DendogramParser(child, dataMap, 
 						library, massTol, rtTol, alpha);

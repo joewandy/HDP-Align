@@ -30,6 +30,8 @@ import com.joewandy.alignmentResearch.objectModel.Feature;
  */
 public class SimaAlignment extends BaseAlignment implements AlignmentMethod {
 
+	private String firstFileName;
+	
 	// the executable name of SIMA
 	private static final String SIMA_EXEC = "/home/joewandy/Dropbox/Project/real_datasets/SIMA_full/SIMA";
 
@@ -50,6 +52,7 @@ public class SimaAlignment extends BaseAlignment implements AlignmentMethod {
 	 */
 	public SimaAlignment(List<AlignmentFile> dataList, AlignmentMethodParam param) {		
 		super(dataList, param);
+		firstFileName = dataList.get(0).getFilename();
 	}
 	
 	@Override
@@ -110,6 +113,7 @@ public class SimaAlignment extends BaseAlignment implements AlignmentMethod {
 		map.put("rt", String.valueOf(this.rtTolerance));
 		map.put("mz", String.valueOf(this.massTolerance));		    
 		map.put("tempDirPath", tempDirPath);
+		map.put("reference", firstFileName);
 		System.out.println(map);
 		
 		// for non-blocking version, see http://commons.apache.org/proper/commons-exec/tutorial.html
@@ -121,6 +125,10 @@ public class SimaAlignment extends BaseAlignment implements AlignmentMethod {
 		cmdLine.addArgument("${mz}");
 		cmdLine.addArgument("-i");
 		cmdLine.addArgument("${tempDirPath}");
+//		cmdLine.addArgument("-a");
+//		cmdLine.addArgument("reference");
+//		cmdLine.addArgument("-s");
+//		cmdLine.addArgument("${reference}");
 		cmdLine.setSubstitutionMap(map);
 		DefaultExecutor executor = new DefaultExecutor();
 		

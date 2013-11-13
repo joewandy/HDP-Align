@@ -1,3 +1,12 @@
-java.lang.NullPointerException
+org.apache.velocity.exception.ResourceNotFoundException: Unable to find resource 'templates/MapAlignerPoseClustering.ini.vm'
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.loadResource(ResourceManagerImpl.java:474)
+	at org.apache.velocity.runtime.resource.ResourceManagerImpl.getResource(ResourceManagerImpl.java:352)
+	at org.apache.velocity.runtime.RuntimeInstance.getTemplate(RuntimeInstance.java:1533)
+	at org.apache.velocity.runtime.RuntimeInstance.getTemplate(RuntimeInstance.java:1514)
+	at org.apache.velocity.app.VelocityEngine.getTemplate(VelocityEngine.java:373)
+	at com.joewandy.alignmentResearch.alignmentMethod.external.OpenMSAlignment.writeConfigTemplate(OpenMSAlignment.java:239)
+	at com.joewandy.alignmentResearch.alignmentMethod.external.OpenMSAlignment.runAlignerLinker(OpenMSAlignment.java:134)
+	at com.joewandy.alignmentResearch.alignmentMethod.external.OpenMSAlignment.matchFeatures(OpenMSAlignment.java:78)
+	at com.joewandy.alignmentResearch.alignmentMethod.BaseAlignment.align(BaseAlignment.java:51)
 	at com.joewandy.alignmentResearch.main.FeatureXMLAlignment.runExperiment(FeatureXMLAlignment.java:451)
 	at com.joewandy.alignmentResearch.main.FeatureXMLAlignment.main(FeatureXMLAlignment.java:292)

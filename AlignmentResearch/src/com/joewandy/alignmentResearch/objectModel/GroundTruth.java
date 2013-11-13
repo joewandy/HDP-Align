@@ -338,26 +338,26 @@ public class GroundTruth {
 	public EvaluationResult evaluate3(List<AlignmentRow> alignmentResult, int noOfFiles, double dmz, double drt) {
 				
 		// construct G+, the set of positive pairwise ground truth ==> things that should be aligned together
-		List<GroundTruthPair> gPlus = this.pairwiseGroundTruth;				
+		Set<GroundTruthPair> gPlus = new HashSet<GroundTruthPair>(this.pairwiseGroundTruth);				
 		
 		// convert tool output into t = a set of pairwise alignments as well
-		List<GroundTruthPair> t = convertToPairwiseFeatureGroup(alignmentResult);		
+		Set<GroundTruthPair> t = new HashSet<GroundTruthPair>(convertToPairwiseFeatureGroup(alignmentResult));		
 	
 		// TP = should be aligned & are aligned = G+ intersect t
 		System.out.println("Computing TP");		
-		List<GroundTruthPair> intersect = new ArrayList<GroundTruthPair>(gPlus);
+		Set<GroundTruthPair> intersect = new HashSet<GroundTruthPair>(gPlus);
 		intersect.retainAll(t);
 		int TP = intersect.size();
 		
 		// FN = should be aligned & aren't aligned = G+ \ t
 		System.out.println("Computing FN");		
-		List<GroundTruthPair> diff1 = new ArrayList<GroundTruthPair>(gPlus);
+		Set<GroundTruthPair> diff1 = new HashSet<GroundTruthPair>(gPlus);
 		diff1.removeAll(t);
 		int FN = diff1.size();
 						
 		// FP = shouldn't be aligned & are aligned = t \ G+
 		System.out.println("Computing FP");
-		List<GroundTruthPair> diff2 = new ArrayList<GroundTruthPair>(t);
+		Set<GroundTruthPair> diff2 = new HashSet<GroundTruthPair>(t);
 		diff2.removeAll(gPlus);
 		int FP = diff2.size();
 		
@@ -366,19 +366,19 @@ public class GroundTruth {
 		System.out.println("FP = " + FP);
 		System.out.println("totalPositives = " + totalPositives);
 		System.out.println("totalPositives-TP = " + (totalPositives-TP));
-		// assert(FP == (totalPositives-TP));
+		assert(FP == (totalPositives-TP));
 		
 		// how many ground truth entries are aligned ?
-		System.out.println("Ground truth entries = ");
-		System.out.print('[');
-		for (GroundTruthPair entry : gPlus) {
-			if (t.contains(entry)) {
-				System.out.print("1, ");
-			} else {
-				System.out.print("0, ");
-			}
-		}
-		System.out.println("];");
+//		System.out.println("Ground truth entries = ");
+//		System.out.print('[');
+//		for (GroundTruthPair entry : gPlus) {
+//			if (t.contains(entry)) {
+//				System.out.print("1, ");
+//			} else {
+//				System.out.print("0, ");
+//			}
+//		}
+//		System.out.println("];");
 
 		// TN = big number, don't compute
 		

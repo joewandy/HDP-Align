@@ -5,7 +5,6 @@ import java.util.concurrent.BlockingQueue;
 
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
-import com.joewandy.alignmentResearch.alignmentMethod.external.SimaAlignment;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentLibrary;
 
@@ -19,7 +18,7 @@ public class StableMarriageLibraryBuilder extends PairwiseLibraryBuilderImpl imp
 	@Override
 	protected AlignmentMethod getAlignmentMethod(List<AlignmentFile> files,
 			AlignmentMethodParam param) {
-		AlignmentMethod pairwiseAligner = new SimaAlignment(files, param);
+		AlignmentMethod pairwiseAligner = new MyStableMarriageAlignment(files, param, false);
 		return pairwiseAligner;
 	}
 

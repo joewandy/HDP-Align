@@ -72,7 +72,7 @@ public class ExtendedLibraryBuilder {
 				 */
 				AlignmentFile data1 = combination.getValue(0);
 				AlignmentFile data2 = combination.getValue(1);	
-				Runnable builder = new BaselineMethodLibraryBuilder(libraryQueue, libraryID, massTolerance, tol, data1, data2);
+				Runnable builder = new StableMarriageLibraryBuilder(libraryQueue, libraryID, massTolerance, tol, data1, data2);
 
 				if (FeatureXMLAlignment.PARALLEL_LIBRARY_BUILD) {
 					Thread t = new Thread(builder);

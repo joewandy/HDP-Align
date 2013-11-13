@@ -35,6 +35,8 @@ import com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.Alignmen
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodFactory;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
+import com.joewandy.alignmentResearch.filter.AlignmentResultFilter;
+import com.joewandy.alignmentResearch.filter.GraphAlignmentResultFilter;
 import com.joewandy.alignmentResearch.noiseModel.ContaminantPeaksNoise;
 import com.joewandy.alignmentResearch.noiseModel.GlobalRetentionShiftNoise;
 import com.joewandy.alignmentResearch.noiseModel.GlobalRetentionShiftNoise.GlobalNoiseLevel;
@@ -440,11 +442,13 @@ public class FeatureXMLAlignment {
 		// setup some filters to prune alignment results later
 		if (options.grouping) {
 //			AlignmentResultFilter sizeFilter = new SizeAlignmentResultFilter(FeatureXMLAlignment.ALIGNMENT_SIZE_THRESHOLD);
-//			aligner.addFilter(sizeFilter);
+//			aligner.addFilter(siave u zeFilter);
 			// FIXME: maybe not correct to directly use alignmentPpm for mahalanobis distance calculation. Here we assume that it's an absolute value !
-//			AlignmentResultFilter graphFilter = new GraphAlignmentResultFilter(alignmentDataList, 
-//					options.graphFilter, options.th, options.alignmentPpm, options.alignmentRtWindow);
-//			aligner.addFilter(graphFilter);
+			if (options.graphFilter != null) {
+				AlignmentResultFilter graphFilter = new GraphAlignmentResultFilter(alignmentDataList, 
+						options.graphFilter, options.th, options.alignmentPpm, options.alignmentRtWindow);
+				aligner.addFilter(graphFilter);				
+			}
 		}
 		
 		// actually do the alignment now, filtering of alignment results also happen inside align()
