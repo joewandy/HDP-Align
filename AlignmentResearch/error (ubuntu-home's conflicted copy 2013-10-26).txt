@@ -1,8 +1,0 @@
-java.lang.NullPointerException
-	at com.joewandy.alignmentResearch.alignmentMethod.custom.StableMatching.computeScores(StableMatching.java:429)
-	at com.joewandy.alignmentResearch.alignmentMethod.custom.StableMatching.match(StableMatching.java:179)
-	at com.joewandy.alignmentResearch.alignmentMethod.custom.StableMatching.getMatchedList(StableMatching.java:70)
-	at com.joewandy.alignmentResearch.alignmentMethod.custom.MyStableMarriageAlignment.matchFeatures(MyStableMarriageAlignment.java:50)
-	at com.joewandy.alignmentResearch.alignmentMethod.BaseAlignment.align(BaseAlignment.java:51)
-	at com.joewandy.alignmentResearch.main.FeatureXMLAlignment.runExperiment(FeatureXMLAlignment.java:444)
-	at com.joewandy.alignmentResearch.main.FeatureXMLAlignment.main(FeatureXMLAlignment.java:285)

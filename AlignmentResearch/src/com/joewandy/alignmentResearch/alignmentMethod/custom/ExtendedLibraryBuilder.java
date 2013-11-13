@@ -13,7 +13,7 @@ import org.paukov.combinatorics.Factory;
 import org.paukov.combinatorics.Generator;
 import org.paukov.combinatorics.ICombinatoricsVector;
 
-import com.joewandy.alignmentResearch.main.FeatureXMLAlignment;
+import com.joewandy.alignmentResearch.main.MultiAlign;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentLibrary;
 import com.joewandy.alignmentResearch.objectModel.ExtendedLibrary;
@@ -25,13 +25,11 @@ public class ExtendedLibraryBuilder {
 	private List<AlignmentFile> dataList;
 	private double massTolerance;
 	private double rtTolerance;
-	private double windowMultiply;
 	
-	public ExtendedLibraryBuilder(List<AlignmentFile> dataList, double massTolerance, double rtTolerance, double windowMultiply) {
+	public ExtendedLibraryBuilder(List<AlignmentFile> dataList, double massTolerance, double rtTolerance) {
 		this.dataList = dataList;
 		this.massTolerance = massTolerance;
 		this.rtTolerance = rtTolerance;
-		this.windowMultiply = windowMultiply;
 	}
 	
 	public Map<Double, List<AlignmentLibrary>> buildPrimaryLibrary() {
@@ -40,57 +38,47 @@ public class ExtendedLibraryBuilder {
 
 		Map<Double, List<AlignmentLibrary>> metaLibraries = new HashMap<Double, List<AlignmentLibrary>>();
 		
-		// try some initial tolerances when building library
-		List<Double> rtTolerances = new ArrayList<Double>();
-		for (int i=1; i <= windowMultiply; i++) {			
-			rtTolerances.add(rtTolerance*i);
-		}
-
 		// id must be unique to all libraries !!
 		int libraryID = 0;
-		for (double tol : rtTolerances) {
 
-			// Create the initial vector
-			ICombinatoricsVector<AlignmentFile> initialVector = Factory.createVector(dataList);
+		// Create the initial vector
+		ICombinatoricsVector<AlignmentFile> initialVector = Factory.createVector(dataList);
 
-			// Create a simple combination generator to generate 2-combinations of
-			// the initial vector
-			Generator<AlignmentFile> gen = Factory.createSimpleCombinationGenerator(
-					initialVector, 2);
+		// Create a simple combination generator to generate 2-combinations of
+		// the initial vector
+		Generator<AlignmentFile> gen = Factory.createSimpleCombinationGenerator(
+				initialVector, 2);
 
-			int noOfCombo = (int) gen.getNumberOfGeneratedObjects();
-			System.out.println("============ LIBRARY : RT TOLERANCE = " + tol + 
-					" ENTRIES = " + noOfCombo + " ============");
-			
-			// Print all possible combinations
-			BlockingQueue<AlignmentLibrary> libraryQueue = new ArrayBlockingQueue<AlignmentLibrary>(noOfCombo);
-			int noOfThreads = 0;
-			for (ICombinatoricsVector<AlignmentFile> combination : gen) {
+		int noOfCombo = (int) gen.getNumberOfGeneratedObjects();
+		System.out.println("============ LIBRARY : ENTRIES = " + noOfCombo + " ============");
+		
+		// Print all possible combinations
+		BlockingQueue<AlignmentLibrary> libraryQueue = new ArrayBlockingQueue<AlignmentLibrary>(noOfCombo);
+		int noOfThreads = 0;
+		for (ICombinatoricsVector<AlignmentFile> combination : gen) {
 
-				/* 
-				 * pairwise align data1 and data2
-				 */
-				AlignmentFile data1 = combination.getValue(0);
-				AlignmentFile data2 = combination.getValue(1);	
-				Runnable builder = new StableMarriageLibraryBuilder(libraryQueue, libraryID, massTolerance, tol, data1, data2);
+			/* 
+			 * pairwise align data1 and data2
+			 */
+			AlignmentFile data1 = combination.getValue(0);
+			AlignmentFile data2 = combination.getValue(1);	
+			Runnable builder = new StableMarriageLibraryBuilder(libraryQueue, libraryID, massTolerance, rtTolerance, data1, data2);
 
-				if (FeatureXMLAlignment.PARALLEL_LIBRARY_BUILD) {
-					Thread t = new Thread(builder);
-					t.start();					
-				} else {
-					PairwiseLibraryBuilder pb = (PairwiseLibraryBuilder) builder;
-					AlignmentLibrary library = pb.producePairwiseLibrary();
-					try {
-						libraryQueue.put(library);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}	
-				}
-								
-				libraryID++;
-				noOfThreads++;
-				
+			if (MultiAlign.PARALLEL_LIBRARY_BUILD) {
+				Thread t = new Thread(builder);
+				t.start();					
+			} else {
+				PairwiseLibraryBuilder pb = (PairwiseLibraryBuilder) builder;
+				AlignmentLibrary library = pb.producePairwiseLibrary();
+				try {
+					libraryQueue.put(library);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}	
 			}
+							
+			libraryID++;
+			noOfThreads++;
 
 			List<AlignmentLibrary> libraries = new ArrayList<AlignmentLibrary>();
 			int resultCounter = 0;
@@ -105,7 +93,7 @@ public class ExtendedLibraryBuilder {
 			}
 			System.out.println("All libraries collected");
 			
-			metaLibraries.put(tol, libraries);
+			metaLibraries.put(rtTolerance, libraries);
 			
 		}		
 

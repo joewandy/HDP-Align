@@ -19,7 +19,7 @@ import cern.colt.matrix.tdouble.impl.SparseDoubleMatrix2D;
 
 import com.jmatio.io.MatFileReader;
 import com.jmatio.types.MLDouble;
-import com.joewandy.alignmentResearch.main.FeatureXMLAlignment;
+import com.joewandy.alignmentResearch.main.MultiAlign;
 
 import dk.ange.octave.OctaveEngine;
 import dk.ange.octave.OctaveEngineFactory;
@@ -138,24 +138,22 @@ public class MatlabFeatureGrouping extends BaseFeatureGrouping implements Featur
 			System.out.println("groupedCount = " + groupedCount);
 			System.out.println("ungroupedCount = " + ungroupedCount);
 
-			if (FeatureXMLAlignment.WEIGHT_USE_ALL_PEAKS) {
-				System.out.print("Getting cluster co-ocurrence probabilities of peaks for " + data.getFilename() + " ");
-				mfr = null;
-				try {
-					mfr = new MatFileReader(MATLAB_SCRIPT_PATH + "/temp.ZZprob.mat");
-				} catch (IOException e) {
-					e.printStackTrace();
-					System.exit(1);
-				}
-				
-				if (mfr != null) {
-
-					DoubleMatrix ZZprob = new DoubleMatrix(((MLDouble)mfr.getMLArray("ZZprob")).getArray());
-//					System.out.println("ZZprob = " + ZZprob.length + "x" + ZZprob[0].length);
-					data.setZZProb(ZZprob);
-					
-				}	
+			System.out.print("Getting cluster co-ocurrence probabilities of peaks for " + data.getFilename() + " ");
+			mfr = null;
+			try {
+				mfr = new MatFileReader(MATLAB_SCRIPT_PATH + "/temp.ZZprob.mat");
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.exit(1);
 			}
+			
+			if (mfr != null) {
+
+				DoubleMatrix ZZprob = new DoubleMatrix(((MLDouble)mfr.getMLArray("ZZprob")).getArray());
+//					System.out.println("ZZprob = " + ZZprob.length + "x" + ZZprob[0].length);
+				data.setZZProb(ZZprob);
+				
+			}	
 			
 		}
 		
@@ -254,24 +252,22 @@ public class MatlabFeatureGrouping extends BaseFeatureGrouping implements Featur
 			System.out.println("groupedCount = " + groupedCount);
 			System.out.println("ungroupedCount = " + ungroupedCount);
 
-			if (FeatureXMLAlignment.WEIGHT_USE_ALL_PEAKS) {
-				System.out.print("Getting cluster co-ocurrence probabilities of peaks for " + data.getFilename() + " ");
-				mfr = null;
-				try {
-					mfr = new MatFileReader(MATLAB_SCRIPT_PATH + data.getFilenameWithoutExtension() + ".csv.ZZprob.mat");
-				} catch (IOException e) {
-					e.printStackTrace();
-					System.exit(1);
-				}
-				
-				if (mfr != null) {
-
-					DoubleMatrix ZZprob = new DoubleMatrix(((MLDouble)mfr.getMLArray("ZZprob")).getArray());
-//					System.out.println("ZZprob = " + ZZprob.length + "x" + ZZprob[0].length);
-					data.setZZProb(ZZprob);
-					
-				}				
+			System.out.print("Getting cluster co-ocurrence probabilities of peaks for " + data.getFilename() + " ");
+			mfr = null;
+			try {
+				mfr = new MatFileReader(MATLAB_SCRIPT_PATH + data.getFilenameWithoutExtension() + ".csv.ZZprob.mat");
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.exit(1);
 			}
+			
+			if (mfr != null) {
+
+				DoubleMatrix ZZprob = new DoubleMatrix(((MLDouble)mfr.getMLArray("ZZprob")).getArray());
+//					System.out.println("ZZprob = " + ZZprob.length + "x" + ZZprob[0].length);
+				data.setZZProb(ZZprob);
+				
+			}				
 			
 		}
 		

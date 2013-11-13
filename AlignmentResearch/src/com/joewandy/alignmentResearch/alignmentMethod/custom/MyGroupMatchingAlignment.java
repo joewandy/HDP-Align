@@ -42,7 +42,7 @@ public class MyGroupMatchingAlignment extends BaseAlignment implements Alignment
 			featureList.add(newList);
 		}
 		
-		threshold = param.getFriendlyThreshold();
+		threshold = AlignmentMethodParam.PARAM_FRIENDLY_THRESHOLD;
 				
 	}
 	

@@ -18,7 +18,7 @@ public class StableMarriageLibraryBuilder extends PairwiseLibraryBuilderImpl imp
 	@Override
 	protected AlignmentMethod getAlignmentMethod(List<AlignmentFile> files,
 			AlignmentMethodParam param) {
-		AlignmentMethod pairwiseAligner = new MyStableMarriageAlignment(files, param, false);
+		AlignmentMethod pairwiseAligner = new MyStableMarriageAlignment(files, param);
 		return pairwiseAligner;
 	}
 

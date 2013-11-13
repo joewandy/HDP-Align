@@ -7,7 +7,7 @@ import org.jblas.DoubleMatrix;
 
 import peakml.chemistry.PeriodicTable;
 
-import com.joewandy.alignmentResearch.main.FeatureXMLAlignment;
+import com.joewandy.alignmentResearch.main.MultiAlign;
 
 import edu.uci.ics.jung.graph.Graph;
 
@@ -122,7 +122,7 @@ public class MatchingScorer {
 	private boolean checkInMassRange(Feature feature, Feature friend, double massTolerance) {
 		boolean inRange = false;
 		double delta = 0;
-		if (FeatureXMLAlignment.ALIGN_BY_RELATIVE_MASS_TOLERANCE) {
+		if (MultiAlign.ALIGN_BY_RELATIVE_MASS_TOLERANCE) {
 			delta = PeriodicTable.PPM(feature.getMass(), massTolerance);			
 		} else {
 			delta = massTolerance;			

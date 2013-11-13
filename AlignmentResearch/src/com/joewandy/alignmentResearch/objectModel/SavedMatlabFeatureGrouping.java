@@ -13,7 +13,7 @@ import cern.colt.matrix.tdouble.impl.SparseDoubleMatrix2D;
 
 import com.jmatio.io.MatFileReader;
 import com.jmatio.types.MLDouble;
-import com.joewandy.alignmentResearch.main.FeatureXMLAlignment;
+import com.joewandy.alignmentResearch.main.MultiAlign;
 
 public class SavedMatlabFeatureGrouping extends BaseFeatureGrouping implements FeatureGrouping {
 
@@ -22,11 +22,6 @@ public class SavedMatlabFeatureGrouping extends BaseFeatureGrouping implements F
 	public List<FeatureGroup> group(List<AlignmentFile> dataList) {
 
 		System.out.println("============ Grouping = " + dataList.size() + " files ============");
-		
-//		for (AlignmentFile data : dataList) {
-//			// order features by intensity
-//			data.sortFeatures();
-//		}
 		
 		// the group ids must be unique across all input files 
 		int groupId = 1;
@@ -92,26 +87,24 @@ public class SavedMatlabFeatureGrouping extends BaseFeatureGrouping implements F
 //			System.out.println("groupedCount = " + groupedCount);
 //			System.out.println("ungroupedCount = " + ungroupedCount);
 
-			if (FeatureXMLAlignment.WEIGHT_USE_ALL_PEAKS) {
-				filename = data.getFilenameWithoutExtension() + ".csv.ZZprob.mat";
-				System.out.println("Loading " + dataPath + filename);				
-				mfr = null;
-				try {
-					mfr = new MatFileReader(dataPath + filename);
-				} catch (IOException e) {
-					e.printStackTrace();
-					System.exit(1);
-				}
-				
-				if (mfr != null) {
+			filename = data.getFilenameWithoutExtension() + ".csv.ZZprob.mat";
+			System.out.println("Loading " + dataPath + filename);				
+			mfr = null;
+			try {
+				mfr = new MatFileReader(dataPath + filename);
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
+			
+			if (mfr != null) {
 
-					DoubleMatrix ZZprob = new DoubleMatrix(((MLDouble)mfr.getMLArray("ZZprob")).getArray());
-					data.setZZProb(ZZprob);
+				DoubleMatrix ZZprob = new DoubleMatrix(((MLDouble)mfr.getMLArray("ZZprob")).getArray());
+				data.setZZProb(ZZprob);
 //					System.out.println("ZZprob = " + ZZprob.rows + "x" + ZZprob.columns);
 //					System.out.println("ZZprob(4693, 4693) = " + ZZprob.get(4693, 4693));
-					
-				}				
-			}
+				
+			}				
 			
 		}
 		

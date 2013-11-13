@@ -19,7 +19,7 @@ import org.jblas.DoubleMatrix;
 
 import com.jmatio.io.MatFileReader;
 import com.jmatio.types.MLDouble;
-import com.joewandy.alignmentResearch.main.FeatureXMLAlignment;
+import com.joewandy.alignmentResearch.main.MultiAlign;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
@@ -35,17 +35,20 @@ public class StableMatching implements FeatureMatching {
 	private double massTol;
 	private double rtTol;	
 	private MatchingScorer scorer;
+	
+	private boolean useGroup;
 	private double alpha;
 	
 	public StableMatching(String listId, AlignmentList masterList, AlignmentList childList,
 			ExtendedLibrary library,
-			double massTol, double rtTol, double alpha) {			
+			double massTol, double rtTol, boolean useGroup, double alpha) {			
 		this.listId = listId;
 		this.masterList = masterList;
 		this.childList = childList;
 		this.massTol = massTol;
 		this.rtTol = rtTol;		
 		this.scorer = new MatchingScorer(this.massTol, this.rtTol);
+		this.useGroup = useGroup;
 		this.alpha = alpha;
 	}
 
@@ -121,15 +124,15 @@ public class StableMatching implements FeatureMatching {
 		return women;
 	}
 
-	private DoubleMatrix getMenClustering(AlignmentList masterList, AlignmentList childList) {
-		if (FeatureXMLAlignment.WEIGHT_USE_WEIGHTED_SCORE) {
-			AlignmentFile data = masterList.getData();
+	private DoubleMatrix getClustering(AlignmentList dataList) {
+		if (useGroup) {
+			AlignmentFile data = dataList.getData();
 			if (data != null) {
 				// for list produced from initial file
-				return getProb(data);				
+				return getClusteringProbs(data);				
 			} else {
 				// for list produced from merging files
-				List<AlignmentRow> rows = masterList.getRows();
+				List<AlignmentRow> rows = dataList.getRows();
 				int n = rows.size();
 				DoubleMatrix mat = new DoubleMatrix(n, n);
 				for (int i = 0; i < n; i++) {
@@ -144,47 +147,14 @@ public class StableMatching implements FeatureMatching {
 			}
 		} else {
 			// for the case when we don't use the weight
-			List<AlignmentRow> rows = masterList.getRows();
+			List<AlignmentRow> rows = dataList.getRows();
 			int n = rows.size();
 			return new DoubleMatrix(n, n);				
 		}
 	}
-
-	private DoubleMatrix getWomenClustering(AlignmentList masterList, AlignmentList childList) {
-		if (FeatureXMLAlignment.WEIGHT_USE_WEIGHTED_SCORE) {
-			AlignmentFile data = childList.getData();
-			if (data != null) {
-				// for list produced from initial file
-				return getProb(data);				
-			} else {
-				// for list produced from merging files
-				List<AlignmentRow> rows = childList.getRows();
-				int n = rows.size();
-				DoubleMatrix mat = new DoubleMatrix(n, n);
-				for (int i = 0; i < n; i++) {
-					for (int j = 0; j < n; j++) {
-						AlignmentRow row1 = rows.get(i);
-						AlignmentRow row2 = rows.get(j);
-						double score = scoreRow(row1, row2);
-						mat.put(i, j, score);
-					}
-				}
-				return mat;
-			}
-		} else {
-			// for the case when we don't use the weight
-			List<AlignmentRow> rows = childList.getRows();
-			int n = rows.size();
-			return new DoubleMatrix(n, n);	
-		}
-	}
 	
-	private DoubleMatrix getProb(AlignmentFile data) {
-		if (FeatureXMLAlignment.WEIGHT_USE_ALL_PEAKS) {
-			return data.getZZProb();
-		} else {				
-			return data.getZ();						
-		}
+	private DoubleMatrix getClusteringProbs(AlignmentFile data) {
+		return data.getZZProb();
 	}
 
 	private double scoreRow(AlignmentRow row1, AlignmentRow row2) {
@@ -194,7 +164,7 @@ public class StableMatching implements FeatureMatching {
 		for (Feature f1 : row1.getFeatures()) {
 			for (Feature f2 : row2.getFeatures()) {
 				if (f1.getData().equals(f2.getData())) {
-					DoubleMatrix prob = getProb(f1.getData());
+					DoubleMatrix prob = getClusteringProbs(f1.getData());
 					int idx1 = f1.getPeakID();
 					int idx2 = f2.getPeakID();
 					if (idx1 == idx2) {
@@ -219,61 +189,18 @@ public class StableMatching implements FeatureMatching {
 		List<AlignmentRow> women = getWomen(masterList, childList);
     	
         Map<AlignmentRow, AlignmentRow> matches = new HashMap<AlignmentRow, AlignmentRow>();
-        if (FeatureXMLAlignment.BAGGING) {
-        	
-    		MatchesResult result = new MatchesResult();
-            for (int i = 0; i < FeatureXMLAlignment.BAGGING_ITER; i++) {
-            	System.out.println("Iteration #" + (i+1));
-            	List<AlignmentRow> sampledMen = new ArrayList<AlignmentRow>(sample(men));
-            	List<AlignmentRow> sampledWomen = new ArrayList<AlignmentRow>(sample(women));
-            	// must readjust the position index
-            	// NOTE: no longer using row id for this kind of purpose
-            	for (int j = 0; j < sampledMen.size(); j++) {
-            		AlignmentRow row = sampledMen.get(j);
-            		row.setPos(j);
-            	}
-            	for (int j = 0; j < sampledWomen.size(); j++) {
-            		AlignmentRow row = sampledWomen.get(j);
-            		row.setPos(j);
-            	}
-            	DoubleMatrix scoreArr = computeScores(sampledMen, sampledWomen);
-            	Map<AlignmentRow, AlignmentRow> match = glMatching(scoreArr, sampledMen, sampledWomen);
-            	result.addMatch(match);
-            }
-            
-            matches = result.getConsensus();        
 
-        } else if (FeatureXMLAlignment.ENSEMBLE) {
+        DoubleMatrix scoreArr = computeScores(men, women);
+//      saveToMatlab(masterList.getData().getParentPath());
 
-    		DoubleMatrix scoreArr = computeScores(men, women);
-    		MatchesResult result = new MatchesResult();
-            
-        	Map<AlignmentRow, AlignmentRow> match = glMatching(scoreArr, men, women);
-        	result.addMatch(match);
-        	
-        	match = approxMaxMatching(scoreArr, men, women);
-        	result.addMatch(match);
-
-        	match = hungarianMatching(scoreArr, men, women);
-        	result.addMatch(match);
-        	
-        	matches = result.getConsensus();        	
-            
-        } else {
-        	
-            DoubleMatrix scoreArr = computeScores(men, women);
-//          saveToMatlab(masterList.getData().getParentPath());
-
-            if (FeatureXMLAlignment.WEIGHT_USE_WEIGHTED_SCORE) {
-        		DoubleMatrix clusteringMen = getMenClustering(masterList, childList);
-        		DoubleMatrix clusteringWomen = getWomenClustering(masterList, childList);
-            	combineScoreJBlas(scoreArr, clusteringMen, clusteringWomen);				
-//            	scoreArr = loadScore();
-    		}
-        	
-        	matches = glMatching(scoreArr, men, women);        	
-
-        }
+        if (useGroup) {
+    		DoubleMatrix clusteringMen = getClustering(masterList);
+    		DoubleMatrix clusteringWomen = getClustering(childList);
+        	combineScoreJBlas(scoreArr, clusteringMen, clusteringWomen);				
+//        	scoreArr = loadScore();
+		}
+    	
+    	matches = glMatching(scoreArr, men, women);        	
         
         return matches;
         
@@ -352,19 +279,6 @@ public class StableMatching implements FeatureMatching {
 		}
 		return matches;
 		
-	}
-		
-	private Set<AlignmentRow> sample(List<AlignmentRow> items) {
-		Set<AlignmentRow> sampled = new HashSet<AlignmentRow>();
-		Random rg = new Random();
-		int counter = 0;
-		while (counter < items.size()) {
-			int pos = rg.nextInt(items.size());
-			AlignmentRow selected = items.get(pos);
-			sampled.add(selected);
-			counter++;
-		}
-		return sampled;
 	}
 
 	private Map<AlignmentRow, AlignmentRow> glMatching(DoubleMatrix scoreArr, 
@@ -492,7 +406,7 @@ public class StableMatching implements FeatureMatching {
 		List<PreferenceItem> prefs = new ArrayList<PreferenceItem>();
 		for (int j = 0; j < womenScore.length; j++) {
 			AlignmentRow woman = women.get(j);
-			if (man.rowInRange(woman, massTol, rtTol, FeatureXMLAlignment.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
+			if (man.rowInRange(woman, massTol, rtTol, MultiAlign.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
 				double score = womenScore.get(j);
 				PreferenceItem pref = new PreferenceItem(j, score);
 				prefs.add(pref);				
@@ -510,7 +424,7 @@ public class StableMatching implements FeatureMatching {
 		int n = women.size();
 		DoubleMatrix scoreArr = new DoubleMatrix(m, n);
 		
-    	System.out.print("\tComputing scores ");
+    	System.out.print("\tComputing distances ");
     	double maxDist = 0;
 		DoubleMatrix distArr = new DoubleMatrix(m, n);
 		for (int i = 0; i < m; i++) {
@@ -518,7 +432,7 @@ public class StableMatching implements FeatureMatching {
 			for (int j = 0; j < n; j++) {
 				AlignmentRow man = men.get(i);
 				AlignmentRow woman = women.get(j);
-				if (man.rowInRange(woman, massTol, -1, FeatureXMLAlignment.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
+				if (man.rowInRange(woman, massTol, -1, MultiAlign.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
 					double dist = scorer.computeDist(man, woman);
 					if (dist > maxDist) {
 						maxDist = dist;
@@ -534,8 +448,10 @@ public class StableMatching implements FeatureMatching {
 		}
 		System.out.println();
 
+    	System.out.print("\tComputing scores ");
 		scoreArr = new DoubleMatrix(m, n);
-		for (int i = 0; i < m; i++) {			
+		for (int i = 0; i < m; i++) {		
+			
 			for (int j = 0; j < n; j++) {
 				double dist = distArr.get(i, j);
 				if (dist > 0) {
@@ -543,7 +459,13 @@ public class StableMatching implements FeatureMatching {
 					scoreArr.put(i, j, score);
 				}
 			}
+
+            if (i % 1000 == 0) {
+            	System.out.print('.');
+            }
+		
 		}
+		System.out.println();
 		distArr = null;
 		
 		// normalise score to 0..1

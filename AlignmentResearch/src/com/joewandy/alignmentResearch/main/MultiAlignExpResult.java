@@ -5,12 +5,12 @@ import java.util.List;
 
 import com.joewandy.alignmentResearch.objectModel.EvaluationResult;
 
-public class FeatureXMLAlignmentResult {
+public class MultiAlignExpResult {
 
 	private List<EvaluationResult> results;
 	private String label;
 	
-	public FeatureXMLAlignmentResult(String label) {
+	public MultiAlignExpResult(String label) {
 		this.label = label;
 		this.results = new ArrayList<EvaluationResult>();
 	}

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.joewandy.alignmentResearch.main.FeatureXMLAlignment;
+import com.joewandy.alignmentResearch.main.MultiAlign;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
 import com.joewandy.alignmentResearch.objectModel.DistanceCalculator;
@@ -20,16 +20,18 @@ public class MaximumWeightMatching implements FeatureMatching {
 	private String listId;
 	private double massTol;
 	private double rtTol;
+	private boolean useGroup;
 
 	public MaximumWeightMatching(String listId, AlignmentList masterList,
 			AlignmentList childList, ExtendedLibrary library, 
-			double massTol, double rtTol) {
+			double massTol, double rtTol, boolean useGroup) {
 		this.listId = listId;
 		this.masterList = masterList;
 		this.childList = childList;
 		this.library = library;
 		this.massTol = massTol;
 		this.rtTol = rtTol;
+		this.useGroup = useGroup;
 	}
 
 	public AlignmentList getMatchedList() {
@@ -135,7 +137,7 @@ public class MaximumWeightMatching implements FeatureMatching {
 				AlignmentRow row1 = rows1.get(i);
 				AlignmentRow row2 = rows2.get(j);
 				double score = 0;
-				if (FeatureXMLAlignment.WEIGHT_USE_WEIGHTED_SCORE) {
+				if (useGroup) {
 					double mass1 = row1.getAverageMz();
 					double mass2 = row2.getAverageMz();
 					double rt1 = row1.getAverageRt();

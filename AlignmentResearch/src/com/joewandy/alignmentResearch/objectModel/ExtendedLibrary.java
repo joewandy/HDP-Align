@@ -11,7 +11,7 @@ import java.util.Set;
 import peakml.chemistry.PeriodicTable;
 
 import com.joewandy.alignmentResearch.alignmentMethod.custom.FeaturePairKey;
-import com.joewandy.alignmentResearch.main.FeatureXMLAlignment;
+import com.joewandy.alignmentResearch.main.MultiAlign;
 
 import edu.uci.ics.jung.graph.Graph;
 import edu.uci.ics.jung.graph.UndirectedSparseGraph;

@@ -14,7 +14,5 @@ public interface AlignmentMethod {
 	public void addFilter(AlignmentResultFilter sizeFilter);
 
 	public List<AlignmentRow> getAlignmentResult();
-	
-	public void writeAlignmentResult(PrintStream alignmentOutput);
-		
+			
 }

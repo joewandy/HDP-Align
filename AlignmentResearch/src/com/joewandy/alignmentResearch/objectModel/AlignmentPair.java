@@ -1,6 +1,6 @@
 package com.joewandy.alignmentResearch.objectModel;
 
-import com.joewandy.alignmentResearch.main.FeatureXMLAlignment;
+import com.joewandy.alignmentResearch.main.MultiAlign;
 
 import peakml.Annotation;
 import peakml.IPeak;
@@ -155,13 +155,6 @@ public class AlignmentPair {
 		double dist = calc.compute(mass1, mass2, rt1, rt2);		
 		double inverseDist = 1/dist;
 		double weight = 1;
-		if (FeatureXMLAlignment.WEIGHT_USE_WEIGHTED_SCORE) {
-			if (FeatureXMLAlignment.WEIGHT_USE_ALL_PEAKS) {
-				weight = getProbWeight();
-			} else {
-				weight = getWeight();
-			}			
-		}
 		double score = weight * inverseDist;
 		return score;
 	}
@@ -171,13 +164,6 @@ public class AlignmentPair {
 		double dist = calc.compute(mass1, mass2, rt1, rt2);		
 		dist = dist / maxDist;
 		double weight = 1;
-		if (FeatureXMLAlignment.WEIGHT_USE_WEIGHTED_SCORE) {
-			if (FeatureXMLAlignment.WEIGHT_USE_ALL_PEAKS) {
-				weight = getProbWeight();
-			} else {
-				weight = getWeight();
-			}			
-		}
 		weight = weight / maxWeight;
 		double score = weightCoeff*weight + distCoeff*dist;
 		score = 1/score;

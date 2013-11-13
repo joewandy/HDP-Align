@@ -69,6 +69,9 @@ public class GreedyFeatureGrouping extends BaseFeatureGrouping implements Featur
 			}
 			data.setZ(Z);
 			
+			DoubleMatrix ZZprob = Z.mmul(Z.transpose());
+			data.setZZProb(ZZprob);
+			
 			int groupedCount = 0;
 			for (Feature feature : data.getFeatures()) {
 				if (feature.isGrouped()) {

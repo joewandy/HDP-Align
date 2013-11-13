@@ -19,7 +19,7 @@ public class AlignmentRow {
 	private List<AlignmentPair> pairs;
 	private boolean aligned;
 	private boolean delete;
-	private double normalisedScore;
+	private double score;
 	private List<RuleG> satisfiedRules;
 	private double avgMz;
 	private double avgRt;
@@ -132,6 +132,14 @@ public class AlignmentRow {
 		return feature;
 	}
 		
+	public double getScore() {
+		return score;
+	}
+
+	public void setScore(double score) {
+		this.score = score;
+	}
+
 	public double getPairGraphScore() {
 
 		double sum = 0;
@@ -144,8 +152,7 @@ public class AlignmentRow {
 
 	public double getNormalizedPairGraphScore(double max) {
 		double score = this.getPairGraphScore();
-		normalisedScore = score / max;
-		return normalisedScore;
+		return score / max;
 	}
 	
 	public double getPairIntensityScore() {

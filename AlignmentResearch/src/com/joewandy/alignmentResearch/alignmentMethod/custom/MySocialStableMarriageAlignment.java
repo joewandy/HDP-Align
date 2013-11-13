@@ -45,7 +45,7 @@ public class MySocialStableMarriageAlignment extends BaseAlignment implements Al
 			featureList.add(newList);
 		}
 		
-		threshold = param.getFriendlyThreshold();
+		threshold = AlignmentMethodParam.PARAM_FRIENDLY_THRESHOLD;
 				
 	}
 	

@@ -13,7 +13,7 @@ import com.joewandy.alignmentResearch.alignmentMethod.external.MzMineJoinAlignme
 import com.joewandy.alignmentResearch.alignmentMethod.external.MzMineRansacAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.external.OpenMSAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.external.SimaAlignment;
-import com.joewandy.alignmentResearch.main.FeatureXMLAlignment;
+import com.joewandy.alignmentResearch.main.MultiAlign;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 
 public class AlignmentMethodFactory {
@@ -57,7 +57,7 @@ public class AlignmentMethodFactory {
 		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_JOIN.equals(method)) {
 			aligner = new MyJoinAlignment(alignmentDataList, param);
 		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_STABLE_MARRIAGE.equals(method)) {
-			aligner = new MyStableMarriageAlignment(alignmentDataList, param, FeatureXMLAlignment.WEIGHT_USE_WEIGHTED_SCORE);
+			aligner = new MyStableMarriageAlignment(alignmentDataList, param);
 		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_SOCIAL_STABLE_MARRIAGE.equals(method)) {
 			aligner = new MySocialStableMarriageAlignment(alignmentDataList, param);
 		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_GROUP_MATCHING.equals(method)) {

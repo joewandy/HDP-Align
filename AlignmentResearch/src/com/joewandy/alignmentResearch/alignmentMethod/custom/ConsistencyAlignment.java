@@ -16,8 +16,7 @@ import com.joewandy.alignmentResearch.util.GraphEdgeConstructor;
 
 public class ConsistencyAlignment extends BaseAlignment implements AlignmentMethod {
 
-	private GraphEdgeConstructor edgeConstructor;
-	private int windowMultiply;
+	private boolean useGroup;
 	private double alpha;
 	
 	/**
@@ -29,14 +28,14 @@ public class ConsistencyAlignment extends BaseAlignment implements AlignmentMeth
 	 */
 	public ConsistencyAlignment(List<AlignmentFile> dataList, AlignmentMethodParam param) {		
 		super(dataList, param);
-		this.windowMultiply = param.getRtWindowMultiply();
+		this.useGroup = param.isUseGroup();
 		this.alpha = param.getAlpha();
 	}
 	
 	@Override
 	protected AlignmentList matchFeatures() {
 		
-		ExtendedLibraryBuilder builder = new ExtendedLibraryBuilder(dataList, massTolerance, rtTolerance, windowMultiply);
+		ExtendedLibraryBuilder builder = new ExtendedLibraryBuilder(dataList, massTolerance, rtTolerance);
 		
 		Map<Double, List<AlignmentLibrary>> metaLibraries = builder.buildPrimaryLibrary();
 		
@@ -92,7 +91,7 @@ public class ConsistencyAlignment extends BaseAlignment implements AlignmentMeth
 	
 		// using guide tree and maximum bipartite matching
 		DendogramBuilder builder = new DendogramBuilder(dataList, 
-				extendedLibrary, massTolerance, rtTolerance, alpha);
+				extendedLibrary, massTolerance, rtTolerance, useGroup, alpha);
 		alignedList = builder.align();
 
 		// bad idea .. ?

@@ -103,29 +103,11 @@ public abstract class BaseAlignment implements AlignmentMethod {
 	public List<AlignmentRow> getAlignmentResult() {
 		return filteredResult;
 	}
-	
-	public void writeAlignmentResult(PrintStream alignmentOutput) {
-		for (AlignmentRow row : filteredResult) {
-			alignmentOutput.println(printRow(row));
-		}
-	}	
 		
 	/**
 	 * Implemented by subclasses to do the actual peak matching
 	 * @return a list of aligned features in every row
 	 */
 	protected abstract AlignmentList matchFeatures();
-	
-	private String printRow(AlignmentRow row) {
-		StringBuilder sb = new StringBuilder();
-		for (Feature feature : row.getFeatures()) {
-			sb.append(printFeature(feature));			
-		}
-		return sb.toString();		
-	}
-	
-	private String printFeature(Feature feature) {
-		return feature.getIntensity() + " " + feature.getRt() + " " + feature.getMass() + " ";
-	}
 	
 }

@@ -21,15 +21,17 @@ public class DendogramBuilder {
 	private String[] labels;
 	private double massTol;
 	private double rtTol;
+	private boolean useGroup;
 	private double alpha;
 	
 	public DendogramBuilder(List<AlignmentFile> dataList,
-			ExtendedLibrary library, double massTol, double rtTol, double alpha) {
+			ExtendedLibrary library, double massTol, double rtTol, boolean useGroup, double alpha) {
 
 		this.dataList = dataList;
 		this.library = library;
 		this.massTol = massTol;
 		this.rtTol = rtTol;
+		this.useGroup = useGroup;
 		this.alpha = alpha;
 
 		int n = dataList.size();
@@ -95,7 +97,7 @@ public class DendogramBuilder {
 			dataMap.put(file.getFilenameWithoutExtension(), file);
 		}
 		DendogramParser parser = new DendogramParser(root, dataMap, 
-				library, massTol, rtTol, alpha);
+				library, massTol, rtTol, useGroup, alpha);
 		String output = parser.traverse(2);
 		System.out.println("tree");
 		System.out.println(output);

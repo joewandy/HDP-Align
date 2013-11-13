@@ -1,6 +1,6 @@
 package com.joewandy.alignmentResearch.alignmentMethod;
 
-import com.joewandy.alignmentResearch.main.FeatureXMLAlignment;
+import com.joewandy.alignmentResearch.main.MultiAlign;
 
 public class AlignmentMethodParam {
 
@@ -48,7 +48,12 @@ public class AlignmentMethodParam {
 	 */
 	public static final double PARAM_FRIENDLY_THRESHOLD = 0.75;
 	public static final int PARAM_TOP_K_FRIENDS = 10;
-	public static final double PARAM_ALPHA = 0;
+
+	/**
+	 * How much weight to allocate to the initial mass similarity between peaks
+	 */
+	public static final double PARAM_ALPHA = 0.5;
+	public static final boolean USE_GROUP = false;	
 	
 	/**
 	 * OpenMS parameter
@@ -58,7 +63,7 @@ public class AlignmentMethodParam {
 	private double massTolerance;
 	private double rtTolerance;
 	private boolean usePpm;
-	private int rtWindowMultiply;
+	private boolean useGroup;
 	private double alpha;
 	
 	// for ransac alignment
@@ -73,9 +78,6 @@ public class AlignmentMethodParam {
 	// for openms
 	private double openMsMzPairMaxDistance;
 	
-	// for grouping alignment
-	private double friendlyThreshold;
-
 	// variant of Builder pattern, as described in Effective Java 2nd Ed.
 	public static class Builder {
 
@@ -84,8 +86,8 @@ public class AlignmentMethodParam {
 		private double rtTolerance;
 
 		// optional parameters
+		private boolean useGroup;
 		private boolean usePpm;
-		private int rtWindowMultiply;
 		private double alpha;
 
 		// for ransac alignment
@@ -99,9 +101,6 @@ public class AlignmentMethodParam {
 		
 		// for OpenMS alignment
 		private double openMsMzPairMaxDistance;
-
-		// for grouping alignment
-		private double friendlyThreshold;
 		
 		public Builder(double massTolerance, double rtTolerance) {
 
@@ -110,8 +109,7 @@ public class AlignmentMethodParam {
 		
 			// set whole loads of default value
 			
-			this.usePpm = FeatureXMLAlignment.ALIGN_BY_RELATIVE_MASS_TOLERANCE;
-			this.rtWindowMultiply = FeatureXMLAlignment.RTWINDOW_MULTIPLY;
+			this.usePpm = MultiAlign.ALIGN_BY_RELATIVE_MASS_TOLERANCE;
 
 			// set whole loads of default value for ransac
 			this.ransacRtToleranceBeforeMinute = AlignmentMethodParam.PARAM_RT_TOLERANCE_BEFORE_CORRECTION / 60.0;
@@ -126,7 +124,7 @@ public class AlignmentMethodParam {
 			this.openMsMzPairMaxDistance = AlignmentMethodParam.PARAM_MZ_PAIR_MAX_DISTANCE;
 			
 			// set parameter for other alignment methods
-			this.friendlyThreshold = AlignmentMethodParam.PARAM_FRIENDLY_THRESHOLD;
+			this.useGroup = AlignmentMethodParam.USE_GROUP;
 			this.alpha = AlignmentMethodParam.PARAM_ALPHA;
 			
 		}
@@ -136,11 +134,11 @@ public class AlignmentMethodParam {
 			return this;
 		}
 		
-		public Builder rtWindowMultiply(int rtWindowMultiply) {
-			this.rtWindowMultiply = rtWindowMultiply;
+		public Builder useGroup(boolean useGroup) {
+			this.useGroup = useGroup;
 			return this;
-		}
-		
+		}		
+				
 		public Builder alpha(double alpha) {
 			this.alpha = alpha;
 			return this;
@@ -181,11 +179,6 @@ public class AlignmentMethodParam {
 			return this;
 		}
 		
-		public Builder friendlyThreshold(double threshold) {
-			this.friendlyThreshold = threshold;
-			return this;
-		}		
-		
 		public Builder openMsMzPairMaxDistance(double dist) {
 			this.openMsMzPairMaxDistance = dist;
 			return this;
@@ -201,7 +194,7 @@ public class AlignmentMethodParam {
 		this.massTolerance = builder.massTolerance;
 		this.rtTolerance = builder.rtTolerance;
 		this.usePpm = builder.usePpm;
-		this.rtWindowMultiply = builder.rtWindowMultiply;
+		this.useGroup = builder.useGroup;
 		this.alpha = builder.alpha;
 		this.ransacRtToleranceBeforeMinute = builder.ransacRtToleranceBeforeMinute;
 		this.ransacRtToleranceAfterMinute = builder.ransacRtToleranceAfterMinute;
@@ -211,7 +204,6 @@ public class AlignmentMethodParam {
 		this.ransacLinearModel = builder.ransacLinearModel;
 		this.ransacSameChargeRequired = builder.ransacSameChargeRequired;
 		this.openMsMzPairMaxDistance = builder.openMsMzPairMaxDistance;
-		this.friendlyThreshold = builder.friendlyThreshold;
 	}
 
 	public double getMassTolerance() {
@@ -226,8 +218,8 @@ public class AlignmentMethodParam {
 		return usePpm;
 	}
 
-	public int getRtWindowMultiply() {
-		return rtWindowMultiply;
+	public boolean isUseGroup() {
+		return useGroup;
 	}
 	
 	public double getAlpha() {
@@ -264,10 +256,6 @@ public class AlignmentMethodParam {
 	
 	public double getOpenMsMzPairMaxDistance() {
 		return openMsMzPairMaxDistance;
-	}
-
-	public double getFriendlyThreshold() {
-		return friendlyThreshold;
 	}
 	
 }

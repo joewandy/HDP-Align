@@ -1,7 +1,0 @@
-java.lang.NullPointerException
-	at java.util.TimSort.sort(TimSort.java:173)
-	at java.util.Arrays.sort(Arrays.java:659)
-	at com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.BenchmarkDataGenerator.getAlignmentFiles(BenchmarkDataGenerator.java:49)
-	at com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.BaseDataGenerator.generate(BaseDataGenerator.java:27)
-	at com.joewandy.alignmentResearch.main.FeatureXMLAlignment.runExperiment(FeatureXMLAlignment.java:396)
-	at com.joewandy.alignmentResearch.main.FeatureXMLAlignment.main(FeatureXMLAlignment.java:289)

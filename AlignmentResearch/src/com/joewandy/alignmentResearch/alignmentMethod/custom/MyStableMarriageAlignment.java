@@ -1,13 +1,8 @@
 package com.joewandy.alignmentResearch.alignmentMethod.custom;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
-import com.jmatio.io.MatFileWriter;
-import com.jmatio.types.MLArray;
-import com.jmatio.types.MLDouble;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
 import com.joewandy.alignmentResearch.alignmentMethod.BaseAlignment;
@@ -19,10 +14,10 @@ public class MyStableMarriageAlignment extends BaseAlignment implements Alignmen
 
 	private List<AlignmentList> featureList;
 	private ExtendedLibrary library;
+	private boolean useGroup;
 	private double alpha;
 	
-	public MyStableMarriageAlignment(List<AlignmentFile> dataList, AlignmentMethodParam param, 
-			boolean useWeightedScore) {
+	public MyStableMarriageAlignment(List<AlignmentFile> dataList, AlignmentMethodParam param) {
 
 		super(dataList, param);
 		
@@ -32,6 +27,8 @@ public class MyStableMarriageAlignment extends BaseAlignment implements Alignmen
 			AlignmentList newList = new AlignmentList(data);
 			featureList.add(newList);
 		}
+		
+		useGroup = param.isUseGroup();
 		alpha = param.getAlpha();
 		
 	}
@@ -46,7 +43,7 @@ public class MyStableMarriageAlignment extends BaseAlignment implements Alignmen
 			System.out.println("Aligning #" + (i+1) + ": " + peakList);
 
 			FeatureMatching matcher = new StableMatching(masterList.getId() + ", " + peakList.getId(), masterList, peakList, 
-					library, massTolerance, rtTolerance, alpha);
+					library, massTolerance, rtTolerance, useGroup, alpha);
 			masterList = matcher.getMatchedList();			
             
 		}

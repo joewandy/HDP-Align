@@ -1,6 +1,6 @@
 package com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator;
 
-import com.joewandy.alignmentResearch.main.FeatureXMLAlignmentOptions;
+import com.joewandy.alignmentResearch.main.MultiAlignCmdOptions;
 
 
 public class AlignmentDataGeneratorFactory {
@@ -17,7 +17,7 @@ public class AlignmentDataGeneratorFactory {
 	// generate alignment data from real data
 	public static final String ALIGNMENT_DATA_REAL = "real";
 	
-	public static AlignmentDataGenerator getAlignmentDataGenerator(FeatureXMLAlignmentOptions options) {
+	public static AlignmentDataGenerator getAlignmentDataGenerator(MultiAlignCmdOptions options) {
 
 		AlignmentDataGenerator generator = null; 
 		if (AlignmentDataGeneratorFactory.ALIGNMENT_DATA_BENCHMARK.equals(options.dataType)) {				
