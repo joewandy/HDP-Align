@@ -16,18 +16,21 @@ import no.uib.cipr.matrix.Matrix;
 
 import com.jmatio.io.MatFileReader;
 import com.jmatio.types.MLDouble;
+import com.joewandy.alignmentResearch.main.MultiAlign;
 
 public class MatlabFeatureGroupingMethod extends BaseFeatureGroupingMethod implements FeatureGroupingMethod {
 
 	public static final String MATLAB_SCRIPT_PATH = "/home/joewandy/Dropbox/workspace/AlignmentModel";
 	
 	private MatlabProxy proxy;
+	private String groupingMethod;
 	private double rtWindow;
 	private double alpha;
 	private int nSamples;
 	
-	public MatlabFeatureGroupingMethod(double rtTolerance, double alpha, int nSamples) {
+	public MatlabFeatureGroupingMethod(String groupingMethod, double rtTolerance, double alpha, int nSamples) {
 		
+		this.groupingMethod = groupingMethod;
 		this.rtWindow = rtTolerance;
 		this.alpha = alpha;
 		this.nSamples = nSamples;
@@ -63,17 +66,17 @@ public class MatlabFeatureGroupingMethod extends BaseFeatureGroupingMethod imple
 	
 	@Override
 	public List<FeatureGroup> group(AlignmentFile data) {
-				
+
+		System.out.print("Grouping " + data.getFilename() + " ");
+		List<FeatureGroup> fileGroups = new ArrayList<FeatureGroup>();
+		
 		if (proxy == null) {
 			System.out.println("Cannot find Matlab !! Proxy is null");
 			System.exit(1);
 		}
-		
-		int groupId = 1;
-		List<FeatureGroup> fileGroups = new ArrayList<FeatureGroup>();
 
-		System.out.print("Grouping " + data.getFilename() + " ");
-	    try {
+		// do clustering with matlab
+		try {
 			double[] dataPoints = getDataPoints(data);
 			String dataStr = asString(dataPoints);
 			proxy.eval(dataStr);
@@ -88,65 +91,72 @@ public class MatlabFeatureGroupingMethod extends BaseFeatureGroupingMethod imple
 			e.printStackTrace();
 		} 
 
-		// load from matlab
-		MatFileReader mfr = null;
-		try {
-			mfr = new MatFileReader(MATLAB_SCRIPT_PATH + "/temp.Z.mat");
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
+		int groupId = 1;
+		if (MultiAlign.GROUPING_METHOD_MIXTURE_RT.equals(groupingMethod)) {
+						
+			// load from matlab
+			MatFileReader mfr = null;
+			try {
+				mfr = new MatFileReader(MATLAB_SCRIPT_PATH + "/temp.Z.mat");
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
 
-		if (mfr != null) {
+			if (mfr != null) {
 
-//			DoubleMatrix dz = new DoubleMatrix(((MLDouble)mfr.getMLArray("Z")).getArray());
-//			data.setZ(dz);
-//			int m = dz.rows;
-//			int n = dz.columns;
-			
-			Matrix dz = new DenseMatrix(((MLDouble)mfr.getMLArray("Z")).getArray());		
-			data.setZ(new DenseMatrix(dz));
-			int m = dz.numRows();
-			int n = dz.numColumns();
-			
-			int[][] Z = new int[m][n];
-			for (int i = 0; i < m; i++) {
-				for (int j = 0; j < n; j++) {
-					Z[i][j] = (int) dz.get(i, j);
+				// load the best single clustering Z
+				System.out.println("Loading Z");
+				Matrix Z = new DenseMatrix(((MLDouble)mfr.getMLArray("Z")).getArray());		
+				
+				// get probabilities of peak vs peak to be together ZZprob
+				System.out.println("Computing ZZprob");
+				
+				DenseMatrix ZZprob = new DenseMatrix(data.getFeaturesCount(), data.getFeaturesCount());
+				Z.transBmult(Z, ZZprob);		
+				data.setZZProb(ZZprob);
+				
+				// map this clustering results into FeatureGroups
+				int m = Z.numRows();
+				int n = Z.numColumns();
+				int[][] zInt = new int[m][n];
+				for (int i = 0; i < m; i++) {
+					for (int j = 0; j < n; j++) {
+						zInt[i][j] = (int) Z.get(i, j);
+					}
 				}
+				Map<Integer, FeatureGroup> groupMap = new HashMap<Integer, FeatureGroup>();
+				for (int k = 0; k < n; k++) {
+					FeatureGroup group = new FeatureGroup(groupId);
+					groupId++;
+					fileGroups.add(group);
+					groupMap.put(k, group);
+				}
+				for (int i = 0; i < m; i++) {
+					Feature feature = data.getFeatureByIndex(i);
+					int k = findClusterIndex(zInt[i]);
+					FeatureGroup group = groupMap.get(k);
+					group.addFeature(feature);
+				}
+				
 			}
-			Map<Integer, FeatureGroup> groupMap = new HashMap<Integer, FeatureGroup>();
-			for (int k = 0; k < n; k++) {
-				FeatureGroup group = new FeatureGroup(groupId);
-				groupId++;
-				fileGroups.add(group);
-				groupMap.put(k, group);
-			}
-			for (int i = 0; i < m; i++) {
-				Feature feature = data.getFeatureByIndex(i);
-				int k = findClusterIndex(Z[i]);
-				FeatureGroup group = groupMap.get(k);
-				group.addFeature(feature);
-			}
-			System.out.println(groupMap.size() + " groups created");
 			
-		}			
-		
-		System.out.print("Getting cluster co-ocurrence probabilities of peaks for " + data.getFilename() + " ");
-		mfr = null;
-		try {
-			mfr = new MatFileReader(MATLAB_SCRIPT_PATH + "/temp.ZZprob.mat");
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(1);
+		} else if (MultiAlign.GROUPING_METHOD_POSTERIOR_RT.equals(groupingMethod)) {
+
+			MatFileReader mfr = null;
+			try {
+				mfr = new MatFileReader(MATLAB_SCRIPT_PATH + "/temp.ZZprob.mat");
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
+			
+			if (mfr != null) {
+				Matrix ZZprob = new DenseMatrix(((MLDouble)mfr.getMLArray("ZZprob")).getArray());		
+				data.setZZProb(new DenseMatrix(ZZprob));		
+			}
+			
 		}
-		
-		if (mfr != null) {
-//			DoubleMatrix ZZprob = new DoubleMatrix(((MLDouble)mfr.getMLArray("ZZprob")).getArray());
-//			data.setZZProb(ZZprob);				
-			Matrix ZZprob = new DenseMatrix(((MLDouble)mfr.getMLArray("ZZprob")).getArray());		
-			data.setZZProb(new DenseMatrix(ZZprob));		
-		}	
 		
 		return fileGroups;
 		

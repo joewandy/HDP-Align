@@ -62,30 +62,6 @@ public class AlignmentFile {
 		return fileNameWithOutExt;
 	}
 	
-//	public DoubleMatrix getZ() {
-//		return Z;
-//	}
-//
-//	public void setZ(DoubleMatrix z) {
-//		Z = z;
-//	}
-//
-//	public DoubleMatrix getZZProb() {
-//		return ZZProb;
-//	}
-//
-//	public void setZZProb(DoubleMatrix zZProb) {
-//		ZZProb = zZProb;
-//	}
-
-	public DenseMatrix getZ() {
-		return Z;
-	}
-
-	public void setZ(DenseMatrix z) {
-		Z = z;
-	}
-
 	public DenseMatrix getZZProb() {
 		return ZZProb;
 	}

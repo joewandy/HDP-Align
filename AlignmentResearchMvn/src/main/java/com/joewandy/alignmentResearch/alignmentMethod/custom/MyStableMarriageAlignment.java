@@ -79,7 +79,7 @@ public class MyStableMarriageAlignment extends BaseAlignment implements Alignmen
 			} else {
 	//			grouping = new MatlabFeatureGrouping(options.groupingRtWindow, 
 	//					options.groupingAlpha, options.groupingNSamples);															
-				grouping = new SavedMatlabFeatureGroupingMethod();															
+				grouping = new SavedMatlabFeatureGroupingMethod(groupingMethod);															
 			}
 		}
 		return grouping;

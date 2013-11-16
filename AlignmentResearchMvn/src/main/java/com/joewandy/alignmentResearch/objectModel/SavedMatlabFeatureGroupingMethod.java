@@ -11,10 +11,15 @@ import no.uib.cipr.matrix.Matrix;
 
 import com.jmatio.io.MatFileReader;
 import com.jmatio.types.MLDouble;
+import com.joewandy.alignmentResearch.main.MultiAlign;
 
 public class SavedMatlabFeatureGroupingMethod extends BaseFeatureGroupingMethod implements FeatureGroupingMethod {
 
-	public SavedMatlabFeatureGroupingMethod() { }
+	private String groupingMethod;
+	
+	public SavedMatlabFeatureGroupingMethod(String groupingMethod) {
+		this.groupingMethod = groupingMethod;
+	}
 	
 	@Override
 	public List<FeatureGroup> group(List<AlignmentFile> dataList) {
@@ -31,74 +36,81 @@ public class SavedMatlabFeatureGroupingMethod extends BaseFeatureGroupingMethod 
 	@Override
 	public List<FeatureGroup> group(AlignmentFile data) {
 
-		int groupId = 1;
-		List<FeatureGroup> fileGroups = new ArrayList<FeatureGroup>();
-
 		System.out.println("Grouping " + data.getFilename() + " ");
-
-		String filename = data.getFilenameWithoutExtension() + ".csv.Z.mat";
 		final String dataPath = data.getParentPath() + "/mat/";
-		System.out.println("Loading " + dataPath + filename);
+		List<FeatureGroup> fileGroups = new ArrayList<FeatureGroup>();
 		
-		// load from matlab
-		MatFileReader mfr = null;
-		try {
-			mfr = new MatFileReader(dataPath + filename);
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(1);
-		}
-
-		if (mfr != null) {
-
-//			DoubleMatrix dz = new DoubleMatrix(((MLDouble)mfr.getMLArray("Z")).getArray());
-//			data.setZ(dz);
-//			int m = dz.rows;
-//			int n = dz.columns;
-
-			Matrix dz = new DenseMatrix(((MLDouble)mfr.getMLArray("Z")).getArray());		
-			data.setZ(new DenseMatrix(dz));
-			int m = dz.numRows();
-			int n = dz.numColumns();
+		int groupId = 1;
+		if (MultiAlign.GROUPING_METHOD_MIXTURE_RT.equals(groupingMethod)) {
+		
+			String filename = data.getFilenameWithoutExtension() + ".csv.Z.mat";
+			System.out.println("Loading " + dataPath + filename);
 			
-			int[][] Z = new int[m][n];
-			for (int i = 0; i < m; i++) {
-				for (int j = 0; j < n; j++) {
-					Z[i][j] = (int) dz.get(i, j);
+			// load from matlab
+			MatFileReader mfr = null;
+			try {
+				mfr = new MatFileReader(dataPath + filename);
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
+
+			if (mfr != null) {
+
+				// load the best single clustering Z
+				System.out.println("Loading Z");
+				Matrix Z = new DenseMatrix(((MLDouble)mfr.getMLArray("Z")).getArray());		
+				
+				// get probabilities of peak vs peak to be together ZZprob
+				System.out.println("Computing ZZprob");
+				
+				DenseMatrix ZZprob = new DenseMatrix(data.getFeaturesCount(), data.getFeaturesCount());
+				Z.transBmult(Z, ZZprob);		
+				data.setZZProb(ZZprob);
+				
+				// map this clustering results into FeatureGroups
+				int m = Z.numRows();
+				int n = Z.numColumns();
+				int[][] zInt = new int[m][n];
+				for (int i = 0; i < m; i++) {
+					for (int j = 0; j < n; j++) {
+						zInt[i][j] = (int) Z.get(i, j);
+					}
 				}
-			}
-			Map<Integer, FeatureGroup> groupMap = new HashMap<Integer, FeatureGroup>();
-			for (int k = 0; k < n; k++) {
-				FeatureGroup group = new FeatureGroup(groupId);
-				groupId++;
-				fileGroups.add(group);
-				groupMap.put(k, group);
-			}
-			for (int i = 0; i < m; i++) {
-				Feature feature = data.getFeatureByIndex(i);
-				int k = findClusterIndex(Z[i]);
-				FeatureGroup group = groupMap.get(k);
-				group.addFeature(feature);
+				Map<Integer, FeatureGroup> groupMap = new HashMap<Integer, FeatureGroup>();
+				for (int k = 0; k < n; k++) {
+					FeatureGroup group = new FeatureGroup(groupId);
+					groupId++;
+					fileGroups.add(group);
+					groupMap.put(k, group);
+				}
+				for (int i = 0; i < m; i++) {
+					Feature feature = data.getFeatureByIndex(i);
+					int k = findClusterIndex(zInt[i]);
+					FeatureGroup group = groupMap.get(k);
+					group.addFeature(feature);
+				}
+				
 			}
 			
-		}			
-		
-		filename = data.getFilenameWithoutExtension() + ".csv.ZZprob.mat";
-		System.out.println("Loading " + dataPath + filename);				
-		mfr = null;
-		try {
-			mfr = new MatFileReader(dataPath + filename);
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(1);
+		} else if (MultiAlign.GROUPING_METHOD_POSTERIOR_RT.equals(groupingMethod)) {
+
+			String filename = data.getFilenameWithoutExtension() + ".csv.ZZprob.mat";
+			System.out.println("Loading " + dataPath + filename);				
+			MatFileReader mfr = null;
+			try {
+				mfr = new MatFileReader(dataPath + filename);
+			} catch (IOException e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
+			
+			if (mfr != null) {
+				Matrix ZZprob = new DenseMatrix(((MLDouble)mfr.getMLArray("ZZprob")).getArray());		
+				data.setZZProb(new DenseMatrix(ZZprob));		
+			}
+			
 		}
-		
-		if (mfr != null) {
-//			DoubleMatrix ZZprob = new DoubleMatrix(((MLDouble)mfr.getMLArray("ZZprob")).getArray());
-//			data.setZZProb(ZZprob);
-			Matrix ZZprob = new DenseMatrix(((MLDouble)mfr.getMLArray("ZZprob")).getArray());		
-			data.setZZProb(new DenseMatrix(ZZprob));		
-		}				
 					
 		return fileGroups;
 				

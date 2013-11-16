@@ -64,23 +64,18 @@ public class GreedyFeatureGroupingMethod extends BaseFeatureGroupingMethod imple
 
 		// create assignment matrix
 		System.out.println("Computing Z");
-//		DoubleMatrix Z = new DoubleMatrix(data.getFeaturesCount(), fileGroups.size());
 		DenseMatrix Z = new DenseMatrix(data.getFeaturesCount(), fileGroups.size());
 		for (int j = 0; j < fileGroups.size(); j++) {
 			FeatureGroup group = fileGroups.get(j);
 			for (Feature f : group.getFeatures()) {
 				int i = f.getPeakID(); // starts from 0
-//				Z.put(i, j, 1);
 				Z.set(i, j, 1);
 			}
 		}
-		data.setZ(Z);
 		
-//		DoubleMatrix ZZprob = Z.mmul(Z.transpose());
 		System.out.println("Computing ZZprob");
 		DenseMatrix ZZprob = new DenseMatrix(data.getFeaturesCount(), data.getFeaturesCount());
 		Z.transBmult(Z, ZZprob);		
-
 		data.setZZProb(ZZprob);
 
 		int groupedCount = 0;
