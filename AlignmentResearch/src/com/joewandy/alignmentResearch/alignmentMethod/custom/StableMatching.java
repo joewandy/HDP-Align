@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.PriorityQueue;
 import java.util.Queue;
-import java.util.Random;
 import java.util.Set;
 
 import org.jblas.DoubleMatrix;
@@ -164,13 +163,14 @@ public class StableMatching implements FeatureMatching {
 		for (Feature f1 : row1.getFeatures()) {
 			for (Feature f2 : row2.getFeatures()) {
 				if (f1.getData().equals(f2.getData())) {
-					DoubleMatrix prob = getClusteringProbs(f1.getData());
 					int idx1 = f1.getPeakID();
 					int idx2 = f2.getPeakID();
 					if (idx1 == idx2) {
 						total += 1;
 					} else {
-						total += prob.get(idx1, idx2);						
+						DoubleMatrix zzProbs = f1.getZZProb();
+						double prob = zzProbs.get(idx1, idx2);
+						total += prob;					
 					}
 					counter++;
 				}
@@ -196,7 +196,7 @@ public class StableMatching implements FeatureMatching {
         if (useGroup) {
     		DoubleMatrix clusteringMen = getClustering(masterList);
     		DoubleMatrix clusteringWomen = getClustering(childList);
-        	combineScoreJBlas(scoreArr, clusteringMen, clusteringWomen);				
+        	scoreArr = combineScoreJBlas(scoreArr, clusteringMen, clusteringWomen);				
 //        	scoreArr = loadScore();
 		}
     	
@@ -476,7 +476,7 @@ public class StableMatching implements FeatureMatching {
 			
 	}
 
-	private void combineScoreJBlas(DoubleMatrix scoreArr, DoubleMatrix clusteringMen,
+	private DoubleMatrix combineScoreJBlas(DoubleMatrix scoreArr, DoubleMatrix clusteringMen,
 			DoubleMatrix clusteringWomen) {
 
     	System.out.println("\tCombining scores ");
@@ -528,6 +528,8 @@ public class StableMatching implements FeatureMatching {
 		
 		long elapsedTime = (System.nanoTime()-startTime)/1000000000;
 		System.out.println("\tElapsed time = " + elapsedTime + "s");
+		
+		return scoreArr;
 		
 	}
 	

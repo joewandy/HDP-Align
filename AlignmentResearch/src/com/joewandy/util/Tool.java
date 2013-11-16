@@ -54,8 +54,8 @@ public class Tool
 	public static void init()
 	{
 		// disable loggers
-		BasicConfigurator.configure();
-		Logger.getRootLogger().setLevel(Level.OFF);
+		// BasicConfigurator.configure();
+		// Logger.getRootLogger().setLevel(Level.OFF);
 	}
 
 	/**

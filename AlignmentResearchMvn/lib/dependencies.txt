@@ -1,0 +1,17 @@
+Maven-managed dependencies
+
+velocity
+xom
+mtj
+jblas
+jmatio
+jung
+commons-exec
+itext
+commons-math
+junit
+
+JAR dependencies in classpath
+
+matlabcontrol
+javaoctave

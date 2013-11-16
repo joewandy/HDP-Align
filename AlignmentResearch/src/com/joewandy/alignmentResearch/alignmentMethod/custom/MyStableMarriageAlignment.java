@@ -1,34 +1,41 @@
 package com.joewandy.alignmentResearch.alignmentMethod.custom;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import org.jblas.DoubleMatrix;
 
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
 import com.joewandy.alignmentResearch.alignmentMethod.BaseAlignment;
+import com.joewandy.alignmentResearch.main.MultiAlign;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.ExtendedLibrary;
+import com.joewandy.alignmentResearch.objectModel.Feature;
+import com.joewandy.alignmentResearch.objectModel.FeatureGroupingMethod;
+import com.joewandy.alignmentResearch.objectModel.GreedyFeatureGroupingMethod;
+import com.joewandy.alignmentResearch.objectModel.SavedMatlabFeatureGroupingMethod;
 
 public class MyStableMarriageAlignment extends BaseAlignment implements AlignmentMethod {
 
-	private List<AlignmentList> featureList;
+	private List<AlignmentFile> dataList;
 	private ExtendedLibrary library;
 	private boolean useGroup;
+	private String groupingMethod;
+	private double groupingRtWindow;
 	private double alpha;
 	
 	public MyStableMarriageAlignment(List<AlignmentFile> dataList, AlignmentMethodParam param) {
 
 		super(dataList, param);
+		this.dataList = dataList;
 		
-		featureList = new ArrayList<AlignmentList>();
-		for (AlignmentFile data : dataList) {
-			// construct list of features in rows, based on data
-			AlignmentList newList = new AlignmentList(data);
-			featureList.add(newList);
-		}
-		
+		// do grouping before aligning ?
 		useGroup = param.isUseGroup();
+		groupingMethod = param.getGroupingMethod();
+		groupingRtWindow = param.getGroupingRtTolerance();
 		alpha = param.getAlpha();
 		
 	}
@@ -36,20 +43,43 @@ public class MyStableMarriageAlignment extends BaseAlignment implements Alignmen
 	public AlignmentList matchFeatures() {
 
 		AlignmentList masterList = new AlignmentList("");
+		FeatureGroupingMethod groupingMethod = getFeatureGroupingMethod();
+	
+		int counter = 0;
+		for (AlignmentFile data : dataList) {
+			
+			AlignmentList peakList = new AlignmentList(data);
 
-		for (int i = 0; i < featureList.size(); i++) {
-
-			AlignmentList peakList = featureList.get(i);
-			System.out.println("Aligning #" + (i+1) + ": " + peakList);
-
+			System.out.println("Grouping #" + (counter+1) + ": " + peakList);
+			groupingMethod.group(data);
+			
+			System.out.println("Aligning #" + (counter+1) + ": " + peakList);
 			FeatureMatching matcher = new StableMatching(masterList.getId() + ", " + peakList.getId(), masterList, peakList, 
 					library, massTolerance, rtTolerance, useGroup, alpha);
 			masterList = matcher.getMatchedList();			
             
+			counter++;
+			
 		}
+		
+		groupingMethod.close();
 		
 		return masterList;
 		
+	}
+
+	private FeatureGroupingMethod getFeatureGroupingMethod() {
+		FeatureGroupingMethod grouping = null;
+		if (useGroup) {
+			if (MultiAlign.GROUPING_METHOD_GREEDY_RT.equals(groupingMethod)) {
+				grouping = new GreedyFeatureGroupingMethod(groupingRtWindow);	
+			} else {
+	//			grouping = new MatlabFeatureGrouping(options.groupingRtWindow, 
+	//					options.groupingAlpha, options.groupingNSamples);															
+				grouping = new SavedMatlabFeatureGroupingMethod();															
+			}
+		}
+		return grouping;
 	}
 		
 }

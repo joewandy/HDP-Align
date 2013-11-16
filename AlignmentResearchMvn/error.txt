@@ -1,0 +1,6 @@
+java.lang.NullPointerException
+	at com.joewandy.alignmentResearch.alignmentMethod.custom.MyStableMarriageAlignment.matchFeatures(MyStableMarriageAlignment.java:54)
+	at com.joewandy.alignmentResearch.alignmentMethod.BaseAlignment.align(BaseAlignment.java:51)
+	at com.joewandy.alignmentResearch.main.MultiAlign.align(MultiAlign.java:112)
+	at com.joewandy.alignmentResearch.main.MultiAlignCmd.runExperiment(MultiAlignCmd.java:308)
+	at com.joewandy.alignmentResearch.main.MultiAlignCmd.main(MultiAlignCmd.java:236)

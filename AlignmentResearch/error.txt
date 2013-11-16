@@ -1,12 +1,6 @@
-org.jblas.exceptions.SizeException: Number of columns of left matrix must be equal to number of rows of right matrix.
-	at org.jblas.DoubleMatrix.assertMultipliesWith(DoubleMatrix.java:1165)
-	at org.jblas.DoubleMatrix.mmuli(DoubleMatrix.java:1673)
-	at org.jblas.DoubleMatrix.mmuli(DoubleMatrix.java:3049)
-	at com.joewandy.alignmentResearch.alignmentMethod.custom.StableMatching.combineScoreJBlas(StableMatching.java:500)
-	at com.joewandy.alignmentResearch.alignmentMethod.custom.StableMatching.match(StableMatching.java:202)
-	at com.joewandy.alignmentResearch.alignmentMethod.custom.StableMatching.getMatchedList(StableMatching.java:61)
-	at com.joewandy.alignmentResearch.alignmentMethod.custom.MyStableMarriageAlignment.matchFeatures(MyStableMarriageAlignment.java:45)
-	at com.joewandy.alignmentResearch.alignmentMethod.BaseAlignment.align(BaseAlignment.java:51)
-	at com.joewandy.alignmentResearch.main.MultiAlign.align(MultiAlign.java:121)
-	at com.joewandy.alignmentResearch.main.MultiAlignCmd.runExperiment(MultiAlignCmd.java:321)
-	at com.joewandy.alignmentResearch.main.MultiAlignCmd.main(MultiAlignCmd.java:249)
+java.lang.NullPointerException
+	at java.io.File.<init>(File.java:277)
+	at com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.BenchmarkDataGenerator.getAlignmentFiles(BenchmarkDataGenerator.java:47)
+	at com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.BaseDataGenerator.generate(BaseDataGenerator.java:27)
+	at com.joewandy.alignmentResearch.main.MultiAlignCmd.runExperiment(MultiAlignCmd.java:305)
+	at com.joewandy.alignmentResearch.main.MultiAlignCmd.main(MultiAlignCmd.java:236)
