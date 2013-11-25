@@ -1,6 +1,7 @@
 package com.joewandy.alignmentResearch.alignmentMethod.custom;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -165,15 +166,9 @@ public class PathGrowing {
 	}
 
 	private MyLink getHeaviestEdge(Graph<AlignmentRow, MyLink> g) {
-		Set<MyLink> incidentEdges = new HashSet<MyLink>(graph.getEdges());
-		double maxWeight = 0;
-		MyLink maxEdge = null;
-		for (MyLink edge : incidentEdges) {
-			if (edge.getWeight() > maxWeight) {
-				maxWeight = edge.getWeight();
-				maxEdge = edge;
-			}
-		}
+		List<MyLink> edges = new ArrayList<MyLink>(graph.getEdges());
+		Collections.sort(edges, new MyLinkComparator());
+		MyLink maxEdge = edges.get(0);		
 		return maxEdge;
 	}
 	
