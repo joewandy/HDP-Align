@@ -33,6 +33,14 @@ public class AlignmentRow {
 		recomputeStats();
 	}
 	
+	public AlignmentList getParent() {
+		return parent;
+	}
+
+	public void setParent(AlignmentList parent) {
+		this.parent = parent;
+	}
+
 	public int getRowId() {
 		return rowId;
 	}

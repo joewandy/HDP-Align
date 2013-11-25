@@ -20,6 +20,8 @@ import org.paukov.combinatorics.ICombinatoricsVector;
 
 public class GroundTruth {
 
+	private static final String GROUND_TRUTH_NEW = "new";
+	private static final String GROUND_TRUTH_OLD = "old";
 	private final static double EPSILON = 0.0001;
 	private List<GroundTruthFeatureGroup> groundTruth;
 	private List<GroundTruthPair> pairwiseGroundTruth;	
@@ -143,11 +145,11 @@ public class GroundTruth {
 		}
 	}
 
-	public EvaluationResult evaluate(List<AlignmentRow> alignmentResult, int noOfFiles, double dmz, double drt) {
+	public EvaluationResult evaluateOld(List<AlignmentRow> alignmentResult, int noOfFiles, double dmz, double drt) {
 		
 		List<FeatureGroup> tool = convertToFeatureGroup(alignmentResult);
 		
-		System.out.println("Calculating ");
+//		System.out.println("Calculating ");
 		
 		// for every consensus feature in ground truth
 		int N = this.groundTruth.size();
@@ -160,7 +162,7 @@ public class GroundTruth {
 		for (int i = 0; i < N; i++) {
 			
 			if (i % 100 == 0) {
-				System.out.print('.');
+//				System.out.print('.');
 			}
 						
 			/* 
@@ -242,100 +244,13 @@ public class GroundTruth {
 		
 		EvaluationResult evalRes = computeAdditional(alignmentResult,
 				noOfFiles, precision, recall, totalTp, totalFp, 0, totalPositives,
-				f1, f05, totalTpRatio, totalFpRatio, totalPositiveRatio, dmz, drt);
+				f1, f05, totalTpRatio, totalFpRatio, totalPositiveRatio, dmz, drt, GROUND_TRUTH_OLD);
 		
 		return evalRes;
 
 	}
 
-	public EvaluationResult evaluate2(List<AlignmentRow> alignmentResult, int noOfFiles, double dmz, double drt) {
-		
-		// convert alignmentResult to feature groups
-		List<FeatureGroup> tool = convertToFeatureGroup(alignmentResult);		
-		System.out.println("Calculating ");
-		
-		// for every item in tool
-		int N = this.groundTruth.size();
-		int M = tool.size(); 
-		int G = this.getFeatureCount();
-		double precision = 0;
-		double recall = 0;
-		int totalTp = 0;
-		int totalFp = 0;
-		int totalPositives = 0;
-		for (int j = 0; j < M; j++) {
-			
-			if (j % 1000 == 0) {
-				System.out.print('.');
-			}
-
-			// ignore singleton alignments from tool
-			FeatureGroup t = tool.get(j);
-			if (t.getFeatureCount() == 1) {
-				continue;
-			}								
-			
-			// find ground truth entries that intersect with this tool entry
-			FeatureGroup gTilde = new FeatureGroup(-1); 
-			for (FeatureGroup g : this.groundTruth) {
-				
-				int count = getIntersectCount(t, g);
-				if (count > 0) {
-					gTilde.addFeatures(g.getFeatures());
-				}
-				
-			}
-			int gTildeCount = gTilde.getFeatureCount();
-			if (gTildeCount == 0) {
-				// skip if no matches at all
-				continue;
-			}				
-
-			// get intersection between tool and gold
-			Set<Feature> intersect = getIntersection(t, gTilde);			
-			int intersectCount = intersect.size();
-			int tCount = t.getFeatureCount();
-			int fp = tCount - intersectCount;
-			int tp = intersectCount;
-//			precision += ((double) intersectCount / tCount);
-//			recall += ((double) intersectCount / gTildeCount);
-
-			totalTp += tp;
-			totalFp += fp;
-			totalPositives += tp + fp;
-						
-		}
-				
-//		precision = precision / M;		
-//		recall = recall / M;
-
-		precision = (double)totalTp / (totalTp + totalFp);
-		recall = (double)totalTp / G;
-		
-		/*
-		 * Calculations here
-		 */
-		
-		double f1 = (2*precision*recall) / (precision + recall);
-		double f05 = (1.25*precision*recall) / ((0.25*precision) + recall);
-		
-		double totalTpRatio = ((double) totalTp) / totalPositives;
-		double totalFpRatio = ((double) totalFp) / totalPositives;		
-		double totalPositiveRatio = ((double) totalPositives) / totalPositives;				
-		
-		/*
-		 * More calculations here
-		 */
-		
-		EvaluationResult evalRes = computeAdditional(alignmentResult,
-				noOfFiles, precision, recall, totalTp, totalFp, 0, totalPositives,
-				f1, f05, totalTpRatio, totalFpRatio, totalPositiveRatio, dmz, drt);
-		
-		return evalRes;
-
-	}
-
-	public EvaluationResult evaluate3(List<AlignmentRow> alignmentResult, int noOfFiles, double dmz, double drt) {
+	public EvaluationResult evaluateNew(List<AlignmentRow> alignmentResult, int noOfFiles, double dmz, double drt) {
 				
 		// construct G+, the set of positive pairwise ground truth ==> things that should be aligned together
 		Set<GroundTruthPair> gPlus = new HashSet<GroundTruthPair>(this.pairwiseGroundTruth);				
@@ -344,28 +259,28 @@ public class GroundTruth {
 		Set<GroundTruthPair> t = new HashSet<GroundTruthPair>(convertToPairwiseFeatureGroup(alignmentResult));		
 	
 		// TP = should be aligned & are aligned = G+ intersect t
-		System.out.println("Computing TP");		
+//		System.out.println("Computing TP");		
 		Set<GroundTruthPair> intersect = new HashSet<GroundTruthPair>(gPlus);
 		intersect.retainAll(t);
 		int TP = intersect.size();
 		
 		// FN = should be aligned & aren't aligned = G+ \ t
-		System.out.println("Computing FN");		
+//		System.out.println("Computing FN");		
 		Set<GroundTruthPair> diff1 = new HashSet<GroundTruthPair>(gPlus);
 		diff1.removeAll(t);
 		int FN = diff1.size();
 						
 		// FP = shouldn't be aligned & are aligned = t \ G+
-		System.out.println("Computing FP");
+//		System.out.println("Computing FP");
 		Set<GroundTruthPair> diff2 = new HashSet<GroundTruthPair>(t);
 		diff2.removeAll(gPlus);
 		int FP = diff2.size();
 		
 		int totalPositives = t.size();
-		System.out.println("TP = " + TP);
-		System.out.println("FP = " + FP);
-		System.out.println("totalPositives = " + totalPositives);
-		System.out.println("totalPositives-TP = " + (totalPositives-TP));
+//		System.out.println("TP = " + TP);
+//		System.out.println("FP = " + FP);
+//		System.out.println("totalPositives = " + totalPositives);
+//		System.out.println("totalPositives-TP = " + (totalPositives-TP));
 		assert(FP == (totalPositives-TP));
 		
 		// how many ground truth entries are aligned ?
@@ -394,7 +309,7 @@ public class GroundTruth {
 				
 		EvaluationResult evalRes = computeAdditional(alignmentResult,
 				noOfFiles, precision, recall, TP, FP, FN, totalPositives,
-				f1, f05, totalTpRatio, totalFpRatio, totalPositiveRatio, dmz, drt);
+				f1, f05, totalTpRatio, totalFpRatio, totalPositiveRatio, dmz, drt, GROUND_TRUTH_NEW);
 		
 		return evalRes;
 
@@ -475,7 +390,7 @@ public class GroundTruth {
 			List<AlignmentRow> alignmentResult, int noOfFiles,
 			double precision, double recall, int totalTp, int totalFp, int totalFn,
 			int totalPositives, double f1, double f05, double totalTpRatio,
-			double totalFpRatio, double totalPositiveRatio, double dmz, double drt) {
+			double totalFpRatio, double totalPositiveRatio, double dmz, double drt, String version) {
 		int coverageCount = 0;		
 		List<Double> sdrtList = new ArrayList<Double>();
 		List<Double> mdrtList = new ArrayList<Double>();		
@@ -518,12 +433,12 @@ public class GroundTruth {
 		// compute coverage
 		double coverage = (double)coverageCount / alignmentResult.size();
 		
-		System.out.println();		
+//		System.out.println();		
 		EvaluationResult evalRes = new EvaluationResult(
 				dmz, drt,
 				precision, recall, f1, f05, 
 				totalTp, totalFp, totalFn, totalPositives, totalTpRatio, totalFpRatio, totalPositiveRatio,
-				medSdrt, meanSdrt, medMdrt, meanMdrt, coverage);
+				medSdrt, meanSdrt, medMdrt, meanMdrt, coverage, version);
 		return evalRes;
 	}
 	

@@ -53,12 +53,7 @@ public class PeakMLToFeatureXML {
 		@Option(name = "o", param = "filename", type = Option.Type.REQUIRED_ARGUMENT, usage = "Option for the output file. This file is writen in the XML format that MzMine " +
 				"import function can understand")
 		public String output = null;
-		
-		@Option(name="polarity", param="string", type=Option.Type.REQUIRED_ARGUMENT, usage=
-				"Polarity of this input file. Used for file-naming purpose only"
-		)
-		public String polarity = null;
-		
+				
 		@Option(name = "h", param = "", type = Option.Type.NO_ARGUMENT, usage = "When this is set, the help is shown.")
 		public boolean help = false;
 		
@@ -114,8 +109,6 @@ public class PeakMLToFeatureXML {
 				System.out.println("Exporting peaks");
 			}
 			String prefix = new File(options.input).getName();
-			prefix = prefix.substring(0, prefix.lastIndexOf('.'));
-			prefix += "." + options.polarity;
 			PeakMLToFeatureXMLWriter.write(prefix, result.header, peakset.getPeaks(), null, output, null);
 
 		} catch (Exception e) {

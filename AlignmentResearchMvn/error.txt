@@ -1,5 +1,9 @@
 java.lang.NullPointerException
-	at com.joewandy.alignmentResearch.alignmentMethod.custom.MyStableMarriageAlignment.matchFeatures(MyStableMarriageAlignment.java:54)
+	at com.joewandy.alignmentResearch.alignmentMethod.custom.PathGrowing.execute(PathGrowing.java:59)
+	at com.joewandy.alignmentResearch.alignmentMethod.custom.MaximumWeightMatching.approxMaxMatching(MaximumWeightMatching.java:243)
+	at com.joewandy.alignmentResearch.alignmentMethod.custom.MaximumWeightMatching.match(MaximumWeightMatching.java:193)
+	at com.joewandy.alignmentResearch.alignmentMethod.custom.MaximumWeightMatching.getMatchedList(MaximumWeightMatching.java:55)
+	at com.joewandy.alignmentResearch.alignmentMethod.custom.MyMaximumMatchingAlignment.matchFeatures(MyMaximumMatchingAlignment.java:56)
 	at com.joewandy.alignmentResearch.alignmentMethod.BaseAlignment.align(BaseAlignment.java:51)
 	at com.joewandy.alignmentResearch.main.MultiAlign.align(MultiAlign.java:112)
 	at com.joewandy.alignmentResearch.main.MultiAlignCmd.runExperiment(MultiAlignCmd.java:308)

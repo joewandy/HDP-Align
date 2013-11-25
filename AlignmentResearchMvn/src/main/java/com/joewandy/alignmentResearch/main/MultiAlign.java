@@ -122,7 +122,19 @@ public class MultiAlign {
 		if (data.getGroundTruth() != null) {			
 			int noOfFiles = data.getNoOfFiles();
 			GroundTruth gt = data.getGroundTruth();
-			evalRes = gt.evaluate3(Collections.unmodifiableList(result.getRows()), noOfFiles, 
+			evalRes = gt.evaluateOld(Collections.unmodifiableList(result.getRows()), noOfFiles, 
+					massTolerance, rtTolerance);				
+		}		
+		evalRes.setTh(alpha);
+		evalRes.setDrtBefore(ransacRtToleranceBeforeCorrection);
+		System.out.println(evalRes);
+		
+		// do performance evaluation
+		evalRes = null;
+		if (data.getGroundTruth() != null) {			
+			int noOfFiles = data.getNoOfFiles();
+			GroundTruth gt = data.getGroundTruth();
+			evalRes = gt.evaluateNew(Collections.unmodifiableList(result.getRows()), noOfFiles, 
 					massTolerance, rtTolerance);				
 		}		
 		evalRes.setTh(alpha);

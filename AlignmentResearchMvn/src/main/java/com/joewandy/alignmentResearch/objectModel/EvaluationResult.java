@@ -22,11 +22,12 @@ public class EvaluationResult {
 	private double coverage;
 	private double th;
 	private double drtBefore;
+	private String version;
 
 	public EvaluationResult(double dmz, double drt, double precision, double recall, double f1,
 			double f05, double totalTp, double totalFp, double totalFn, double totalPositives,
 			double totalTpRatio, double totalFpRatio, double totalPositivesRatio,
-			double medSdrt, double meanSdrt, double medMdrt, double meanMdrt, double coverage) {
+			double medSdrt, double meanSdrt, double medMdrt, double meanMdrt, double coverage, String version) {
 		super();
 		this.dmz = dmz;
 		this.drt = drt;
@@ -46,6 +47,7 @@ public class EvaluationResult {
 		this.medMdrt = medMdrt;
 		this.meanMdrt = meanMdrt;
 		this.coverage = coverage;
+		this.version = version;
 	}
 
 	public double getPrecision() {
@@ -144,6 +146,14 @@ public class EvaluationResult {
 		this.drtBefore = drtBefore;
 	}
 
+	public String getVersion() {
+		return version;
+	}
+
+	public void setVersion(String version) {
+		this.version = version;
+	}
+
 	@Override
 	public String toString() {
 		
@@ -162,19 +172,20 @@ public class EvaluationResult {
 		
 		// human readable
 		String output = "";
-		output += "Precision = " + precStr + "\n";
-		output += "Recall = " + recallStr + "\n";
-		output += "F1 = " + f1Str + "\n";
-		output += "F0.5 = " + f05Str + "\n";
-		output += "Total TP = " + totalTp + " (" + totalTpRatioStr + ")" + "\n";
-		output += "Total FP = " + totalFp + " (" + totalFpRatioStr + ")" + "\n";
-		output += "Total FN = " + totalFn + "\n";		
-		output += "Total positives = " + totalPositives + " (" + totalPositivesRatioStr + ")"  + "\n";
-		output += "Median SDRT = " + medSdrtStr + "\n";
-		output += "Mean SDRT = " + meanSdrtStr + "\n";
-		output += "Median MDRT = " + medMdrtStr + "\n";
-		output += "Mean MDRT = " + meanMdrtStr + "\n";
-		output += "Coverage = " + coverageStr + "\n";
+//		output += "Precision = " + precStr + "\n";
+//		output += "Recall = " + recallStr + "\n";
+//		output += "F1 = " + f1Str + "\n";
+//		output += "F0.5 = " + f05Str + "\n";
+//		output += "Total TP = " + totalTp + " (" + totalTpRatioStr + ")" + "\n";
+//		output += "Total FP = " + totalFp + " (" + totalFpRatioStr + ")" + "\n";
+//		output += "Total FN = " + totalFn + "\n";		
+//		output += "Total positives = " + totalPositives + " (" + totalPositivesRatioStr + ")"  + "\n";
+//		output += "Median SDRT = " + medSdrtStr + "\n";
+//		output += "Mean SDRT = " + meanSdrtStr + "\n";
+//		output += "Median MDRT = " + medMdrtStr + "\n";
+//		output += "Mean MDRT = " + meanMdrtStr + "\n";
+//		output += "Coverage = " + coverageStr + "\n";
+//		output += "Version = " + version + "\n";
 
 		// for parsing in CSV format
 		output += "!OUTPUT," + dmz + ", " + drt + ", " + th + ", " + precStr + ", " + recallStr + ", " + f1Str + ", " + f05Str + ", " + 
@@ -184,7 +195,8 @@ public class EvaluationResult {
 				totalPositives + ", " + totalPositivesRatioStr + ", " + 
 				medSdrtStr + ", " + meanSdrtStr + ", " + 
 				medMdrtStr + ", " + meanMdrtStr + ", " +
-				coverageStr + ", " + drtBefore;
+				coverageStr + ", " + drtBefore + ", " +
+				version;
 
 		return output;
 		

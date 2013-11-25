@@ -138,7 +138,6 @@ public class StableMatching implements FeatureMatching {
 				// for list produced from merging files
 				List<AlignmentRow> rows = dataList.getRows();
 				int n = rows.size();
-//				DoubleMatrix mat = new DoubleMatrix(n, n);
 				DenseMatrix mat = new DenseMatrix(n, n);
 				for (int i = 0; i < n; i++) {
 					for (int j = 0; j < n; j++) {
@@ -155,7 +154,6 @@ public class StableMatching implements FeatureMatching {
 			// for the case when we don't use the weight
 			List<AlignmentRow> rows = dataList.getRows();
 			int n = rows.size();
-//			return new DoubleMatrix(n, n);				
 			return new DenseMatrix(n, n);				
 		}
 	}
@@ -202,17 +200,11 @@ public class StableMatching implements FeatureMatching {
     	
         Map<AlignmentRow, AlignmentRow> matches = new HashMap<AlignmentRow, AlignmentRow>();
 
-//      DoubleMatrix scoreArr = computeScores(men, women);
         Matrix scoreArr = computeScores(men, women);
         
 //      saveToMatlab(masterList.getData().getParentPath());
 
-        if (useGroup) {
-    		
-//        	DoubleMatrix clusteringMen = getClustering(masterList);
-//    		DoubleMatrix clusteringWomen = getClustering(childList);
-//    		combineScoreJBlas(scoreArr, clusteringMen, clusteringWomen);				
-        	
+        if (useGroup) {        	
         	Matrix clusteringMen = getClustering(masterList);
     		Matrix clusteringWomen = getClustering(childList);        	
     		scoreArr = combineScoreMtj(scoreArr, clusteringMen, clusteringWomen);
@@ -243,70 +235,9 @@ public class StableMatching implements FeatureMatching {
 //		}
 //	}
 
-	private Map<AlignmentRow, AlignmentRow> hungarianMatching(DoubleMatrix scoreArr,
-			List<AlignmentRow> men, List<AlignmentRow> women) {
-		
-        double maxScore = scoreArr.max();
-        
-    	// normalise 
-    	for (int i = 0; i < men.size(); i++) {
-    		for (int j = 0; j < women.size(); j++) {
-    			scoreArr.put(i, j, maxScore - scoreArr.get(i, j));
-    		}
-    	}
-		// running matching
-		System.out.print("\tRunning maximum weighted matching ");
-		HungarianAlgorithm algo = new HungarianAlgorithm(scoreArr.toArray2());
-		int[] res = algo.execute();
-		System.out.println();
-		
-		// store the result
-		Map<AlignmentRow, AlignmentRow> matches = new HashMap<AlignmentRow, AlignmentRow>();
-		for (int i=0; i<men.size(); i++) {
-			int matchIndex = res[i];
-			// if there's a match
-			if (matchIndex != -1) {
-				AlignmentRow row1 = men.get(i);
-				AlignmentRow row2 = women.get(matchIndex);
-				matches.put(row1, row2);
-			}
-		}
-		return matches;
-
-	}
-
-	private Map<AlignmentRow, AlignmentRow> approxMaxMatching(DoubleMatrix scoreArr, 
-			List<AlignmentRow> men, 
-			List<AlignmentRow> women) {
-		
-		// running matching
-		System.out.print("\tRunning approximately maximum greedy matching ");
-		GreedyApprox algo = new GreedyApprox(scoreArr.toArray2());
-		int[] res = algo.execute();
-		System.out.println();
-		
-		// store the result
-		Map<AlignmentRow, AlignmentRow> matches = new HashMap<AlignmentRow, AlignmentRow>();
-		for (int i=0; i<men.size(); i++) {
-			int matchIndex = res[i];
-			// if there's a match
-			if (matchIndex != -1) {
-				AlignmentRow row1 = men.get(i);
-				AlignmentRow row2 = women.get(matchIndex);
-				matches.put(row1, row2);
-			}
-		}
-		return matches;
-		
-	}
-
-//	private Map<AlignmentRow, AlignmentRow> glMatching(DoubleMatrix scoreArr, 
-//			List<AlignmentRow> men, 
-//			List<AlignmentRow> women) {
 	private Map<AlignmentRow, AlignmentRow> glMatching(Matrix scoreArr, 
 			List<AlignmentRow> men, 
 			List<AlignmentRow> women) {
-
 	
         // Create a free list of men (and use it to store their proposals)
     	System.out.print("\tCreating prefs ");
@@ -337,9 +268,6 @@ public class StableMatching implements FeatureMatching {
 
 	}
 
-//	private Map<AlignmentRow, RowPreference> galeShapley(
-//			DoubleMatrix scoreArr, 
-//			Queue<RowPreference> freemen, List<AlignmentRow> women) {
 	private Map<AlignmentRow, RowPreference> galeShapley(
 			Matrix scoreArr, 
 			Queue<RowPreference> freemen, List<AlignmentRow> women) {
@@ -474,7 +402,6 @@ public class StableMatching implements FeatureMatching {
 		System.out.println();
 
     	System.out.print("\tComputing scores ");
-//		scoreArr = new DoubleMatrix(m, n);
 		scoreArr = new DenseMatrix(m, n);
 		for (int i = 0; i < m; i++) {		
 			
@@ -482,7 +409,6 @@ public class StableMatching implements FeatureMatching {
 				double dist = distArr.get(i, j);
 				if (dist > 0) {
 					double score = 1-(dist/maxDist);
-//					scoreArr.put(i, j, score);
 					scoreArr.set(i, j, score);
 				}
 			}
@@ -503,61 +429,6 @@ public class StableMatching implements FeatureMatching {
 			
 	}
 
-	private void combineScoreJBlas(DoubleMatrix scoreArr, DoubleMatrix clusteringMen,
-			DoubleMatrix clusteringWomen) {
-
-    	System.out.println("\tCombining scores ");
-		long startTime = System.nanoTime();
-
-		DoubleMatrix W = scoreArr;
-		double maxScore = W.max();
-		W.divi(maxScore);
-		System.out.println("\t\tW = " + W.rows + "x" + W.columns);
-		
-		DoubleMatrix A = clusteringMen;
-		for (int i = 0; i < A.rows; i++) {
-			A.put(i, i, 0);
-		}
-		System.out.println("\t\tA = " + A.rows + "x" + A.columns);
-		 
-		DoubleMatrix B = clusteringWomen;
-		for (int i = 0; i < B.rows; i++) {
-			B.put(i, i, 0);
-		}
-		System.out.println("\t\tB = " + B.rows + "x" + B.columns);
-
-		// D = (A*W)*B;
-		System.out.println("\t\tComputing D=(AW)B");
-		DoubleMatrix D = A.mmul(W);
-		D.mmuli(B);
-
-		// D = Q .* D;
-		System.out.println("\t\tComputing D.*Q");
-		for (int i = 0; i < scoreArr.rows; i++) {			
-			for (int j = 0; j < scoreArr.columns; j++) {
-				if (scoreArr.get(i, j) > 0) {
-					// leave as it is
-				} else {
-					D.put(i, j, 0);
-				}
-			}
-		}
-		
-		// D = D ./ max(max(D));
-		maxScore = D.max();
-		D.divi(maxScore);
-
-		// Wp = (alpha .* W) + ((1-alpha) .* D);
-		System.out.println("\t\tComputing W'=(alpha.*W)+((1-alpha).*D)");
-		W.muli(alpha);
-		D.muli(1-alpha);
-		scoreArr = W.add(D);
-		
-		long elapsedTime = (System.nanoTime()-startTime)/1000000000;
-		System.out.println("\tElapsed time = " + elapsedTime + "s");
-		
-	}
-	
 	private Matrix combineScoreMtj(Matrix scoreArr, Matrix clusteringMen,
 			Matrix clusteringWomen) {
 
@@ -690,10 +561,8 @@ public class StableMatching implements FeatureMatching {
     private class WomanPreferenceComparator implements Comparator<AlignmentRow>{
 
     	private AlignmentRow woman;
-//    	private DoubleMatrix scoreArr;
     	private Matrix scoreArr;
   	
-//    	public WomanPreferenceComparator(AlignmentRow woman, DoubleMatrix scoreArr) {
     	public WomanPreferenceComparator(AlignmentRow woman, Matrix scoreArr) {
     		this.woman = woman;
     		this.scoreArr = scoreArr;

@@ -2,7 +2,6 @@ package com.joewandy.alignmentResearch.alignmentMethod.custom;
 
 import java.util.List;
 
-import com.joewandy.alignmentResearch.main.MultiAlign;
 import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
 
 public class GreedyApprox {
