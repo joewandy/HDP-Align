@@ -72,8 +72,8 @@ public class MyMaximumMatchingAlignment extends BaseAlignment implements Alignme
 			if (MultiAlign.GROUPING_METHOD_GREEDY_RT.equals(groupingMethod)) {
 				grouping = new GreedyFeatureGroupingMethod(groupingRtWindow);	
 			} else {
-	//			grouping = new MatlabFeatureGrouping(options.groupingRtWindow, 
-	//					options.groupingAlpha, options.groupingNSamples);															
+//				grouping = new MatlabFeatureGroupingMethod(groupingMethod, groupingRtWindow, 
+//						MultiAlign.GROUPING_METHOD_ALPHA, MultiAlign.GROUPING_METHOD_NUM_SAMPLES);															
 				grouping = new SavedMatlabFeatureGroupingMethod(groupingMethod);															
 			}
 		}

@@ -66,7 +66,7 @@
 			<version>2.0.1</version>
 		</dependency>
 
-		<!-- Apache Commons -->
+		<!-- Apache Stuff-->
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-exec</artifactId>
@@ -82,7 +82,12 @@
 			<artifactId>commons-math3</artifactId>
 			<version>3.0</version>
 		</dependency>
-
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.3.1</version>
+		</dependency>
+            
 		<!-- Apache Velocity -->
 		<dependency>
 			<groupId>org.apache.velocity</groupId>
@@ -134,6 +139,37 @@
 			<artifactId>guava</artifactId>
 			<version>15.0</version>
 		</dependency>
-
+		
+		<!-- Base64 encoding -->
+		<dependency>
+			<groupId>org.ostermiller</groupId>
+			<artifactId>utils</artifactId>
+			<version>1.07.00</version>
+		</dependency>
+		
+		<!-- Jackson -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>2.3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<version>2.3.0</version>
+		</dependency>
+		
+		<!-- OpenCSV -->
+		<dependency>
+			<groupId>net.sf.opencsv</groupId>
+			<artifactId>opencsv</artifactId>
+			<version>2.0</version>
+		</dependency>		
+                                                            		
 	</dependencies>
 </project>

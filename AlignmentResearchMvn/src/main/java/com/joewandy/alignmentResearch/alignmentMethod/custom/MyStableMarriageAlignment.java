@@ -16,6 +16,7 @@ import com.joewandy.alignmentResearch.objectModel.ExtendedLibrary;
 import com.joewandy.alignmentResearch.objectModel.Feature;
 import com.joewandy.alignmentResearch.objectModel.FeatureGroupingMethod;
 import com.joewandy.alignmentResearch.objectModel.GreedyFeatureGroupingMethod;
+import com.joewandy.alignmentResearch.objectModel.MatlabFeatureGroupingMethod;
 import com.joewandy.alignmentResearch.objectModel.SavedMatlabFeatureGroupingMethod;
 
 public class MyStableMarriageAlignment extends BaseAlignment implements AlignmentMethod {
@@ -77,8 +78,8 @@ public class MyStableMarriageAlignment extends BaseAlignment implements Alignmen
 			if (MultiAlign.GROUPING_METHOD_GREEDY_RT.equals(groupingMethod)) {
 				grouping = new GreedyFeatureGroupingMethod(groupingRtWindow);	
 			} else {
-	//			grouping = new MatlabFeatureGrouping(options.groupingRtWindow, 
-	//					options.groupingAlpha, options.groupingNSamples);															
+//				grouping = new MatlabFeatureGroupingMethod(groupingMethod, groupingRtWindow, 
+//						MultiAlign.GROUPING_METHOD_ALPHA, MultiAlign.GROUPING_METHOD_NUM_SAMPLES);															
 				grouping = new SavedMatlabFeatureGroupingMethod(groupingMethod);															
 			}
 		}

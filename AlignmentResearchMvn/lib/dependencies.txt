@@ -15,3 +15,4 @@ JAR dependencies in classpath
 
 matlabcontrol
 javaoctave
+mzmatch (the current mzmatch project, in jar form .. to avoid circular dependencies)

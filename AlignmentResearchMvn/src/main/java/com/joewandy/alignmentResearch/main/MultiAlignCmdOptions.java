@@ -128,10 +128,10 @@ public class MultiAlignCmdOptions {
 	 */
 	
 	@Option(name = "groupingAlpha", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Alpha")
-	public double groupingAlpha = 10;
+	public double groupingAlpha = MultiAlign.GROUPING_METHOD_ALPHA;
 
 	@Option(name = "groupingNSamples", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "No. of samples")
-	public int groupingNSamples = 1;
+	public int groupingNSamples = MultiAlign.GROUPING_METHOD_NUM_SAMPLES;
 
 	
 	/*

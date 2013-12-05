@@ -1,0 +1,10 @@
+java.lang.ArrayIndexOutOfBoundsException: 1335
+	at thermologviewer.view.GraphView.update(GraphView.java:87)
+	at thermologviewer.MainWnd.update(MainWnd.java:110)
+	at thermologviewer.MainWnd.handleEvent(MainWnd.java:189)
+	at org.eclipse.swt.widgets.EventTable.sendEvent(Unknown Source)
+	at org.eclipse.swt.widgets.Widget.sendEvent(Unknown Source)
+	at org.eclipse.swt.widgets.Display.runDeferredEvents(Unknown Source)
+	at org.eclipse.swt.widgets.Display.readAndDispatch(Unknown Source)
+	at thermologviewer.MainWnd.display(MainWnd.java:139)
+	at thermologviewer.ThermoLogViewer.main(ThermoLogViewer.java:48)

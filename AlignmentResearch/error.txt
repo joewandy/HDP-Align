@@ -1,6 +1,0 @@
-java.lang.NullPointerException
-	at java.io.File.<init>(File.java:277)
-	at com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.BenchmarkDataGenerator.getAlignmentFiles(BenchmarkDataGenerator.java:47)
-	at com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.BaseDataGenerator.generate(BaseDataGenerator.java:27)
-	at com.joewandy.alignmentResearch.main.MultiAlignCmd.runExperiment(MultiAlignCmd.java:305)
-	at com.joewandy.alignmentResearch.main.MultiAlignCmd.main(MultiAlignCmd.java:236)

@@ -1,4 +1,0 @@
-java.lang.NullPointerException
-	at java.util.TimSort.sort(TimSort.java:173)
-	at java.util.Arrays.sort(Arrays.java:659)
-	at mzmatch.ipeak.CombineResultAnalyse.main(CombineResultAnalyse.java:94)

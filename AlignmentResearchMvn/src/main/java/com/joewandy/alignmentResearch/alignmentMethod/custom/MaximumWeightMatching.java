@@ -1,5 +1,8 @@
 package com.joewandy.alignmentResearch.alignmentMethod.custom;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +12,9 @@ import no.uib.cipr.matrix.DenseMatrix;
 import no.uib.cipr.matrix.Matrix;
 import no.uib.cipr.matrix.MatrixEntry;
 
+import com.jmatio.io.MatFileWriter;
+import com.jmatio.types.MLArray;
+import com.jmatio.types.MLDouble;
 import com.joewandy.alignmentResearch.main.MultiAlign;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
@@ -187,7 +193,9 @@ public class MaximumWeightMatching implements FeatureMatching {
         if (useGroup) {
         	Matrix clusteringMen = getClustering(masterList);
     		Matrix clusteringWomen = getClustering(childList);        	
+    		Matrix scoreArrInitial = scoreArr.copy();
     		scoreArr = combineScoreMtj(scoreArr, clusteringMen, clusteringWomen);
+//    		saveToMatlab(masterList.getData().getParentPath(), scoreArrInitial, scoreArr);
 		}
     	
     	matches = approxMaxMatching(scoreArr, men, women);        	
@@ -196,6 +204,23 @@ public class MaximumWeightMatching implements FeatureMatching {
         return matches;
         
     }
+    
+	private void saveToMatlab(String path, Matrix scoreInitial, Matrix scoreNew) {
+		System.out.println("Saving scores to matlab");
+		MLDouble scoreInitialMat = new MLDouble("W", toArray(scoreInitial));
+		MLDouble scoreNewMat = new MLDouble("Wp", toArray(scoreNew));
+		final Collection<MLArray> output = new ArrayList<MLArray>();
+		output.add(scoreInitialMat);
+		output.add(scoreNewMat);
+		final MatFileWriter writer = new MatFileWriter();
+		try {
+			String fullPath = path + "/mat/W.mat";
+			writer.write(fullPath, output);
+			System.out.println("Written to " + fullPath);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
     	
 	private Map<AlignmentRow, AlignmentRow> hungarianMatching(Matrix scoreArr,
 			List<AlignmentRow> men, List<AlignmentRow> women) {
@@ -259,7 +284,7 @@ public class MaximumWeightMatching implements FeatureMatching {
 			for (int j = 0; j < n; j++) {
 				AlignmentRow man = men.get(i);
 				AlignmentRow woman = women.get(j);
-				if (man.rowInRange(woman, massTol, -1, MultiAlign.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
+				if (man.rowInRange(woman, massTol, rtTol, MultiAlign.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
 					double dist = scorer.computeDist(man, woman);
 					if (dist > maxDist) {
 						maxDist = dist;
