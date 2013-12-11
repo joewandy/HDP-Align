@@ -95,10 +95,10 @@ public class DendogramParser {
 						library, massTol, rtTol, useGroup, alpha);
 				AlignmentList childList = parser.buildAlignment();
 
-				FeatureMatching matcher = new StableMatching(clusterName, alignedList, childList, 
+//				FeatureMatching matcher = new StableMatching(clusterName, alignedList, childList, 
+//						library, massTol, rtTol, useGroup, alpha);
+				FeatureMatching matcher = new MaximumWeightMatching(clusterName, alignedList, childList, 
 						library, massTol, rtTol, useGroup, alpha);
-//				FeatureMatching matcher = new MaximumWeightMatching(clusterName, alignedList, childList, 
-//						library, massTol, rtTol);
 //				FeatureMatching matcher = new DynamicProgrammingMatching(clusterName, alignedList, childList, 
 //						library, massTol, rtTol);
 //				FeatureMatching matcher = new GreedyScoreMatching(clusterName, alignedList, childList, 

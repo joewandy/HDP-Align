@@ -104,6 +104,10 @@ public class MultiAlignCmdOptions {
 	@Option(name="useGroup", param="boolean", type=Option.Type.REQUIRED_ARGUMENT, 
 			usage="Stable marriage - use cluster weight when scoring")
 	public boolean useGroup = AlignmentMethodParam.USE_GROUP;
+
+	@Option(name="usePeakShape", param="boolean", type=Option.Type.REQUIRED_ARGUMENT, 
+			usage="Whether to use peak shape correlation when grouping")
+	public boolean usePeakShape = AlignmentMethodParam.USE_PEAK_SHAPE;
 	
 	@Option(name = "alpha", param = "float", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, 
 			usage = "Stable marriage weight parameter.")
@@ -114,7 +118,7 @@ public class MultiAlignCmdOptions {
 	
 	// valid choices are defined in MultiAlign
 	@Option(name = "groupingMethod", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Grouping method")
-	public String groupingMethod = MultiAlign.GROUPING_METHOD_GREEDY_RT;
+	public String groupingMethod = MultiAlign.GROUPING_METHOD_GREEDY;
 	
 	/*
 	 * Stable matching options - for greedy RT grouping

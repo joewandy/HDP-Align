@@ -16,9 +16,11 @@ import com.joewandy.alignmentResearch.main.MultiAlign;
 public class SavedMatlabFeatureGroupingMethod extends BaseFeatureGroupingMethod implements FeatureGroupingMethod {
 
 	private String groupingMethod;
+	private boolean usePeakShape;
 	
-	public SavedMatlabFeatureGroupingMethod(String groupingMethod) {
+	public SavedMatlabFeatureGroupingMethod(String groupingMethod, boolean usePeakShape) {
 		this.groupingMethod = groupingMethod;
+		this.usePeakShape = usePeakShape;
 	}
 	
 	@Override
@@ -41,9 +43,12 @@ public class SavedMatlabFeatureGroupingMethod extends BaseFeatureGroupingMethod 
 		List<FeatureGroup> fileGroups = new ArrayList<FeatureGroup>();
 		
 		int groupId = 1;
-		if (MultiAlign.GROUPING_METHOD_MIXTURE_RT.equals(groupingMethod)) {
+		if (MultiAlign.GROUPING_METHOD_MIXTURE.equals(groupingMethod)) {
 		
 			String filename = data.getFilenameWithoutExtension() + ".csv.Z.mat";
+			if (usePeakShape) {
+				filename = data.getFilenameWithoutExtension() + ".csv.corr.Z.mat";
+			}
 			System.out.println("Loading " + dataPath + filename);
 			
 			// load from matlab
@@ -93,9 +98,12 @@ public class SavedMatlabFeatureGroupingMethod extends BaseFeatureGroupingMethod 
 				
 			}
 			
-		} else if (MultiAlign.GROUPING_METHOD_POSTERIOR_RT.equals(groupingMethod)) {
+		} else if (MultiAlign.GROUPING_METHOD_POSTERIOR.equals(groupingMethod)) {
 
 			String filename = data.getFilenameWithoutExtension() + ".csv.ZZprob.mat";
+			if (usePeakShape) {
+				filename = data.getFilenameWithoutExtension() + ".csv.corr.ZZprob.mat";
+			}
 			System.out.println("Loading " + dataPath + filename);				
 			MatFileReader mfr = null;
 			try {

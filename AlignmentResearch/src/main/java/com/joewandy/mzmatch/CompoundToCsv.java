@@ -5,21 +5,15 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
-import au.com.bytecode.opencsv.CSVWriter;
-
 import mzmatch.ipeak.util.Common;
 import mzmatch.ipeak.util.GeneralDerivative;
-import mzmatch.ipeak.util.GeneralMassSpectrum;
 import mzmatch.util.Tool;
-import peakml.chemistry.Mass;
-import peakml.chemistry.MolecularFormula;
 import peakml.chemistry.Molecule;
-import peakml.chemistry.Polarity;
 import peakml.io.chemistry.MoleculeIO;
+import au.com.bytecode.opencsv.CSVWriter;
 import cmdline.CmdLineParser;
 import cmdline.Option;
 import cmdline.OptionsClass;
@@ -161,6 +155,7 @@ public class CompoundToCsv {
 				}
 
 			}
+			writer.close();
 
 			System.out.println();
 			System.out

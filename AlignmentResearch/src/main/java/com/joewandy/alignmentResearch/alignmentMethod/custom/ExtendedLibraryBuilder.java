@@ -55,6 +55,7 @@ public class ExtendedLibraryBuilder {
 		// Print all possible combinations
 		BlockingQueue<AlignmentLibrary> libraryQueue = new ArrayBlockingQueue<AlignmentLibrary>(noOfCombo);
 		int noOfThreads = 0;
+		List<AlignmentLibrary> libraries = new ArrayList<AlignmentLibrary>();
 		for (ICombinatoricsVector<AlignmentFile> combination : gen) {
 
 			/* 
@@ -62,40 +63,46 @@ public class ExtendedLibraryBuilder {
 			 */
 			AlignmentFile data1 = combination.getValue(0);
 			AlignmentFile data2 = combination.getValue(1);	
-			Runnable builder = new StableMarriageLibraryBuilder(libraryQueue, libraryID, massTolerance, rtTolerance, data1, data2);
+			Runnable builder = new MaxWeightLibraryBuilder(libraryQueue, libraryID, massTolerance, rtTolerance, data1, data2);
 
-			if (MultiAlign.PARALLEL_LIBRARY_BUILD) {
-				Thread t = new Thread(builder);
-				t.start();					
-			} else {
-				PairwiseLibraryBuilder pb = (PairwiseLibraryBuilder) builder;
-				AlignmentLibrary library = pb.producePairwiseLibrary();
-				try {
-					libraryQueue.put(library);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}	
-			}
-							
+//			if (MultiAlign.PARALLEL_LIBRARY_BUILD) {
+//				Thread t = new Thread(builder);
+//				t.start();					
+//			} else {
+//				PairwiseLibraryBuilder pb = (PairwiseLibraryBuilder) builder;
+//				AlignmentLibrary library = pb.producePairwiseLibrary();
+//				try {
+//					libraryQueue.put(library);
+//				} catch (InterruptedException e) {
+//					e.printStackTrace();
+//				}	
+//			}
+//							
+//			libraryID++;
+//			noOfThreads++;
+//
+//			List<AlignmentLibrary> libraries = new ArrayList<AlignmentLibrary>();
+//			int resultCounter = 0;
+//			while (resultCounter < noOfThreads) {
+//				try {
+//					AlignmentLibrary library = libraryQueue.take();
+//					libraries.add(library);
+//					resultCounter++;
+//				} catch (InterruptedException e) {
+//					e.printStackTrace();
+//				}
+//			}
+//			System.out.println("All libraries collected");
+//			
+//			metaLibraries.put(rtTolerance, libraries);
+
+			PairwiseLibraryBuilder pb = (PairwiseLibraryBuilder) builder;
+			AlignmentLibrary library = pb.producePairwiseLibrary();							
 			libraryID++;
-			noOfThreads++;
-
-			List<AlignmentLibrary> libraries = new ArrayList<AlignmentLibrary>();
-			int resultCounter = 0;
-			while (resultCounter < noOfThreads) {
-				try {
-					AlignmentLibrary library = libraryQueue.take();
-					libraries.add(library);
-					resultCounter++;
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-			System.out.println("All libraries collected");
-			
-			metaLibraries.put(rtTolerance, libraries);
-			
+			libraries.add(library);
+									
 		}		
+		metaLibraries.put(rtTolerance, libraries);
 
 		// store the normalised scores ?
 //		double max = Double.MIN_VALUE;
@@ -145,7 +152,9 @@ public class ExtendedLibraryBuilder {
 				}
 				
 				// add the graph too
-				combinedLibrary.add(library.getGraph());
+				if (library.getGraph() != null) {
+					combinedLibrary.add(library.getGraph());					
+				}
 				
 			}
 			
@@ -228,7 +237,7 @@ public class ExtendedLibraryBuilder {
 		List<ExtendedLibraryEntry> entries = new ArrayList<ExtendedLibraryEntry>(combinedLibrary.getEntries());
 		Collections.sort(entries);
 		Collections.reverse(entries);
-		printLibraryEntries(entries);
+		// printLibraryEntries(entries);
 
 	}
 	

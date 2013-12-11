@@ -24,6 +24,7 @@ public class MyStableMarriageAlignment extends BaseAlignment implements Alignmen
 	private List<AlignmentFile> dataList;
 	private ExtendedLibrary library;
 	private boolean useGroup;
+	private boolean usePeakShape;
 	private String groupingMethod;
 	private double groupingRtWindow;
 	private double alpha;
@@ -35,6 +36,7 @@ public class MyStableMarriageAlignment extends BaseAlignment implements Alignmen
 		
 		// do grouping before aligning ?
 		useGroup = param.isUseGroup();
+		useGroup = param.isUsePeakShape();
 		groupingMethod = param.getGroupingMethod();
 		groupingRtWindow = param.getGroupingRtTolerance();
 		alpha = param.getAlpha();
@@ -75,8 +77,8 @@ public class MyStableMarriageAlignment extends BaseAlignment implements Alignmen
 	private FeatureGroupingMethod getFeatureGroupingMethod() {
 		FeatureGroupingMethod grouping = null;
 		if (useGroup) {
-			if (MultiAlign.GROUPING_METHOD_GREEDY_RT.equals(groupingMethod)) {
-				grouping = new GreedyFeatureGroupingMethod(groupingRtWindow);	
+			if (MultiAlign.GROUPING_METHOD_GREEDY.equals(groupingMethod)) {
+				grouping = new GreedyFeatureGroupingMethod(groupingRtWindow, usePeakShape);	
 			} else {
 //				grouping = new MatlabFeatureGroupingMethod(groupingMethod, groupingRtWindow, 
 //						MultiAlign.GROUPING_METHOD_ALPHA, MultiAlign.GROUPING_METHOD_NUM_SAMPLES);															

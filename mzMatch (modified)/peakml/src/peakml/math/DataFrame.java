@@ -97,7 +97,7 @@ public abstract class DataFrame
 	 * 
 	 * @return			The list with all the row-names.
 	 */
-	public Vector<String> getRowNames()
+	public List<String> getRowNames()
 	{
 		return rownames;
 	}
@@ -116,14 +116,14 @@ public abstract class DataFrame
 	}
 	
 	/**
-	 * Sets all the row-names in one step. The vector with names needs to be of equal
+	 * Sets all the row-names in one step. The List with names needs to be of equal
 	 * size as the number of rows or otherwise a RuntimeException is thrown.
 	 * 
 	 * @param names		The list with the row-names.
 	 * @throws RuntimeException
 	 * 					Thrown when the list with names is not the same size as the number of rows.
 	 */
-	public void setRowNames(Vector<String> names) throws RuntimeException
+	public void setRowNames(List<String> names) throws RuntimeException
 	{
 		if (names.size() != rownames.size())
 			throw new RuntimeException("invalid length of the names");
@@ -192,7 +192,7 @@ public abstract class DataFrame
 	 * 
 	 * @return			The list with all the column-names.
 	 */
-	public Vector<String> getColNames()
+	public List<String> getColNames()
 	{
 		return colnames;
 	}
@@ -211,14 +211,14 @@ public abstract class DataFrame
 	}
 	
 	/**
-	 * Sets all the column-names in one step. The vector with names needs to be of equal
+	 * Sets all the column-names in one step. The List with names needs to be of equal
 	 * size as the number of columns or otherwise a RuntimeException is thrown.
 	 * 
 	 * @param names		The list with the column-names.
 	 * @throws RuntimeException
 	 * 					Thrown when the list with names is not the same size as the number of column.
 	 */
-	public void setColNames(Vector<String> names) throws RuntimeException
+	public void setColNames(List<String> names) throws RuntimeException
 	{
 		if (names.size() != colnames.size())
 			throw new RuntimeException("invalid length of the names");
@@ -456,6 +456,6 @@ public abstract class DataFrame
 	// data
 	protected int rows;
 	protected int cols;
-	protected Vector<String> rownames = new Vector<String>();
-	protected Vector<String> colnames = new Vector<String>();
+	protected List<String> rownames = new ArrayList<String>();
+	protected List<String> colnames = new ArrayList<String>();
 }

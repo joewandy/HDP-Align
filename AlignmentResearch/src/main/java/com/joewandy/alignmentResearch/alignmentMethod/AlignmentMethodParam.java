@@ -53,7 +53,16 @@ public class AlignmentMethodParam {
 	 * How much weight to allocate to the initial mass similarity between peaks
 	 */
 	public static final double PARAM_ALPHA = 0.5;
+	
+	/**
+	 * Use grouping information during alignment ?
+	 */
 	public static final boolean USE_GROUP = false;	
+	
+	/**
+	 * Use peak shape info during grouping ?
+	 */
+	public static final boolean USE_PEAK_SHAPE = false;	
 	
 	/**
 	 * OpenMS parameter
@@ -64,6 +73,7 @@ public class AlignmentMethodParam {
 	private double rtTolerance;
 	private boolean usePpm;
 	private boolean useGroup;
+	private boolean usePeakShape;
 	private String groupingMethod;
 	private double groupingRtTolerance;
 	private double alpha;
@@ -90,6 +100,7 @@ public class AlignmentMethodParam {
 		
 		// optional parameters
 		private boolean useGroup;		
+		private boolean usePeakShape;		
 		private String groupingMethod;
 		private double groupingRtTolerance;
 		private double alpha;
@@ -129,7 +140,8 @@ public class AlignmentMethodParam {
 			
 			// set parameter for other alignment methods
 			this.useGroup = AlignmentMethodParam.USE_GROUP;
-			this.groupingMethod = MultiAlign.GROUPING_METHOD_GREEDY_RT;
+			this.usePeakShape = AlignmentMethodParam.USE_PEAK_SHAPE;
+			this.groupingMethod = MultiAlign.GROUPING_METHOD_GREEDY;
 			this.groupingRtTolerance = MultiAlign.GROUPING_METHOD_RT_TOLERANCE;
 			this.alpha = AlignmentMethodParam.PARAM_ALPHA;
 			
@@ -142,6 +154,11 @@ public class AlignmentMethodParam {
 		
 		public Builder useGroup(boolean useGroup) {
 			this.useGroup = useGroup;
+			return this;
+		}		
+
+		public Builder usePeakShape(boolean usePeakShape) {
+			this.usePeakShape = usePeakShape;
 			return this;
 		}		
 		
@@ -211,6 +228,7 @@ public class AlignmentMethodParam {
 		this.rtTolerance = builder.rtTolerance;
 		this.usePpm = builder.usePpm;
 		this.useGroup = builder.useGroup;
+		this.usePeakShape = builder.usePeakShape;
 		this.groupingMethod = builder.groupingMethod;
 		this.groupingRtTolerance = builder.groupingRtTolerance;
 		this.alpha = builder.alpha;
@@ -240,6 +258,10 @@ public class AlignmentMethodParam {
 		return useGroup;
 	}
 
+	public boolean isUsePeakShape() {
+		return usePeakShape;
+	}
+	
 	public String getGroupingMethod() {
 		return groupingMethod;
 	}

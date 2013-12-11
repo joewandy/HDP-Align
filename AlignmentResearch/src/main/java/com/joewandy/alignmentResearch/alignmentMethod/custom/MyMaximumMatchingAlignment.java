@@ -15,9 +15,10 @@ import com.joewandy.alignmentResearch.objectModel.SavedMatlabFeatureGroupingMeth
 
 public class MyMaximumMatchingAlignment extends BaseAlignment implements AlignmentMethod {
 
-	private List<AlignmentFile> dataList;
+	protected List<AlignmentFile> dataList;
 	private ExtendedLibrary library;
 	private boolean useGroup;
+	private boolean usePeakShape;
 	private String groupingMethod;
 	private double groupingRtWindow;
 	private double alpha;
@@ -29,6 +30,7 @@ public class MyMaximumMatchingAlignment extends BaseAlignment implements Alignme
 		
 		// do grouping before aligning ?
 		useGroup = param.isUseGroup();
+		usePeakShape = param.isUsePeakShape();
 		groupingMethod = param.getGroupingMethod();
 		groupingRtWindow = param.getGroupingRtTolerance();
 		alpha = param.getAlpha();
@@ -37,24 +39,34 @@ public class MyMaximumMatchingAlignment extends BaseAlignment implements Alignme
 	
 	public AlignmentList matchFeatures() {
 
-		AlignmentList masterList = new AlignmentList("");
+		groupFeatures();
+		
+		AlignmentList masterList = new AlignmentList("");	
+		int counter = 0;
+		for (AlignmentFile data : dataList) {			
+			AlignmentList peakList = new AlignmentList(data);
+			System.out.println("Aligning #" + (counter+1) + ": " + peakList);
+			FeatureMatching matcher = new MaximumWeightMatching(masterList.getId() + ", " + peakList.getId(), masterList, peakList, 
+					library, massTolerance, rtTolerance, useGroup, alpha);
+			masterList = matcher.getMatchedList();			            
+			counter++;
+		}
+		
+		return masterList;
+		
+	}
+	
+	protected void groupFeatures() {
+		
 		FeatureGroupingMethod groupingMethod = getFeatureGroupingMethod();
 	
 		int counter = 0;
 		for (AlignmentFile data : dataList) {
-			
 			AlignmentList peakList = new AlignmentList(data);
-
 			System.out.println("Grouping #" + (counter+1) + ": " + peakList);
 			if (groupingMethod != null) {
 				groupingMethod.group(data);				
-			}
-			
-			System.out.println("Aligning #" + (counter+1) + ": " + peakList);
-			FeatureMatching matcher = new MaximumWeightMatching(masterList.getId() + ", " + peakList.getId(), masterList, peakList, 
-					library, massTolerance, rtTolerance, useGroup, alpha);
-			masterList = matcher.getMatchedList();			
-            
+			}			
 			counter++;
 			
 		}
@@ -62,19 +74,17 @@ public class MyMaximumMatchingAlignment extends BaseAlignment implements Alignme
 			groupingMethod.close();			
 		}
 		
-		return masterList;
-		
 	}
 
-	private FeatureGroupingMethod getFeatureGroupingMethod() {
+	protected FeatureGroupingMethod getFeatureGroupingMethod() {
 		FeatureGroupingMethod grouping = null;
 		if (useGroup) {
-			if (MultiAlign.GROUPING_METHOD_GREEDY_RT.equals(groupingMethod)) {
-				grouping = new GreedyFeatureGroupingMethod(groupingRtWindow);	
+			if (MultiAlign.GROUPING_METHOD_GREEDY.equals(groupingMethod)) {
+				grouping = new GreedyFeatureGroupingMethod(groupingRtWindow, usePeakShape);	
 			} else {
 //				grouping = new MatlabFeatureGroupingMethod(groupingMethod, groupingRtWindow, 
 //						MultiAlign.GROUPING_METHOD_ALPHA, MultiAlign.GROUPING_METHOD_NUM_SAMPLES);															
-				grouping = new SavedMatlabFeatureGroupingMethod(groupingMethod);															
+				grouping = new SavedMatlabFeatureGroupingMethod(groupingMethod, usePeakShape);															
 			}
 		}
 		return grouping;

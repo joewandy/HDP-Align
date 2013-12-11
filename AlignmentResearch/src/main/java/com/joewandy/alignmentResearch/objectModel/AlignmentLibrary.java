@@ -23,6 +23,7 @@ public class AlignmentLibrary {
 		this.libraryID = id;
 		this.data1 = data1;
 		this.data2 = data2;
+		aligned = new ArrayList<ExtendedLibraryEntry>();
 	
 	}	
 	

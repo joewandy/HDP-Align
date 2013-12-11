@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.joewandy.alignmentResearch.alignmentExperiment.AlignmentData;
 import com.joewandy.alignmentResearch.alignmentMethod.custom.BaselineAlignment;
-import com.joewandy.alignmentResearch.alignmentMethod.custom.ConsistencyAlignment;
+import com.joewandy.alignmentResearch.alignmentMethod.custom.HierarchicalAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.custom.MyJoinAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.custom.MyMaximumMatchingAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.custom.MyStableMarriageAlignment;
@@ -40,7 +40,7 @@ public class AlignmentMethodFactory {
 	public static final String ALIGNMENT_METHOD_OPENMS = "openMS";
 	
 	// calls consistency-based alignment
-	public static final String ALIGNMENT_METHOD_CONSISTENCY = "consistency";
+	public static final String ALIGNMENT_METHOD_HIERARCHICAL = "hierarchical";
 	
 	public static AlignmentMethod getAlignmentMethod(final String method, AlignmentMethodParam.Builder paramBuilder, 
 			AlignmentData data) {
@@ -65,8 +65,8 @@ public class AlignmentMethodFactory {
 			aligner = new SimaAlignment(alignmentDataList, param);
 		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_OPENMS.equals(method)) {
 			aligner = new OpenMSAlignment(alignmentDataList, param);
-		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_CONSISTENCY.equals(method)) {
-			aligner = new ConsistencyAlignment(alignmentDataList, param);
+		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_HIERARCHICAL.equals(method)) {
+			aligner = new HierarchicalAlignment(alignmentDataList, param);
 		}
 		
 		return aligner;

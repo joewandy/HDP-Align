@@ -68,6 +68,7 @@ public abstract class PairwiseLibraryBuilderImpl implements Runnable, PairwiseLi
 		files.add(data2);
 
 		AlignmentMethodParam.Builder paramBuilder = new AlignmentMethodParam.Builder(massTolerance, rtTolerance);
+		paramBuilder.usePpm(MultiAlign.ALIGN_BY_RELATIVE_MASS_TOLERANCE);
 		AlignmentMethodParam param = paramBuilder.build();
 		AlignmentMethod pairwiseAligner = getAlignmentMethod(files, param);
 
@@ -75,6 +76,9 @@ public abstract class PairwiseLibraryBuilderImpl implements Runnable, PairwiseLi
 		List<AlignmentRow> rows = result.getRows();
 
 		AlignmentLibrary library = new AlignmentLibrary(libraryID, data1, data2);
+
+		// find max dist and set some flags
+		double maxDist = 0;
 		for (AlignmentRow row : rows) {
 
 			// TODO: hack .. mark all features as unaligned, necessary when doing the final alignment later
@@ -83,15 +87,31 @@ public abstract class PairwiseLibraryBuilderImpl implements Runnable, PairwiseLi
 				f.setAligned(false);
 			}
 			
+			// consider only rows containing pairwise alignment
 			if (row.getFeaturesCount() == 2) {
 				Feature[] features = row.getFeatures().toArray(new Feature[0]);
 				Feature f1 = features[0];
 				Feature f2 = features[1];
-				double score = computeSimilarity(f1, f2);
-				double weight = 1;
-				library.addAlignedPair(f1, f2, score, weight);					
+				double dist = computeDist(f1, f2);
+				if (dist > maxDist) {
+					maxDist = dist;
+				}
 			}
 			
+		}
+		
+		// compute similarities and add to library
+		final double weight = 1;
+		for (AlignmentRow row : rows) {
+			// consider only rows containing pairwise alignment
+			if (row.getFeaturesCount() == 2) {
+				Feature[] features = row.getFeatures().toArray(new Feature[0]);
+				Feature f1 = features[0];
+				Feature f2 = features[1];
+				double dist = computeDist(f1, f2);
+				double score = 1-(dist/maxDist);
+				library.addAlignedPair(f1, f2, score, weight);					
+			}
 		}
 		
 		System.out.println("#" + String.format("%04d ", libraryID) + 
@@ -104,13 +124,12 @@ public abstract class PairwiseLibraryBuilderImpl implements Runnable, PairwiseLi
 
 	protected abstract AlignmentMethod getAlignmentMethod(List<AlignmentFile> files, AlignmentMethodParam param);
 
-	protected double computeSimilarity(Feature f1, Feature f2) {
+	protected double computeDist(Feature f1, Feature f2) {
 
 		DistanceCalculator calc = new MahalanobisDistanceCalculator(massTolerance, rtTolerance);
 		double dist = calc.compute(f1.getMass(), f2.getMass(), f1.getRt(), f2.getRt());
-		double similarity = 1/dist;
-		return similarity;
-				
+		return dist;
+		
 	}
 
 }

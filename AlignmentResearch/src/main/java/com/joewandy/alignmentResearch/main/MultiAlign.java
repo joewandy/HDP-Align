@@ -42,12 +42,12 @@ public class MultiAlign {
 	public static final boolean ALIGN_BY_RELATIVE_MASS_TOLERANCE = false;
 	public static final boolean PARALLEL_LIBRARY_BUILD = false;
 	
-	public static final String GROUPING_METHOD_GREEDY_RT = "greedy";
-	public static final String GROUPING_METHOD_MIXTURE_RT = "mixture";
-	public static final String GROUPING_METHOD_POSTERIOR_RT = "posterior";
-	public static final double GROUPING_METHOD_RT_TOLERANCE = 10;
-	public static final double GROUPING_METHOD_ALPHA = 10;
-	public static final int GROUPING_METHOD_NUM_SAMPLES = 100;
+	public static final String GROUPING_METHOD_GREEDY = "greedy";
+	public static final String GROUPING_METHOD_MIXTURE = "mixture";
+	public static final String GROUPING_METHOD_POSTERIOR = "posterior";
+	public static final double GROUPING_METHOD_RT_TOLERANCE = 5;
+	public static final double GROUPING_METHOD_ALPHA = 1;
+	public static final int GROUPING_METHOD_NUM_SAMPLES = 10;
 
 	private AlignmentData data;
 	private String method;
@@ -88,6 +88,7 @@ public class MultiAlign {
 		this.paramBuilder.ransacSameChargeRequired(options.ransacSameChargeRequired);
 		this.paramBuilder.openMsMzPairMaxDistance(options.openMsMzPairMaxDistance);
 		this.paramBuilder.useGroup(options.useGroup);
+		this.paramBuilder.usePeakShape(options.usePeakShape);
 		this.paramBuilder.groupingMethod(options.groupingMethod);
 		this.paramBuilder.groupingRtTolerance(options.groupingRtWindow);
 		this.paramBuilder.alpha(options.alpha);

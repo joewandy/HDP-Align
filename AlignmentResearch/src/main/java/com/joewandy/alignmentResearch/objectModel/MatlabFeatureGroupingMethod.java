@@ -92,7 +92,7 @@ public class MatlabFeatureGroupingMethod extends BaseFeatureGroupingMethod imple
 		} 
 
 		int groupId = 1;
-		if (MultiAlign.GROUPING_METHOD_MIXTURE_RT.equals(groupingMethod)) {
+		if (MultiAlign.GROUPING_METHOD_MIXTURE.equals(groupingMethod)) {
 						
 			// load from matlab
 			MatFileReader mfr = null;
@@ -141,7 +141,7 @@ public class MatlabFeatureGroupingMethod extends BaseFeatureGroupingMethod imple
 				
 			}
 			
-		} else if (MultiAlign.GROUPING_METHOD_POSTERIOR_RT.equals(groupingMethod)) {
+		} else if (MultiAlign.GROUPING_METHOD_POSTERIOR.equals(groupingMethod)) {
 
 			MatFileReader mfr = null;
 			try {

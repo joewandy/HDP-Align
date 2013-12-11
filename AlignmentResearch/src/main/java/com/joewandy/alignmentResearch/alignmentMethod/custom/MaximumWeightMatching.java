@@ -341,13 +341,13 @@ public class MaximumWeightMatching implements FeatureMatching {
 		W.scale(1/maxScore);
 		System.out.println("\t\tW = " + W.numRows() + "x" + W.numColumns());
 
-		Matrix A = clusteringMen;
+		Matrix A = clusteringMen.copy();
 		for (int i = 0; i < A.numRows(); i++) {
 			A.set(i, i, 0);
 		}
 		System.out.println("\t\tA = " + A.numRows() + "x" + A.numColumns());
 		 
-		Matrix B = clusteringWomen;
+		Matrix B = clusteringWomen.copy();
 		for (int i = 0; i < B.numRows(); i++) {
 			B.set(i, i, 0);
 		}

@@ -225,7 +225,7 @@ public class OpenMSAlignment extends BaseAlignment implements AlignmentMethod {
 			Attribute mapAttr = child.getAttribute("map");
 			Attribute idAttr = child.getAttribute("id");
 			int mapIdx = Integer.parseInt(mapAttr.getValue());
-			int peakId = Integer.parseInt(idAttr.getValue());
+			int peakId = Integer.parseInt(idAttr.getValue()) - 1; // id goes from 1 ... N in the consensusXML file
 			AlignmentFile data = dataMap.get(mapIdx);
 			Feature f = data.getFeatureByIndex(peakId);
 			consensus.addAlignedFeature(f);

@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
@@ -42,6 +43,9 @@ import mzmatch.ipeak.util.GeneralMassSpectrum;
 import mzmatch.ipeak.util.GeneralMassSpectrumDatabase;
 import mzmatch.util.RandomSeedException;
 import mzmatch.util.Tool;
+import no.uib.cipr.matrix.DenseMatrix;
+import no.uib.cipr.matrix.Matrix;
+import no.uib.cipr.matrix.MatrixEntry;
 import peakml.Annotation;
 import peakml.IPeak;
 import peakml.IPeakSet;
@@ -61,6 +65,9 @@ import cmdline.Option;
 import cmdline.OptionsClass;
 
 import com.google.common.base.Joiner;
+import com.jmatio.io.MatFileWriter;
+import com.jmatio.types.MLArray;
+import com.jmatio.types.MLDouble;
 
 import domsax.XmlParserException;
 
@@ -136,7 +143,7 @@ public class MetAssign
 	// main entrance
 	final static String version = "1.0.0";
 	final static String application = "MetAssign";
-	@OptionsClass(name=application, version=version, author="R—n‡n Daly (Ronan.Daly@glasgow.ac.uk)",
+	@OptionsClass(name=application, version=version, author="Rï¿½nï¿½n Daly (Ronan.Daly@glasgow.ac.uk)",
 		description=
 		"LC-MS experiments yield large amounts of peaks, many of which correspond to derivatives of peaks " +
 		"of interest (eg, isotope peaks, adducts, fragments, multiply charged molecules), termed here as " +
@@ -388,9 +395,9 @@ public class MetAssign
 		)
 		public boolean rtClustering = true;
 		
-		//@Option(name="corrClustering", param="boolean", type=Option.Type.REQUIRED_ARGUMENT, usage=
-		//	"A flag to specify whether clustering using peak shape correlations should be used"
-		//)
+		@Option(name="corrClustering", param="boolean", type=Option.Type.REQUIRED_ARGUMENT, usage=
+			"A flag to specify whether clustering using peak shape correlations should be used"
+		)
 		public boolean corrClustering = false;
 		
 		@Option(name="seed", param="long", type=Option.Type.REQUIRED_ARGUMENT, level=Option.Level.USER, usage=
@@ -412,6 +419,11 @@ public class MetAssign
 			"Where compound identification results are stored."
 		)
 		public String dbIdentOut = null;
+		
+		@Option(name="matOut", param="string", type=Option.Type.REQUIRED_ARGUMENT, level=Option.Level.USER, usage=
+			"Where clustering probabilities are stored (in .mat format). Only when no database is specified."
+		)
+		public String matOut = null;		
 		
 		@Option(name="test", param="string", type=Option.Type.REQUIRED_ARGUMENT, level=Option.Level.USER, usage=
 			"Options for testing purposes"
@@ -519,13 +531,17 @@ public class MetAssign
 			
 			RelatedPeaks.labelRelationships(peaks, options.verbose, options.ppm);
 
-			if (options.verbose)
-				System.err.println("writing results");
+			if (options.output != null) {
 			
-			PeakMLWriter.write(
-					result.header, peaks.getPeaks(), null,
-					new GZIPOutputStream(new FileOutputStream(options.output)), null
-				);
+				if (options.verbose)
+					System.err.println("writing results");
+				
+				PeakMLWriter.write(
+						result.header, peaks.getPeaks(), null,
+						new GZIPOutputStream(new FileOutputStream(options.output)), null
+					);
+				
+			}			
 			
 			if (options.basepeaks != null)
 			{
@@ -570,6 +586,7 @@ public class MetAssign
 		}
 
 		if ( molecules.size() == 0 ) {
+
 			System.err.println("No database, so only performing clustering");
 			final Data data = new Data(header, peaks);
 			final CorrelationParameters parameters = new CorrelationParameters(options.rtwindow, options.p1, options.p0,
@@ -585,8 +602,45 @@ public class MetAssign
 			final PeakPosteriorScorer<SimpleClustering> scorer = new PeakPosteriorScorer<SimpleClustering>(scorers, parameters);
 			Clusterer<Data,SimpleClustering> clusterer = new CorrelationClusterer(data, parameters, random,
 					inScorer, outScorer, measure, scorer);
+
+			final int n = peaks.size();
+			SampleHandler peakClusteringHandler = new PeakClusteringSamplerHandler(n);
 			final List<SampleHandler<Data,SimpleClustering>> handlers = new ArrayList<SampleHandler<Data,SimpleClustering>>();
+			handlers.add(peakClusteringHandler);
 			basepeaks = Clusterer.findRelatedPeaks(peaks, clusterer, random, handlers);
+					
+			if (options.matOut != null) {
+			
+				// extract peak vs cluster membership 
+				Matrix Z = ((PeakClusteringSamplerHandler) peakClusteringHandler).getLastZ();
+				
+				// extract peak vs. peak probabilities
+				Matrix ZZprob = ((PeakClusteringSamplerHandler) peakClusteringHandler).getZZall();
+				final double numSamples = ((PeakClusteringSamplerHandler) peakClusteringHandler).getNumSamples();
+				ZZprob.scale(1/numSamples);
+				
+				// quick hack: save the resulting output to matlab files
+				System.err.println("Saving clustering output");
+				MLDouble ZMat = new MLDouble("Z", toArray(Z));
+				MLDouble ZZProbMat = new MLDouble("ZZprob", toArray(ZZprob));
+				final Collection<MLArray> output1 = new ArrayList<MLArray>();
+				final Collection<MLArray> output2 = new ArrayList<MLArray>();
+				output1.add(ZMat);
+				output2.add(ZZProbMat);
+				final String matFile1 = options.matOut + ".Z.mat";
+				final String matFile2 = options.matOut + ".ZZprob.mat";
+				final MatFileWriter writer = new MatFileWriter();
+				try {
+					writer.write(matFile1, output1);
+					System.err.println("Written to " + matFile1);
+					writer.write(matFile2, output2);
+					System.err.println("Written to " + matFile2);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}			
+				
+			}
+						
 		} else {
 			final List<String> moleculeNames = new ArrayList<String>();
 			final List<String> moleculeRealNames = new ArrayList<String>();
@@ -727,6 +781,17 @@ public class MetAssign
 			ah.writeAnnotations();
 		}
 		return basepeaks;
+	}
+	
+	private static double[][] toArray(Matrix matrix) {
+		double[][] arr = new double[matrix.numRows()][matrix.numColumns()];
+		for (MatrixEntry e : matrix) {
+			int i = e.row();
+			int j = e.column();
+			double val = e.get();
+			arr[i][j] = val;
+		}
+		return arr;
 	}
 	
 	private static void priorMassLikelihoodAnnotations(final FormulaClusterer.MassIntensityClusteringScorer miScorer,
