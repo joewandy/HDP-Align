@@ -226,11 +226,13 @@ public class OpenMSAlignment extends BaseAlignment implements AlignmentMethod {
 			Attribute idAttr = child.getAttribute("id");
 			int mapIdx = Integer.parseInt(mapAttr.getValue());
 			
-			// for standard data
 			int peakId = Integer.parseInt(idAttr.getValue()) - 1; // id goes from 1 ... N in the consensusXML file
 
-			// for P1 & P2
-//			int peakId = Integer.parseInt(idAttr.getValue()) - 0; // id goes from 0 ... N in the consensusXML file
+			// TODO: WHAT A HACK !! for P1 & P2 only.
+			String path = dataList.get(0).getParentPath();
+			if (path.contains("P1") || path.contains("P2")) {
+				peakId = Integer.parseInt(idAttr.getValue()) - 0; // id goes from 0 ... N in the consensusXML file				
+			}
 
 			AlignmentFile data = dataMap.get(mapIdx);
 			Feature f = data.getFeatureByIndex(peakId);
