@@ -7,6 +7,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import mzmatch.util.Tool;
 import cmdline.CmdLineException;
 import cmdline.CmdLineParser;
 
@@ -27,12 +28,15 @@ import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
 import com.joewandy.alignmentResearch.objectModel.EvaluationResult;
 import com.joewandy.alignmentResearch.objectModel.Feature;
-import com.joewandy.util.Tool;
 
 public class MultiAlignCmd {
 
-	private static final double[] ALL_ALPHA = { 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1 };
+//	private static final double[] ALL_ALPHA = { 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1 };
+//	private static final double[] ALL_GROUPING_RT = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 
+	private static final double[] ALL_ALPHA = { 0.2, 0.4, 0.6, 0.8  };
+	private static final double[] ALL_GROUPING_RT = { 2, 4, 6, 8, 10 };
+	
 	private static final String EXPERIMENT_TYPE_MISSING_PEAKS = "missingPeaks";
 	private static final String EXPERIMENT_TYPE_CONTAMINANT_PEAKS = "contaminantPeaks";
 	private static final String EXPERIMENT_TYPE_MEASUREMENT_NOISE = "measurementNoise";
@@ -216,28 +220,28 @@ public class MultiAlignCmd {
 				System.out.println("============ noiseParam: NONE ============");
 
 				MultiAlignExpResult expResult = new MultiAlignExpResult("no_noise");
-				
-				double[] alphas = MultiAlignCmd.ALL_ALPHA;
+				double[] alphas = new double[] { options.alpha };	
+				double[] groupingRts = new double[] { options.groupingRtWindow };														
 				if (options.autoAlpha) {
+					alphas = MultiAlignCmd.ALL_ALPHA;
+				}
+				if (options.autoOptimiseGreedy && options.useGroup && MultiAlign.GROUPING_METHOD_GREEDY.equals(options.groupingMethod)) {
+					groupingRts = MultiAlignCmd.ALL_GROUPING_RT;
+				}
+				for (int k = 0; k < groupingRts.length; k++) {
 					for (int j = 0; j < alphas.length; j++) {
 						for (int i = 0; i < iteration; i++) {
 							options.alpha = alphas[j];
-							System.out.println("==================================================");
-							System.out.println("threshold = " + options.th);
-							System.out.println("==================================================");
+							options.groupingRtWindow = groupingRts[k];
 							EvaluationResult evalRes = runExperiment(options, false, 
 									0.0, 0.0, GlobalNoiseLevel.NONE, LocalNoiseLevel.NONE, 
-									PolynomialNoiseLevel.NONE, MeasurementNoiseLevel.NONE);				
-							expResult.addResult(evalRes);						
+									PolynomialNoiseLevel.NONE, MeasurementNoiseLevel.NONE);	
+							evalRes.setTh(options.alpha);
+							String note = options.alpha + ", " + options.groupingRtWindow;
+							evalRes.setNote(note);
+							expResult.addResult(evalRes);	
 						}
 					}
-				} else {
-					for (int i = 0; i < iteration; i++) {
-						EvaluationResult evalRes = runExperiment(options, false, 
-								0.0, 0.0, GlobalNoiseLevel.NONE, LocalNoiseLevel.NONE, 
-								PolynomialNoiseLevel.NONE, MeasurementNoiseLevel.NONE);				
-						expResult.addResult(evalRes);						
-					}					
 				}
 				results.add(expResult);										
 				System.out.println("==================================================");
@@ -245,6 +249,7 @@ public class MultiAlignCmd {
 			}
 						
 			 printForMatlab(results);
+			 
 			
 		} catch (Exception e) {
 			Tool.unexpectedError(e, MultiAlignCmdOptions.APPLICATION);
@@ -307,7 +312,7 @@ public class MultiAlignCmd {
 		MultiAlign multiAlign = new MultiAlign(data, options);
 		AlignmentList result = multiAlign.align();
 		writeAlignmentResult(result, options.output);
-		EvaluationResult evalRes = multiAlign.evaluate(result);
+		EvaluationResult evalRes = multiAlign.evaluate(result, options.useGroup);
 		return evalRes;
 		
 	}

@@ -23,6 +23,7 @@ import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.Arrays;
 
+import mzmatch.util.Tool;
 import cmdline.CmdLineParser;
 import cmdline.Option;
 import cmdline.OptionsClass;
@@ -33,7 +34,6 @@ import com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.Benchmar
 import com.joewandy.alignmentResearch.comparator.NaturalOrderFilenameComparator;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.Feature;
-import com.joewandy.util.Tool;
 
 public class FeatureXMLToText {
 

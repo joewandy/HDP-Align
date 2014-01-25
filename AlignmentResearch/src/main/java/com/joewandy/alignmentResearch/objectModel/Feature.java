@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import no.uib.cipr.matrix.DenseMatrix;
+import no.uib.cipr.matrix.Matrix;
 
 
 /**
@@ -98,6 +98,9 @@ public class Feature {
 	}
 
 	public FeatureGroup getFirstGroup() {
+		if (this.groups.isEmpty()) {
+			return null;
+		}
 		return this.groups.get(0);
 	}
 
@@ -141,7 +144,7 @@ public class Feature {
 //		return data.getZZProb();
 //	}
 
-	public DenseMatrix getZZProb() {
+	public Matrix getZZProb() {
 		return data.getZZProb();
 	}	
 	

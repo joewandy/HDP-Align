@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 import no.uib.cipr.matrix.DenseMatrix;
+import no.uib.cipr.matrix.Matrix;
 import peakml.chemistry.PeriodicTable;
 
 import com.joewandy.alignmentResearch.comparator.FeatureIntensityComparator;
@@ -22,8 +23,7 @@ public class AlignmentFile {
 	private File file;
 	private List<Feature> features;
 	private List<Feature> sortedFeatures; // sorted by intensity descending
-	private DenseMatrix Z;
-	private DenseMatrix ZZProb;
+	private Matrix ZZProb;
 		
 	public AlignmentFile(int id, String filename, List<Feature> features) {
 		this.id = id;
@@ -34,6 +34,7 @@ public class AlignmentFile {
 		}
 		this.sortedFeatures = new ArrayList<Feature>(features);
 		Collections.sort(this.sortedFeatures, new FeatureIntensityComparator());
+		ZZProb = null;
 	}
 
 	public AlignmentFile(int id, File file, List<Feature> features) {
@@ -62,11 +63,11 @@ public class AlignmentFile {
 		return fileNameWithOutExt;
 	}
 	
-	public DenseMatrix getZZProb() {
+	public Matrix getZZProb() {
 		return ZZProb;
 	}
 
-	public void setZZProb(DenseMatrix zZProb) {
+	public void setZZProb(Matrix zZProb) {
 		ZZProb = zZProb;
 	}
 

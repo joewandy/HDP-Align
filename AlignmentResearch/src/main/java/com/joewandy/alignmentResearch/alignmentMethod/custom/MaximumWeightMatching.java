@@ -193,7 +193,6 @@ public class MaximumWeightMatching implements FeatureMatching {
         if (useGroup) {
         	Matrix clusteringMen = getClustering(masterList);
     		Matrix clusteringWomen = getClustering(childList);        	
-    		Matrix scoreArrInitial = scoreArr.copy();
     		scoreArr = combineScoreMtj(scoreArr, clusteringMen, clusteringWomen);
 //    		saveToMatlab(masterList.getData().getParentPath(), scoreArrInitial, scoreArr);
 		}
@@ -330,6 +329,51 @@ public class MaximumWeightMatching implements FeatureMatching {
 			
 	}
 
+	private Matrix computeScores2(List<AlignmentRow> men, List<AlignmentRow> women) {
+
+		int m = men.size();
+		int n = women.size();
+		Matrix scoreArr = new DenseMatrix(m, n);
+		
+    	System.out.print("\tComputing scores ");
+		for (int i = 0; i < m; i++) {
+			
+			for (int j = 0; j < n; j++) {
+				AlignmentRow man = men.get(i);
+				AlignmentRow woman = women.get(j);
+				if (man.rowInRange(woman, massTol, rtTol, MultiAlign.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
+					
+					// Calculate differences between m/z and RT values
+					double mzDiff = Math.abs(man.getAverageMz()
+							- woman.getAverageMz());
+
+					double rtDiff = Math.abs(man.getAverageRt()
+							- woman.getAverageRt());
+
+					final double mzWeight = 0;
+					final double rtWeight = 1;
+					double score = ((1 - mzDiff / massTol) * mzWeight)
+							+ ((1 - rtDiff / rtTol) * rtWeight);
+					scoreArr.set(i, j, score);
+
+				}
+			}
+			
+            if (i % 1000 == 0) {
+            	System.out.print('.');
+            }
+			
+		}
+		System.out.println();
+		
+		// normalise score to 0..1
+		double maxScore = getMax(scoreArr);
+		scoreArr.scale(1/maxScore);
+		
+		return scoreArr;
+			
+	}
+	
 	private Matrix combineScoreMtj(Matrix scoreArr, Matrix clusteringMen,
 			Matrix clusteringWomen) {
 
@@ -382,6 +426,17 @@ public class MaximumWeightMatching implements FeatureMatching {
 		W.scale(alpha);
 		D.scale(1-alpha);
 		scoreArr = W.add(D);
+
+		// alternatively, Wp = W .* D
+//		System.out.println("\t\tComputing W'=W.*D");
+//		for (MatrixEntry e : W) {
+//			int row = e.row();
+//			int col = e.column();
+//			double dCurr = D.get(row, col);
+//			double wCurr = e.get();
+//			double wNew = dCurr * wCurr;
+//			e.set(wNew);
+//		}
 		
 		long elapsedTime = (System.nanoTime()-startTime)/1000000000;
 		System.out.println("\tElapsed time = " + elapsedTime + "s");

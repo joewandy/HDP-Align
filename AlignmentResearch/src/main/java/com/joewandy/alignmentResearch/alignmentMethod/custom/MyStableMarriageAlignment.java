@@ -1,6 +1,5 @@
 package com.joewandy.alignmentResearch.alignmentMethod.custom;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,7 +15,6 @@ import com.joewandy.alignmentResearch.objectModel.ExtendedLibrary;
 import com.joewandy.alignmentResearch.objectModel.Feature;
 import com.joewandy.alignmentResearch.objectModel.FeatureGroupingMethod;
 import com.joewandy.alignmentResearch.objectModel.GreedyFeatureGroupingMethod;
-import com.joewandy.alignmentResearch.objectModel.MatlabFeatureGroupingMethod;
 import com.joewandy.alignmentResearch.objectModel.SavedMatlabFeatureGroupingMethod;
 
 public class MyStableMarriageAlignment extends BaseAlignment implements AlignmentMethod {
@@ -82,7 +80,7 @@ public class MyStableMarriageAlignment extends BaseAlignment implements Alignmen
 			} else {
 //				grouping = new MatlabFeatureGroupingMethod(groupingMethod, groupingRtWindow, 
 //						MultiAlign.GROUPING_METHOD_ALPHA, MultiAlign.GROUPING_METHOD_NUM_SAMPLES);															
-				grouping = new SavedMatlabFeatureGroupingMethod(groupingMethod);															
+				grouping = new SavedMatlabFeatureGroupingMethod(groupingMethod, usePeakShape);															
 			}
 		}
 		return grouping;

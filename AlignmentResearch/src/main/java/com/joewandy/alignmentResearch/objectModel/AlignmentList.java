@@ -3,6 +3,7 @@ package com.joewandy.alignmentResearch.objectModel;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -148,6 +149,12 @@ public class AlignmentList {
 	public List<AlignmentRow> getRows() {
 		return rows;
 	}
+	
+	public AlignmentRow getRandomRow() {
+		List<AlignmentRow> copy = new ArrayList<AlignmentRow>(rows);
+		Collections.shuffle(copy);
+		return copy.get(0);
+	}
 
 	public List<AlignmentRow> getUnalignedRows() {
 		List<AlignmentRow> result = new ArrayList<AlignmentRow>();
@@ -185,6 +192,15 @@ public class AlignmentList {
 	
 	public String getId() {
 		return id;
+	}
+	
+	public boolean isAligned(Feature f1, Feature f2) {
+		for (AlignmentRow row : getRows()) {
+			if (row.contains(f1) && row.contains(f2)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public Set<AlignmentRow> getRowsInRange(AlignmentRow reference, double massTol, double rtTol, 

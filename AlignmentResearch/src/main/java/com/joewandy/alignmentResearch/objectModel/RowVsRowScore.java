@@ -19,8 +19,8 @@ public class RowVsRowScore implements Comparable<RowVsRowScore> {
 		double mzRatio = mzDiff/mzTolerance;
 		double rtRatio = rtDiff/rtTolerance; 
 
-		// lower is better
-		this.score = mzRatio + rtRatio;
+//		this.score = (1-mzRatio) + (1-rtRatio);
+		this.score = (1-rtRatio);
 		
 	}
 	
@@ -38,7 +38,7 @@ public class RowVsRowScore implements Comparable<RowVsRowScore> {
 
 	
 	public int compareTo(RowVsRowScore object) {
-		return Double.compare(this.score, object.getScore());
+		return - Double.compare(this.score, object.getScore());
 	}
 
 	

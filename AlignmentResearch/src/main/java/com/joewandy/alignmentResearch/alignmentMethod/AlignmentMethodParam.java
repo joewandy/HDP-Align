@@ -1,5 +1,8 @@
 package com.joewandy.alignmentResearch.alignmentMethod;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.joewandy.alignmentResearch.main.MultiAlign;
 
 public class AlignmentMethodParam {
@@ -142,7 +145,6 @@ public class AlignmentMethodParam {
 			this.useGroup = AlignmentMethodParam.USE_GROUP;
 			this.usePeakShape = AlignmentMethodParam.USE_PEAK_SHAPE;
 			this.groupingMethod = MultiAlign.GROUPING_METHOD_GREEDY;
-			this.groupingRtTolerance = MultiAlign.GROUPING_METHOD_RT_TOLERANCE;
 			this.alpha = AlignmentMethodParam.PARAM_ALPHA;
 			
 		}

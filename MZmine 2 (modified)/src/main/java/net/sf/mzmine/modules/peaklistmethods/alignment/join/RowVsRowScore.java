@@ -32,6 +32,10 @@ class RowVsRowScore implements Comparable<RowVsRowScore> {
 	RowVsRowScore(PeakListRow peakListRow, PeakListRow alignedRow,
 			double mzMaxDiff, double mzWeight, double rtMaxDiff, double rtWeight) {
 
+		if (peakListRow.getID() == 1264 && alignedRow.getID() == 1180) {
+			System.out.println("Break");
+		}
+		
 		this.peakListRow = peakListRow;
 		this.alignedRow = alignedRow;
 

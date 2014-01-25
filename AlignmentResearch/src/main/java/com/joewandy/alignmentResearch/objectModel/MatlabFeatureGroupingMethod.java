@@ -27,13 +27,15 @@ public class MatlabFeatureGroupingMethod extends BaseFeatureGroupingMethod imple
 	private double rtWindow;
 	private double alpha;
 	private int nSamples;
+	private int burnIn;
 	
-	public MatlabFeatureGroupingMethod(String groupingMethod, double rtTolerance, double alpha, int nSamples) {
+	public MatlabFeatureGroupingMethod(String groupingMethod, double rtTolerance, double alpha, int nSamples, int burnIn) {
 		
 		this.groupingMethod = groupingMethod;
 		this.rtWindow = rtTolerance;
 		this.alpha = alpha;
 		this.nSamples = nSamples;
+		this.burnIn = burnIn;
 				
 		//Create a proxy, which we will use to control MATLAB
 		MatlabProxyFactoryOptions options = new MatlabProxyFactoryOptions.Builder()
@@ -67,7 +69,7 @@ public class MatlabFeatureGroupingMethod extends BaseFeatureGroupingMethod imple
 	@Override
 	public List<FeatureGroup> group(AlignmentFile data) {
 
-		System.out.print("Grouping " + data.getFilename() + " ");
+		System.out.println("Grouping " + data.getFilename() + " rtwindow " + rtWindow);
 		List<FeatureGroup> fileGroups = new ArrayList<FeatureGroup>();
 		
 		if (proxy == null) {
@@ -83,8 +85,9 @@ public class MatlabFeatureGroupingMethod extends BaseFeatureGroupingMethod imple
 			proxy.eval("rtWindow = " + rtWindow + ";");
 			proxy.eval("alpha = " + alpha + ";");
 			proxy.eval("nSamples = " + nSamples + ";");
+			proxy.eval("burnIn = " + burnIn + ";");
 			proxy.eval("cd " + MatlabFeatureGroupingMethod.MATLAB_SCRIPT_PATH);
-			proxy.eval("gmm_dp_sampler(data', rtWindow, alpha, nSamples);");
+			proxy.eval("gmm_dp_sampler(data', rtWindow, alpha, nSamples, burnIn);");
 			proxy.eval("clear all; clc; close all;");
 			
 		} catch (MatlabInvocationException e) {

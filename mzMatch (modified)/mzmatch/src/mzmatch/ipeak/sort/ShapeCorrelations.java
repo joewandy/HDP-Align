@@ -251,10 +251,10 @@ public class ShapeCorrelations
 		*/
 		for (int i = 0; i < numReplicates; ++i) {
 			//final FlexCompRowMatrix mat = correlations[i];
-//			final FlexCompRowMatrix mat = calculateCorrelationsNew(data.signals[i], data.retentionTimes[i], options.rtwindow);
-//			final String correlationMatOutputFile = basename + "_" + (char)(i + 65) + "_rt" + rtwindowLong + ".mat";
+			final FlexCompRowMatrix mat = calculateCorrelationsNew(data.signals[i], data.retentionTimes[i], options.rtwindow);
+			final String correlationMatOutputFile = basename + "_" + (char)(i + 65) + "_rt" + options.rtwindow + ".mat";
 			
-			//outputCorrelationsMat(mat, correlationMatOutputFile, data.ids, basename);
+			outputCorrelationsMat(mat, correlationMatOutputFile, data.ids, basename);
 			//final String dataOutputFile = basename + "_" + (char)(i + 65) + ".csv";
 			final String dataOutputFile = outputFilename + "_" + (char)(i + 65) + ".csv";
 			outputData(peaks, header, i, data.ids, dataOutputFile);
@@ -406,7 +406,7 @@ public class ShapeCorrelations
 	private static void outputCorrelationsMat(FlexCompRowMatrix correlations, String filename, String[] ids,
 			String basename) throws IOException {
 		final String[] correctedBasenameArray = basename.split("\\/");
-		final String correctedBasename = correctedBasenameArray[correctedBasenameArray.length - 1];
+		final String correctedBasename = "correl";
 		System.err.println("Outputing correlations to " + filename);
 		final int size = correlations.numRows();
 		final int[] dims = new int[] { size, size };

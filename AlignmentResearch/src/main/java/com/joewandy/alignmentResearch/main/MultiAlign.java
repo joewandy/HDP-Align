@@ -30,11 +30,11 @@ import com.joewandy.alignmentResearch.filter.AlignmentResultFilter;
 import com.joewandy.alignmentResearch.filter.GraphAlignmentResultFilter;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
+import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
 import com.joewandy.alignmentResearch.objectModel.EvaluationResult;
-import com.joewandy.alignmentResearch.objectModel.FeatureGroupingMethod;
-import com.joewandy.alignmentResearch.objectModel.GreedyFeatureGroupingMethod;
+import com.joewandy.alignmentResearch.objectModel.Feature;
+import com.joewandy.alignmentResearch.objectModel.FeatureGroup;
 import com.joewandy.alignmentResearch.objectModel.GroundTruth;
-import com.joewandy.alignmentResearch.objectModel.SavedMatlabFeatureGroupingMethod;
 
 
 public class MultiAlign {
@@ -45,9 +45,13 @@ public class MultiAlign {
 	public static final String GROUPING_METHOD_GREEDY = "greedy";
 	public static final String GROUPING_METHOD_MIXTURE = "mixture";
 	public static final String GROUPING_METHOD_POSTERIOR = "posterior";
+	public static final String GROUPING_METHOD_METASSIGN_MIXTURE = "metAssignMixture";
+	public static final String GROUPING_METHOD_METASSIGN_POSTERIOR = "metAssignPosterior";
+	
 	public static final double GROUPING_METHOD_RT_TOLERANCE = 5;
 	public static final double GROUPING_METHOD_ALPHA = 1;
-	public static final int GROUPING_METHOD_NUM_SAMPLES = 10;
+	public static final int GROUPING_METHOD_NUM_SAMPLES = 100;
+	public static final int GROUPING_METHOD_BURN_IN = 100;
 
 	private AlignmentData data;
 	private String method;
@@ -118,8 +122,33 @@ public class MultiAlign {
 				
 	}
 		
-	public EvaluationResult evaluate(AlignmentList result) {
+	public EvaluationResult evaluate(AlignmentList result, boolean useGroup) {
 
+		// evaluate clustering quality
+		if (useGroup) {
+			AlignmentFile firstFile = data.getAlignmentDataList().get(0);
+			AlignmentFile secondFile = data.getAlignmentDataList().get(1);
+			int counter = 0;
+			int found = 0;
+			do {
+				AlignmentRow randomRow = result.getRandomRow();
+				if (randomRow.getFeaturesCount() > 1) {
+					Feature firstFeature = randomRow.getFeaturesFromFile(firstFile.getFilenameWithoutExtension());
+					Feature secondFeature = randomRow.getFeaturesFromFile(secondFile.getFilenameWithoutExtension());
+					if (firstFeature != null && secondFeature != null) {
+						counter++;
+						boolean hasAligned = hasAlignedFriend(result, firstFeature, secondFeature);
+						if (hasAligned) {
+							found++;
+						}
+					}
+				}
+			} while (counter < 100);
+			
+			double goodness = (double)found / counter;
+			System.out.println("Clustering goodness = " + goodness);			
+		}
+		
 		// do performance evaluation
 		EvaluationResult evalRes = null;
 		if (data.getGroundTruth() != null) {			
@@ -129,7 +158,8 @@ public class MultiAlign {
 					massTolerance, rtTolerance);				
 		}		
 		evalRes.setTh(alpha);
-		evalRes.setDrtBefore(ransacRtToleranceBeforeCorrection);
+		String note = alpha + ", " + groupingRtWindow;
+		evalRes.setNote(note);
 		System.out.println(evalRes);
 		
 		// do performance evaluation
@@ -141,15 +171,40 @@ public class MultiAlign {
 					massTolerance, rtTolerance);				
 		}		
 		evalRes.setTh(alpha);
-		evalRes.setDrtBefore(ransacRtToleranceBeforeCorrection);
+		note = alpha + ", " + groupingRtWindow;
+		evalRes.setNote(note);
+		
 		System.out.println(evalRes);
 					
 		// RetentionTimePrinter rtp = new RetentionTimePrinter();
 		// rtp.printRt1(alignmentDataList.get(0), alignmentDataList.get(1));
 		// rtp.printRt2(alignmentDataList.get(0), alignmentDataList.get(1), result);
-		
+				
 		return evalRes;
 		
+	}
+
+	private boolean hasAlignedFriend(AlignmentList result, Feature firstFeature,
+			Feature secondFeature) {
+		FeatureGroup firstGroup = firstFeature.getFirstGroup();
+		FeatureGroup secondGroup = secondFeature.getFirstGroup();
+		if (firstGroup == null || secondGroup == null) {
+			return false;
+		}
+		for (Feature f1 : firstGroup.getFeatures()) {
+			for (Feature f2 : secondGroup.getFeatures()) {
+				if (f1.equals(firstFeature)) {
+					continue;
+				}
+				if (f2.equals(secondFeature)) {
+					continue;
+				}
+				if (result.isAligned(f1, f2)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 		
 	

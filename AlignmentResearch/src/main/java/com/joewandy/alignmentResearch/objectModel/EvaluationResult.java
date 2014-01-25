@@ -23,6 +23,7 @@ public class EvaluationResult {
 	private double th;
 	private double drtBefore;
 	private String version;
+	private String note;
 
 	public EvaluationResult(double dmz, double drt, double precision, double recall, double f1,
 			double f05, double totalTp, double totalFp, double totalFn, double totalPositives,
@@ -154,6 +155,14 @@ public class EvaluationResult {
 		this.version = version;
 	}
 
+	public String getNote() {
+		return note;
+	}
+
+	public void setNote(String note) {
+		this.note = note;
+	}
+
 	@Override
 	public String toString() {
 		
@@ -196,7 +205,7 @@ public class EvaluationResult {
 				medSdrtStr + ", " + meanSdrtStr + ", " + 
 				medMdrtStr + ", " + meanMdrtStr + ", " +
 				coverageStr + ", " + drtBefore + ", " +
-				version;
+				version + ", " + note;
 
 		return output;
 		

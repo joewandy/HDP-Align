@@ -1,4 +1,4 @@
-function [Z, ZZprob] = gmm_dp_sampler(data, param_rtwindow, param_alpha, param_nsamps)
+function [Z, ZZprob] = gmm_dp_sampler(data, param_rtwindow, param_alpha, param_nsamps, param_burnin)
 
 % graphics_toolkit ("fltk");
 N = length(data);
@@ -13,15 +13,18 @@ alpha = param_alpha; % DP concentration parameter
 K = 3; % Initial number of clusters
 Z = rand(N, K); % indicator for cluster membership
 Z = (Z==repmat(max(Z,[],2), 1, K)); % turn to binary values
-NSAMPS = param_nsamps; % no. of samples
+NSAMPS = param_nsamps + param_burnin; % no. of samples
 cSums = sum(Z,1); % no. of members in each cluster
-AllNk = zeros(NSAMPS, 1); % K for each sample
-t1 = zeros(NSAMPS, 1); % time taken for each sample
-scores = zeros(NSAMPS, 1);
+AllNk = zeros(param_nsamps, 1); % K for each sample
+t1 = zeros(param_nsamps, 1); % time taken for each sample
+scores = zeros(param_nsamps, 1);
 ZZall = zeros(N);
-allZ = zeros(N,NSAMPS);
+allZ = zeros(N, param_nsamps);
+
+[sorted, pos] = sort(data);
 
 % sampling starts here ..
+counter = 0;
 h = figure;
 for s = 1:NSAMPS
 
@@ -86,51 +89,56 @@ for s = 1:NSAMPS
         end
         
     end
+    time_taken = toc;
       
     % plot Z, ZZ
-    t1(s) = toc;
-    AllNk(s,1) = K;
     subplot(121)
-    imagesc(double(Z)); 
+    imagesc(double(Z(pos, :))); 
     xlabel('K'); 
     ylabel('N');
     title('Z');
     subplot(122)
-    ZZall = ZZall + double(Z)*double(Z');
-    imagesc(ZZall);
+    imagesc(ZZall(pos, pos));
     title('ZZall');
     colorbar;
     drawnow;
     
-    % store all the samples
-    [r,c] = find(Z);
-    [r I] = sort(r,'ascend');
-    allZ(:,s) = c(I);
+    if s > param_burnin
+        counter = counter + 1;
+        fprintf('SAMPLE\tIteration %d\ttime %f\tnumClusters %d\n', counter, time_taken, K);
+        t1(counter) = time_taken;
+        AllNk(counter, 1) = K;        
+        ZZall = ZZall + double(Z)*double(Z');        
+        % store all the samples after burn-in
+        [r, c] = find(Z);
+        [r I] = sort(r, 'ascend');
+        allZ(:, counter) = c(I);
+    else
+        fprintf('BURN-IN\tIteration %d\ttime %f\tnumClusters %d\n', s, time_taken, K);
+    end
     
 end % end sample
 
+% Just return the last sample to keep things simple ...
+
 % Find the least squares clustering
-bestsse = inf;
-bestZ = [];
-for s = 1:NSAMPS
+% bestsse = inf;
+% bestZ = [];
+% for i = 1:counter
     % convert 1D vector allZ(:, s) into a 2D matrix again
-    tempZ = full(sparse([1:N]', allZ(:,s), 1));
-    tempZZ = tempZ*tempZ';
+%    tempZ = full(sparse([1:N]', allZ(:, i), 1));
+%    tempZZ = tempZ*tempZ';
     % compute SSE
-    sse(s) = sum(sum((tempZZ - ZZall).^2));
-    if sse(s) < bestsse
-        bestsse = sse(s);
-        bestZ = tempZ;
-    end
-end
+%    sse(i) = sum(sum((tempZZ - ZZall).^2));
+%    if sse(i) < bestsse
+%        bestsse = sse(i);
+%        bestZ = tempZ;
+%    end
+% end
+% Z = bestZ;
 
-Z = bestZ;
+% get the probabilities
+ZZprob = ZZall ./ param_nsamps;
 
-% dim = size(ZZall, 2);
-% ZZprob = ZZall ./ repmat(max(ZZall, [], 2), 1, dim);
-ZZprob = ZZall ./ NSAMPS;
-
-% save('-v6', 'temp.mat');
 save('-v6', 'temp.Z.mat', 'Z');
-% save('-v6', 'temp.ZZall.mat', 'ZZall');
 save('-v6', 'temp.ZZprob.mat', 'ZZprob');

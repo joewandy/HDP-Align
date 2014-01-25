@@ -264,8 +264,8 @@ public class MetAssign
 			"mass is covered by this value in each direction.")
 		public double ppm = -1;
 		
-		//@Option(name="rtwindow", param="double", type=Option.Type.REQUIRED_ARGUMENT, level=Option.Level.USER, usage=
-		//	"The retention time window in seconds, defining the range where to look for matches.")
+		@Option(name="rtwindow", param="double", type=Option.Type.REQUIRED_ARGUMENT, level=Option.Level.USER, usage=
+			"The retention time window in seconds, defining the range where to look for matches.")
 		public double rtwindow = 0;
 		
 		//@Option(name="minrt", param="double", type=Option.Type.REQUIRED_ARGUMENT, level=Option.Level.USER, usage=
@@ -448,6 +448,8 @@ public class MetAssign
 			// parse the commandline options
 			Options options = new Options();
 			CmdLineParser cmdline = new CmdLineParser(options);
+
+			System.out.println("RTWINDOW = " + options.rtwindow);
 			
 			// check whether we need to show the help
 			cmdline.parse(args);
@@ -558,7 +560,7 @@ public class MetAssign
 		}
 	}
 	
-	private static Vector<IPeak> modelBasedClustering(final Options options, IPeakSet<IPeak> peaks, final Header header,
+	public static Vector<IPeak> modelBasedClustering(final Options options, IPeakSet<IPeak> peaks, final Header header,
 			final Random random, final CorrelationMeasure measure) throws IOException, XmlParserException {
 		float rangeMin = -1.0f;
 		float rangeMax = 1.0f;
@@ -603,42 +605,19 @@ public class MetAssign
 			Clusterer<Data,SimpleClustering> clusterer = new CorrelationClusterer(data, parameters, random,
 					inScorer, outScorer, measure, scorer);
 
-			final int n = peaks.size();
-			SampleHandler peakClusteringHandler = new PeakClusteringSamplerHandler(n);
 			final List<SampleHandler<Data,SimpleClustering>> handlers = new ArrayList<SampleHandler<Data,SimpleClustering>>();
-			handlers.add(peakClusteringHandler);
+
+			final int n = peaks.size();
+			PeakClusteringSamplerHandler peakClusteringHandler = null;
+			if (options.matOut != null) {
+				peakClusteringHandler = new PeakClusteringSamplerHandler(n);
+				handlers.add(peakClusteringHandler);
+			}
+			
 			basepeaks = Clusterer.findRelatedPeaks(peaks, clusterer, random, handlers);
 					
-			if (options.matOut != null) {
-			
-				// extract peak vs cluster membership 
-				Matrix Z = ((PeakClusteringSamplerHandler) peakClusteringHandler).getLastZ();
-				
-				// extract peak vs. peak probabilities
-				Matrix ZZprob = ((PeakClusteringSamplerHandler) peakClusteringHandler).getZZall();
-				final double numSamples = ((PeakClusteringSamplerHandler) peakClusteringHandler).getNumSamples();
-				ZZprob.scale(1/numSamples);
-				
-				// quick hack: save the resulting output to matlab files
-				System.err.println("Saving clustering output");
-				MLDouble ZMat = new MLDouble("Z", toArray(Z));
-				MLDouble ZZProbMat = new MLDouble("ZZprob", toArray(ZZprob));
-				final Collection<MLArray> output1 = new ArrayList<MLArray>();
-				final Collection<MLArray> output2 = new ArrayList<MLArray>();
-				output1.add(ZMat);
-				output2.add(ZZProbMat);
-				final String matFile1 = options.matOut + ".Z.mat";
-				final String matFile2 = options.matOut + ".ZZprob.mat";
-				final MatFileWriter writer = new MatFileWriter();
-				try {
-					writer.write(matFile1, output1);
-					System.err.println("Written to " + matFile1);
-					writer.write(matFile2, output2);
-					System.err.println("Written to " + matFile2);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}			
-				
+			if (peakClusteringHandler != null) {
+				peakClusteringHandler.saveResult(options.matOut);			
 			}
 						
 		} else {
@@ -781,17 +760,6 @@ public class MetAssign
 			ah.writeAnnotations();
 		}
 		return basepeaks;
-	}
-	
-	private static double[][] toArray(Matrix matrix) {
-		double[][] arr = new double[matrix.numRows()][matrix.numColumns()];
-		for (MatrixEntry e : matrix) {
-			int i = e.row();
-			int j = e.column();
-			double val = e.get();
-			arr[i][j] = val;
-		}
-		return arr;
 	}
 	
 	private static void priorMassLikelihoodAnnotations(final FormulaClusterer.MassIntensityClusteringScorer miScorer,

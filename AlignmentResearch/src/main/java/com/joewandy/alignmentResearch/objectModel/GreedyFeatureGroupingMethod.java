@@ -54,12 +54,13 @@ public class GreedyFeatureGroupingMethod extends BaseFeatureGroupingMethod imple
 	public List<FeatureGroup> group(AlignmentFile data) {
 
 		List<FeatureGroup> fileGroups = new ArrayList<FeatureGroup>();
+		double rtTolerance = this.rtTolerance; 
 		if (!usePeakShape) {
 			// do greedy grouping, based on retention time only
-			fileGroups = greedyRTGrouping(data);			
+			fileGroups = greedyRTGrouping(data, rtTolerance);			
 		} else {
 			// call mzmatch to do greedy peakshape correlation grouping
-			fileGroups = greedyPeakShapeGrouping(data);
+			fileGroups = greedyRTGrouping(data, rtTolerance);
 		}		
 		System.out.println("fileGroups.size() = " + fileGroups.size());
 
@@ -69,7 +70,7 @@ public class GreedyFeatureGroupingMethod extends BaseFeatureGroupingMethod imple
 					
 	}
 
-	private List<FeatureGroup> greedyPeakShapeGrouping(AlignmentFile data) {
+	private List<FeatureGroup> greedyPeakShapeGrouping(AlignmentFile data, double rtTolerance) {
 
 		List<FeatureGroup> fileGroups = new ArrayList<FeatureGroup>();
 		
@@ -133,42 +134,37 @@ public class GreedyFeatureGroupingMethod extends BaseFeatureGroupingMethod imple
 	
 	}
 
-	private List<FeatureGroup> greedyRTGrouping(AlignmentFile data) {
+	private List<FeatureGroup> greedyRTGrouping(AlignmentFile data, double rtTolerance) {
 
 		List<FeatureGroup> fileGroups = new ArrayList<FeatureGroup>();
 		
 		// the group ids must be unique across all input files ?!
 		int groupId = 1;
 		
-		System.out.print("Grouping " + data.getFilename() + " ");
+		System.out.println("Grouping " + data.getFilename() + " rtTolerance " + rtTolerance);
 		for (Feature feature : data.getFeatures()) {
 
 			// process ungrouped features
 			if (!feature.isGrouped()) {
 				FeatureGroup group = new FeatureGroup(groupId);
-				Set<Feature> nearbyFeatures = findNearbyFeatures(data, feature);
+				Set<Feature> nearbyFeatures = findNearbyFeatures(data, feature, rtTolerance);
 				if (!nearbyFeatures.isEmpty()) {
 					group.addFeatures(nearbyFeatures);
 				} 
 				groupId++;
 				fileGroups.add(group);
 			}
-			
-			if (groupId % 1000 == 0) {
-				System.out.print(".");
-			}
-			
+						
 		}				
-		System.out.println();
 
 		return fileGroups;
 		
 	}
 			
-	private Set<Feature> findNearbyFeatures(AlignmentFile data, Feature referenceFeature) {
+	private Set<Feature> findNearbyFeatures(AlignmentFile data, Feature referenceFeature, double rtTolerance) {
 		Set<Feature> nearbyFeatures = new HashSet<Feature>();
 		// find matching feature
-		Set<Feature> unmatched = data.getNextUngroupedFeatures(referenceFeature, this.rtTolerance);
+		Set<Feature> unmatched = data.getNextUngroupedFeatures(referenceFeature, rtTolerance);
 		nearbyFeatures.addAll(unmatched);
 		return nearbyFeatures;
 	}

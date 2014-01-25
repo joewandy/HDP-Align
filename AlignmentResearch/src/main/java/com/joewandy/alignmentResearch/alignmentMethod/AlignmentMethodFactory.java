@@ -25,7 +25,8 @@ public class AlignmentMethodFactory {
 	// my own aligners
 	public static final String ALIGNMENT_METHOD_MY_JOIN = "myJoin";
 	public static final String ALIGNMENT_METHOD_MY_STABLE_MARRIAGE = "myStableMarriage";
-	public static final String ALIGNMENT_METHOD_MY_MAXIMUM_WEIGHT_MATCHING = "myMaxWeight";
+	public static final String ALIGNMENT_METHOD_MY_MAXIMUM_WEIGHT_MATCHING_REFERENCE = "myMaxWeightRef";
+	public static final String ALIGNMENT_METHOD_MY_MAXIMUM_WEIGHT_MATCHING_HIERARCHICAL = "myMaxWeight";
 	
 	// calls mzMine Join aligner
 	public static final String ALIGNMENT_METHOD_MZMINE_JOIN = "join";
@@ -39,8 +40,6 @@ public class AlignmentMethodFactory {
 	// calls OpenMS alignment
 	public static final String ALIGNMENT_METHOD_OPENMS = "openMS";
 	
-	// calls consistency-based alignment
-	public static final String ALIGNMENT_METHOD_HIERARCHICAL = "hierarchical";
 	
 	public static AlignmentMethod getAlignmentMethod(final String method, AlignmentMethodParam.Builder paramBuilder, 
 			AlignmentData data) {
@@ -55,7 +54,7 @@ public class AlignmentMethodFactory {
 			aligner = new MyJoinAlignment(alignmentDataList, param);
 		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_STABLE_MARRIAGE.equals(method)) {
 			aligner = new MyStableMarriageAlignment(alignmentDataList, param);
-		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_MAXIMUM_WEIGHT_MATCHING.equals(method)) {
+		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_MAXIMUM_WEIGHT_MATCHING_REFERENCE.equals(method)) {
 			aligner = new MyMaximumMatchingAlignment(alignmentDataList, param);
 		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MZMINE_RANSAC.equals(method)) {
 			aligner = new MzMineRansacAlignment(alignmentDataList, param);
@@ -65,7 +64,7 @@ public class AlignmentMethodFactory {
 			aligner = new SimaAlignment(alignmentDataList, param);
 		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_OPENMS.equals(method)) {
 			aligner = new OpenMSAlignment(alignmentDataList, param);
-		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_HIERARCHICAL.equals(method)) {
+		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_MAXIMUM_WEIGHT_MATCHING_HIERARCHICAL.equals(method)) {
 			aligner = new HierarchicalAlignment(alignmentDataList, param);
 		}
 		

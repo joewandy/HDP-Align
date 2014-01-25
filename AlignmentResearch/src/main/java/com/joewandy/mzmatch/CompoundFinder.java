@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import mzmatch.util.Tool;
 import peakml.chemistry.Mass;
 import peakml.chemistry.Molecule;
 import peakml.chemistry.PeriodicTable;
@@ -23,7 +24,6 @@ import cmdline.OptionsClass;
 import com.joewandy.mzmatch.query.CompoundQuery;
 import com.joewandy.mzmatch.query.KeggQuery;
 import com.joewandy.mzmatch.query.PubChemQuery;
-import com.joewandy.util.Tool;
 
 public class CompoundFinder {
 

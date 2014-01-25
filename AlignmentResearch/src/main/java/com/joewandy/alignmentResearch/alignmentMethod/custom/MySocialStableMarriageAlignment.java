@@ -13,7 +13,7 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 
-import no.uib.cipr.matrix.DenseMatrix;
+import no.uib.cipr.matrix.Matrix;
 import peakml.chemistry.PeriodicTable;
 
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
@@ -312,7 +312,7 @@ public class MySocialStableMarriageAlignment extends BaseAlignment implements Al
 		Set<Feature> friends = new HashSet<Feature>();		
 		AlignmentFile file = feature.getData();
 //		DoubleMatrix zzProb = feature.getZZProb();
-		DenseMatrix zzProb = feature.getZZProb();
+		Matrix zzProb = feature.getZZProb();
 		
 		if (zzProb == null) {
 			return friends;

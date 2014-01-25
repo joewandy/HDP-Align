@@ -23,13 +23,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import mzmatch.util.Tool;
 import cmdline.CmdLineParser;
 import cmdline.Option;
 import cmdline.OptionsClass;
 
 import com.joewandy.alignmentResearch.comparator.NaturalOrderFilenameComparator;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
-import com.joewandy.util.Tool;
 
 public class GroundTruthToCsv {
 

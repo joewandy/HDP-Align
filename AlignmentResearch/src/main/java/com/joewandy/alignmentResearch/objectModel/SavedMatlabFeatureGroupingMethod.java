@@ -28,9 +28,11 @@ public class SavedMatlabFeatureGroupingMethod extends BaseFeatureGroupingMethod 
 		System.out.println("============ Grouping = " + dataList.size() + " files ============");
 		// the group ids must be unique across all input files 
 		List<FeatureGroup> groups = new ArrayList<FeatureGroup>();
+		int counter = 0;
 		for (AlignmentFile data : dataList) {
 			List<FeatureGroup> fileGroups = group(data);
 			groups.addAll(fileGroups);			
+			counter++;
 		}
 		return groups;		
 	}

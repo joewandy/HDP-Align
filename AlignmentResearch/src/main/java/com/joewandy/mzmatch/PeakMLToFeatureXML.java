@@ -25,6 +25,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import mzmatch.util.Tool;
 import peakml.IPeak;
 import peakml.IPeakSet;
 import peakml.io.ParseResult;
@@ -32,8 +33,6 @@ import peakml.io.peakml.PeakMLParser;
 import cmdline.CmdLineParser;
 import cmdline.Option;
 import cmdline.OptionsClass;
-
-import com.joewandy.util.Tool;
 
 public class PeakMLToFeatureXML {
 	

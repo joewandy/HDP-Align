@@ -1,5 +1,8 @@
 package com.joewandy.alignmentResearch.main;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import cmdline.Option;
 import cmdline.OptionsClass;
 
@@ -115,6 +118,9 @@ public class MultiAlignCmdOptions {
 
 	@Option(name = "autoAlpha", param = "", type = Option.Type.NO_ARGUMENT, level = Option.Level.SYSTEM, usage = "When this is set, automatically adjust alpha from 0 to 1.")
 	public boolean autoAlpha = false;
+
+	@Option(name = "autoOptimiseGreedy", param = "", type = Option.Type.NO_ARGUMENT, level = Option.Level.SYSTEM, usage = "When this is set, automatically tries to some combinations of grouping rt windows")
+	public boolean autoOptimiseGreedy = false;
 	
 	// valid choices are defined in MultiAlign
 	@Option(name = "groupingMethod", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Grouping method")
@@ -125,15 +131,12 @@ public class MultiAlignCmdOptions {
 	 */
 	
 	@Option(name = "groupingRtWindow", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Grouping RT window for greedy grouping")
-	public double groupingRtWindow = MultiAlign.GROUPING_METHOD_RT_TOLERANCE;
+	public double groupingRtWindow;
 
 	/*
 	 * Stable matching options - for mixture model RT grouping
 	 */
 	
-	@Option(name = "groupingAlpha", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Alpha")
-	public double groupingAlpha = MultiAlign.GROUPING_METHOD_ALPHA;
-
 	@Option(name = "groupingNSamples", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "No. of samples")
 	public int groupingNSamples = MultiAlign.GROUPING_METHOD_NUM_SAMPLES;
 

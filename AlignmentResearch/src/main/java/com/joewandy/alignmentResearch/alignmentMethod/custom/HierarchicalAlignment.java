@@ -35,7 +35,9 @@ public class HierarchicalAlignment extends MyMaximumMatchingAlignment implements
 	@Override
 	public AlignmentList matchFeatures() {
 
-		groupFeatures();
+		if (useGroup) {
+			groupFeatures();
+		}	
 		
 		ExtendedLibraryBuilder builder = new ExtendedLibraryBuilder(dataList, massTolerance, rtTolerance);		
 		Map<Double, List<AlignmentLibrary>> metaLibraries = builder.buildPrimaryLibrary();

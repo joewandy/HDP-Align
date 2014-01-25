@@ -119,6 +119,21 @@ public class MultiAlignExpResult {
 			System.out.print(String.format("%.3f,", result.getCoverage()));
 		}
 		System.out.println(" ]';");		
+
+		System.out.println();
+		for (EvaluationResult result : results) {
+			if (result == null) {
+				continue;
+			}
+			String precision = String.format("%.3f", result.getPrecision());
+			String recall = String.format("%.3f", result.getRecall());
+			String f1 = String.format("%.3f", result.getF1());
+			String tp = String.format("%.1f", result.getTotalTp());
+			String fp = String.format("%.1f", result.getTotalFp());
+			String fn = String.format("%.1f", result.getTotalFn());			
+			String note = result.getNote();
+			System.out.println(precision + "\t" + recall + "\t" + f1 + "\t" + tp + "\t" + fp + "\t" + fn + "\t" + note);
+		}
 		
 	}
 	
