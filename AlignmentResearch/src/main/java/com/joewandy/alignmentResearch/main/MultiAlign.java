@@ -50,8 +50,8 @@ public class MultiAlign {
 	
 	public static final double GROUPING_METHOD_RT_TOLERANCE = 5;
 	public static final double GROUPING_METHOD_ALPHA = 1;
-	public static final int GROUPING_METHOD_NUM_SAMPLES = 100;
-	public static final int GROUPING_METHOD_BURN_IN = 100;
+	public static final int GROUPING_METHOD_NUM_SAMPLES = 20;
+	public static final int GROUPING_METHOD_BURN_IN = 10;
 
 	private AlignmentData data;
 	private String method;
@@ -117,7 +117,9 @@ public class MultiAlign {
 		
 		// actually do the alignment now, filtering of alignment results also happen inside align()
 		AlignmentList result = aligner.align();
-		System.out.println("Total " + result.getRowsCount() + " rows aligned");
+		if (result != null) {
+			System.out.println("Total " + result.getRowsCount() + " rows aligned");			
+		}
 		return result;
 				
 	}
@@ -125,29 +127,29 @@ public class MultiAlign {
 	public EvaluationResult evaluate(AlignmentList result, boolean useGroup) {
 
 		// evaluate clustering quality
-		if (useGroup) {
-			AlignmentFile firstFile = data.getAlignmentDataList().get(0);
-			AlignmentFile secondFile = data.getAlignmentDataList().get(1);
-			int counter = 0;
-			int found = 0;
-			do {
-				AlignmentRow randomRow = result.getRandomRow();
-				if (randomRow.getFeaturesCount() > 1) {
-					Feature firstFeature = randomRow.getFeaturesFromFile(firstFile.getFilenameWithoutExtension());
-					Feature secondFeature = randomRow.getFeaturesFromFile(secondFile.getFilenameWithoutExtension());
-					if (firstFeature != null && secondFeature != null) {
-						counter++;
-						boolean hasAligned = hasAlignedFriend(result, firstFeature, secondFeature);
-						if (hasAligned) {
-							found++;
-						}
-					}
-				}
-			} while (counter < 100);
-			
-			double goodness = (double)found / counter;
-			System.out.println("Clustering goodness = " + goodness);			
-		}
+//		if (useGroup) {
+//			AlignmentFile firstFile = data.getAlignmentDataList().get(0);
+//			AlignmentFile secondFile = data.getAlignmentDataList().get(1);
+//			int counter = 0;
+//			int found = 0;
+//			do {
+//				AlignmentRow randomRow = result.getRandomRow();
+//				if (randomRow.getFeaturesCount() > 1) {
+//					Feature firstFeature = randomRow.getFeaturesFromFile(firstFile.getFilenameWithoutExtension());
+//					Feature secondFeature = randomRow.getFeaturesFromFile(secondFile.getFilenameWithoutExtension());
+//					if (firstFeature != null && secondFeature != null) {
+//						counter++;
+//						boolean hasAligned = hasAlignedFriend(result, firstFeature, secondFeature);
+//						if (hasAligned) {
+//							found++;
+//						}
+//					}
+//				}
+//			} while (counter < 100);
+//			
+//			double goodness = (double)found / counter;
+//			System.out.println("Clustering goodness = " + goodness);			
+//		}
 		
 		// do performance evaluation
 		EvaluationResult evalRes = null;

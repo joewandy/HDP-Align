@@ -59,10 +59,17 @@ public class MultiAlignCmd {
 			GlobalNoiseLevel.HIGH 
 	};
 	private static final LocalNoiseLevel [] NOISE_LOCAL_RT_DRIFTS = { 
-			LocalNoiseLevel.SUPER_HIGH
+		LocalNoiseLevel.NONE,
+		LocalNoiseLevel.LOW,
+		LocalNoiseLevel.MEDIUM,
+		LocalNoiseLevel.HIGH
 	};
 	private static final PolynomialNoiseLevel [] NOISE_POLY_RT_DRIFTS = { 
-		PolynomialNoiseLevel.HIGH
+		PolynomialNoiseLevel.NONE,
+		PolynomialNoiseLevel.LOW,
+		PolynomialNoiseLevel.MEDIUM,
+		PolynomialNoiseLevel.HIGH,
+		PolynomialNoiseLevel.SUPER_HIGH
 	};
 	
 	public static void main(String args[]) throws Exception {
@@ -89,8 +96,10 @@ public class MultiAlignCmd {
 					for (int i = 0; i < iteration; i++) {
 						EvaluationResult evalRes = runExperiment(options, true, 
 								noiseParam, 0, GlobalNoiseLevel.NONE, LocalNoiseLevel.NONE, 
-								PolynomialNoiseLevel.NONE, MeasurementNoiseLevel.NONE);				
-						expResult.addResult(evalRes);
+								PolynomialNoiseLevel.NONE, MeasurementNoiseLevel.NONE);	
+						if (evalRes != null) {
+							expResult.addResult(evalRes);							
+						}
 					}
 					results.add(expResult);					
 					
@@ -113,7 +122,9 @@ public class MultiAlignCmd {
 							EvaluationResult evalRes = runExperiment(options, true, 
 									0, noiseParam, GlobalNoiseLevel.NONE, LocalNoiseLevel.NONE, 
 									PolynomialNoiseLevel.NONE, MeasurementNoiseLevel.NONE);				
-							expResult.addResult(evalRes);
+							if (evalRes != null) {
+								expResult.addResult(evalRes);							
+							}
 						}
 						results.add(expResult);					
 						
@@ -136,7 +147,9 @@ public class MultiAlignCmd {
 						EvaluationResult evalRes = runExperiment(options, true, 
 								0.0, 0.0, GlobalNoiseLevel.NONE, LocalNoiseLevel.NONE, 
 								PolynomialNoiseLevel.NONE, noiseParam);				
-						expResult.addResult(evalRes);
+						if (evalRes != null) {
+							expResult.addResult(evalRes);							
+						}
 					}
 					results.add(expResult);					
 
@@ -159,7 +172,9 @@ public class MultiAlignCmd {
 						EvaluationResult evalRes = runExperiment(options, true, 
 								0.0, 0.0, noiseParam, LocalNoiseLevel.NONE, 
 								PolynomialNoiseLevel.NONE, MeasurementNoiseLevel.NONE);				
-						expResult.addResult(evalRes);
+						if (evalRes != null) {
+							expResult.addResult(evalRes);							
+						}
 					}
 					results.add(expResult);					
 
@@ -182,7 +197,9 @@ public class MultiAlignCmd {
 						EvaluationResult evalRes = runExperiment(options, true, 
 								0.0, 0.0, GlobalNoiseLevel.NONE, noiseParam, 
 								PolynomialNoiseLevel.NONE, MeasurementNoiseLevel.NONE);				
-						expResult.addResult(evalRes);
+						if (evalRes != null) {
+							expResult.addResult(evalRes);							
+						}
 					}
 					results.add(expResult);					
 
@@ -205,7 +222,9 @@ public class MultiAlignCmd {
 						EvaluationResult evalRes = runExperiment(options, true, 
 								0.0, 0.0, GlobalNoiseLevel.NONE, LocalNoiseLevel.NONE, 
 								noiseParam, MeasurementNoiseLevel.NONE);				
-						expResult.addResult(evalRes);
+						if (evalRes != null) {
+							expResult.addResult(evalRes);							
+						}
 					}
 					results.add(expResult);					
 
@@ -236,10 +255,12 @@ public class MultiAlignCmd {
 							EvaluationResult evalRes = runExperiment(options, false, 
 									0.0, 0.0, GlobalNoiseLevel.NONE, LocalNoiseLevel.NONE, 
 									PolynomialNoiseLevel.NONE, MeasurementNoiseLevel.NONE);	
-							evalRes.setTh(options.alpha);
-							String note = options.alpha + ", " + options.groupingRtWindow;
-							evalRes.setNote(note);
-							expResult.addResult(evalRes);	
+							if (evalRes != null) {
+								evalRes.setTh(options.alpha);
+								String note = options.alpha + ", " + options.groupingRtWindow;
+								evalRes.setNote(note);
+								expResult.addResult(evalRes);	
+							}
 						}
 					}
 				}
@@ -311,9 +332,13 @@ public class MultiAlignCmd {
 		
 		MultiAlign multiAlign = new MultiAlign(data, options);
 		AlignmentList result = multiAlign.align();
-		writeAlignmentResult(result, options.output);
-		EvaluationResult evalRes = multiAlign.evaluate(result, options.useGroup);
-		return evalRes;
+		if (result != null) {
+			writeAlignmentResult(result, options.output);
+			EvaluationResult evalRes = multiAlign.evaluate(result, options.useGroup);
+			return evalRes;			
+		} else {
+			return null;
+		}
 		
 	}
 	

@@ -170,6 +170,34 @@
 			<artifactId>opencsv</artifactId>
 			<version>2.0</version>
 		</dependency>		
-                                                            		
+		
+		<!-- BigMemory -->
+		<dependency>
+		  <groupId>org.terracotta.bigmemory</groupId>
+		  <artifactId>bigmemory</artifactId>
+		  <version>4.1.0</version>
+		</dependency>
+				  <dependency>
+				    <groupId>net.sf.ehcache</groupId>
+				    <artifactId>ehcache-ee</artifactId>
+				    <version>2.8.0</version>
+				  </dependency>
+				  <dependency>
+			<groupId>javax.transaction</groupId>
+			<artifactId>jta</artifactId>
+			<version>1.1</version>
+		</dependency>
+		  		                                                            		
 	</dependencies>
+	<repositories>
+			<repository>
+		    <id>terracotta-repository</id>
+		    <url>http://www.terracotta.org/download/reflector/releases</url>
+		    <releases>
+		        <enabled>true</enabled>
+		    </releases>
+		</repository>
+	
+	</repositories>
+	
 </project>

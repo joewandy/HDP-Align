@@ -49,6 +49,9 @@ public abstract class BaseAlignment implements AlignmentMethod {
 				
 		// match features provided by subclasses implementations
 		AlignmentList alignmentResult = this.matchFeatures();
+		if (alignmentResult == null) {
+			return null;
+		}
 		
 		// filter the alignment results sequentially, if necessary
 		// System.out.println("Aligned rows " + alignmentResult.getRowsCount() + " with " + this.getClass().getName());

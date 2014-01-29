@@ -17,9 +17,9 @@ public class MeasurementNoise implements AlignmentNoise {
 	public enum MeasurementNoiseLevel {
 
 		NONE		(0),
-		LOW 		(0.10),
-		MEDIUM		(0.20),
-		HIGH		(0.50);
+		LOW 		(0.005),
+		MEDIUM		(0.010),
+		HIGH		(0.020);
 		
 		private final double massStdev;
 		private final double intensityStdev;
@@ -83,8 +83,8 @@ public class MeasurementNoise implements AlignmentNoise {
 				double newIntensity = noisyIntensity(feature.getIntensity());
 				double newRt = noisyRt(feature.getRt());
 				feature.setMass(newMass);
-//				feature.setIntensity(newIntensity);
-//				feature.setRt(newRt);
+				feature.setIntensity(newIntensity);
+				feature.setRt(newRt);
 			}
 		}
 

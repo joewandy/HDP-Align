@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.InputMismatchException;
 import java.util.Iterator;
@@ -33,11 +34,13 @@ public class BenchmarkDataGenerator extends BaseDataGenerator implements Alignme
 	private String inputDirectory;
 	private String gtPath;
 	private List<AlignmentFile> alignmentFiles;
+	private boolean randomise;
 	
-	public BenchmarkDataGenerator(String inputDirectory, String gtPath) {
+	public BenchmarkDataGenerator(String inputDirectory, String gtPath, boolean randomise) {
 		super();
 		this.inputDirectory = inputDirectory;
 		this.gtPath = gtPath;
+		this.randomise = randomise;
 	}
 	
 	@Override
@@ -84,8 +87,18 @@ public class BenchmarkDataGenerator extends BaseDataGenerator implements Alignme
 			
 		}
 		
-		this.alignmentFiles = alignmentDataList;
-		return alignmentDataList;
+		if (!randomise) {
+			this.alignmentFiles = alignmentDataList;		
+			return alignmentDataList;
+		} else {
+			// pick only top 2 files
+			Collections.shuffle(alignmentDataList);
+			List<AlignmentFile> newList = new ArrayList<AlignmentFile>();
+			newList.add(alignmentDataList.get(0));
+			newList.add(alignmentDataList.get(1));
+			this.alignmentFiles = newList;
+			return newList;
+		}		
 		
 	}
 
@@ -234,6 +247,7 @@ public class BenchmarkDataGenerator extends BaseDataGenerator implements Alignme
 						.equals(featureElem.getQualifiedName())) {
 					Feature feature = getFeatureFromElement(featureElem,
 							peakId);
+					feature.setXmlElem(featureElem);
 					features.add(feature);						
 					peakId++;
 				}
@@ -244,7 +258,7 @@ public class BenchmarkDataGenerator extends BaseDataGenerator implements Alignme
 		return features;
 		
 	}
-	
+		
 	private Feature getFeatureFromElement(Element featureElem, int peakId) {
 		Elements children = featureElem.getChildElements();
 		double mass = 0;

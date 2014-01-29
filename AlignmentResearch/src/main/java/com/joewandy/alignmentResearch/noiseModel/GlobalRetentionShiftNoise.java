@@ -64,10 +64,11 @@ public class GlobalRetentionShiftNoise implements AlignmentNoise {
 				Feature feature = it.next();
 				double newRt = noisyRt(feature.getRt());
 				if (newRt == 0) {
-					// the feature never elutes ... so we remove it from the data file
-					it.remove();
-					// also remove from ground truth
-					data.getGroundTruth().clearFeature(feature);
+//					// the feature never elutes ... so we remove it from the data file
+//					it.remove();
+//					// also remove from ground truth
+//					data.getGroundTruth().clearFeature(feature);
+					newRt = 10;
 				} else {
 					feature.setRt(newRt);					
 				}

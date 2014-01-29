@@ -278,6 +278,7 @@ public class MaximumWeightMatching implements FeatureMatching {
     	System.out.print("\tComputing distances ");
     	double maxDist = 0;
 		Matrix distArr = new DenseMatrix(m, n);
+//		Matrix distArr = new LinkedSparseMatrix(m, n);
 		for (int i = 0; i < m; i++) {
 			
 			for (int j = 0; j < n; j++) {

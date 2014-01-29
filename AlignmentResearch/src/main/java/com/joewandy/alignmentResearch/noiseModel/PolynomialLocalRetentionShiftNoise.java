@@ -15,10 +15,10 @@ public class PolynomialLocalRetentionShiftNoise implements AlignmentNoise {
 	public enum PolynomialNoiseLevel {
 
 		NONE		(0),
-		LOW 		(1),
-		MEDIUM		(2),
-		HIGH		(3),
-		SUPER_HIGH	(4);
+		LOW 		(0.5),
+		MEDIUM		(1),
+		HIGH		(1.5),
+		SUPER_HIGH	(2);
 		
 		private final double upper;
 		

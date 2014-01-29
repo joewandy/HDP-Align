@@ -60,7 +60,7 @@ public class GreedyFeatureGroupingMethod extends BaseFeatureGroupingMethod imple
 			fileGroups = greedyRTGrouping(data, rtTolerance);			
 		} else {
 			// call mzmatch to do greedy peakshape correlation grouping
-			fileGroups = greedyRTGrouping(data, rtTolerance);
+			fileGroups = greedyPeakShapeGrouping(data, rtTolerance);
 		}		
 		System.out.println("fileGroups.size() = " + fileGroups.size());
 

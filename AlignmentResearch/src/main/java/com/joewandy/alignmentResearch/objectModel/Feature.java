@@ -5,6 +5,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import no.uib.cipr.matrix.Matrix;
+import nu.xom.Attribute;
+import nu.xom.Element;
+import nu.xom.Elements;
 
 
 /**
@@ -27,6 +30,7 @@ public class Feature {
 	private int noPairs;
 	private boolean delete;
 	private AlignmentVertex vertex;
+	private Element xmlElem;
 	
 	public Feature(int peakID, double mass, double rt, double intensity) {
 		super();
@@ -71,6 +75,35 @@ public class Feature {
 
 	public void setData(AlignmentFile data) {
 		this.data = data;
+	}
+
+	public Element getXmlElem() {
+		
+		Element featureElem = (Element) this.xmlElem.copy();
+		featureElem.removeChildren();
+		
+		Element rtChild = new Element("position");
+		Attribute rtChildAttr = new Attribute("dim", "0");
+		rtChild.addAttribute(rtChildAttr);
+		rtChild.appendChild(String.valueOf(rt));
+		featureElem.appendChild(rtChild);
+
+		Element massChild = new Element("position");
+		Attribute massChildAttr = new Attribute("dim", "1");
+		massChild.addAttribute(massChildAttr);
+		massChild.appendChild(String.valueOf(mass));
+		featureElem.appendChild(massChild);
+
+		Element intenseChild = new Element("intensity");
+		intenseChild.appendChild(String.valueOf(intensity));
+		featureElem.appendChild(intenseChild);
+
+		return featureElem;
+		
+	}
+
+	public void setXmlElem(Element xmlElem) {
+		this.xmlElem = xmlElem;
 	}
 
 	public boolean isAligned() {

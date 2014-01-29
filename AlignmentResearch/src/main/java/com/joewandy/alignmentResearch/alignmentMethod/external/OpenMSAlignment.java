@@ -84,8 +84,7 @@ public class OpenMSAlignment extends BaseAlignment implements AlignmentMethod {
 			alignedList = readResult(inputConsensusXML);
 						
 		} catch (IOException e) {
-			e.printStackTrace();
-			System.exit(1);
+			System.out.println(e.getMessage());
 		}
 
 		return alignedList;
@@ -106,12 +105,17 @@ public class OpenMSAlignment extends BaseAlignment implements AlignmentMethod {
 
 		// put all spectra files inside TEMP_INPUT_DIR
 		for (AlignmentFile data : dataList) {
-			File source = data.getFile();
+
 			String destPath = OpenMSAlignment.TEMP_INPUT_DIR + "/" + 
 					data.getFilename();
-			File dest = new File(destPath);
-			FileUtils.copyFile(source, dest);
+			
+//			File source = data.getFile();
+//			File dest = new File(destPath);
+//			FileUtils.copyFile(source, dest);
+			
+			data.saveFeatures(destPath);			
 			System.out.println("Written to " + destPath);
+
 		}
 		return tempDirPath;
 	

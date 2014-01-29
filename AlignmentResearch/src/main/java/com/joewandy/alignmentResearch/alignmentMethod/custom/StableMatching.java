@@ -18,10 +18,7 @@ import no.uib.cipr.matrix.DenseMatrix;
 import no.uib.cipr.matrix.Matrix;
 import no.uib.cipr.matrix.MatrixEntry;
 
-import org.jblas.DoubleMatrix;
-
 import com.jmatio.io.MatFileReader;
-import com.jmatio.types.MLDouble;
 import com.joewandy.alignmentResearch.main.MultiAlign;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
@@ -29,6 +26,8 @@ import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
 import com.joewandy.alignmentResearch.objectModel.ExtendedLibrary;
 import com.joewandy.alignmentResearch.objectModel.Feature;
 import com.joewandy.alignmentResearch.objectModel.MatchingScorer;
+
+import dk.ange.octave.type.matrix.DoubleMatrix;
 
 public class StableMatching implements FeatureMatching {
 
@@ -510,7 +509,8 @@ public class StableMatching implements FeatureMatching {
 			e.printStackTrace();
 			System.exit(1);
 		}
-		DoubleMatrix scoreArr = new DoubleMatrix(((MLDouble)mfr.getMLArray("Wp")).getArray());
+//		DoubleMatrix scoreArr = new DoubleMatrix(((MLDouble)mfr.getMLArray("Wp")).getArray());
+		DoubleMatrix scoreArr = null;
 		return scoreArr;
 	}
 	

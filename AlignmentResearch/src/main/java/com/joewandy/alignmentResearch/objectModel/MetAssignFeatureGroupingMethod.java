@@ -192,7 +192,7 @@ public class MetAssignFeatureGroupingMethod extends BaseFeatureGroupingMethod im
 		}
 		final PeakPosteriorScorer<SimpleClustering> scorer = new PeakPosteriorScorer<SimpleClustering>(scorers, parameters);
 		Clusterer<Data,SimpleClustering> clusterer = new CorrelationClusterer(data, parameters, random,
-				inScorer, outScorer, measure, scorer);
+				inScorer, outScorer, measure, scorer, options.verbose);
 
 		final List<SampleHandler<Data,SimpleClustering>> handlers = new ArrayList<SampleHandler<Data,SimpleClustering>>();
 

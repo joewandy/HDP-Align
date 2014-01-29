@@ -121,6 +121,9 @@ public class MultiAlignCmdOptions {
 
 	@Option(name = "autoOptimiseGreedy", param = "", type = Option.Type.NO_ARGUMENT, level = Option.Level.SYSTEM, usage = "When this is set, automatically tries to some combinations of grouping rt windows")
 	public boolean autoOptimiseGreedy = false;
+
+	@Option(name = "randomise", param = "", type = Option.Type.NO_ARGUMENT, level = Option.Level.SYSTEM, usage = "When this is set, randomly align only 2 files")
+	public boolean randomise = false;
 	
 	// valid choices are defined in MultiAlign
 	@Option(name = "groupingMethod", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Grouping method")

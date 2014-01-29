@@ -1,6 +1,9 @@
 package com.joewandy.alignmentResearch.objectModel;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -8,8 +11,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import no.uib.cipr.matrix.DenseMatrix;
 import no.uib.cipr.matrix.Matrix;
+import nu.xom.Attribute;
+import nu.xom.Document;
+import nu.xom.Element;
 import peakml.chemistry.PeriodicTable;
 
 import com.joewandy.alignmentResearch.comparator.FeatureIntensityComparator;
@@ -66,9 +71,11 @@ public class AlignmentFile {
 	public Matrix getZZProb() {
 		return ZZProb;
 	}
-
+	
 	public void setZZProb(Matrix zZProb) {
-		ZZProb = zZProb;
+//		LinkedSparseMatrix temp = new LinkedSparseMatrix(zZProb);
+//		ZZProb = temp;
+		this.ZZProb = zZProb;
 	}
 
 	public List<Feature> getFeatures() {
@@ -315,6 +322,33 @@ public class AlignmentFile {
 		return result;
 		
 	}
+	
+	public void saveFeatures(String path) throws IOException {
+		
+		// main element
+		Element featureMap = new Element("featureMap");
+		
+		// feature list
+		Element featureList = new Element("featureList");
+        Attribute count = new Attribute("count", String.valueOf(this.features.size()));
+        featureList.addAttribute(count);
+        featureMap.appendChild(featureList);
+        
+        for (Feature feature : this.features) {
+        	Element featureElem = feature.getXmlElem();
+        	featureList.appendChild(featureElem);
+        }
+
+        // Creating a Document object (from "XOM" API).
+        Document doc = new Document(featureMap);
+        FileWriter xmlFILE = new FileWriter(path);
+        PrintWriter write = new PrintWriter(xmlFILE);
+        write.print(doc.toXML());
+        write.flush();
+        write.close();
+		
+	}
+
 
 	@Override
 	public int hashCode() {

@@ -1,0 +1,19 @@
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xsi:noNamespaceSchemaLocation="http://ehcache.org/ehcache.xsd"
+     name="myBigMemoryGoConfig">
+
+  <!-- Tell BigMemory where to write its data to disk. -->
+  <diskStore path="/home/joewandy/temp"/>
+
+  <!-- set "maxBytesLocalOffHeap" to the amount of off-heap memory you
+  want to use.  This memory is invisible to the Java garbage collector,
+  providing gigabytes to terabytes of in-memory data without garbage
+  collection pauses. --> 
+  <cache name="myBigMemoryGoStore"
+        maxBytesLocalHeap="2G"
+        maxBytesLocalOffHeap="32G">
+    <!-- Tell BigMemory to use the "localRestartable" persistence
+    strategy for fast restart (optional). -->
+    <persistence strategy="localRestartable"/>
+  </cache>
+</ehcache>

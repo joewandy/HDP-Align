@@ -12,6 +12,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathFactory;
+
 import net.sf.mzmine.modules.peaklistmethods.identification.dbsearch.DBGateway;
 import net.sf.mzmine.modules.peaklistmethods.identification.dbsearch.databases.PubChemGateway;
 import net.sf.mzmine.parameters.parametertypes.MZTolerance;
@@ -23,6 +30,9 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 import peakml.chemistry.Molecule;
 
@@ -56,6 +66,11 @@ public class PubChemQuery extends BaseQuery implements CompoundQuery {
 	private final int batchSize;
 	private final int numResults;
 
+	public PubChemQuery() {
+		this.numResults = DEFAULT_NUM_RESULTS;		
+		this.batchSize = DEFAULT_BATCH_SIZE;
+	}
+	
 	public PubChemQuery(Map<String, Molecule> molecules) {
 		this(molecules, PubChemQuery.DEFAULT_NUM_RESULTS, PubChemQuery.DEFAULT_BATCH_SIZE);
 	}
@@ -163,6 +178,68 @@ public class PubChemQuery extends BaseQuery implements CompoundQuery {
 
 	}
 	
+	public PubChemMolecule findCompoundsByNameFormula(Molecule original, boolean useFormula) throws Exception {
+
+		System.out.print("Querying remote PubChem");
+		String name = original.getName();
+		String formula = original.getPlainFormula();
+		System.out.print("\tname=" + name + " formula=" + formula);
+
+		String[] cids = null;
+		if (useFormula) {
+			cids = findCompounds(name, formula);		
+		} else {
+			cids = findCompounds(name, null);		
+		}
+		PubChemMolecule[] retrieved = findMoleculesByCids(cids);
+		PubChemMolecule singleRetrieved = null;
+		if (retrieved.length == 1) {
+			singleRetrieved = retrieved[0];			
+		}
+		return singleRetrieved;
+
+	}
+	
+	private String[] findCompounds(String name, String formula) throws IOException {
+		
+		StringBuilder pubchemUrl = new StringBuilder();
+
+		pubchemUrl
+			.append("http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?usehistory=n&db=pccompound&sort=cida&retmax=");
+		pubchemUrl.append(1);
+		pubchemUrl.append("&term=");
+		pubchemUrl.append("\"name\"[Synonym]");			
+		if (formula != null) {
+			pubchemUrl.append("%20AND%20" + formula);			
+		}
+
+		NodeList cidElements;
+
+		try {
+		    DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		    DocumentBuilder builder = dbf.newDocumentBuilder();
+		    Document parsedResult = builder.parse(pubchemUrl.toString());
+
+		    XPathFactory factory = XPathFactory.newInstance();
+		    XPath xpath = factory.newXPath();
+		    XPathExpression expr = xpath.compile("//eSearchResult/IdList/Id");
+		    cidElements = (NodeList) expr.evaluate(parsedResult,
+			    XPathConstants.NODESET);
+
+		} catch (Exception e) {
+		    throw (new IOException(e));
+		}
+
+		String cidArray[] = new String[cidElements.getLength()];
+		for (int i = 0; i < cidElements.getLength(); i++) {
+		    Element cidElement = (Element) cidElements.item(i);
+		    cidArray[i] = cidElement.getTextContent();
+		}
+
+		return cidArray;
+		
+	}
+
 	public PubChemMolecule[] findMoleculesByCids(String[] cids) throws URISyntaxException, ClientProtocolException, IOException {
 
 		/*
