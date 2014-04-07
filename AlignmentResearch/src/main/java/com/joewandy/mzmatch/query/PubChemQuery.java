@@ -180,10 +180,14 @@ public class PubChemQuery extends BaseQuery implements CompoundQuery {
 	
 	public PubChemMolecule findCompoundsByNameFormula(Molecule original, boolean useFormula) throws Exception {
 
-		System.out.print("Querying remote PubChem");
 		String name = original.getName();
 		String formula = original.getPlainFormula();
-		System.out.print("\tname=" + name + " formula=" + formula);
+		
+		if (useFormula) {
+			System.out.println("Querying PubChem by name=" + name + " formula=" + formula);			
+		} else {
+			System.out.println("\t--RETRY-- Querying PubChem by name=" + name + " only");
+		}
 
 		String[] cids = null;
 		if (useFormula) {
@@ -192,10 +196,10 @@ public class PubChemQuery extends BaseQuery implements CompoundQuery {
 			cids = findCompounds(name, null);		
 		}
 		PubChemMolecule[] retrieved = findMoleculesByCids(cids);
-		PubChemMolecule singleRetrieved = null;
-		if (retrieved.length == 1) {
-			singleRetrieved = retrieved[0];			
+		if (retrieved == null) {
+			return null;
 		}
+		PubChemMolecule singleRetrieved = retrieved[0];			
 		return singleRetrieved;
 
 	}
@@ -203,15 +207,17 @@ public class PubChemQuery extends BaseQuery implements CompoundQuery {
 	private String[] findCompounds(String name, String formula) throws IOException {
 		
 		StringBuilder pubchemUrl = new StringBuilder();
-
+//		pubchemUrl
+//			.append("http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?usehistory=n&db=pccompound&sort=cida&retmax=");
 		pubchemUrl
-			.append("http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?usehistory=n&db=pccompound&sort=cida&retmax=");
+			.append("http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?usehistory=n&db=pccompound&retmax=");
 		pubchemUrl.append(1);
 		pubchemUrl.append("&term=");
-		pubchemUrl.append("\"name\"[Synonym]");			
+		pubchemUrl.append("\"" + name + "\"[Synonym]");			
 		if (formula != null) {
 			pubchemUrl.append("%20AND%20" + formula);			
 		}
+		System.out.println("\tQuery: " + pubchemUrl);
 
 		NodeList cidElements;
 
@@ -271,6 +277,11 @@ public class PubChemQuery extends BaseQuery implements CompoundQuery {
          *
 		 *
 		 */		
+		
+		if (cids.length == 0) {
+			System.out.println("\tNo compound to retrieve");
+			return null;
+		}
 
 		StringBuilder builder = new StringBuilder();
 		builder.append(PubChemQuery.QUERY_PROLOG);
@@ -286,7 +297,8 @@ public class PubChemQuery extends BaseQuery implements CompoundQuery {
 
 		HttpGet httpget = new HttpGet(uri);
 		// System.out.println("GET: " + httpget.getURI());
-		System.out.println("Retrieving " + cids.length + " compounds from PubChem");
+		System.out.println("\tFetching " + cids.length + " compounds from PubChem");
+		System.out.println("\t\t" + httpget);
 		HttpClient httpclient = new DefaultHttpClient();
 		HttpResponse httpResponse = httpclient.execute(httpget);
 		

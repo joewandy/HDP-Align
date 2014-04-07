@@ -107,13 +107,14 @@ public class MultiAlign {
 		
 	}
 	
-	public AlignmentList align() {
+	public AlignmentList align(boolean silent) {
 
 		// set filters if necessary
 		AlignmentMethod aligner = AlignmentMethodFactory.getAlignmentMethod(method, paramBuilder, data);
 		for (AlignmentResultFilter filter : filters) {
 			aligner.addFilter(filter);							
 		}
+		aligner.setSilentMode(silent);
 		
 		// actually do the alignment now, filtering of alignment results also happen inside align()
 		AlignmentList result = aligner.align();
@@ -124,7 +125,7 @@ public class MultiAlign {
 				
 	}
 		
-	public EvaluationResult evaluate(AlignmentList result, boolean useGroup) {
+	public EvaluationResult evaluate(AlignmentList result, boolean useGroup, boolean silent) {
 
 		// evaluate clustering quality
 //		if (useGroup) {
@@ -151,7 +152,7 @@ public class MultiAlign {
 //			System.out.println("Clustering goodness = " + goodness);			
 //		}
 		
-		// do performance evaluation
+		// do performance evaluation - OLD
 		EvaluationResult evalRes = null;
 		if (data.getGroundTruth() != null) {			
 			int noOfFiles = data.getNoOfFiles();
@@ -162,9 +163,11 @@ public class MultiAlign {
 		evalRes.setTh(alpha);
 		String note = alpha + ", " + groupingRtWindow;
 		evalRes.setNote(note);
-		System.out.println(evalRes);
+		if (!silent) {
+			System.out.println(evalRes);			
+		}
 		
-		// do performance evaluation
+		// do performance evaluation - NEW
 		evalRes = null;
 		if (data.getGroundTruth() != null) {			
 			int noOfFiles = data.getNoOfFiles();
@@ -176,7 +179,11 @@ public class MultiAlign {
 		note = alpha + ", " + groupingRtWindow;
 		evalRes.setNote(note);
 		
-		System.out.println(evalRes);
+		if (!silent) {
+			System.out.println(evalRes);			
+		} else {
+			System.out.println("evalRes RT=" + evalRes.getDrt() + " F1=" + evalRes.getF1());
+		}
 					
 		// RetentionTimePrinter rtp = new RetentionTimePrinter();
 		// rtp.printRt1(alignmentDataList.get(0), alignmentDataList.get(1));

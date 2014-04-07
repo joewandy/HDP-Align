@@ -19,8 +19,22 @@ public class MultiAlignExpResult {
 		this.results.add(result);
 	}
 	
+	public EvaluationResult getResultBestF1() {
+		double lowest = 0;
+		EvaluationResult best = null;
+		System.out.println("Finding best result");
+		for (EvaluationResult res : results) {
+			System.out.println("\talignmentRt=" + res.getDrt() + " f1=" + res.getF1());
+			if (res.getF1() > lowest) {
+				best = res;
+				lowest = best.getF1();
+			}
+		}
+		return best;
+	}
+	
 	public void printResult() {
-		
+				
 		System.out.print(label + "_prec = [ ");
 		for (EvaluationResult result : results) {
 			if (result == null) {

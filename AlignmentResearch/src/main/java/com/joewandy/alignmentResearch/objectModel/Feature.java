@@ -44,6 +44,10 @@ public class Feature {
 	public int getPeakID() {
 		return peakID;
 	}
+	
+	public void setPeakID(int peakID) {
+		this.peakID = peakID;
+	}
 
 	public double getMass() {
 		return mass;

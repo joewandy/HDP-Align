@@ -123,6 +123,15 @@ public class AlignmentFile {
 	public Feature getFeatureByIndex(int index) {
 		return features.get(index);
 	}
+	
+	public Feature getFeatureByPeakID(int peakID) {
+		for (Feature feature : this.features) {
+			if (feature.getPeakID() == peakID) {
+				return feature;
+			}
+		}
+		return null;
+	}
 
 	public Feature getFeatureByExample(Feature example) {
 		return getFeatureByProperties(example.getMass(), example.getRt(), example.getIntensity());

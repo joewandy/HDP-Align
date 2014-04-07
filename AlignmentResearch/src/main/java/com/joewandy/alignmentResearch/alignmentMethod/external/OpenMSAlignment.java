@@ -239,7 +239,8 @@ public class OpenMSAlignment extends BaseAlignment implements AlignmentMethod {
 			}
 
 			AlignmentFile data = dataMap.get(mapIdx);
-			Feature f = data.getFeatureByIndex(peakId);
+			Feature f = data.getFeatureByPeakID(peakId);
+			assert f != null : "peakID " + peakId + " not found";
 			consensus.addAlignedFeature(f);
 		}
 		return consensus;

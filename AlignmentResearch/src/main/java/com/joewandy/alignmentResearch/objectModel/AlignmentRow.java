@@ -20,6 +20,7 @@ public class AlignmentRow {
 	private double score;
 	private double avgMz;
 	private double avgRt;
+	private double avgIntensity;
 	private double absoluteRtDiff;
 	private double minRt;
 	
@@ -83,6 +84,15 @@ public class AlignmentRow {
 
 	public Set<Feature> getFeatures() {
 		return features;
+	}
+	
+	public Feature asFeature() {
+		int peakID = this.getRowId();
+		double mz = this.getAverageMz();
+		double rt = this.getAverageRt();
+		double intensity = this.getAverageIntensity();
+		Feature representative = new Feature(peakID, mz, rt, intensity);
+		return representative;
 	}
 	
 	public boolean contains(Feature f) {
@@ -216,6 +226,10 @@ public class AlignmentRow {
 	public double getAverageRt() {
 		return avgRt;
 	}
+	
+	public double getAverageIntensity() {
+		return avgIntensity;
+	}
 
 	public double getAbsoluteRtDiff() {
 		return absoluteRtDiff;
@@ -316,6 +330,7 @@ public class AlignmentRow {
 	private void recomputeStats() {
 		this.avgMz = this.computeAverageMz();
 		this.avgRt = this.computeAverageRt();
+		this.avgIntensity = this.computeAverageIntensity();
 		this.absoluteRtDiff = this.computeAbsoluteRtDiff();
 		this.minRt = this.computeMinRt();		
 	}
@@ -332,6 +347,14 @@ public class AlignmentRow {
 		double sum = 0;
 		for (Feature f : features) {
 			sum += f.getRt();
+		}
+		return sum / getFeaturesCount();
+	}
+
+	private double computeAverageIntensity() {
+		double sum = 0;
+		for (Feature f : features) {
+			sum += f.getIntensity();
 		}
 		return sum / getFeaturesCount();
 	}

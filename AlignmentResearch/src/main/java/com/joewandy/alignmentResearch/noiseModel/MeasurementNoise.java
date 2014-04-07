@@ -19,7 +19,8 @@ public class MeasurementNoise implements AlignmentNoise {
 		NONE		(0),
 		LOW 		(0.005),
 		MEDIUM		(0.010),
-		HIGH		(0.020);
+		HIGH		(0.020),
+		SUPER_HIGH	(1.0);
 		
 		private final double massStdev;
 		private final double intensityStdev;

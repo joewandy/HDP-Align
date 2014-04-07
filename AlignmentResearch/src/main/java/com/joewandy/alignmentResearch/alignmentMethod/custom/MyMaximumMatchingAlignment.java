@@ -17,12 +17,12 @@ import com.joewandy.alignmentResearch.objectModel.SavedMatlabFeatureGroupingMeth
 public class MyMaximumMatchingAlignment extends BaseAlignment implements AlignmentMethod {
 
 	protected List<AlignmentFile> dataList;
-	private ExtendedLibrary library;
-	private boolean useGroup;
-	private boolean usePeakShape;
-	private String groupingMethod;
-	private double groupingRtWindow;
-	private double alpha;
+	protected ExtendedLibrary library;
+	protected boolean useGroup;
+	protected boolean usePeakShape;
+	protected String groupingMethod;
+	protected double groupingRtWindow;
+	protected double alpha;
 	
 	public MyMaximumMatchingAlignment(List<AlignmentFile> dataList, AlignmentMethodParam param) {
 
@@ -40,8 +40,9 @@ public class MyMaximumMatchingAlignment extends BaseAlignment implements Alignme
 	
 	public AlignmentList matchFeatures() {
 
+		FeatureGroupingMethod groupingMethod = null;
 		if (useGroup) {
-			groupFeatures();			
+			groupingMethod = groupFeatures();			
 		}
 		
 		AlignmentList masterList = new AlignmentList("");	
@@ -50,7 +51,7 @@ public class MyMaximumMatchingAlignment extends BaseAlignment implements Alignme
 			AlignmentList peakList = new AlignmentList(data);
 			System.out.println("Aligning #" + (counter+1) + ": " + peakList);
 			FeatureMatching matcher = new MaximumWeightMatching(masterList.getId() + ", " + peakList.getId(), masterList, peakList, 
-					library, massTolerance, rtTolerance, useGroup, alpha);
+					library, massTolerance, rtTolerance, useGroup, alpha, groupingMethod);
 			masterList = matcher.getMatchedList();			            
 			counter++;
 		}
@@ -59,7 +60,7 @@ public class MyMaximumMatchingAlignment extends BaseAlignment implements Alignme
 		
 	}
 	
-	protected void groupFeatures() {
+	protected FeatureGroupingMethod groupFeatures() {
 		
 		FeatureGroupingMethod groupingMethod = getFeatureGroupingMethod();
 	
@@ -75,6 +76,8 @@ public class MyMaximumMatchingAlignment extends BaseAlignment implements Alignme
 		if (groupingMethod != null) {
 			groupingMethod.close();			
 		}
+		
+		return groupingMethod;
 		
 	}
 

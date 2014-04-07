@@ -1,24 +1,19 @@
 package com.joewandy.alignmentResearch.alignmentMethod;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam.Builder;
-import com.joewandy.alignmentResearch.alignmentMethod.custom.BaselineAlignment;
 import com.joewandy.alignmentResearch.filter.AlignmentResultFilter;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
-import com.joewandy.alignmentResearch.objectModel.Feature;
 
 public abstract class BaseAlignment implements AlignmentMethod {
 
 	protected double massTolerance;
 	protected boolean usePpm;
 	protected double rtTolerance;
+	protected boolean silent;
 
 	protected List<AlignmentFile> dataList;	
 	protected List<AlignmentResultFilter> filters;
@@ -107,6 +102,10 @@ public abstract class BaseAlignment implements AlignmentMethod {
 		return filteredResult;
 	}
 		
+	public void setSilentMode(boolean silent) {
+		this.silent = silent;
+	}
+
 	/**
 	 * Implemented by subclasses to do the actual peak matching
 	 * @return a list of aligned features in every row

@@ -46,4 +46,24 @@ public class AlignmentData {
 		return alignmentDataList.size();
 	}
 	
+	public String[] getFileNames() {
+		String[] fileNames = new String[getNoOfFiles()];
+		int i = 0;
+		for (AlignmentFile file : alignmentDataList) {
+			fileNames[i] = file.getFilename();
+			i++;
+		}
+		return fileNames;
+	}
+
+	public String[] getFileNamesNoExt() {
+		String[] fileNames = new String[getNoOfFiles()];
+		int i = 0;
+		for (AlignmentFile file : alignmentDataList) {
+			fileNames[i] = file.getFilenameWithoutExtension();
+			i++;
+		}
+		return fileNames;
+	}
+	
 }

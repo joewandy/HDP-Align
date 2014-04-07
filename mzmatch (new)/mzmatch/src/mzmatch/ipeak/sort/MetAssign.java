@@ -205,7 +205,7 @@ public class MetAssign
 	// main entrance
 	final static String version = "1.0.0";
 	final static String application = "MetAssign";
-	@OptionsClass(name=application, version=version, author="R—n‡n Daly (Ronan.Daly@glasgow.ac.uk)",
+	@OptionsClass(name=application, version=version, author="Rï¿½nï¿½n Daly (Ronan.Daly@glasgow.ac.uk)",
 		description=
 		"LC-MS experiments yield large amounts of peaks, many of which correspond to derivatives of peaks " +
 		"of interest (eg, isotope peaks, adducts, fragments, multiply charged molecules), termed here as " +
@@ -255,8 +255,8 @@ public class MetAssign
 			"mass is covered by this value in each direction.")
 		public double ppm = -1;
 		
-		//@Option(name="rtwindow", param="double", type=Option.Type.REQUIRED_ARGUMENT, level=Option.Level.USER, usage=
-		//	"The retention time window in seconds, defining the range where to look for matches.")
+		@Option(name="rtwindow", param="double", type=Option.Type.REQUIRED_ARGUMENT, level=Option.Level.USER, usage=
+			"The retention time window in seconds, defining the range where to look for matches.")
 		public double rtwindow = 0;
 		
 		//@Option(name="minrt", param="double", type=Option.Type.REQUIRED_ARGUMENT, level=Option.Level.USER, usage=
@@ -386,9 +386,9 @@ public class MetAssign
 		)
 		public boolean rtClustering = true;
 		
-		//@Option(name="corrClustering", param="boolean", type=Option.Type.REQUIRED_ARGUMENT, usage=
-		//	"A flag to specify whether clustering using peak shape correlations should be used"
-		//)
+		@Option(name="corrClustering", param="boolean", type=Option.Type.REQUIRED_ARGUMENT, usage=
+			"A flag to specify whether clustering using peak shape correlations should be used"
+		)
 		public boolean corrClustering = false;
 		
 		@Option(name="seed", param="long", type=Option.Type.REQUIRED_ARGUMENT, level=Option.Level.USER, usage=
@@ -410,6 +410,11 @@ public class MetAssign
 			"Where compound identification results are stored."
 		)
 		public String dbIdentOut = null;
+		
+		@Option(name="matOut", param="string", type=Option.Type.REQUIRED_ARGUMENT, level=Option.Level.USER, usage=
+				"Where clustering probabilities are stored (in .mat format). Only when no database is specified."
+			)
+			public String matOut = null;				
 		
 		@Option(name="test", param="string", type=Option.Type.REQUIRED_ARGUMENT, level=Option.Level.USER, usage=
 			"Options for testing purposes"
@@ -517,14 +522,17 @@ public class MetAssign
 			
 			RelatedPeaks.labelRelationships(peaks, options.verbose, options.ppm);
 
-			if (options.verbose)
-				System.err.println("writing results");
+			if (options.output != null) {
 			
-			PeakMLWriter.write(
-					result.header, peaks.getPeaks(), null,
-					new GZIPOutputStream(new FileOutputStream(options.output)), null
-				);
-			
+				if (options.verbose)
+					System.err.println("writing results");
+				
+				PeakMLWriter.write(
+						result.header, peaks.getPeaks(), null,
+						new GZIPOutputStream(new FileOutputStream(options.output)), null
+					);
+				
+			}			
 			if (options.basepeaks != null)
 			{
 				PeakMLWriter.write(
@@ -584,7 +592,20 @@ public class MetAssign
 			Clusterer<Data,SimpleClustering> clusterer = new CorrelationClusterer(data, parameters, random,
 					inScorer, outScorer, measure, scorer, options.verbose);
 			final List<SampleHandler<Data,SimpleClustering>> handlers = new ArrayList<SampleHandler<Data,SimpleClustering>>();
+			
+			final int n = peaks.size();
+			PeakClusteringSamplerHandler peakClusteringHandler = null;
+			if (options.matOut != null) {
+				peakClusteringHandler = new PeakClusteringSamplerHandler(n);
+				handlers.add(peakClusteringHandler);
+			}
+			
 			basepeaks = Clusterer.findRelatedPeaks(peaks, clusterer, random, handlers);
+			
+			if (peakClusteringHandler != null) {
+				peakClusteringHandler.saveResult(options.matOut);			
+			}
+			
 		} else {
 			final List<String> moleculeNames = new ArrayList<String>();
 			final List<String> moleculeRealNames = new ArrayList<String>();

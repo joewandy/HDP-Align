@@ -131,6 +131,10 @@ public class GroundTruth {
 	
 	}
 	
+	public int getGroundTruthGroupsCount() {
+		return groundTruth.size();
+	}
+
 	public void clearFeature(Feature example) {
 		Iterator<GroundTruthFeatureGroup> it = this.groundTruth.iterator();
 		while (it.hasNext()) {

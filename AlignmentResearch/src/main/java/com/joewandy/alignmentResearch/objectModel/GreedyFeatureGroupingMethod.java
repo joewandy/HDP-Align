@@ -14,6 +14,7 @@ import mzmatch.ipeak.sort.IdentifyPeaksets;
 import mzmatch.ipeak.sort.PeakComparer;
 import mzmatch.ipeak.sort.RelatedPeaks;
 import no.uib.cipr.matrix.DenseMatrix;
+import no.uib.cipr.matrix.Matrix;
 import peakml.IPeak;
 import peakml.IPeakSet;
 import peakml.io.Header;
@@ -23,8 +24,8 @@ import domsax.XmlParserException;
 
 public class GreedyFeatureGroupingMethod extends BaseFeatureGroupingMethod implements FeatureGroupingMethod {
 
-	private static final int MASS_TOLERANCE_PPM = 3;
-	private static final double MIN_CORR_SIGNALS = 0.75;
+	private static final int MASS_TOLERANCE_PPM = 10;
+	private static final double MIN_CORR_SIGNALS = 0.70;
 	private double rtTolerance;
 	private boolean usePeakShape;
 	
@@ -172,21 +173,25 @@ public class GreedyFeatureGroupingMethod extends BaseFeatureGroupingMethod imple
 	private void setAssignmentMatrix(AlignmentFile data,
 			List<FeatureGroup> fileGroups) {
 
-		System.out.println("Computing Z");
-		DenseMatrix Z = new DenseMatrix(data.getFeaturesCount(), fileGroups.size());
-		for (int j = 0; j < fileGroups.size(); j++) {
-			FeatureGroup group = fileGroups.get(j);
-			for (Feature f : group.getFeatures()) {
-				int i = f.getPeakID(); // starts from 0
-				Z.set(i, j, 1);
-			}
-		}
+		if (data.getZZProb() == null) {
 		
-		System.out.println("Computing ZZprob");
-		DenseMatrix ZZprob = new DenseMatrix(data.getFeaturesCount(), data.getFeaturesCount());
-		Z.transBmult(Z, ZZprob);		
-		data.setZZProb(ZZprob);
+			System.out.println("Computing Z");
+			DenseMatrix Z = new DenseMatrix(data.getFeaturesCount(), fileGroups.size());
+			for (int j = 0; j < fileGroups.size(); j++) {
+				FeatureGroup group = fileGroups.get(j);
+				for (Feature f : group.getFeatures()) {
+					int i = f.getPeakID(); // starts from 0
+					Z.set(i, j, 1);
+				}
+			}
+			
+			System.out.println("Computing ZZprob");
+			ZZprob = new DenseMatrix(data.getFeaturesCount(), data.getFeaturesCount());
+			Z.transBmult(Z, ZZprob);		
+			data.setZZProb(ZZprob);
 
+		}
+			
 		int groupedCount = 0;
 		for (Feature feature : data.getFeatures()) {
 			if (feature.isGrouped()) {

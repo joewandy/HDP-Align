@@ -101,13 +101,12 @@ public class MetAssignFeatureGroupingMethod extends BaseFeatureGroupingMethod im
 			if (usePeakShape) {
 				options.corrClustering = true;
 				options.rtClustering = true;
-				options.rtwindow = rtTolerance;
 			} else {
 				options.corrClustering = false;
 				options.rtClustering = true;
-				options.retentionTimeSD = rtTolerance/2;
 			}
 			options.rtwindow = rtTolerance;
+			options.retentionTimeSD = rtTolerance/2;
 			options.alpha0 = 10;
 			options.alpha1 = 20;
 			options.p0 = 0.97;
@@ -173,9 +172,11 @@ public class MetAssignFeatureGroupingMethod extends BaseFeatureGroupingMethod im
 		
 		System.err.println("No database, so only performing clustering");
 		final Data data = new Data(header, peaks);
+		TestOptions test = new TestOptions();
+		System.err.println(test);
 		final CorrelationParameters parameters = new CorrelationParameters(options.rtwindow, options.p1, options.p0,
 				options.alpha, options.numDraws, options.burnIn, options.retentionTimeSD, options.debug,
-				options.initialNumClusters, new TestOptions());
+				options.initialNumClusters, test);
 		
 		final float rangeMin = -1.0f;
 		final float rangeMax = 1.0f;

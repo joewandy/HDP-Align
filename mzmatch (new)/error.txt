@@ -1,4 +1,3 @@
 java.lang.NullPointerException
-	at java.io.FileInputStream.<init>(FileInputStream.java:138)
-	at java.io.FileInputStream.<init>(FileInputStream.java:101)
-	at mzmatch.ipeak.util.ExtractSets.main(ExtractSets.java:133)
+	at com.joewandy.mzmatch.query.PubChemQuery.findCompoundsByNameFormula(PubChemQuery.java:196)
+	at mzmatch.ipeak.util.InchiFinder.main(InchiFinder.java:70)

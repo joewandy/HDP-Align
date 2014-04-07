@@ -58,4 +58,10 @@ public class RealDataGenerator extends BaseDataGenerator implements AlignmentDat
 		return null;
 	}
 
+	@Override
+	protected void setAlignmentFiles(List<AlignmentFile> files) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

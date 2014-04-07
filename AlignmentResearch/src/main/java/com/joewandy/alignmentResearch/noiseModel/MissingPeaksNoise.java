@@ -47,12 +47,17 @@ public class MissingPeaksNoise implements AlignmentNoise {
 			}
 			it = file.getFeatures().iterator();
 			counter = 0;
+			int peakID = 0;
 			while (it.hasNext()) {
 				Feature example = it.next();
 				if (example.isDelete()) {
 					it.remove();
 					gt.clearFeature(example);
 					counter++;					
+				} else {
+					// renumber peakID. Always start from 0.
+//					example.setPeakID(peakID);
+//					peakID++;
 				}
 			}
 			// System.out.println("Removed " + counter + " features");

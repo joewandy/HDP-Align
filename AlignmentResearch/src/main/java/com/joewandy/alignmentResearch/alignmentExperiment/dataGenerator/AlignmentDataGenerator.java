@@ -9,4 +9,8 @@ public interface AlignmentDataGenerator {
 	
 	public AlignmentData generate();
 	
+	public AlignmentData generateRandomly(int n);
+	
+	public AlignmentData generateByIndices(int[] indices);
+	
 }

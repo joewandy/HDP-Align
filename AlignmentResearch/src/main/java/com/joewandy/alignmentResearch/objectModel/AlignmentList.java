@@ -6,11 +6,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
+
+import com.joewandy.alignmentResearch.alignmentExperiment.AlignmentData;
 
 
 public class AlignmentList {
@@ -148,6 +149,15 @@ public class AlignmentList {
 	
 	public List<AlignmentRow> getRows() {
 		return rows;
+	}
+	
+	public AlignmentFile getRowsAsFile() {
+		List<Feature> features = new ArrayList<Feature>();
+		for (AlignmentRow row : rows) {
+			features.add(row.asFeature());
+		}
+		AlignmentFile file = new AlignmentFile(0, "", features);
+		return file;
 	}
 	
 	public AlignmentRow getRandomRow() {

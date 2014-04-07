@@ -12,6 +12,7 @@ import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
 import com.joewandy.alignmentResearch.objectModel.ExtendedLibrary;
 import com.joewandy.alignmentResearch.objectModel.Feature;
+import com.joewandy.alignmentResearch.objectModel.FeatureGroupingMethod;
 import com.joewandy.alignmentResearch.util.GraphEdgeConstructor;
 
 public class HierarchicalAlignment extends MyMaximumMatchingAlignment implements AlignmentMethod {
@@ -35,9 +36,10 @@ public class HierarchicalAlignment extends MyMaximumMatchingAlignment implements
 	@Override
 	public AlignmentList matchFeatures() {
 
+		FeatureGroupingMethod groupingMethod = null;
 		if (useGroup) {
-			groupFeatures();
-		}	
+			groupingMethod = groupFeatures();			
+		}
 		
 		ExtendedLibraryBuilder builder = new ExtendedLibraryBuilder(dataList, massTolerance, rtTolerance);		
 		Map<Double, List<AlignmentLibrary>> metaLibraries = builder.buildPrimaryLibrary();
@@ -45,19 +47,19 @@ public class HierarchicalAlignment extends MyMaximumMatchingAlignment implements
 //		ExtendedLibrary extendedLibrary = builder.extendLibrary(builder.combineLibraries(metaLibraries));
 
 		System.out.println("ALIGNMENT");
-		AlignmentList alignedList = align(extendedLibrary);
+		AlignmentList alignedList = align(extendedLibrary, groupingMethod);
 
 		return alignedList;
 				
 	}
 
-	private AlignmentList align(ExtendedLibrary extendedLibrary) {
+	private AlignmentList align(ExtendedLibrary extendedLibrary, FeatureGroupingMethod featureGroupingMethod) {
 
 		AlignmentList alignedList = new AlignmentList("");
 		
 		// using guide tree and maximum matching
 		DendogramBuilder builder = new DendogramBuilder(dataList, 
-				extendedLibrary, massTolerance, rtTolerance, useGroup, alpha);
+				extendedLibrary, massTolerance, rtTolerance, useGroup, alpha, groupingMethod, featureGroupingMethod);
 		alignedList = builder.align();
 				
 		return alignedList;

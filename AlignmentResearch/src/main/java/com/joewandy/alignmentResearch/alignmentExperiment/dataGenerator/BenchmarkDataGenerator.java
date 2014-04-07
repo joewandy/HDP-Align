@@ -34,13 +34,11 @@ public class BenchmarkDataGenerator extends BaseDataGenerator implements Alignme
 	private String inputDirectory;
 	private String gtPath;
 	private List<AlignmentFile> alignmentFiles;
-	private boolean randomise;
 	
-	public BenchmarkDataGenerator(String inputDirectory, String gtPath, boolean randomise) {
+	public BenchmarkDataGenerator(String inputDirectory, String gtPath) {
 		super();
 		this.inputDirectory = inputDirectory;
 		this.gtPath = gtPath;
-		this.randomise = randomise;
 	}
 	
 	@Override
@@ -87,19 +85,13 @@ public class BenchmarkDataGenerator extends BaseDataGenerator implements Alignme
 			
 		}
 		
-		if (!randomise) {
-			this.alignmentFiles = alignmentDataList;		
-			return alignmentDataList;
-		} else {
-			// pick only top 2 files
-			Collections.shuffle(alignmentDataList);
-			List<AlignmentFile> newList = new ArrayList<AlignmentFile>();
-			newList.add(alignmentDataList.get(0));
-			newList.add(alignmentDataList.get(1));
-			this.alignmentFiles = newList;
-			return newList;
-		}		
+		this.alignmentFiles = alignmentDataList;		
+		return alignmentDataList;
 		
+	}
+	
+	protected void setAlignmentFiles(List<AlignmentFile> files) {
+		this.alignmentFiles = files;
 	}
 
 	@Override

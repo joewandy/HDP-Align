@@ -21,7 +21,7 @@ public class AlignmentDataGeneratorFactory {
 
 		AlignmentDataGenerator generator = null; 
 		if (AlignmentDataGeneratorFactory.ALIGNMENT_DATA_BENCHMARK.equals(options.dataType)) {				
-			generator = new BenchmarkDataGenerator(options.inputDirectory, options.gt, options.randomise);
+			generator = new BenchmarkDataGenerator(options.inputDirectory, options.gt);
 		}
 		
 		return generator;

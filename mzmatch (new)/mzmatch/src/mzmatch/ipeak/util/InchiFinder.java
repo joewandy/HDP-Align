@@ -5,7 +5,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import mzmatch.util.Tool;
 import peakml.Annotation;
@@ -15,6 +17,7 @@ import cmdline.CmdLineParser;
 import cmdline.Option;
 import cmdline.OptionsClass;
 
+import com.joewandy.alignmentResearch.comparator.NaturalOrderComparator;
 import com.joewandy.mzmatch.model.PubChemMolecule;
 import com.joewandy.mzmatch.query.PubChemQuery;
 
@@ -61,15 +64,24 @@ public class InchiFinder {
 
 			// open the streams
 			System.out.println("Loading molecule data");
-			HashMap<String, Molecule> molecules = new HashMap<String, Molecule>();
+			Map<String, Molecule> molecules = new TreeMap<String, Molecule>(new NaturalOrderComparator());
 			molecules.putAll(MoleculeIO.parseXml(new FileInputStream(options.input)));
 
 			PubChemQuery query = new PubChemQuery();
 			for (Entry<String, Molecule> entry : molecules.entrySet()) {
 				Molecule mol = entry.getValue();
+				System.out.print("Processing " + entry.getKey() + "\n\t");
 				PubChemMolecule retrieved = query.findCompoundsByNameFormula(mol,  true);
 				if (retrieved == null) {
+					// second try, use only the name
 					retrieved = query.findCompoundsByNameFormula(mol, false);
+				}
+				if (retrieved != null) {
+					mol.setInChi(retrieved.getInChi());
+					System.out.println("\tRetrieved");
+					System.out.println("\t\tname=" + retrieved.getIupacName());
+					System.out.println("\t\tformula=" + retrieved.getMolecularFormula());
+					System.out.println("\t\tinchi=" + retrieved.getInChi());
 				}
 			}
 			
@@ -78,7 +90,8 @@ public class InchiFinder {
 			if (options.output != null) {
 				output = new FileOutputStream(options.output);
 			}
-			MoleculeIO.writeXml(molecules, output);
+			HashMap<String, Molecule> temp = new HashMap<String, Molecule>();
+			MoleculeIO.writeXml(temp, output);
 
 		} catch (Exception e) {
 			Tool.unexpectedError(e, application);

@@ -1,6 +1,5 @@
 package com.joewandy.alignmentResearch.alignmentMethod;
 
-import java.io.PrintStream;
 import java.util.List;
 
 import com.joewandy.alignmentResearch.filter.AlignmentResultFilter;
@@ -14,5 +13,7 @@ public interface AlignmentMethod {
 	public void addFilter(AlignmentResultFilter sizeFilter);
 
 	public List<AlignmentRow> getAlignmentResult();
+	
+	public void setSilentMode(boolean silent);
 			
 }

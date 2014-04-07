@@ -11,6 +11,7 @@ import com.apporiented.algorithm.clustering.DefaultClusteringAlgorithm;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.ExtendedLibrary;
+import com.joewandy.alignmentResearch.objectModel.FeatureGroupingMethod;
 
 public class DendogramBuilder {
 
@@ -23,9 +24,12 @@ public class DendogramBuilder {
 	private double rtTol;
 	private boolean useGroup;
 	private double alpha;
+	private String groupingMethod;
+	private FeatureGroupingMethod featureGroupingMethod;
 	
 	public DendogramBuilder(List<AlignmentFile> dataList,
-			ExtendedLibrary library, double massTol, double rtTol, boolean useGroup, double alpha) {
+			ExtendedLibrary library, double massTol, double rtTol, boolean useGroup, 
+			double alpha, String groupingMethod, FeatureGroupingMethod featureGroupingMethod) {
 
 		this.dataList = dataList;
 		this.library = library;
@@ -33,6 +37,8 @@ public class DendogramBuilder {
 		this.rtTol = rtTol;
 		this.useGroup = useGroup;
 		this.alpha = alpha;
+		this.groupingMethod = groupingMethod;
+		this.featureGroupingMethod = featureGroupingMethod;
 
 		int n = dataList.size();
 		scores = new double[n][n];
@@ -97,7 +103,7 @@ public class DendogramBuilder {
 			dataMap.put(file.getFilenameWithoutExtension(), file);
 		}
 		DendogramParser parser = new DendogramParser(root, dataMap, 
-				library, massTol, rtTol, useGroup, alpha);
+				library, massTol, rtTol, useGroup, alpha, groupingMethod, featureGroupingMethod);
 		String output = parser.traverse(2);
 		System.out.println("tree");
 		System.out.println(output);
