@@ -1,3 +1,4 @@
 java.lang.NullPointerException
-	at com.joewandy.mzmatch.query.PubChemQuery.findCompoundsByNameFormula(PubChemQuery.java:196)
-	at mzmatch.ipeak.util.InchiFinder.main(InchiFinder.java:70)
+	at java.io.File.<init>(File.java:277)
+	at mzmatch.util.Tool.createFilePath(Tool.java:132)
+	at mzmatch.ipeak.util.ExtractIsotopePatterns.main(ExtractIsotopePatterns.java:178)
