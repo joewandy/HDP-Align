@@ -16,7 +16,7 @@ import no.uib.cipr.matrix.Matrix;
 
 import com.jmatio.io.MatFileReader;
 import com.jmatio.types.MLDouble;
-import com.joewandy.alignmentResearch.main.MultiAlign;
+import com.joewandy.alignmentResearch.main.MultiAlignConstants;
 
 public class MatlabFeatureGroupingMethod extends BaseFeatureGroupingMethod implements FeatureGroupingMethod {
 
@@ -95,7 +95,7 @@ public class MatlabFeatureGroupingMethod extends BaseFeatureGroupingMethod imple
 		} 
 
 		int groupId = 1;
-		if (MultiAlign.GROUPING_METHOD_MIXTURE.equals(groupingMethod)) {
+		if (MultiAlignConstants.GROUPING_METHOD_MIXTURE.equals(groupingMethod)) {
 						
 			// load from matlab
 			MatFileReader mfr = null;
@@ -144,7 +144,7 @@ public class MatlabFeatureGroupingMethod extends BaseFeatureGroupingMethod imple
 				
 			}
 			
-		} else if (MultiAlign.GROUPING_METHOD_POSTERIOR.equals(groupingMethod)) {
+		} else if (MultiAlignConstants.GROUPING_METHOD_POSTERIOR.equals(groupingMethod)) {
 
 			MatFileReader mfr = null;
 			try {

@@ -12,7 +12,7 @@ import java.util.Set;
 import no.uib.cipr.matrix.Matrix;
 import no.uib.cipr.matrix.MatrixEntry;
 
-import com.joewandy.alignmentResearch.main.MultiAlign;
+import com.joewandy.alignmentResearch.main.MultiAlignConstants;
 import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
 
 import edu.uci.ics.jung.graph.Graph;
@@ -200,7 +200,7 @@ public class PathGrowing {
 				// and they're within tolerances
 				AlignmentRow man = men.get(i);
 				AlignmentRow woman = women.get(j);
-				if (man.rowInRange(woman, massTol, rtTol, MultiAlign.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
+				if (man.rowInRange(woman, massTol, rtTol, MultiAlignConstants.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
 				
 					// then add the edge in graph
 					MyLink link = new MyLink(val);

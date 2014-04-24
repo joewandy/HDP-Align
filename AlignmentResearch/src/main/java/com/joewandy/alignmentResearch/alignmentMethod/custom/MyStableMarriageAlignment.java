@@ -8,7 +8,7 @@ import no.uib.cipr.matrix.Matrix;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
 import com.joewandy.alignmentResearch.alignmentMethod.BaseAlignment;
-import com.joewandy.alignmentResearch.main.MultiAlign;
+import com.joewandy.alignmentResearch.main.MultiAlignConstants;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.ExtendedLibrary;
@@ -75,7 +75,7 @@ public class MyStableMarriageAlignment extends BaseAlignment implements Alignmen
 	private FeatureGroupingMethod getFeatureGroupingMethod() {
 		FeatureGroupingMethod grouping = null;
 		if (useGroup) {
-			if (MultiAlign.GROUPING_METHOD_GREEDY.equals(groupingMethod)) {
+			if (MultiAlignConstants.GROUPING_METHOD_GREEDY.equals(groupingMethod)) {
 				grouping = new GreedyFeatureGroupingMethod(groupingRtWindow, usePeakShape);	
 			} else {
 //				grouping = new MatlabFeatureGroupingMethod(groupingMethod, groupingRtWindow, 

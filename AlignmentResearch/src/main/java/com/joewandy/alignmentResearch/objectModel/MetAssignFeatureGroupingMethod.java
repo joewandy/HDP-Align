@@ -33,7 +33,7 @@ import peakml.io.Header;
 import peakml.io.ParseResult;
 import peakml.io.peakml.PeakMLParser;
 
-import com.joewandy.alignmentResearch.main.MultiAlign;
+import com.joewandy.alignmentResearch.main.MultiAlignConstants;
 
 import domsax.XmlParserException;
 
@@ -203,9 +203,9 @@ public class MetAssignFeatureGroupingMethod extends BaseFeatureGroupingMethod im
 		List<IPeak> basepeaks = Clusterer.findRelatedPeaks(peaks, clusterer, random, handlers);
 		
 		Matrix ZZprob = null;
-		if (MultiAlign.GROUPING_METHOD_METASSIGN_MIXTURE.equals(groupingMethod)) { 
+		if (MultiAlignConstants.GROUPING_METHOD_METASSIGN_MIXTURE.equals(groupingMethod)) { 
 			ZZprob = peakClusteringHandler.getLastZZ();
-		} else if (MultiAlign.GROUPING_METHOD_METASSIGN_POSTERIOR.equals(groupingMethod)) {
+		} else if (MultiAlignConstants.GROUPING_METHOD_METASSIGN_POSTERIOR.equals(groupingMethod)) {
 			ZZprob = peakClusteringHandler.getZZprob();
 		}
 		file.setZZProb(ZZprob);

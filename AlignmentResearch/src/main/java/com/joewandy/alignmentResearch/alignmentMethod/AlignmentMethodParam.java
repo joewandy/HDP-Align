@@ -1,9 +1,6 @@
 package com.joewandy.alignmentResearch.alignmentMethod;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.joewandy.alignmentResearch.main.MultiAlign;
+import com.joewandy.alignmentResearch.main.MultiAlignConstants;
 
 public class AlignmentMethodParam {
 
@@ -127,7 +124,7 @@ public class AlignmentMethodParam {
 		
 			// set whole loads of default value
 			
-			this.usePpm = MultiAlign.ALIGN_BY_RELATIVE_MASS_TOLERANCE;
+			this.usePpm = MultiAlignConstants.ALIGN_BY_RELATIVE_MASS_TOLERANCE;
 
 			// set whole loads of default value for ransac
 			this.ransacRtToleranceBeforeMinute = AlignmentMethodParam.PARAM_RT_TOLERANCE_BEFORE_CORRECTION / 60.0;
@@ -144,7 +141,7 @@ public class AlignmentMethodParam {
 			// set parameter for other alignment methods
 			this.useGroup = AlignmentMethodParam.USE_GROUP;
 			this.usePeakShape = AlignmentMethodParam.USE_PEAK_SHAPE;
-			this.groupingMethod = MultiAlign.GROUPING_METHOD_GREEDY;
+			this.groupingMethod = MultiAlignConstants.GROUPING_METHOD_GREEDY;
 			this.alpha = AlignmentMethodParam.PARAM_ALPHA;
 			
 		}

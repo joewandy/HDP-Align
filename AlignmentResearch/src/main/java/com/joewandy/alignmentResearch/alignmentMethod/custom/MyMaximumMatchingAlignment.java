@@ -6,6 +6,7 @@ import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
 import com.joewandy.alignmentResearch.alignmentMethod.BaseAlignment;
 import com.joewandy.alignmentResearch.main.MultiAlign;
+import com.joewandy.alignmentResearch.main.MultiAlignConstants;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.ExtendedLibrary;
@@ -84,10 +85,10 @@ public class MyMaximumMatchingAlignment extends BaseAlignment implements Alignme
 	protected FeatureGroupingMethod getFeatureGroupingMethod() {
 		FeatureGroupingMethod grouping = null;
 		if (useGroup) {
-			if (MultiAlign.GROUPING_METHOD_GREEDY.equals(groupingMethod)) {
+			if (MultiAlignConstants.GROUPING_METHOD_GREEDY.equals(groupingMethod)) {
 				grouping = new GreedyFeatureGroupingMethod(groupingRtWindow, usePeakShape);	
-			} else if (MultiAlign.GROUPING_METHOD_METASSIGN_MIXTURE.equals(groupingMethod) || 
-					MultiAlign.GROUPING_METHOD_METASSIGN_POSTERIOR.equals(groupingMethod)) {
+			} else if (MultiAlignConstants.GROUPING_METHOD_METASSIGN_MIXTURE.equals(groupingMethod) || 
+					MultiAlignConstants.GROUPING_METHOD_METASSIGN_POSTERIOR.equals(groupingMethod)) {
 				grouping = new MetAssignFeatureGroupingMethod(groupingMethod, groupingRtWindow, usePeakShape);																			
 			} else {
 //				grouping = new MatlabFeatureGroupingMethod(groupingMethod, groupingRtWindow, 

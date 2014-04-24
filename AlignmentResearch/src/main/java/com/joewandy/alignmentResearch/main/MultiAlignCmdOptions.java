@@ -1,8 +1,5 @@
 package com.joewandy.alignmentResearch.main;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import cmdline.Option;
 import cmdline.OptionsClass;
 
@@ -41,7 +38,7 @@ public class MultiAlignCmdOptions {
 	public String dataType = AlignmentDataGeneratorFactory.ALIGNMENT_DATA_BENCHMARK;
 	
 	@Option(name = "experimentType", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "greedy or mzMine join aligner.")
-	public String experimentType = "none";	
+	public String experimentType = null;	
 
 	@Option(name = "experimentIter", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "No. of iterations")
 	public int experimentIter = 1;
@@ -121,37 +118,18 @@ public class MultiAlignCmdOptions {
 
 	@Option(name = "autoOptimiseGreedy", param = "", type = Option.Type.NO_ARGUMENT, level = Option.Level.SYSTEM, usage = "When this is set, automatically tries to some combinations of grouping rt windows")
 	public boolean autoOptimiseGreedy = false;
-
-	@Option(name = "randomise", param = "", type = Option.Type.NO_ARGUMENT, level = Option.Level.SYSTEM, usage = "When this is set, randomly align only 2 files")
-	public boolean randomise = false;
 	
-	// valid choices are defined in MultiAlign
+	// which grouping method to use
+	// TODO: change to enum
 	@Option(name = "groupingMethod", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Grouping method")
-	public String groupingMethod = MultiAlign.GROUPING_METHOD_GREEDY;
+	public String groupingMethod = MultiAlignConstants.GROUPING_METHOD_GREEDY;
 	
-	/*
-	 * Stable matching options - for greedy RT grouping
-	 */
-	
+	// for greedy grouping
 	@Option(name = "groupingRtWindow", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Grouping RT window for greedy grouping")
 	public double groupingRtWindow;
 
-	/*
-	 * Stable matching options - for mixture model RT grouping
-	 */
-	
+	// for model-based grouping
 	@Option(name = "groupingNSamples", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "No. of samples")
-	public int groupingNSamples = MultiAlign.GROUPING_METHOD_NUM_SAMPLES;
-
-	
-	/*
-	 * Graph filtering options
-	 */
-	
-	@Option(name = "graphFilter", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Graph filter method of matched peaks.")
-	public String graphFilter = null;
-
-	@Option(name = "th", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Graph filter threshold of matched peaks.")
-	public double th = -1;
-		
+	public int groupingNSamples = MultiAlignConstants.GROUPING_METHOD_NUM_SAMPLES;
+			
 }

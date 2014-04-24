@@ -1,4 +1,4 @@
-package com.joewandy.alignmentResearch.main;
+package com.joewandy.alignmentResearch.main.experiment;
 
 import java.util.ArrayList;
 import java.util.List;

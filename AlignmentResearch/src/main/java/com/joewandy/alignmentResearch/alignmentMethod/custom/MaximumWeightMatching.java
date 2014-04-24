@@ -18,15 +18,14 @@ import org.la4j.matrix.sparse.CCSMatrix;
 import com.jmatio.io.MatFileWriter;
 import com.jmatio.types.MLArray;
 import com.jmatio.types.MLDouble;
-import com.joewandy.alignmentResearch.alignmentExperiment.AlignmentData;
 import com.joewandy.alignmentResearch.main.MultiAlign;
+import com.joewandy.alignmentResearch.main.MultiAlignConstants;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
 import com.joewandy.alignmentResearch.objectModel.ExtendedLibrary;
 import com.joewandy.alignmentResearch.objectModel.Feature;
 import com.joewandy.alignmentResearch.objectModel.FeatureGroupingMethod;
-import com.joewandy.alignmentResearch.objectModel.GreedyFeatureGroupingMethod;
 import com.joewandy.alignmentResearch.objectModel.MatchingScorer;
 
 public class MaximumWeightMatching implements FeatureMatching {
@@ -284,7 +283,7 @@ public class MaximumWeightMatching implements FeatureMatching {
 				AlignmentRow row1 = men.get(i);
 				AlignmentRow row2 = women.get(matchIndex);
 				// and they are within tolerance to each other
-				if (row1.rowInRange(row2, massTol, rtTol, MultiAlign.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
+				if (row1.rowInRange(row2, massTol, rtTol, MultiAlignConstants.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
 					matches.put(row1, row2);
 				}
 			}
@@ -321,7 +320,7 @@ public class MaximumWeightMatching implements FeatureMatching {
 			for (int j = 0; j < n; j++) {
 				AlignmentRow man = men.get(i);
 				AlignmentRow woman = women.get(j);
-				if (man.rowInRange(woman, massTol, rtTol, MultiAlign.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
+				if (man.rowInRange(woman, massTol, rtTol, MultiAlignConstants.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
 					double dist = scorer.computeDist(man, woman);
 					if (dist > maxDist) {
 						maxDist = dist;

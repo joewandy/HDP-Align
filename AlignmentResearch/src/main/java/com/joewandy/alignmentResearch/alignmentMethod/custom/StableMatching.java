@@ -19,7 +19,7 @@ import no.uib.cipr.matrix.Matrix;
 import no.uib.cipr.matrix.MatrixEntry;
 
 import com.jmatio.io.MatFileReader;
-import com.joewandy.alignmentResearch.main.MultiAlign;
+import com.joewandy.alignmentResearch.main.MultiAlignConstants;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
@@ -358,7 +358,7 @@ public class StableMatching implements FeatureMatching {
 		List<PreferenceItem> prefs = new ArrayList<PreferenceItem>();
 		for (int j = 0; j < scoreMatrix.numColumns(); j++) {
 			AlignmentRow woman = women.get(j);
-			if (man.rowInRange(woman, massTol, rtTol, MultiAlign.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
+			if (man.rowInRange(woman, massTol, rtTol, MultiAlignConstants.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
 				double score = scoreMatrix.get(i, j);
 				PreferenceItem pref = new PreferenceItem(j, score);
 				prefs.add(pref);				
@@ -384,7 +384,7 @@ public class StableMatching implements FeatureMatching {
 			for (int j = 0; j < n; j++) {
 				AlignmentRow man = men.get(i);
 				AlignmentRow woman = women.get(j);
-				if (man.rowInRange(woman, massTol, -1, MultiAlign.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
+				if (man.rowInRange(woman, massTol, -1, MultiAlignConstants.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
 					double dist = scorer.computeDist(man, woman);
 					if (dist > maxDist) {
 						maxDist = dist;

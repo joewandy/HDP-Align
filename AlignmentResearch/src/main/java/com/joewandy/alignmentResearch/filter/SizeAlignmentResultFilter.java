@@ -17,7 +17,6 @@ public class SizeAlignmentResultFilter implements AlignmentResultFilter {
 		this.accepted = new ArrayList<AlignmentRow>();
 		this.rejected = new ArrayList<AlignmentRow>();
 	}
-
 	
 	public void process(AlignmentList result) {
 		for (AlignmentRow row : result.getRows()) {
@@ -36,7 +35,6 @@ public class SizeAlignmentResultFilter implements AlignmentResultFilter {
 	public List<AlignmentRow> getRejected() {
 		return rejected;
 	}
-
 	
 	public String getLabel() {
 		return "alignment result filtering by consensus map size " + this.threshold;

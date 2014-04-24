@@ -1,32 +1,20 @@
 package com.joewandy.alignmentResearch.alignmentMethod.custom;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.BlockingQueue;
-
-import peakml.chemistry.PeriodicTable;
 
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
-import com.joewandy.alignmentResearch.main.MultiAlign;
-import com.joewandy.alignmentResearch.objectModel.AlignmentEdge;
+import com.joewandy.alignmentResearch.main.MultiAlignConstants;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentLibrary;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
-import com.joewandy.alignmentResearch.objectModel.AlignmentPair;
 import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
-import com.joewandy.alignmentResearch.objectModel.AlignmentVertex;
 import com.joewandy.alignmentResearch.objectModel.DistanceCalculator;
-import com.joewandy.alignmentResearch.objectModel.ExtendedLibraryEntry;
 import com.joewandy.alignmentResearch.objectModel.Feature;
 import com.joewandy.alignmentResearch.objectModel.MahalanobisDistanceCalculator;
 import com.joewandy.alignmentResearch.util.GraphEdgeConstructor;
-
-import edu.uci.ics.jung.graph.Graph;
 
 public abstract class PairwiseLibraryBuilderImpl implements Runnable, PairwiseLibraryBuilder {
 
@@ -68,7 +56,7 @@ public abstract class PairwiseLibraryBuilderImpl implements Runnable, PairwiseLi
 		files.add(data2);
 
 		AlignmentMethodParam.Builder paramBuilder = new AlignmentMethodParam.Builder(massTolerance, rtTolerance);
-		paramBuilder.usePpm(MultiAlign.ALIGN_BY_RELATIVE_MASS_TOLERANCE);
+		paramBuilder.usePpm(MultiAlignConstants.ALIGN_BY_RELATIVE_MASS_TOLERANCE);
 		AlignmentMethodParam param = paramBuilder.build();
 		AlignmentMethod pairwiseAligner = getAlignmentMethod(files, param);
 

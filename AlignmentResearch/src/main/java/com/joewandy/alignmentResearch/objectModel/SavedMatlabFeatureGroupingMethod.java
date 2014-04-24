@@ -11,7 +11,7 @@ import no.uib.cipr.matrix.Matrix;
 
 import com.jmatio.io.MatFileReader;
 import com.jmatio.types.MLDouble;
-import com.joewandy.alignmentResearch.main.MultiAlign;
+import com.joewandy.alignmentResearch.main.MultiAlignConstants;
 
 public class SavedMatlabFeatureGroupingMethod extends BaseFeatureGroupingMethod implements FeatureGroupingMethod {
 
@@ -45,7 +45,7 @@ public class SavedMatlabFeatureGroupingMethod extends BaseFeatureGroupingMethod 
 		List<FeatureGroup> fileGroups = new ArrayList<FeatureGroup>();
 		
 		int groupId = 1;
-		if (MultiAlign.GROUPING_METHOD_MIXTURE.equals(groupingMethod)) {
+		if (MultiAlignConstants.GROUPING_METHOD_MIXTURE.equals(groupingMethod)) {
 		
 			String filename = data.getFilenameWithoutExtension() + ".csv.Z.mat";
 			if (usePeakShape) {
@@ -100,7 +100,7 @@ public class SavedMatlabFeatureGroupingMethod extends BaseFeatureGroupingMethod 
 				
 			}
 			
-		} else if (MultiAlign.GROUPING_METHOD_POSTERIOR.equals(groupingMethod)) {
+		} else if (MultiAlignConstants.GROUPING_METHOD_POSTERIOR.equals(groupingMethod)) {
 
 			String filename = data.getFilenameWithoutExtension() + ".csv.ZZprob.mat";
 			if (usePeakShape) {
