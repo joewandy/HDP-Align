@@ -11,6 +11,13 @@ import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 
 public abstract class MultiAlignBaseExp implements MultiAlignExperiment {
 
+	public void printResult(List<MultiAlignExpResult> results) {
+		for (MultiAlignExpResult result : results) {
+			result.printResult();
+			System.out.println();
+		}		 
+	}
+	
 	protected AlignmentData getData(MultiAlignCmdOptions options, int[] fileIndices)
 			throws FileNotFoundException {
 

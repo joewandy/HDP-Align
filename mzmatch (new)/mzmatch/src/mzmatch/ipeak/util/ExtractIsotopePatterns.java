@@ -174,7 +174,7 @@ public class ExtractIsotopePatterns
 			}
 			
 			// check the command-line parameters
-			{
+			if (options.output != null){
 				Tool.createFilePath(options.output, true);
 			}
 			

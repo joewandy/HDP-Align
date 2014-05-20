@@ -32,14 +32,6 @@ public class MatchingScorer {
 		return score;			
 	}
 	
-	public double computeGraphScore(Feature f1, Feature f2,
-			Graph<AlignmentVertex, AlignmentEdge> graph) {
-		double dist = computeDist(f1, f2);
-		double weight = computeGraphWeight(f1, f2, graph);
-		double score = weight * (1/dist);
-		return score;			
-	}
-
 	public double computeProbScore(Feature f1, Feature f2) {
 		double dist = computeDist(f1, f2);
 		double weight = computeProbWeight(f1, f2);
@@ -71,20 +63,6 @@ public class MatchingScorer {
 
 	}	
 	
-	private double computeGraphWeight(Feature f1, Feature f2, 
-			Graph<AlignmentVertex, AlignmentEdge> graph) {
-		AlignmentVertex v1 = f1.getVertex();
-		AlignmentVertex v2 = f2.getVertex();
-		AlignmentEdge existing = graph.findEdge(
-				v1, v2);
-		if (existing != null) {
-			double weight = existing.getWeight();
-			return weight;
-		} else {
-			return 1;
-		}
-	}
-
 	private double computeProbWeight(Feature fi, Feature fj) {
 		double weight = 0;
 		int fiIdx = fi.getPeakID();

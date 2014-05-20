@@ -34,4 +34,10 @@ public class MultiAlignConstants {
 	public static final int GROUPING_METHOD_NUM_SAMPLES = 20;
 	public static final int GROUPING_METHOD_BURN_IN = 10;
 	
+	// use Lange, et al. (2008) measure
+	public static final String PERFORMANCE_MEASURE_LANGE = "lange";
+
+	// use my own performance measure
+	public static final String PERFORMANCE_MEASURE_JOE = "joe";
+	
 }

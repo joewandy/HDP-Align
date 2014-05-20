@@ -14,13 +14,11 @@ import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
 import com.joewandy.alignmentResearch.objectModel.DistanceCalculator;
 import com.joewandy.alignmentResearch.objectModel.Feature;
 import com.joewandy.alignmentResearch.objectModel.MahalanobisDistanceCalculator;
-import com.joewandy.alignmentResearch.util.GraphEdgeConstructor;
 
 public abstract class PairwiseLibraryBuilderImpl implements Runnable, PairwiseLibraryBuilder {
 
 	protected BlockingQueue<AlignmentLibrary> queue;
 
-	protected GraphEdgeConstructor edgeConstructor;
 	protected int libraryID;
 	protected double massTolerance;
 	protected double rtTolerance;
@@ -30,7 +28,6 @@ public abstract class PairwiseLibraryBuilderImpl implements Runnable, PairwiseLi
 	public PairwiseLibraryBuilderImpl(BlockingQueue<AlignmentLibrary> queue,
 			int libraryID, double massTolerance, double rtTolerance, AlignmentFile data1, AlignmentFile data2) {
 		this.queue = queue;
-		this.edgeConstructor = new GraphEdgeConstructor();
 		this.libraryID = libraryID;
 		this.massTolerance = massTolerance;
 		this.rtTolerance = rtTolerance;

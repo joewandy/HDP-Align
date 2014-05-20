@@ -6,12 +6,19 @@ import mzmatch.util.Tool;
 import cmdline.CmdLineException;
 import cmdline.CmdLineParser;
 
+import com.joewandy.alignmentResearch.main.experiment.GenerativeBiologicalExperiment;
+import com.joewandy.alignmentResearch.main.experiment.GenerativeTechnicalExperiment;
+import com.joewandy.alignmentResearch.main.experiment.M1Experiment;
 import com.joewandy.alignmentResearch.main.experiment.MultiAlignExpResult;
 import com.joewandy.alignmentResearch.main.experiment.MultiAlignExperiment;
-import com.joewandy.alignmentResearch.main.experiment.MultiAlignM1Experiment;
 import com.joewandy.alignmentResearch.main.experiment.MultiAlignNormalRun;
-import com.joewandy.alignmentResearch.main.experiment.MultiAlignP1P2Experiment;
+import com.joewandy.alignmentResearch.main.experiment.P1P2Experiment;
 
+/**
+ * Command-line to invoke various alignment tools
+ * @author joewandy
+ *
+ */
 public class MultiAlignCmd {
 	
 	public static void main(String args[]) throws Exception {
@@ -19,6 +26,8 @@ public class MultiAlignCmd {
 		try {
 
 			Tool.init();
+			
+			// parse command line stuff
 			MultiAlignCmdOptions options = parseCommandLine(args);
 
 			// run alignment
@@ -26,10 +35,7 @@ public class MultiAlignCmd {
 
 			// print out the results
 			List<MultiAlignExpResult> results = exp.performExperiment(options);									
-			for (MultiAlignExpResult result : results) {
-				result.printResult();
-				System.out.println();
-			}		 
+			exp.printResult(results);
 			
 		} catch (Exception e) {
 			Tool.unexpectedError(e, MultiAlignCmdOptions.APPLICATION);
@@ -47,11 +53,17 @@ public class MultiAlignCmd {
 
 			if (MultiAlignExperiment.EXPERIMENT_TYPE_M1.equals(options.experimentType)) {
 				// metabolomic experiment using the M1 dataset from Lange, et al. (2008)
-				exp = new MultiAlignM1Experiment();
+				exp = new M1Experiment();
 			} else if (MultiAlignExperiment.EXPERIMENT_TYPE_P1P2.equals(options.experimentType)) {
 				// proteomic experiment using the P1 and P2 datasets from Lange, et al. (2008)
-				exp = new MultiAlignP1P2Experiment();
-			}
+				exp = new P1P2Experiment();
+			} else if (MultiAlignExperiment.EXPERIMENT_TYPE_GENERATIVE_TECHNICAL_REPLICATES.equals(options.experimentType)) {
+				// generative model alignment without retention time warping
+				exp = new GenerativeTechnicalExperiment();
+			} else if (MultiAlignExperiment.EXPERIMENT_TYPE_GENERATIVE_BIOLOGICAL_REPLICATES.equals(options.experimentType)) {
+				// generative model alignment with retention time warping
+				exp = new GenerativeBiologicalExperiment();
+			} 
 			
 		} 
 		

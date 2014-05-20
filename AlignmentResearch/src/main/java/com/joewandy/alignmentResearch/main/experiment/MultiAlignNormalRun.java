@@ -32,7 +32,6 @@ public class MultiAlignNormalRun extends MultiAlignBaseExp implements MultiAlign
 		results.add(expResult);										
 		System.out.println("==================================================");
 		double totalTime = (endTime - startTime);
-		double averageTime = totalTime;
 		System.out.println("Total execution time: " + totalTime/1000  + " seconds");
 		
 		return results;

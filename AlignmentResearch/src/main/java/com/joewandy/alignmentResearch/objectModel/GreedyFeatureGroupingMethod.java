@@ -54,6 +54,11 @@ public class GreedyFeatureGroupingMethod extends BaseFeatureGroupingMethod imple
 	@Override
 	public List<FeatureGroup> group(AlignmentFile data) {
 
+		// wipe out all existing grouping information first
+		for (Feature feature : data.getFeatures()) {
+			feature.clearGroups();
+		}
+		
 		List<FeatureGroup> fileGroups = new ArrayList<FeatureGroup>();
 		double rtTolerance = this.rtTolerance; 
 		if (!usePeakShape) {

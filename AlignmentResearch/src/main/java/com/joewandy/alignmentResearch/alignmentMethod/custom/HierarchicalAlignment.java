@@ -5,15 +5,11 @@ import java.util.Map;
 
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
-import com.joewandy.alignmentResearch.alignmentMethod.BaseAlignment;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentLibrary;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
-import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
 import com.joewandy.alignmentResearch.objectModel.ExtendedLibrary;
-import com.joewandy.alignmentResearch.objectModel.Feature;
 import com.joewandy.alignmentResearch.objectModel.FeatureGroupingMethod;
-import com.joewandy.alignmentResearch.util.GraphEdgeConstructor;
 
 public class HierarchicalAlignment extends MyMaximumMatchingAlignment implements AlignmentMethod {
 
@@ -60,7 +56,9 @@ public class HierarchicalAlignment extends MyMaximumMatchingAlignment implements
 		// using guide tree and maximum matching
 		DendogramBuilder builder = new DendogramBuilder(dataList, 
 				extendedLibrary, massTolerance, rtTolerance, useGroup, alpha, groupingMethod, featureGroupingMethod);
-		alignedList = builder.align();
+		if (!dataList.isEmpty()) {
+			alignedList = builder.align();			
+		}
 				
 		return alignedList;
 

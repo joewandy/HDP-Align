@@ -5,23 +5,23 @@ import com.joewandy.alignmentResearch.main.MultiAlignCmdOptions;
 
 public class AlignmentDataGeneratorFactory {
 
-	// generate alignment data from benchmark data
-	public static final String ALIGNMENT_DATA_BENCHMARK = "benchmark";
+	// generate alignment data from benchmark dataset
+	public static final String FEATURE_XML_DATA = "featureXml";
 
-	// generate alignment data from proteomic simulator
-	public static final String ALIGNMENT_DATA_PROTEOMIC = "proteomic";
+	// generate alignment data from generative model
+	public static final String GENERATIVE_MODEL_DATA = "generativeModel";
 
-	// generate alignment data from metabolomic simulator
-	public static final String ALIGNMENT_DATA_METABOLOMIC = "metabolomic";
-
-	// generate alignment data from real data
-	public static final String ALIGNMENT_DATA_REAL = "real";
+	// generate alignment data from peakml data
+	public static final String PEAKML_DATA = "peakML";
 	
 	public static AlignmentDataGenerator getAlignmentDataGenerator(MultiAlignCmdOptions options) {
 
 		AlignmentDataGenerator generator = null; 
-		if (AlignmentDataGeneratorFactory.ALIGNMENT_DATA_BENCHMARK.equals(options.dataType)) {				
-			generator = new BenchmarkDataGenerator(options.inputDirectory, options.gt);
+		if (AlignmentDataGeneratorFactory.FEATURE_XML_DATA.equals(options.dataType)) {				
+			generator = new FeatureXMLDataGenerator(options.inputDirectory, options.gt);
+		} else if (AlignmentDataGeneratorFactory.GENERATIVE_MODEL_DATA.equals(options.dataType)) {				
+			GenerativeModelParameter params = options.generativeParams;
+			generator = new GenerativeModelDataGenerator(options.inputDirectory, params);
 		}
 		
 		return generator;

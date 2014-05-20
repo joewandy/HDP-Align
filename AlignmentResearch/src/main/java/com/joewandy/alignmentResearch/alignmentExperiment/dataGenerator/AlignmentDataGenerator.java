@@ -8,9 +8,7 @@ public interface AlignmentDataGenerator {
 	public void addNoise(AlignmentNoise noiseModel);
 	
 	public AlignmentData generate();
-	
-	public AlignmentData generateRandomly(int n);
-	
+		
 	public AlignmentData generateByIndices(int[] indices);
 	
 }

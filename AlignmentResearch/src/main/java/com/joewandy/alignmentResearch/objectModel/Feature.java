@@ -7,7 +7,6 @@ import java.util.List;
 import no.uib.cipr.matrix.Matrix;
 import nu.xom.Attribute;
 import nu.xom.Element;
-import nu.xom.Elements;
 
 
 /**
@@ -29,11 +28,16 @@ public class Feature {
 	private double totalIntensityError;
 	private int noPairs;
 	private boolean delete;
-	private AlignmentVertex vertex;
 	private Element xmlElem;
+	private int theoPeakID;
+	
+	public Feature(int peakID) {
+		// the peakID is also the position index, so it should start from 0
+		this.peakID = peakID;
+		this.groups = new ArrayList<FeatureGroup>();
+	}
 	
 	public Feature(int peakID, double mass, double rt, double intensity) {
-		super();
 		this.peakID = peakID;
 		this.mass = mass;
 		this.rt = rt;
@@ -83,7 +87,17 @@ public class Feature {
 
 	public Element getXmlElem() {
 		
-		Element featureElem = (Element) this.xmlElem.copy();
+		Element featureElem = null;
+		
+		if (this.xmlElem != null) {
+			featureElem = (Element) this.xmlElem.copy();
+		} else {
+			// generative data has no feature xml element
+			featureElem = new Element("feature");
+			Attribute id = new Attribute("id", String.valueOf(peakID));
+			featureElem.addAttribute(id);
+		}
+		
 		featureElem.removeChildren();
 		
 		Element rtChild = new Element("position");
@@ -108,6 +122,14 @@ public class Feature {
 
 	public void setXmlElem(Element xmlElem) {
 		this.xmlElem = xmlElem;
+	}
+
+	public int getTheoPeakID() {
+		return theoPeakID;
+	}
+
+	public void setTheoPeakID(int theoPeakID) {
+		this.theoPeakID = theoPeakID;
 	}
 
 	public boolean isAligned() {
@@ -169,14 +191,6 @@ public class Feature {
 		return false;
 	}
 	
-	public AlignmentVertex getVertex() {
-		return vertex;
-	}
-
-	public void setVertex(AlignmentVertex vertex) {
-		this.vertex = vertex;
-	}
-
 //	public DoubleMatrix getZZProb() {
 //		return data.getZZProb();
 //	}

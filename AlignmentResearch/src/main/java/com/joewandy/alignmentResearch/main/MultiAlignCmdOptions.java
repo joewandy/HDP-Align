@@ -4,6 +4,7 @@ import cmdline.Option;
 import cmdline.OptionsClass;
 
 import com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.AlignmentDataGeneratorFactory;
+import com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.GenerativeModelParameter;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodFactory;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
 
@@ -33,18 +34,37 @@ public class MultiAlignCmdOptions {
 
 	@Option(name = "v", param = "", type = Option.Type.NO_ARGUMENT, level = Option.Level.SYSTEM, usage = "When this is set, the progress is shown on the standard output.")
 	public boolean verbose = false;
+	
+	/*
+	 * Data type options
+	 */
+	
+	@Option(name = "dataType", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Read from file or generate data.")
+	public String dataType = AlignmentDataGeneratorFactory.FEATURE_XML_DATA;
 
-	@Option(name = "dataType", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "greedy or mzMine join aligner.")
-	public String dataType = AlignmentDataGeneratorFactory.ALIGNMENT_DATA_BENCHMARK;
+	// for FeatureXML data, if ground truth is available
+	@Option(name = "gt", param = "filename", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "The ground truth file for these data.")
+	public String gt = null;
+	
+	@Option(name = "measureType", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Which way to compute performance measures.")
+	public String measureType = MultiAlignConstants.PERFORMANCE_MEASURE_LANGE;	
+		
+	/*
+	 * Experiment options
+	 */
 	
 	@Option(name = "experimentType", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "greedy or mzMine join aligner.")
 	public String experimentType = null;	
 
 	@Option(name = "experimentIter", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "No. of iterations")
 	public int experimentIter = 1;
-		
-	@Option(name = "gt", param = "filename", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "The ground truth file for these data.")
-	public String gt = null;
+			
+	@Option(name = "autoAlpha", param = "", type = Option.Type.NO_ARGUMENT, level = Option.Level.SYSTEM, usage = "When this is set, automatically adjust alpha from 0 to 1.")
+	public boolean autoAlpha = false;
+
+	@Option(name = "autoOptimiseGreedy", param = "", type = Option.Type.NO_ARGUMENT, level = Option.Level.SYSTEM, usage = "When this is set, automatically tries to some combinations of grouping rt windows")
+	public boolean autoOptimiseGreedy = false;
+
 	
 	/*
 	 * Common alignment parameters
@@ -98,11 +118,11 @@ public class MultiAlignCmdOptions {
 	public double openMsMzPairMaxDistance = AlignmentMethodParam.PARAM_MZ_PAIR_MAX_DISTANCE;
 
 	/*
-	 * Stable matching options
+	 * Max-weight matching options
 	 */
 	
 	@Option(name="useGroup", param="boolean", type=Option.Type.REQUIRED_ARGUMENT, 
-			usage="Stable marriage - use cluster weight when scoring")
+			usage="Whether to use grouping")
 	public boolean useGroup = AlignmentMethodParam.USE_GROUP;
 
 	@Option(name="usePeakShape", param="boolean", type=Option.Type.REQUIRED_ARGUMENT, 
@@ -110,16 +130,13 @@ public class MultiAlignCmdOptions {
 	public boolean usePeakShape = AlignmentMethodParam.USE_PEAK_SHAPE;
 	
 	@Option(name = "alpha", param = "float", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, 
-			usage = "Stable marriage weight parameter.")
+			usage = "Controls the ratio of weights used in similarity calculation during matching.")
 	public double alpha = AlignmentMethodParam.PARAM_ALPHA;
-
-	@Option(name = "autoAlpha", param = "", type = Option.Type.NO_ARGUMENT, level = Option.Level.SYSTEM, usage = "When this is set, automatically adjust alpha from 0 to 1.")
-	public boolean autoAlpha = false;
-
-	@Option(name = "autoOptimiseGreedy", param = "", type = Option.Type.NO_ARGUMENT, level = Option.Level.SYSTEM, usage = "When this is set, automatically tries to some combinations of grouping rt windows")
-	public boolean autoOptimiseGreedy = false;
 	
-	// which grouping method to use
+	/*
+	 * Grouping options
+	 */
+	
 	// TODO: change to enum
 	@Option(name = "groupingMethod", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Grouping method")
 	public String groupingMethod = MultiAlignConstants.GROUPING_METHOD_GREEDY;
@@ -131,5 +148,11 @@ public class MultiAlignCmdOptions {
 	// for model-based grouping
 	@Option(name = "groupingNSamples", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "No. of samples")
 	public int groupingNSamples = MultiAlignConstants.GROUPING_METHOD_NUM_SAMPLES;
-			
+	
+	/*
+	 * Generative model parameters
+	 */
+
+	public GenerativeModelParameter generativeParams = new GenerativeModelParameter();
+	
 }

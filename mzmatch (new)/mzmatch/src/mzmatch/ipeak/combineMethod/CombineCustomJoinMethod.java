@@ -22,7 +22,7 @@ public class CombineCustomJoinMethod extends CombineBaseMethod implements Combin
 			List<IPeakSet<IPeak>> peaksets, CombineOptions options) {
 		
 		// convert List<IPeakSet<IPeak>> to List<AlignmentFile>
-		AlignmentDataGenerator gen = new RealDataGenerator(peaksets);
+		AlignmentDataGenerator gen = new PeakMLDataGenerator(peaksets);
 		AlignmentData data = gen.generate();		
 		List<AlignmentFile> dataList = data.getAlignmentDataList();
 		assert(dataList.size() == peaksets.size());		

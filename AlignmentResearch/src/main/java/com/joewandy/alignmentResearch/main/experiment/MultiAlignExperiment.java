@@ -14,8 +14,12 @@ public interface MultiAlignExperiment {
 	};
 	public static final double[] ALL_ALIGNMENT_RT = { 20, 40, 60, 80, 100 };
 	public static final String EXPERIMENT_TYPE_M1 = "M1";		
-	public static final String EXPERIMENT_TYPE_P1P2 = "P1P2";		
+	public static final String EXPERIMENT_TYPE_P1P2 = "P1P2";	
+	public static final String EXPERIMENT_TYPE_GENERATIVE_TECHNICAL_REPLICATES = "GT";		
+	public static final String EXPERIMENT_TYPE_GENERATIVE_BIOLOGICAL_REPLICATES = "GB";		
 	
 	public List<MultiAlignExpResult> performExperiment(MultiAlignCmdOptions options) throws Exception;
+
+	public void printResult(List<MultiAlignExpResult> results);
 	
 }

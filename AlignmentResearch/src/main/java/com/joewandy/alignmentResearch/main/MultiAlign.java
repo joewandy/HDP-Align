@@ -75,7 +75,7 @@ public class MultiAlign {
 		AlignmentList result = align(false);
 		if (result != null) {
 			writeAlignmentResult(result, options.output);
-			EvaluationResult evalRes = evaluate(result);
+			EvaluationResult evalRes = evaluate(result, options.measureType);
 			return evalRes;			
 		} else {
 			return null;
@@ -101,33 +101,29 @@ public class MultiAlign {
 				
 	}
 		
-	private EvaluationResult evaluate(AlignmentList result) {
+	private EvaluationResult evaluate(AlignmentList result, String measureType) {
 		
-		// do performance evaluation - OLD
 		EvaluationResult evalRes = null;
 		if (data.getGroundTruth() != null) {			
 			int noOfFiles = data.getNoOfFiles();
 			GroundTruth gt = data.getGroundTruth();
-			evalRes = gt.evaluateOld(Collections.unmodifiableList(result.getRows()), noOfFiles, 
-					massTolerance, rtTolerance);				
+			if (measureType.equals(MultiAlignConstants.PERFORMANCE_MEASURE_LANGE)) {
+				evalRes = gt.evaluateOld(Collections.unmodifiableList(result.getRows()), noOfFiles, 
+						massTolerance, rtTolerance);								
+			} else if (measureType.equals(MultiAlignConstants.PERFORMANCE_MEASURE_JOE)) {
+				evalRes = gt.evaluateNew(Collections.unmodifiableList(result.getRows()), noOfFiles, 
+						massTolerance, rtTolerance);												
+			}
 		}		
 		evalRes.setTh(alpha);
 		String note = alpha + ", " + groupingRtWindow;
 		evalRes.setNote(note);
 		
-		// do performance evaluation - NEW
-		evalRes = null;
-		if (data.getGroundTruth() != null) {			
-			int noOfFiles = data.getNoOfFiles();
-			GroundTruth gt = data.getGroundTruth();
-			evalRes = gt.evaluateNew(Collections.unmodifiableList(result.getRows()), noOfFiles, 
-					massTolerance, rtTolerance);				
-		}		
-		evalRes.setTh(alpha);
-		note = alpha + ", " + groupingRtWindow;
-		evalRes.setNote(note);
-		
-		System.out.println("evalRes RT=" + evalRes.getDrt() + " F1=" + evalRes.getF1());
+		System.out.println();
+		System.out.println("******************************************************");
+		System.out.println("evalRes method=" + method + " RT=" + evalRes.getDrt() + " F1=" + evalRes.getF1());
+		System.out.println("******************************************************");
+		System.out.println();
 					
 		// RetentionTimePrinter rtp = new RetentionTimePrinter();
 		// rtp.printRt1(alignmentDataList.get(0), alignmentDataList.get(1));

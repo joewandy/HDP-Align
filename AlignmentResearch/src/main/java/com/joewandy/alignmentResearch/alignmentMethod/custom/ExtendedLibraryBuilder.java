@@ -51,6 +51,9 @@ public class ExtendedLibraryBuilder {
 
 		int noOfCombo = (int) gen.getNumberOfGeneratedObjects();
 		System.out.println("============ LIBRARY : ENTRIES = " + noOfCombo + " ============");
+		if (noOfCombo == 0) {
+			return metaLibraries;
+		}
 		
 		// Print all possible combinations
 		BlockingQueue<AlignmentLibrary> libraryQueue = new ArrayBlockingQueue<AlignmentLibrary>(noOfCombo);

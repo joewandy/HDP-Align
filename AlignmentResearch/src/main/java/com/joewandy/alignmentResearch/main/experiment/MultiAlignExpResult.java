@@ -33,6 +33,10 @@ public class MultiAlignExpResult {
 		return best;
 	}
 	
+	public List<EvaluationResult> getEvaluationResults() {
+		return this.results;
+	}
+	
 	public void printResult() {
 				
 		System.out.print(label + "_prec = [ ");

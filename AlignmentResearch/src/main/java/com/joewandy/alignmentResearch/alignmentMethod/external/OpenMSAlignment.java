@@ -222,28 +222,40 @@ public class OpenMSAlignment extends BaseAlignment implements AlignmentMethod {
 	}
 	
 	private AlignmentRow getConsensusRow(Element featureElem, AlignmentList parent, int id) {
+
 		AlignmentRow consensus = new AlignmentRow(parent, id);
 		Elements children = featureElem.getChildElements("element");
+		
+		// TODO: the smallest ID can change in the consensusXML file ??!!
+		// either 0 or 1 .. WHY ?
+		int smallest = 1;
 		for (int i = 0; i < children.size(); i++) {
+			Element child = children.get(i);
+			Attribute idAttr = child.getAttribute("id");
+			int peakId = Integer.parseInt(idAttr.getValue());
+			if (peakId == 0) {
+				smallest = 0; // just in case it's 0
+			}
+		}
+
+		// now then create the consensus row
+		for (int i = 0; i < children.size(); i++) {
+
 			Element child = children.get(i);
 			Attribute mapAttr = child.getAttribute("map");
 			Attribute idAttr = child.getAttribute("id");
 			int mapIdx = Integer.parseInt(mapAttr.getValue());
 			
-			int peakId = Integer.parseInt(idAttr.getValue()) - 1; // id goes from 1 ... N in the consensusXML file
-
-			// TODO: WHAT A HACK !! for P1 & P2 only.
-			String path = dataList.get(0).getParentPath();
-			if (path.contains("P1") || path.contains("P2")) {
-				peakId = Integer.parseInt(idAttr.getValue()) - 0; // id goes from 0 ... N in the consensusXML file				
-			}
-
+			int peakId = Integer.parseInt(idAttr.getValue()) - smallest; 
 			AlignmentFile data = dataMap.get(mapIdx);
 			Feature f = data.getFeatureByPeakID(peakId);
 			assert f != null : "peakID " + peakId + " not found";
 			consensus.addAlignedFeature(f);
+			
 		}
+		
 		return consensus;
+		
 	}	
 	
 	private void writeConfigTemplate(String templateName, String tempPath) throws FileNotFoundException {

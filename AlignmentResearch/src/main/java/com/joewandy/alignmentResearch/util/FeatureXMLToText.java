@@ -30,7 +30,7 @@ import cmdline.OptionsClass;
 
 import com.joewandy.alignmentResearch.alignmentExperiment.AlignmentData;
 import com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.AlignmentDataGenerator;
-import com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.BenchmarkDataGenerator;
+import com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.FeatureXMLDataGenerator;
 import com.joewandy.alignmentResearch.comparator.NaturalOrderFilenameComparator;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.Feature;
@@ -80,7 +80,7 @@ public class FeatureXMLToText {
 				cmdline.printOptions();
 			}
 
-			AlignmentDataGenerator generator = new BenchmarkDataGenerator(options.inputDirectory, options.gt);
+			AlignmentDataGenerator generator = new FeatureXMLDataGenerator(options.inputDirectory, options.gt);
 			AlignmentData data = generator.generate();
 			
 			// sort input file alphabetically to look nicer

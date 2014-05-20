@@ -44,13 +44,7 @@ public class AlignmentMethodParam {
 	public static final boolean PARAM_REQUIRE_SAME_CHARGE_STATE = false;	
 	
 	/**
-	 * Threshold for picking 'friends' for social stable matching
-	 */
-	public static final double PARAM_FRIENDLY_THRESHOLD = 0.75;
-	public static final int PARAM_TOP_K_FRIENDS = 10;
-
-	/**
-	 * How much weight to allocate to the initial mass similarity between peaks
+	 * How much weight to allocate to the various weights
 	 */
 	public static final double PARAM_ALPHA = 0.5;
 	

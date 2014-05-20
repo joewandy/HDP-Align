@@ -71,5 +71,5 @@ public class AlignmentMethodFactory {
 		return aligner;
 
 	}
-	
+		
 }
