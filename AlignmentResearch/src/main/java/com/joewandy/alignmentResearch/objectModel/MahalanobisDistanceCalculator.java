@@ -15,7 +15,6 @@ public class MahalanobisDistanceCalculator implements DistanceCalculator {
 		double rt = rt1 - rt2;
 		double mz = mass1 - mass2;
         double dist = Math.sqrt((rt*rt)/(drt*drt) + (mz*mz)/(dmz*dmz));
-//        dist = Math.sqrt((rt*rt)/(drt*drt));
         return dist;
 	}
 

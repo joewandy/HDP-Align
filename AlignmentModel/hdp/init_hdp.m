@@ -1,35 +1,45 @@
-function hdp = init_hdp(input_hdp)
+function hdp = init_hdp(input_hdp, debug)
 
-    data = input_hdp.data;
-
-    hdp.gtI = input_hdp.I;          % for debugging
+    % copy all the parameters from the input object ..
     
-    hdp.J = size(data, 2);          % number of replicates
-    hdp.NSAMPS = 100;              % number of samples
+    hdp.J = input_hdp.J;                        % number of replicates
+    hdp.NSAMPS = input_hdp.NSAMPS;              % total number of samples
+    hdp.BURN_IN = input_hdp.BURN_IN;            % initial burn-in samples
 
-    % hdp.mu_0 = mean(mean(data));  % base distribution mean
-    hdp.mu_0 = 0;                   % base distribution mean
-    hdp.sigma_0_prec = 1/1000;      % base distribution prec
+    hdp.mu_0 = input_hdp.mu_0;                  % mean for base distribution of metabolite RT
+    hdp.sigma_0_prec = input_hdp.sigma_0_prec;  % prec for base distribution of metabolite RT
+    hdp.psi_0 = input_hdp.psi_0;                % mean for base distribution of mass
+    hdp.rho_0 = input_hdp.rho_0;                % precision for base distribution of mass
+    
+    hdp.alpha_rt = input_hdp.alpha_rt;          % RT cluster DP concentration param
+    hdp.alpha_mass = input_hdp.alpha_mass;      % mass cluster DP concentration param
+    hdp.top_alpha = input_hdp.top_alpha;        % metabolite DP concentration param    
 
-    hdp.top_alpha = 5;              % metabolite DP concentration param    
-    hdp.alpha = 1;                  % cluster DP concentration param
-
-    hdp.gamma_prec = 1;             % precision for cluster-level Gaussian
-    hdp.delta_prec = 1;             % precision for metabolite-level Gaussian
-
-    hdp.I = 1;                      % initial number of metabolites
-    hdp.fi = zeros(1, hdp.I);       % 1 x I, number of clusters assigned to metabolite i
-
+    hdp.gamma_prec = input_hdp.gamma_prec;      % precision for RT cluster mixture components
+    hdp.rho_prec = input_hdp.rho_prec;          % precision for mass cluster mixture components
+    hdp.delta_prec = input_hdp.delta_prec;      % precision for top component Gaussians    
+    
+    if debug
+        hdp.gtI = input_hdp.I;                  % for debugging
+    end
+    
     % sample initial metabolite RT    
+    hdp.I = 1;                                  % initial number of metabolites
+    hdp.fi = zeros(1, hdp.I);                   % 1 x I, number of clusters assigned to metabolite i    
     hdp.ti = normrnd(hdp.mu_0, sqrt(1/hdp.sigma_0_prec), 1, hdp.I); % 1 x I, the metabolite's RT
 
     for j = 1:hdp.J
 
-        hdp.file{j}.K = 1;                                  % number of clusters in this file
-        hdp.file{j}.data = data(:, j);
-        hdp.file{j}.N = length(hdp.file{j}.data);
+        hdp.file{j}.K = 1; % number of clusters in this file
+        hdp.file{j}.peakID = input_hdp.file{j}.peakID;
+        hdp.file{j}.N = length(hdp.file{j}.peakID);
+        hdp.file{j}.data_rt = input_hdp.file{j}.data_rt;
+        hdp.file{j}.data_mass = input_hdp.file{j}.data_mass;
+        hdp.file{j}.data_intensity = input_hdp.file{j}.data_intensity;
         
-        hdp.file{j}.ground_truth = input_hdp.file{j}.ground_truth; % for debugging
+        if debug
+            hdp.file{j}.ground_truth = input_hdp.file{j}.ground_truth; % for debugging
+        end
 
         % K x I, clusters to metabolites assignment
         top_Z = rand(hdp.file{j}.K, hdp.I);
@@ -54,7 +64,14 @@ function hdp = init_hdp(input_hdp)
 
         % 1 x K, no. of peaks under each cluster
         hdp.file{j}.count_Z = sum(hdp.file{j}.Z, 1);
-          
+                
+        for i = 1:hdp.I
+            hdp.metabolite{i}.A = 0; % number of mass cluster in this metabolite
+            hdp.metabolite{i}.V = []; % assignment of peak n to mass cluster a
+            hdp.metabolite{i}.fa = []; % number of peaks under each mass cluster
+            hdp.metabolite{i}.sa = []; % sum of masses of peaks under each mass cluster
+        end
+                          
     end
 
 end

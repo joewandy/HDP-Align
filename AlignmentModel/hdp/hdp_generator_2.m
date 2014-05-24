@@ -1,7 +1,10 @@
 function hdp = hdp_generator_2
 
+    isOctave = exist('OCTAVE_VERSION', 'builtin') ~= 0;
+
     %% Generate some data from a HDP
 
+    hdp.NSAMPS = 100;               % number of samples
     hdp.N = 100;                    % num peaks
     hdp.J = 5;                      % number of replicates
     hdp.mu_0 = 0;                   % base distribution mean
@@ -17,20 +20,26 @@ function hdp = hdp_generator_2
     hdp.fi = [];    
     hdp.ti = [];
 
-    data = [];
     for j = 1:hdp.J
 
         hdp.file{j}.K = 0;           
         hdp.file{j}.ti = zeros(hdp.file{j}.K, 1);
         hdp.file{j}.fi = zeros(hdp.file{j}.K, 1);
 
-        hdp.file{j}.Z = zeros(hdp.N, 1);
+        hdp.file{j}.Z = []; % N by 1
         hdp.file{j}.count_Z = zeros(hdp.file{j}.K, 1);
 
-        hdp.file{j}.data = zeros(hdp.N, 1);
-        hdp.file{j}.ground_truth = zeros(hdp.N, 1);
+        hdp.file{j}.data_rt = []; % N by 1
+        hdp.file{j}.ground_truth = []; % N by 1
         
+        hdp.file{j}.peakID = []; % N by 1
+        peakID = 0;
         for n = 1:hdp.N
+        
+            % peak has some probability of disappearing
+            if rand>0.8
+                continue
+            end
         
             % Choose a table for this peak
             probs = [hdp.file{j}.count_Z hdp.alpha];
@@ -62,30 +71,29 @@ function hdp = hdp_generator_2
             end
 
             % Assign peak to table
-            hdp.file{j}.Z(n) = k;
+            hdp.file{j}.Z = [hdp.file{j}.Z; k];
             hdp.file{j}.count_Z(k) = hdp.file{j}.count_Z(k) + 1;
             tij = hdp.file{j}.ti;
-            hdp.file{j}.data(n) = normrnd(tij, sqrt(inv(hdp.gamma_prec)));
+            rt = normrnd(tij, sqrt(inv(hdp.gamma_prec)));
+            hdp.file{j}.data_rt = [hdp.file{j}.data_rt; rt];
+            hdp.file{j}.peakID = [hdp.file{j}.peakID; peakID];
+            peakID = peakID + 1;
             
             % Keep track of peak to top as well
-            hdp.file{j}.ground_truth(n) = i;       
+            hdp.file{j}.ground_truth = [hdp.file{j}.ground_truth; i];
 
         end     
-
-        data = [data, hdp.file{j}.data];
         
     end
     
     % Plot the data
-    data = [];
     close all
     for j = 1:hdp.J
-        [f,xi] = ksdensity(hdp.file{j}.data);
-        plot(xi,f);
-        hold all
-        data = [data, hdp.file{j}.data];
+        if ~isOctave
+            [f,xi] = ksdensity(hdp.file{j}.data_rt); % no equivalent function in octave ?!
+            plot(xi,f);
+            hold all
+        end
     end
-    
-    hdp.data = data;
-    
+        
 end

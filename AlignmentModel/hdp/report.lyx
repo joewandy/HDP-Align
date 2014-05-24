@@ -83,7 +83,29 @@ Peak alignment is an important step in the pre-processing stages of LC-MS
 \end_layout
 
 \begin_layout Section
-A Generative Model for LC-MS Data
+Hierarchical Dirichlet Process (HDP) Mixture Model
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Add description about mixture model, DP, HDP, Chinese Restaurant Franchise
+ and the stick breaking stuff
+\end_layout
+
+\begin_layout Standard
+See 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kim2004"
+
+\end_inset
+
+ too.
+\end_layout
+
+\begin_layout Section
+HDP Model - RT Only
 \end_layout
 
 \begin_layout Standard
@@ -109,7 +131,7 @@ key "Teh2005"
 
 \begin_layout Standard
 The observed data is the peak RT values 
-\begin_inset Formula $\mathbf{x}=(x_{n}^{j})$
+\begin_inset Formula $\mathbf{d}=(x_{n}^{j})$
 \end_inset
 
  for all peaks across files.
@@ -186,13 +208,6 @@ t_{i}|\mu_{0},\sigma_{0}\sim\mathcal{N}(\mu_{0},\sigma_{0}^{-1})\label{eq:draw_t
 
 \end_layout
 
-\begin_layout Standard
-
-\emph on
-Add description about HDP, Chinese Restaurant Franchise and the stick breaking
- stuff
-\end_layout
-
 \begin_layout Subsection
 Modelling Assumptions
 \end_layout
@@ -226,6 +241,12 @@ We model RT drifts across replicates using the clusters (which are basically
 \end_layout
 
 \begin_layout Subsection
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:Inference"
+
+\end_inset
+
 Inference
 \end_layout
 
@@ -521,7 +542,7 @@ To update the assignment of peak
 p(z_{jnk}=1|\ldots)\propto\begin{cases}
 \begin{array}{c}
 c_{jk}\cdot L(x_{n}^{j}|z_{jnk}=1)\\
-\alpha\cdot L(x_{n}^{j}|z_{jnk^{*}}=1)
+\alpha_{t}\cdot L(x_{n}^{j}|z_{jnk^{*}}=1)
 \end{array}\end{cases}\label{eq:table_likelihood}
 \end{equation}
 
@@ -560,7 +581,7 @@ For a new cluster
 \end_inset
 
 , this is proportional to 
-\begin_inset Formula $\alpha$
+\begin_inset Formula $\alpha_{t}$
 \end_inset
 
 .
@@ -580,7 +601,7 @@ For a new cluster
 \begin_layout Standard
 \begin_inset Formula 
 \begin{equation}
-L(x_{n}^{j}|z_{jnk^{*}}=1)=\sum_{i}\left[\frac{c_{i}}{\alpha^{'}+\sum_{i}c_{i}}p(x_{i}^{j}|v_{jk^{*}i}=1)\right]+\frac{\alpha'}{\alpha^{'}+\sum_{i}c_{i}}p(x_{i}^{j}|v_{jk^{*}i^{*}}=1)\label{eq:9}
+L(x_{n}^{j}|z_{jnk^{*}}=1)=\sum_{i}\left[\frac{c_{i}}{\alpha^{'}+\sum_{i}c_{i}}p(x_{i}^{j}|v_{jni}=1)\right]+\frac{\alpha'}{\alpha^{'}+\sum_{i}c_{i}}p(x_{i}^{j}|v_{jni^{*}}=1)\label{eq:9}
 \end{equation}
 
 \end_inset
@@ -589,7 +610,29 @@ L(x_{n}^{j}|z_{jnk^{*}}=1)=\sum_{i}\left[\frac{c_{i}}{\alpha^{'}+\sum_{i}c_{i}}p
 \end_layout
 
 \begin_layout Standard
-For existing metabolite 
+Here 
+\begin_inset Formula $\alpha'$
+\end_inset
+
+ is the concentration parameter for metabolite DP mixture.
+ Let the indicator 
+\begin_inset Formula $v_{jni}=1$
+\end_inset
+
+ denotes the assignment of peak 
+\begin_inset Formula $n$
+\end_inset
+
+ in file 
+\begin_inset Formula $j$
+\end_inset
+
+ to metabolite 
+\begin_inset Formula $i$
+\end_inset
+
+.
+ Then for existing metabolite 
 \begin_inset Formula $i$
 \end_inset
 
@@ -631,7 +674,7 @@ reference "eq:12"
 \begin_layout Standard
 \begin_inset Formula 
 \begin{eqnarray}
-p(x_{n}^{j}|v_{jk^{*}i}=1) & \propto & \int\left[p(x_{n}^{j}|t_{k}^{j})p(t_{k}^{j}|t_{i})\right]\, dt_{k}^{j}\label{eq:10}\\
+p(x_{n}^{j}|v_{jni}=1) & \propto & \int\left[p(x_{n}^{j}|t_{k}^{j},\gamma)p(t_{k}^{j}|t_{i},\delta)\right]\, dt_{k}^{j}\label{eq:10}\\
  & \propto & \int\left[\mathcal{N}(x_{n}^{j}|t_{k}^{j},\gamma^{-1})\cdot\mathcal{N}(t_{k}^{j}|t_{i},\delta^{-1})\right]\, dt_{k}^{j}\label{eq:11}\\
  & \propto & \mathcal{N}(x_{n}^{j}|t_{i},(\gamma^{-1}+\delta^{-1}))\label{eq:12}
 \end{eqnarray}
@@ -661,7 +704,7 @@ For new metabolite
 \begin_layout Standard
 \begin_inset Formula 
 \begin{eqnarray}
-p(x_{n}^{j}|v_{jk^{*}i^{*}}=1) & \propto & \int\int\left[p(x_{n}^{j}|t_{k}^{j})p(t_{k}^{j}|t_{i})\right]\, dt_{k}^{j}\, dt_{i}\label{eq:13}\\
+p(x_{n}^{j}|v_{jni^{*}}=1) & \propto & \int\int\left[p(x_{n}^{j}|t_{k}^{j},\gamma)p(t_{k}^{j}|t_{i},\delta)\right]\, dt_{k}^{j}\, dt_{i}\label{eq:13}\\
  & \propto & \int\int\left[\mathcal{N}(x_{n}^{j}|t_{k}^{j},\gamma^{-1})\cdot\mathcal{N}(t_{k}^{j}|t_{i},\delta^{-1})\cdot\mathcal{N}(t_{i}|\mu_{0},\sigma_{0}^{-1})\right]\, dt_{k}^{j}\, dt_{i}\\
  & \propto & \mathcal{N}(x_{n}^{j}|\mu_{0},(\sigma_{0}^{-1}+\gamma^{-1}+\delta^{-1}))
 \end{eqnarray}
@@ -974,7 +1017,7 @@ So, when creating a new dish
 \begin_layout Standard
 \begin_inset Formula 
 \begin{eqnarray}
-p(t_{k}^{j}|x_{n}^{j}) & \propto & p(x_{n}^{j}|t_{k}^{j})p(t_{k}^{j}|t_{i})=\mathcal{N}(t_{k}^{j}|\mu_{k},\gamma_{k}^{-1})
+p(t_{k}^{j}|x_{n}^{j}) & \propto & p(x_{n}^{j}|t_{k}^{j},\gamma)p(t_{k}^{j}|t_{i},\delta)=\mathcal{N}(t_{k}^{j}|\mu_{k},\gamma_{k}^{-1})
 \end{eqnarray}
 
 \end_inset
@@ -1016,7 +1059,7 @@ The specific steps to update
  is given in algorithm 
 \begin_inset CommandInset ref
 LatexCommand ref
-reference "alg:gibbs1"
+reference "alg:assign_peaks_RT"
 
 \end_inset
 
@@ -1084,6 +1127,11 @@ j = loop randomly over files
 
 \begin_layout Plain Layout
 
+				I = I-1
+\end_layout
+
+\begin_layout Plain Layout
+
 			end
 \end_layout
 
@@ -1098,12 +1146,12 @@ j = loop randomly over files
 
 \begin_layout Plain Layout
 
-		P1 = compute cjk * L(peak n|existing cluster, eq 7, 8)
+		P1 = compute cjk * L(x_n|existing cluster, eq 7)
 \end_layout
 
 \begin_layout Plain Layout
 
-		P2 = compute alpha * L(peak n|new cluster, eq 7, 9)
+		P2 = compute alpha * L(x_n|new cluster, eq 8)
 \end_layout
 
 \begin_layout Plain Layout
@@ -1127,12 +1175,12 @@ j = loop randomly over files
 
 \begin_layout Plain Layout
 
-			P3 = compute ci * L(peak n|existing metabolite, eq 10)
+			P3 = compute ci * L(x_n|t_i, eq 11)
 \end_layout
 
 \begin_layout Plain Layout
 
-			P4 = compute alpha' * L(peak n|new metabolite, eq 11)
+			P4 = compute alpha' * L(x_n|t_i, eq 14)
 \end_layout
 
 \begin_layout Plain Layout
@@ -1157,12 +1205,12 @@ j = loop randomly over files
 \begin_layout Plain Layout
 
 				ti = sample new metabolite RT given peak n (eq.
- 16)
+ 18)
 \end_layout
 
 \begin_layout Plain Layout
 
-				set metabolite RT = ti
+				set metabolite RT = t_i
 \end_layout
 
 \begin_layout Plain Layout
@@ -1172,13 +1220,22 @@ j = loop randomly over files
 
 \begin_layout Plain Layout
 
-			tij = sample new cluster RT given ti and peak n (eq.
- 27)
 \end_layout
 
 \begin_layout Plain Layout
 
-			set cluster RT = tij
+			assign v_jki = 1 for cluster k in file j to metabolite i
+\end_layout
+
+\begin_layout Plain Layout
+
+			t_jk = sample new cluster RT given t_i and peak n (eq.
+ 26)
+\end_layout
+
+\begin_layout Plain Layout
+
+			set cluster RT = t_jk
 \end_layout
 
 \begin_layout Plain Layout
@@ -1192,7 +1249,7 @@ j = loop randomly over files
 
 \begin_layout Plain Layout
 
-		assign Zjnk = 1 for peak n to cluster k in file j			
+		assign Z_jnk = 1 for peak n to cluster k in file j			
 \end_layout
 
 \begin_layout Plain Layout
@@ -1220,7 +1277,7 @@ end
 \begin_layout Plain Layout
 \begin_inset CommandInset label
 LatexCommand label
-name "alg:gibbs1"
+name "alg:assign_peaks_RT"
 
 \end_inset
 
@@ -1290,7 +1347,7 @@ The probability is proportional to
 \begin_layout Standard
 \begin_inset Formula 
 \begin{equation}
-p(t_{k}^{j}|t_{i})=\mathcal{N}(t_{i},\delta^{-1})
+p(t_{k}^{j}|t_{i},\delta)=\mathcal{N}(t_{k}^{j}|t_{i},\delta^{-1})
 \end{equation}
 
 \end_inset
@@ -1305,9 +1362,8 @@ For new table, it is
 \begin_layout Standard
 \begin_inset Formula 
 \begin{eqnarray}
-p(t_{k}^{j}|t_{i^{*}}) & \propto & \int\left[p(t_{k}^{j}|t_{i})\,\cdot\, p(t_{i}|\mu_{0},\sigma_{0})\right]\, dt_{i}\\
- & \propto & \int\left[\mathcal{N}(t_{k}^{j}|t_{i},\delta^{-1})\,\cdot\,\mathcal{N}(t_{i}|\mu_{0},\sigma_{0}^{-1})\right]\, dt_{i}\\
- & \propto & \mathcal{N}(t_{i}|\mu_{0},(\delta^{-1}+\sigma_{0}^{-1}))
+p(t_{k}^{j}|t_{i^{*}},...) & \propto & \int\left[p(t_{k}^{j}|t_{i},\delta)\,\cdot\, p(t_{i}|\mu_{0},\sigma_{0})\right]\, dt_{i}\\
+ & \propto & \mathcal{N}(t_{k}^{j}|\mu_{0},(\delta^{-1}+\sigma_{0}^{-1}))
 \end{eqnarray}
 
 \end_inset
@@ -1316,58 +1372,164 @@ p(t_{k}^{j}|t_{i^{*}}) & \propto & \int\left[p(t_{k}^{j}|t_{i})\,\cdot\, p(t_{i}
 \end_layout
 
 \begin_layout Standard
-If we marginalise out 
-\begin_inset Formula $t_{k}^{j}$
-\end_inset
+\begin_inset Float algorithm
+placement H
+wide false
+sideways false
+status open
 
-, the metabolite RT 
-\begin_inset Formula $t_{i}$
-\end_inset
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset listings
+lstparams "basicstyle={\scriptsize},tabsize=4"
+inline false
+status open
 
- is known but the new cluster RT 
-\begin_inset Formula $t_{k}^{j}$
-\end_inset
+\begin_layout Plain Layout
 
- is unknown, so we can no longer assume conditional independence between
- the peaks.
- To compute the probability of this block of peaks under the new metabolite
- 
-\begin_inset Formula $i$
-\end_inset
-
-, we have to apply the chain rule:
+j = loop randomly over files
 \end_layout
 
-\begin_layout Standard
-\begin_inset Formula 
-\begin{equation}
-p(x_{1}^{j},x_{2}^{j},\ldots,x_{n}^{j}|t_{i})=p(x_{1}^{j}|t_{i})\cdot p(x_{2}^{j}|t_{i},x_{1}^{j})\cdot p(x_{3}^{j}|t_{i},x_{1}^{j},x_{2}^{j})\ldots p(x_{n}^{j}|t_{i},x_{1}^{j},x_{2}^{j},\ldots,x_{n-1}^{j})
-\end{equation}
+\begin_layout Plain Layout
 
-\end_inset
+	k = loop randomly over clusters
+\end_layout
 
+\begin_layout Plain Layout
 
 \end_layout
 
-\begin_layout Standard
-where
+\begin_layout Plain Layout
+
+		remove cluster k from model
 \end_layout
 
-\begin_layout Standard
-\begin_inset Formula 
-\begin{eqnarray}
-p(x_{n}^{j}|t_{i},x_{1}^{j},x_{2}^{j},\ldots,x_{n-1}^{j}) & = & \int\left[p(x_{n}^{j}|t_{k}^{j})\cdot p(t_{k}^{j}|t_{i},x_{1}^{j},x_{2}^{j},\ldots,x_{n-1}^{j})\right]dt_{k}^{j}
-\end{eqnarray}
+\begin_layout Plain Layout
+
+		if this results in empty metabolite i
+\end_layout
+
+\begin_layout Plain Layout
+
+			delete cluster k from model
+\end_layout
+
+\begin_layout Plain Layout
+
+			if this results in empty metabolite i
+\end_layout
+
+\begin_layout Plain Layout
+
+				delete metabolite i from model
+\end_layout
+
+\begin_layout Plain Layout
+
+				I = I-1
+\end_layout
+
+\begin_layout Plain Layout
+
+			end
+\end_layout
+
+\begin_layout Plain Layout
+
+		end
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		P1 = compute ci * L(t_jk|existing metabolite, eq 29)
+\end_layout
+
+\begin_layout Plain Layout
+
+		P2 = compute alpha' * L(t_jk|new metabolite, eq 32)
+\end_layout
+
+\begin_layout Plain Layout
+
+		new_i = pick_metabolite(P1, P2)
+\end_layout
+
+\begin_layout Plain Layout
+
+		if new_i > I
+\end_layout
+
+\begin_layout Plain Layout
+
+			I = I+1
+\end_layout
+
+\begin_layout Plain Layout
+
+			ti = sample new metabolite RT given ? (eq.
+ ?)
+\end_layout
+
+\begin_layout Plain Layout
+
+			set metabolite RT = ti
+\end_layout
+
+\begin_layout Plain Layout
+
+		end
+\end_layout
+
+\begin_layout Plain Layout
+
+		assign v_jki = 1 for cluster k in file j to metabolite i
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+	end
+\end_layout
+
+\begin_layout Plain Layout
+
+end
+\end_layout
 
 \end_inset
 
 
 \end_layout
 
-\begin_layout Standard
+\begin_layout Plain Layout
+\begin_inset Caption
 
-\emph on
-More to come ..
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "alg:assign_cluster_RT"
+
+\end_inset
+
+Updating peak assignments (assign_peaks.m)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subsubsection
@@ -1580,7 +1742,70 @@ c_{z_{jnk}=1}=\sum_{n}I(z_{jnk}=1)
 \end_layout
 
 \begin_layout Subsection
+Marginalising out the clusters
+\end_layout
+
+\begin_layout Standard
+If we marginalise out 
+\begin_inset Formula $t_{k}^{j}$
+\end_inset
+
+, the metabolite RT 
+\begin_inset Formula $t_{i}$
+\end_inset
+
+ is known but the new cluster RT 
+\begin_inset Formula $t_{k}^{j}$
+\end_inset
+
+ is unknown, so we can no longer assume conditional independence between
+ the peaks.
+ To compute the probability of this block of peaks under the new metabolite
+ 
+\begin_inset Formula $i$
+\end_inset
+
+, we have to apply the chain rule:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+p(x_{1}^{j},x_{2}^{j},\ldots,x_{n}^{j}|t_{i})=p(x_{1}^{j}|t_{i})\cdot p(x_{2}^{j}|t_{i},x_{1}^{j})\cdot p(x_{3}^{j}|t_{i},x_{1}^{j},x_{2}^{j})\ldots p(x_{n}^{j}|t_{i},x_{1}^{j},x_{2}^{j},\ldots,x_{n-1}^{j})
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+where
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray}
+p(x_{n}^{j}|t_{i},x_{1}^{j},x_{2}^{j},\ldots,x_{n-1}^{j}) & = & \int\left[p(x_{n}^{j}|t_{k}^{j})\cdot p(t_{k}^{j}|t_{i},x_{1}^{j},x_{2}^{j},\ldots,x_{n-1}^{j})\right]dt_{k}^{j}
+\end{eqnarray}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+More to come ...
+\end_layout
+
+\begin_layout Subsection
 Matching
+\end_layout
+
+\begin_layout Standard
+Quick note.
 \end_layout
 
 \begin_layout Standard
@@ -1588,30 +1813,8 @@ Given the grouping (clustering) of peaks within the top components, we have
  to perform another additional step of actually matching the peak.
  We use the samples produced during the Gibbs sampling to compute the posterior
  'similarity' of peaks.
-\end_layout
-
-\begin_layout Subsection
-Implementation Details
-\end_layout
-
-\begin_layout Standard
-The above inference and matching code is prototyped in Matlab and ported
- over to Python in its actual implementation.
- The primary evaluation pipeline has been done in Java, but throughout the
- development of previous work (Incorporating Grouping Information ..), it
- was found that available matrix library for Java is generally quite terrible.
- Either they are: 1) fast (with appropriate optimization with e.g.
- multi-threaded ATLAS library) but do not support sparse matrix multiplication,
- or 2) slow and support sparse matrix multiplication.
- Both cases are not what we want.
- Examples of the first category are: MTJ (with system optimised Netlib library),
- JBLAS (with system optimised multi-threaded ATLAS library).
- Examples of the second cateogyr are: Jama, Colt/Parallel Colt, Apache Commons
- Math, EJML
-\end_layout
-
-\begin_layout Standard
-HDP alignment:
+ Following is a procedure for a quick test using the HDP result for matching.
+ Steps involved:
 \end_layout
 
 \begin_layout Enumerate
@@ -1620,67 +1823,291 @@ Cluster all peaks across files at once using HDP
 
 \begin_deeper
 \begin_layout Enumerate
-HDP score = posterior similarity of two peaks
+HDP score = posterior 'similarity' of two peaks being assigned to the same
+ metabolite
 \end_layout
 
 \end_deeper
 \begin_layout Enumerate
-Perform maximum weighted matching across all files at once
+Perform greedy matching
 \end_layout
 
 \begin_deeper
 \begin_layout Enumerate
-Idea: http://www.researchgate.net/publication/2702275_Linear_Time_frac12-Approxima
-tion_Algorithm_for_Maximum_Weighted_Matching_in_General_Graphs/file/60b7d51a70b5
-b3c9a0.pdf
-\end_layout
-
-\begin_layout Enumerate
-Distance = Mahalanobis(p1, p2), but using HDP score above for the time component.
+Distance = Mahalanobis(p1, p2), but using HDP posterior similarity score
+ above for the time component.
 \end_layout
 
 \begin_layout Enumerate
 Peaks outside mass tolerance will not be matched
 \end_layout
 
-\begin_layout Enumerate
-No restriction on RT tolerance (peaks can still be matched, even if they're
- outside the RT tolerance).
+\end_deeper
+\begin_layout Standard
+Parameters:
 \end_layout
 
-\end_deeper
+\begin_layout Enumerate
+# samples = 200 (100 burn-in)
+\end_layout
+
+\begin_layout Enumerate
+mu_0 = mean of RT values from input files
+\end_layout
+
+\begin_layout Enumerate
+sigma_0 = 1/5000
+\end_layout
+
+\begin_layout Enumerate
+top_alpha = 1
+\end_layout
+
+\begin_layout Enumerate
+alpha = 1
+\end_layout
+
+\begin_layout Enumerate
+delta_prec = 1/30
+\end_layout
+
+\begin_layout Enumerate
+gamma_prec = 1/60
+\end_layout
+
+\begin_layout Standard
+Test on the P1 data: 2 replicates per fraction.
+ Fraction 080 has ~ 1200 peaks, and fraction 100 has ~750 peaks.
+\end_layout
+
+\begin_layout Standard
+OOops ...
+ forgot to restrict the matching so that we match only peaks within the
+ same component !
+\end_layout
+
 \begin_layout Subsection
 Results
 \end_layout
 
-\begin_layout Enumerate
-Experiment with current code + mass matching
+\begin_layout Standard
+Not that great ?
 \end_layout
 
-\begin_deeper
-\begin_layout Enumerate
-Take last sample
+\begin_layout Standard
+\begin_inset Float table
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="3" columns="6">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Fraction
 \end_layout
 
-\begin_layout Enumerate
-Posterior 'similarity'
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Join
 \end_layout
 
-\end_deeper
-\begin_layout Enumerate
-Extend current code:
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+OpenMS
 \end_layout
 
-\begin_deeper
-\begin_layout Enumerate
-Add in mixture of masses into the top component
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+SIMA
 \end_layout
 
-\begin_layout Enumerate
-kernel density estimate on the masses
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+MW
 \end_layout
 
-\end_deeper
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+HDP
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+080
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.944
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.882
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.944
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.944
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.917
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+100
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.950
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.920
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.950
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.950
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.940
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+F1 scores
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
 \begin_layout Standard
 \begin_inset Float figure
 wide false
@@ -1703,7 +2130,564 @@ status open
 \begin_inset Caption
 
 \begin_layout Plain Layout
-Sample result
+P1_100.
+ Left is posterior distribution of the number of top components inferred,
+ right is the distribution on the 'similarity' of peaks.
+ Peak p1 is similar to p2 if they are placed together under the same top
+ component in a sample.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Discussion
+\end_layout
+
+\begin_layout Enumerate
+Are the probabilities well-calibrated ? We want to plot some ROC curve.
+ Say, for each matching, assign the posterior similarity as its score.
+ Make a ROC curve out of this.
+ What do we get ?
+\end_layout
+
+\begin_layout Enumerate
+Is there any relationship between the cluster retention time 
+\begin_inset Formula $t_{ij}$
+\end_inset
+
+ and the metabolite retention time 
+\begin_inset Formula $t_{i}$
+\end_inset
+
+ within each file.
+ For each posterior sample within each file, plot the 
+\begin_inset Formula $t_{ij}$
+\end_inset
+
+ and 
+\begin_inset Formula $t_{i}$
+\end_inset
+
+, what do you observe / expect to see ? 
+\end_layout
+
+\begin_layout Section
+HDP Model - RT & Mass
+\end_layout
+
+\begin_layout Standard
+Each metabolite 
+\begin_inset Formula $m$
+\end_inset
+
+ has 
+\begin_inset Formula $A_{m}$
+\end_inset
+
+ possible adducts / deducts, where adduct 
+\begin_inset Formula $a$
+\end_inset
+
+ in metabolite 
+\begin_inset Formula $m$
+\end_inset
+
+ has 
+\begin_inset Formula $I_{am}$
+\end_inset
+
+ isotopic peaks.
+ Adduct is a product of direct addition of of >= 2 distinct molecules that
+ results in a single reaction product containing all the atoms of the component
+ molecules.
+ In LC-MS, the term adduct ion refers refers to the ions formed by adduction
+ of an ionic species to the molecule.
+ In positive ion analysis, the most common metal adduct ions are single-charged
+ sodium (
+\begin_inset Formula $[M+Na]^{+})$
+\end_inset
+
+ and potassium (
+\begin_inset Formula $[M+K]^{+}$
+\end_inset
+
+) adducts.
+ Adduct ions can be recognized from the mass spectrum by observing the differenc
+e from the analyte molecule, e.g.
+ the adduct ion composition 
+\begin_inset Formula $[M+H]^{+}$
+\end_inset
+
+ has the observed m/z value 
+\begin_inset Formula $M+1$
+\end_inset
+
+, where 
+\begin_inset Formula $M$
+\end_inset
+
+ is the molecular mass of the analyte molecule (i.e.
+ metabolite).
+ Most naturally occuring elements in nature consist of isotopes.
+ Isotopes are variants of a particular chemical element that have the same
+ number of protons but differ in the number of neutrons (they have different
+ atomic mass).
+ 
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Describe ESI ionisation here ..
+\end_layout
+
+\begin_layout Standard
+There are two modelling approaches when we want to bring in the mass information
+: one where we consider the sum formula of the metabolite and one where
+ we don't.
+ 
+\end_layout
+
+\begin_layout Subsection
+Modelling mass with knowledge of formulae
+\end_layout
+
+\begin_layout Standard
+The approach in MetAssign requires us to have the formula of the metabolite
+ to begin with (since we're computing the isotopic profile from the formula,
+ see 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Snider2007"
+
+\end_inset
+
+).
+ This is because peaks are related by their isotopic distribution along
+ the m/z dimension (in the mass spectrum).
+ Given observed peaks, we can attempt to predict their possible formulae
+ as such:
+\end_layout
+
+\begin_layout Enumerate
+Remove mass of adduct from the observed mass.
+ This gives us the neutral mass 
+\begin_inset Formula $m$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+Generate 
+\begin_inset Formula $F$
+\end_inset
+
+ = {all formulae possible given the mass constraint of 
+\begin_inset Formula $m+\epsilon$
+\end_inset
+
+, where 
+\begin_inset Formula $\epsilon$
+\end_inset
+
+ is the MS instrument accuracy}.
+\end_layout
+
+\begin_layout Enumerate
+Filter 
+\begin_inset Formula $F$
+\end_inset
+
+ by various heuristics such as the 7 golden rule 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Kind2007"
+
+\end_inset
+
+, element counts, ring double bond etc.
+ This should reduce 
+\begin_inset Formula $|F|$
+\end_inset
+
+ a lot from say, 50000 entries to 1000.
+\end_layout
+
+\begin_layout Enumerate
+For every 
+\begin_inset Formula $f\in F$
+\end_inset
+
+, we can assign it some isotopic pattern score, which is the goodness of
+ fit between the predicted isotopic peaks (generated by 
+\begin_inset Formula $f$
+\end_inset
+
+ versus the observed peaks).
+ Predicted peaks can be efficiently generated according to 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Snider2007"
+
+\end_inset
+
+.
+ Methods that compute this score are for e.g.
+ in MzMine2 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Pluskal2012"
+
+\end_inset
+
+ and SIRIUS 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Bocker2009"
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Then what ...
+ ?
+\end_layout
+
+\begin_layout Subsection
+Modelling mass without knowledge of formulae
+\end_layout
+
+\begin_layout Standard
+Another way is if we do not explicitly model the formula.
+ The observed data is now a vector of mass and retention time 
+\begin_inset Formula $\mathbf{d}_{n}^{j}=(x_{n}^{j},y_{n}^{j})$
+\end_inset
+
+ where 
+\begin_inset Formula $x_{n}^{j}$
+\end_inset
+
+ is the retention time value and 
+\begin_inset Formula $y_{n}^{j}$
+\end_inset
+
+ is the mass value of peak 
+\begin_inset Formula $n$
+\end_inset
+
+ in file 
+\begin_inset Formula $j$
+\end_inset
+
+.
+ We perform the assignment of 
+\begin_inset Formula $\mathbf{d}_{n}^{j}$
+\end_inset
+
+ based on its retention time value to RT cluster 
+\begin_inset Formula $k$
+\end_inset
+
+ and metabolite 
+\begin_inset Formula $i$
+\end_inset
+
+ (as in section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sub:Inference"
+
+\end_inset
+
+) and also based on the mass information to separate peaks further into
+ mass clusters.
+ To do this, each metabolite 
+\begin_inset Formula $i$
+\end_inset
+
+ is linked to an infinite mixture model (using DP prior) where components
+ in this mixture model correspond to groupings of peaks by their masses.
+ The Normal distribution is used as the component in the linked DP mixture.
+ Individual peaks are now assigned to an RT cluster (and its respective
+ parent metabolite) and put into a mass cluster.
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+[draw the plate diagram here]
+\end_layout
+
+\begin_layout Standard
+Table 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "tab:CRF-analogy-for"
+
+\end_inset
+
+ shows the correspondence between the actual biological entities and their
+ correspondence in the CRF analogy.
+ In the CRF story, a customer 
+\begin_inset Formula $n$
+\end_inset
+
+ walks into the restaurant 
+\begin_inset Formula $j$
+\end_inset
+
+ and is seated at table 
+\begin_inset Formula $k$
+\end_inset
+
+.
+ He is then served the dish 
+\begin_inset Formula $i$
+\end_inset
+
+ which is shared across the restaurant franchise.
+ Additionally, the dish now also comes in seasoned varieties (e.g.
+ less salt, spicier).
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="6" columns="3">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Indexing variable
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Biological entity
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+CRF entity
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $n$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Peak
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Customer
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $j$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+File (replicate)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Restaurant
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $k$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+RT cluster
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Table
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $i$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Metabolite
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Dish
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $a$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Mass cluster
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Seasoned dish
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "tab:CRF-analogy-for"
+
+\end_inset
+
+CRF analogy for the RT + mass HDP model
 \end_layout
 
 \end_inset
@@ -1718,6 +2702,318 @@ Sample result
 \end_inset
 
 
+\end_layout
+
+\begin_layout Standard
+Let the indicator 
+\begin_inset Formula $v_{jnia}=1$
+\end_inset
+
+ denotes the assignment of peak 
+\begin_inset Formula $n$
+\end_inset
+
+ in file 
+\begin_inset Formula $j$
+\end_inset
+
+ to metabolite 
+\begin_inset Formula $i$
+\end_inset
+
+ and the mass cluster 
+\begin_inset Formula $a$
+\end_inset
+
+ within 
+\begin_inset Formula $i$
+\end_inset
+
+.
+ Then following equation 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "eq:table_likelihood"
+
+\end_inset
+
+, the likelihood of peak data point 
+\begin_inset Formula $\mathbf{d}_{n}^{j}$
+\end_inset
+
+ going into an existing cluster is proportional to 
+\begin_inset Formula $c_{jk}$
+\end_inset
+
+, the number of peaks inside that cluster.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray}
+L(\mathbf{d}_{n}^{j}|z_{jnk}=1) & = & p(x_{n}^{j}|z_{jnk}=1)p(y_{n}^{j}|v_{jnia}=1)
+\end{eqnarray}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+where the RT term is
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+p(x_{n}^{j}|z_{jnk}=1)=\mathcal{N}(x_{n}^{j}|t_{k}^{j},\gamma^{-1})\label{eq:existing_table-1}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+and the mass term is 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+p(y_{n}^{j}|v_{jnia}=1)=\sum_{a}\left[\frac{c_{ia}}{\alpha_{m}^{'}+\sum_{a}c_{ia}}p(y_{n}^{j}|v_{jnia}=1)\right]+\frac{\alpha_{m}}{\alpha_{m}+\sum_{a}c_{ia}}p(y_{n}^{j}|v_{jnia^{*}}=1)\label{eq:9-1}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Then
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+p(y_{n}^{j}|v_{jnia}=1)=\mathcal{N}(y_{n}^{j}|\theta_{ia},\rho^{-1})
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+where 
+\begin_inset Formula $\theta_{ia}$
+\end_inset
+
+ is the mean of the component 
+\begin_inset Formula $a$
+\end_inset
+
+, and 
+\begin_inset Formula $\rho^{-1}$
+\end_inset
+
+ the precision, which should a priori be set to be a small value by the
+ user (or maybe we can draw from some Gamma distribution ?).
+ The component mean 
+\begin_inset Formula $\theta_{ia}$
+\end_inset
+
+ is drawn from the base distribution
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+p(\theta_{ia}|\theta_{0},\rho_{0})=\mathcal{N}(\theta_{ia}|\psi_{0},\rho_{0}^{-1})
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Similar to how it's done for RT clustering previously, once a customer has
+ been offered a dish 
+\begin_inset Formula $i$
+\end_inset
+
+, we compute the likelihood for the customer to be assigned existing or
+ new seasoned dishes.
+ The seasoned dish 
+\begin_inset Formula $a$
+\end_inset
+
+ is selected via a cointoss.
+ For each dish 
+\begin_inset Formula $i,$
+\end_inset
+
+ the variable 
+\begin_inset Formula $A_{i}$
+\end_inset
+
+ maintains the number of seasoned dish variations that exist.
+ If the new seasoned dish is required (
+\begin_inset Formula $a>A_{i}$
+\end_inset
+
+), we create one and serves that the customer 
+\begin_inset Formula $n$
+\end_inset
+
+.
+ When creating a new seasoned dish, we need to set its mixture parameter
+ 
+\begin_inset Formula $\theta_{ia}$
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray}
+p(\theta_{ia}|y_{n}^{j}) & \propto & p(y_{n}^{j}|\theta_{ia},\rho)p(\theta_{ia}|\psi_{0},\rho_{0})=\mathcal{N}(\theta_{ia}|\mu_{a},\sigma_{a}^{-1})
+\end{eqnarray}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+where
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\sigma_{a}=\rho+\rho_{0}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\mu_{a}=\frac{1}{\sigma_{a}}\left[\rho y_{n}^{j}+\rho_{0}\psi_{0}\right]
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Then 
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+for every mass cluster 
+\begin_inset Formula $a$
+\end_inset
+
+ in the mixture associated to metabolite 
+\begin_inset Formula $i$
+\end_inset
+
+, we update its mixture parameter:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+p(\theta_{ia}|\ldots)\propto p(\theta_{ia}|\psi_{0},\rho_{0})\prod_{n}^{N}p(y_{n}^{j}|\theta_{ia},\rho)=\mathcal{N}(\mu_{b},\sigma_{b}^{-1})
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\sigma_{b}=\rho_{0}+N\rho
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{equation}
+\mu_{b}=\frac{1}{\sigma_{b}}\left[\rho_{0}\psi_{0}+\rho\sum_{n}y_{n}^{j}\right]
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+It is also possible for a customer or a set of customers to reject the seasoned
+ dish served.
+ This happens when a customer 
+\begin_inset Formula $n$
+\end_inset
+
+ is switching table from 
+\begin_inset Formula $k$
+\end_inset
+
+ to 
+\begin_inset Formula $k'$
+\end_inset
+
+, or when the whole table 
+\begin_inset Formula $k$
+\end_inset
+
+ switches the dish assigned to it from 
+\begin_inset Formula $i$
+\end_inset
+
+ to 
+\begin_inset Formula $i'$
+\end_inset
+
+.
+ In this case, we have to perform the necessary book-keeping such as recomputing
+ the mixture parameter 
+\begin_inset Formula $\theta_{ia}$
+\end_inset
+
+ when its customer membership changes, and deleting the whole lot of dish
+ variations 
+\begin_inset Formula $a$
+\end_inset
+
+ when their linked dish 
+\begin_inset Formula $i$
+\end_inset
+
+ is deleted.
 \end_layout
 
 \begin_layout Standard

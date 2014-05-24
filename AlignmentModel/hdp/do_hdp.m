@@ -1,6 +1,9 @@
 %% data is N x J matrix
 function samples = do_hdp(hdp)
     
+    % check if octave or matlab
+    isOctave = exist('OCTAVE_VERSION', 'builtin') ~= 0;
+    
     samples = [];
     for s = 1:hdp.NSAMPS
 
@@ -13,14 +16,14 @@ function samples = do_hdp(hdp)
                                                        
         %%% update cluster RT        
         for j = 1:hdp.J
-            hdp.file{j}.sum_Z = sum( repmat(hdp.file{j}.data, 1, hdp.file{j}.K) .* hdp.file{j}.Z, 1);        
+            hdp.file{j}.sum_Z = sum( repmat(hdp.file{j}.data_rt, 1, hdp.file{j}.K) .* hdp.file{j}.Z, 1);        
             for k = 1:hdp.file{j}.K
                 % find parent metabolite of this cluster
                 i = find(hdp.file{j}.top_Z(k, :));
                 ti = hdp.ti(i);
                 % find the peaks under this cluster
                 child_peaks = find(hdp.file{j}.Z(:, k));
-                sum_xn = sum(hdp.file{j}.data(child_peaks));
+                sum_xn = sum(hdp.file{j}.data_rt(child_peaks));
                 count_peaks = length(child_peaks);
                 % draw new tij
                 prec = hdp.delta_prec + count_peaks*hdp.gamma_prec;
@@ -49,10 +52,15 @@ function samples = do_hdp(hdp)
         end                    
                    
         fprintf('\t(I=%d)\n', hdp.I);
-                    
         time_taken = toc;
         
-        samples = [samples, hdp];
+        if s > hdp.BURN_IN
+            samples = [samples, hdp];
+        end
+        
+        if isOctave
+            fflush(stdout);
+        end
         
     end
 

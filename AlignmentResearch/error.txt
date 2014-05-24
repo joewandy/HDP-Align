@@ -1,9 +1,5 @@
-java.lang.ArrayIndexOutOfBoundsException: 0
-	at com.joewandy.alignmentResearch.objectModel.ChineseRestaurant.sample(ChineseRestaurant.java:17)
-	at com.joewandy.alignmentResearch.objectModel.GenerativeFeatureClusterer.cluster(GenerativeFeatureClusterer.java:26)
-	at com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.GenerativeModelDataGenerator.initialiseClusters(GenerativeModelDataGenerator.java:260)
-	at com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.GenerativeModelDataGenerator.getAlignmentFiles(GenerativeModelDataGenerator.java:132)
-	at com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.BaseDataGenerator.generate(BaseDataGenerator.java:29)
-	at com.joewandy.alignmentResearch.main.experiment.MultiAlignBaseExp.getData(MultiAlignBaseExp.java:28)
-	at com.joewandy.alignmentResearch.main.experiment.GenerativeExperiment.performExperiment(GenerativeExperiment.java:28)
-	at com.joewandy.alignmentResearch.main.MultiAlignCmd.main(MultiAlignCmd.java:37)
+cmdline.CmdLineException: Unhandled situation:
+java.lang.NumberFormatException: For input string: "-rtWindow"
+	at cmdline.CmdLineParser.parse(CmdLineParser.java:227)
+	at com.joewandy.alignmentResearch.main.MultiAlignCmd.parseCommandLine(MultiAlignCmd.java:85)
+	at com.joewandy.alignmentResearch.main.MultiAlignCmd.main(MultiAlignCmd.java:31)

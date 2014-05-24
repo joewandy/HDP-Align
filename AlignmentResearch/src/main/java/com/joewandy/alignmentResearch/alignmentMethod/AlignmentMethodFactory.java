@@ -12,6 +12,7 @@ import com.joewandy.alignmentResearch.alignmentMethod.external.MzMineJoinAlignme
 import com.joewandy.alignmentResearch.alignmentMethod.external.MzMineRansacAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.external.OpenMSAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.external.SimaAlignment;
+import com.joewandy.alignmentResearch.alignmentMethod.external.TestHdpAlignment;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 
 public class AlignmentMethodFactory {
@@ -27,6 +28,7 @@ public class AlignmentMethodFactory {
 	public static final String ALIGNMENT_METHOD_MY_STABLE_MARRIAGE = "myStableMarriage";
 	public static final String ALIGNMENT_METHOD_MY_MAXIMUM_WEIGHT_MATCHING_REFERENCE = "myMaxWeightRef";
 	public static final String ALIGNMENT_METHOD_MY_MAXIMUM_WEIGHT_MATCHING_HIERARCHICAL = "myMaxWeight";
+	public static final String ALIGNMENT_METHOD_MY_HDP_ALIGNMENT = "myHdp";
 	
 	// calls mzMine Join aligner
 	public static final String ALIGNMENT_METHOD_MZMINE_JOIN = "join";
@@ -66,6 +68,8 @@ public class AlignmentMethodFactory {
 			aligner = new OpenMSAlignment(alignmentDataList, param);
 		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_MAXIMUM_WEIGHT_MATCHING_HIERARCHICAL.equals(method)) {
 			aligner = new HierarchicalAlignment(alignmentDataList, param);
+		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_HDP_ALIGNMENT.equals(method)) {
+			aligner = new TestHdpAlignment(alignmentDataList, param);
 		}
 		
 		return aligner;
