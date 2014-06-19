@@ -134,7 +134,7 @@ public class HungarianAlgorithm {
 		int w = fetchUnmatchedWorker();
 		while (w < dim) {
             if (w % 100 == 0) {
-            	System.out.print('.');
+//            	System.out.print('.');
             }
 			initializePhase(w);
 			executePhase();

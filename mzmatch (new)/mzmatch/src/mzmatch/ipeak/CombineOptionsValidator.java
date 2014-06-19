@@ -55,8 +55,7 @@ public class CombineOptionsValidator {
 				&& !AlignmentMethodFactory.ALIGNMENT_METHOD_MY_JOIN.equals(options.method)
 				&& !AlignmentMethodFactory.ALIGNMENT_METHOD_MZMINE_JOIN.equals(options.method)
 				&& !AlignmentMethodFactory.ALIGNMENT_METHOD_MZMINE_RANSAC.equals(options.method)
-				&& !AlignmentMethodFactory.ALIGNMENT_METHOD_SIMA.equals(options.method)
-				&& !AlignmentMethodFactory.ALIGNMENT_METHOD_MY_STABLE_MARRIAGE.equals(options.method)) {
+				&& !AlignmentMethodFactory.ALIGNMENT_METHOD_SIMA.equals(options.method)) {
 			System.err
 					.println("[ERROR]: valid options for method are 'greedy', 'join', 'ransac', 'sima' or 'groupingInfo'.");
 			System.exit(1);

@@ -12,6 +12,7 @@ import no.uib.cipr.matrix.Matrix;
 import com.jmatio.io.MatFileReader;
 import com.jmatio.types.MLDouble;
 import com.joewandy.alignmentResearch.main.MultiAlignConstants;
+import com.joewandy.alignmentResearch.matrix.LinkedSparseMatrix;
 
 public class SavedMatlabFeatureGroupingMethod extends BaseFeatureGroupingMethod implements FeatureGroupingMethod {
 
@@ -70,8 +71,12 @@ public class SavedMatlabFeatureGroupingMethod extends BaseFeatureGroupingMethod 
 				
 				// get probabilities of peak vs peak to be together ZZprob
 				System.out.println("Computing ZZprob");
-				
-				DenseMatrix ZZprob = new DenseMatrix(data.getFeaturesCount(), data.getFeaturesCount());
+
+				if (data.getFeaturesCount() < 10000) {
+					ZZprob = new DenseMatrix(data.getFeaturesCount(), data.getFeaturesCount());
+				} else {
+					ZZprob = new LinkedSparseMatrix(data.getFeaturesCount(), data.getFeaturesCount());				
+				}
 				Z.transBmult(Z, ZZprob);		
 				data.setZZProb(ZZprob);
 				

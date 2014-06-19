@@ -6,12 +6,11 @@ import java.util.Map;
 
 import com.apporiented.algorithm.clustering.Cluster;
 import com.apporiented.algorithm.clustering.ClusteringAlgorithm;
-import com.apporiented.algorithm.clustering.CompleteLinkageStrategy;
 import com.apporiented.algorithm.clustering.DefaultClusteringAlgorithm;
+import com.apporiented.algorithm.clustering.SingleLinkageStrategy;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.ExtendedLibrary;
-import com.joewandy.alignmentResearch.objectModel.FeatureGroupingMethod;
 
 public class DendogramBuilder {
 
@@ -23,22 +22,20 @@ public class DendogramBuilder {
 	private double massTol;
 	private double rtTol;
 	private boolean useGroup;
+	private boolean exactMatch;
 	private double alpha;
-	private String groupingMethod;
-	private FeatureGroupingMethod featureGroupingMethod;
 	
 	public DendogramBuilder(List<AlignmentFile> dataList,
-			ExtendedLibrary library, double massTol, double rtTol, boolean useGroup, 
-			double alpha, String groupingMethod, FeatureGroupingMethod featureGroupingMethod) {
+			ExtendedLibrary library, double massTol, double rtTol, boolean useGroup, boolean exactMatch,
+			double alpha) {
 
 		this.dataList = dataList;
 		this.library = library;
 		this.massTol = massTol;
 		this.rtTol = rtTol;
 		this.useGroup = useGroup;
+		this.exactMatch = exactMatch;
 		this.alpha = alpha;
-		this.groupingMethod = groupingMethod;
-		this.featureGroupingMethod = featureGroupingMethod;
 
 		int n = dataList.size();
 		scores = new double[n][n];
@@ -96,14 +93,14 @@ public class DendogramBuilder {
 		System.out.println("Hierarchical clustering ...");
 		ClusteringAlgorithm alg = new DefaultClusteringAlgorithm();
 		Cluster root = alg.performClustering(dists, labels,
-				new CompleteLinkageStrategy());
+				new SingleLinkageStrategy());
 
 		Map<String, AlignmentFile> dataMap = new HashMap<String, AlignmentFile>();
 		for (AlignmentFile file : dataList) {
 			dataMap.put(file.getFilenameWithoutExtension(), file);
 		}
 		DendogramParser parser = new DendogramParser(root, dataMap, 
-				library, massTol, rtTol, useGroup, alpha, groupingMethod, featureGroupingMethod);
+				library, massTol, rtTol, useGroup, exactMatch, alpha);
 		String output = parser.traverse(2);
 		System.out.println("tree");
 		System.out.println(output);

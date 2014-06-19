@@ -39,10 +39,11 @@ public class CombineMzMineRANSACMethod extends CombineBaseMethod implements Comb
 		paramBuilder.ransacThreshold(options.ransacThreshold);
 		paramBuilder.ransacLinearModel(options.ransacLinearModel);
 		paramBuilder.ransacSameChargeRequired(options.ransacSameChargeRequired);
-		
+		AlignmentMethodParam param = paramBuilder.build();
+
 		AlignmentMethod aligner = AlignmentMethodFactory.getAlignmentMethod(
 				AlignmentMethodFactory.ALIGNMENT_METHOD_MZMINE_RANSAC, 
-				paramBuilder, data);
+				param, data, null);
 		AlignmentList result = aligner.align();
 		List<AlignmentRow> resultRows = result.getRows();
 		System.out.println("Total " + result.getRowsCount() + " rows aligned");

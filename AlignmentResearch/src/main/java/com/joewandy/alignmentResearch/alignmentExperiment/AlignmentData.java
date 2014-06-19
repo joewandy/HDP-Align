@@ -1,9 +1,16 @@
 package com.joewandy.alignmentResearch.alignmentExperiment;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
+import com.joewandy.alignmentResearch.objectModel.Feature;
 import com.joewandy.alignmentResearch.objectModel.GroundTruth;
+import com.joewandy.alignmentResearch.objectModel.GroundTruthFeatureGroup;
 
 public class AlignmentData {
 
@@ -64,6 +71,35 @@ public class AlignmentData {
 			i++;
 		}
 		return fileNames;
+	}
+	
+	public void saveGroundTruth(String path) throws IOException {
+
+		// write header
+		PrintWriter pw = new PrintWriter(new FileOutputStream(path));
+		Map<AlignmentFile, Integer> fileMap = new HashMap<AlignmentFile, Integer>();
+		int counter = 1;
+		for (AlignmentFile file : alignmentDataList) {
+			fileMap.put(file, counter);
+			pw.println("> " + counter + " " + file.getFilenameWithoutExtension());
+			counter++;
+		}
+		
+		// write features
+		List<GroundTruthFeatureGroup> groundTruthList = this.groundTruth.getGroundTruthFeatureGroups();		
+		for (GroundTruthFeatureGroup gt : groundTruthList) {
+			StringBuilder sb = new StringBuilder();
+			sb.append("# ");
+			for (Feature f : gt.getFeatures()) {
+				AlignmentFile file = f.getData();
+				int fileIdx = fileMap.get(file);
+				int peakID = f.getPeakID() + 1; // starts from 1 in the ground truth
+				sb.append(fileIdx + " " + peakID + " ");
+			}
+			pw.println(sb.toString());
+		}
+		pw.close();
+		
 	}
 	
 }

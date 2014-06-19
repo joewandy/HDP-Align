@@ -101,13 +101,16 @@ public class AlignmentList {
 			AlignmentFile data = map.get(fileNameWithOutExt);
 			
 			// third column in the line is position of feature in data
-			int featureIndex = lineSplitter.nextInt();
+			int peakIdx = lineSplitter.nextInt();
 			Feature feature = null;
 			try {
-				feature = data.getFeatureByIndex(featureIndex);				
+				feature = data.getFeatureByIndex(peakIdx);		
+				if (feature == null) {
+					continue;
+				}
 			} catch (IndexOutOfBoundsException e) {
 				// invalid entry in the alignment result, skipping ...
-				System.out.println("Invalid index " + featureIndex + " for " + data.getFilename() + " (" + data.getFeaturesCount() + ")");
+				System.out.println("Invalid index " + peakIdx + " for " + data.getFilename() + " (" + data.getFeaturesCount() + ")");
 				continue;
 			} finally {
 				lineSplitter.close();				
@@ -149,6 +152,17 @@ public class AlignmentList {
 	
 	public List<AlignmentRow> getRows() {
 		return rows;
+	}
+	
+	public int getLastRowId() {
+		// find last accepted row id
+		int lastRowId = 0;
+		for (AlignmentRow acc : rows) {
+			if (acc.getRowId() > lastRowId) {
+				lastRowId = acc.getRowId();
+			}
+		}
+		return lastRowId;
 	}
 	
 	public AlignmentFile getRowsAsFile() {

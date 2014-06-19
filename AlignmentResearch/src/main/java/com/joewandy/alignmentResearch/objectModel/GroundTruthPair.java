@@ -48,5 +48,10 @@ public class GroundTruthPair {
 			return false;
 		return true;
 	}
+
+	@Override
+	public String toString() {
+		return "GroundTruthPair [f1=" + f1 + ", f2=" + f2 + "]";
+	}
 	
 }

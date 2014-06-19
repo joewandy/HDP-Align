@@ -4,28 +4,21 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import no.uib.cipr.matrix.DenseMatrix;
 import no.uib.cipr.matrix.Matrix;
 import no.uib.cipr.matrix.MatrixEntry;
 
-import org.la4j.matrix.sparse.CCSMatrix;
-
 import com.jmatio.io.MatFileWriter;
 import com.jmatio.types.MLArray;
 import com.jmatio.types.MLDouble;
-import com.joewandy.alignmentResearch.main.MultiAlign;
 import com.joewandy.alignmentResearch.main.MultiAlignConstants;
+import com.joewandy.alignmentResearch.matrix.LinkedSparseMatrix;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
-import com.joewandy.alignmentResearch.objectModel.ExtendedLibrary;
-import com.joewandy.alignmentResearch.objectModel.Feature;
-import com.joewandy.alignmentResearch.objectModel.FeatureGroupingMethod;
 import com.joewandy.alignmentResearch.objectModel.MatchingScorer;
 
 public class MaximumWeightMatching implements FeatureMatching {
@@ -38,13 +31,14 @@ public class MaximumWeightMatching implements FeatureMatching {
 	private MatchingScorer scorer;
 	
 	private boolean useGroup;
+	private boolean exactMatch;
 	private double alpha;
-	private FeatureGroupingMethod groupingMethod;
+	
+	private boolean quiet;
 	
 	public MaximumWeightMatching(String listId, AlignmentList masterList, AlignmentList childList,
-			ExtendedLibrary library,
-			double massTol, double rtTol, boolean useGroup, double alpha, 
-			FeatureGroupingMethod groupingMethod) {			
+			double massTol, double rtTol, boolean useGroup, boolean exactMatch, double alpha, 
+			boolean quiet) {			
 		this.listId = listId;
 		this.masterList = masterList;
 		this.childList = childList;
@@ -52,8 +46,9 @@ public class MaximumWeightMatching implements FeatureMatching {
 		this.rtTol = rtTol;		
 		this.scorer = new MatchingScorer(this.massTol, this.rtTol);
 		this.useGroup = useGroup;
+		this.exactMatch = exactMatch;
 		this.alpha = alpha;
-		this.groupingMethod = groupingMethod;
+		this.quiet = quiet;
 	}
 
 	public AlignmentList getMatchedList() {
@@ -65,18 +60,22 @@ public class MaximumWeightMatching implements FeatureMatching {
 		
 		// do max weight matching here ...
 		
-		System.out.println("Running maximum weight matching on " + listId);
-		Map<AlignmentRow, AlignmentRow> stableMatch = match(masterList, childList);
+		if (!quiet) {
+			System.out.println("Running maximum weight matching on " + listId);
+		}
+		List<MatchResult> matchResults = match(masterList, childList);
 		
 		// construct a new list and merge the matched entries together
-		System.out.println("\tMerging matched results = " + stableMatch.size() + " entries");
+		if (!quiet) {
+			System.out.println("\tMerging matched results = " + matchResults.size() + " entries");
+		}
 		AlignmentList matchedList = new AlignmentList(listId);
 		int rowId = 0;
 		int rejectedCount = 0;		
-		for (Entry<AlignmentRow, AlignmentRow> match : stableMatch.entrySet()) {
+		for (MatchResult match : matchResults) {
 
-			AlignmentRow row1 = match.getKey();
-			AlignmentRow row2 = match.getValue();
+			AlignmentRow row1 = match.getRow1();
+			AlignmentRow row2 = match.getRow2();
 						
 			row1.setAligned(true);
 			row2.setAligned(true);
@@ -84,6 +83,7 @@ public class MaximumWeightMatching implements FeatureMatching {
 			AlignmentRow merged = new AlignmentRow(masterList, rowId++);
 			merged.addAlignedFeatures(row1.getFeatures());
 			merged.addAlignedFeatures(row2.getFeatures());
+			merged.setScore(match.getScore());
 			
 			matchedList.addRow(merged);
 
@@ -110,11 +110,13 @@ public class MaximumWeightMatching implements FeatureMatching {
 				womenMatchedCount++;
 			}
 		}
-		System.out.println("\t\tmen matched rows = " + menMatchedCount);
-		System.out.println("\t\tmen unmatched rows = " + menUnmatchedCount);		
-		System.out.println("\t\twomen matched rows = " + womenMatchedCount);
-		System.out.println("\t\twomen unmatched rows = " + womenUnmatchedCount);
-		System.out.println("\tRejected rows = " + rejectedCount);
+		if (!quiet) {
+			System.out.println("\t\tmen matched rows = " + menMatchedCount);
+			System.out.println("\t\tmen unmatched rows = " + menUnmatchedCount);		
+			System.out.println("\t\twomen matched rows = " + womenMatchedCount);
+			System.out.println("\t\twomen unmatched rows = " + womenUnmatchedCount);
+			System.out.println("\tRejected rows = " + rejectedCount);
+		}
 		return matchedList;
 
 	}
@@ -142,7 +144,7 @@ public class MaximumWeightMatching implements FeatureMatching {
 				Matrix mat = null;
 				
 				// for intermediate list produced from merging files, recluster the peaks
-//				if (groupingMethod != null) {
+//				if (MultiAlignConstants.GROUPING_METHOD_GREEDY.equals(groupingMethod)) {
 //					System.out.println("Grouping newData");
 //					AlignmentFile newFile = dataList.getRowsAsFile();
 //					List<AlignmentFile> files = new ArrayList<AlignmentFile>();
@@ -151,19 +153,6 @@ public class MaximumWeightMatching implements FeatureMatching {
 //					mat = groupingMethod.getClusteringMatrix();
 //				}			
 				
-				// TODO: this should be replaced !
-				List<AlignmentRow> rows = dataList.getRows();
-				int n = rows.size();
-				mat = new DenseMatrix(n, n);
-				for (int i = 0; i < n; i++) {
-					for (int j = 0; j < n; j++) {
-						AlignmentRow row1 = rows.get(i);
-						AlignmentRow row2 = rows.get(j);
-						double score = scoreRow(row1, row2);
-						mat.set(i, j, score);
-					}
-				}
-
 				return mat;
 				
 			}
@@ -171,58 +160,31 @@ public class MaximumWeightMatching implements FeatureMatching {
 			// for the case when we don't use the weight
 			List<AlignmentRow> rows = dataList.getRows();
 			int n = rows.size();
-			return new DenseMatrix(n, n);				
+			if (n < 10000) {
+				return new DenseMatrix(n, n);								
+			} else {
+				return new LinkedSparseMatrix(n, n);				
+				
+			}
 		}
 	}
 	
 	private Matrix getClusteringMatrix(AlignmentFile data) {
 		return data.getZZProb();
 	}
-	
-	private double scoreRow(AlignmentRow row1, AlignmentRow row2) {
 		
-		double total = 0;
-		int counter = 0;
-		for (Feature f1 : row1.getFeatures()) {
-			for (Feature f2 : row2.getFeatures()) {
-				if (f1.getData().equals(f2.getData())) {
-					int idx1 = f1.getPeakID();
-					int idx2 = f2.getPeakID();
-					if (idx1 == idx2) {
-						total += 1;
-					} else {
-						Matrix probs = f1.getData().getZZProb();
-						double prob = probs.get(idx1, idx2);
-						total += prob;					
-					}
-					counter++;
-				}
-			}
-		}
-		double avg = total / counter;		
-		return avg;
-		
-	}
-	
-    private Map<AlignmentRow, AlignmentRow> match(AlignmentList masterList, AlignmentList childList) {
+    private List<MatchResult> match(AlignmentList masterList, AlignmentList childList) {
 
-		System.out.println("\tmasterList " + masterList.getId());
-		System.out.println("\tchildList " + childList.getId());		
+    	if (!quiet) {
+    		System.out.println("\tmasterList " + masterList.getId());
+    		System.out.println("\tchildList " + childList.getId());		    		
+    	}
 		List<AlignmentRow> men = getMen(masterList, childList);
 		List<AlignmentRow> women = getWomen(masterList, childList);
     	
-        Map<AlignmentRow, AlignmentRow> matches = new HashMap<AlignmentRow, AlignmentRow>();
-
-//        Matrix scoreArr = computeScores(men, women);        
-//        if (useGroup) {
-//        	Matrix clusteringMen = getClustering(masterList);
-//    		Matrix clusteringWomen = getClustering(childList);        	
-//    		scoreArr = combineScoreMtj(scoreArr, clusteringMen, clusteringWomen);
-//		}
-        
+        List<MatchResult> matches = new ArrayList<MatchResult>();
 		if (useGroup) {
 			Matrix scoreArr = computeScores(men, women);
-			Matrix scoreArrInitial = scoreArr.copy();
 			Matrix clusteringMen = getClustering(masterList);
 			Matrix clusteringWomen = getClustering(childList);        	
 			if (clusteringMen != null && clusteringWomen != null) {
@@ -230,10 +192,18 @@ public class MaximumWeightMatching implements FeatureMatching {
 //				saveToMatlab("/home/joewandy/Dropbox/Project/real_datasets/P2/source_features_080/debug/", masterList.getId(), 
 //						scoreArrInitial, scoreArr);				
 			}
-	    	matches = approxMaxMatching(scoreArr, men, women);
+			if (!exactMatch) {
+		    	matches = approxMaxMatching(scoreArr, men, women);				
+			} else {
+				matches = hungarianMatching(scoreArr, men, women);				
+			}
 		} else {
 			Matrix scoreArr = computeScores(men, women);  
-			matches = approxMaxMatching(scoreArr, men, women);        				
+			if (!exactMatch) {
+				matches = approxMaxMatching(scoreArr, men, women);        								
+			} else {
+				matches = hungarianMatching(scoreArr, men, women);				
+			}
 		}
         
         return matches;
@@ -257,7 +227,7 @@ public class MaximumWeightMatching implements FeatureMatching {
 		}
 	}
     	
-	private Map<AlignmentRow, AlignmentRow> hungarianMatching(Matrix scoreArr,
+	private List<MatchResult> hungarianMatching(Matrix scoreArr,
 			List<AlignmentRow> men, List<AlignmentRow> women) {
 		
         double maxScore = getMax(scoreArr);
@@ -269,13 +239,17 @@ public class MaximumWeightMatching implements FeatureMatching {
     		}
     	}
 		// running matching
-		System.out.print("\tRunning maximum weighted matching ");
+    	if (!quiet) {
+    		System.out.print("\tRunning maximum weighted matching ");    		
+    	}
 		HungarianAlgorithm algo = new HungarianAlgorithm(toArray(scoreArr));
 		int[] res = algo.execute();
-		System.out.println();
+    	if (!quiet) {
+    		System.out.println();
+    	}
 		
 		// store the result
-		Map<AlignmentRow, AlignmentRow> matches = new HashMap<AlignmentRow, AlignmentRow>();
+		List<MatchResult> matches = new ArrayList<MatchResult>();
 		for (int i=0; i<men.size(); i++) {
 			int matchIndex = res[i];
 			// if there's a match
@@ -284,7 +258,8 @@ public class MaximumWeightMatching implements FeatureMatching {
 				AlignmentRow row2 = women.get(matchIndex);
 				// and they are within tolerance to each other
 				if (row1.rowInRange(row2, massTol, rtTol, MultiAlignConstants.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
-					matches.put(row1, row2);
+					MatchResult matchRes = new MatchResult(row1, row2, scoreArr.get(i, matchIndex));
+					matches.add(matchRes);
 				}
 			}
 		}
@@ -292,15 +267,17 @@ public class MaximumWeightMatching implements FeatureMatching {
 
 	}
 
-	private Map<AlignmentRow, AlignmentRow> approxMaxMatching(Matrix scoreArr, 
+	private List<MatchResult> approxMaxMatching(Matrix scoreArr, 
 			List<AlignmentRow> men, 
 			List<AlignmentRow> women) {
 		
 		// running matching
-		System.out.println("\tRunning approximately maximum greedy matching ");
+		if (!quiet) {
+			System.out.println("\tRunning approximately maximum greedy matching ");			
+		}
 		PathGrowing algo = new PathGrowing(scoreArr, men, women, massTol, rtTol);
-		Map<AlignmentRow, AlignmentRow> matches = algo.executeGreedy();
-//		Map<AlignmentRow, AlignmentRow> matches = algo.execute();
+		List<MatchResult> matches = algo.executeGreedy();
+//		List<MatchResult> matches = algo.execute();
 		return matches;
 		
 	}
@@ -309,12 +286,17 @@ public class MaximumWeightMatching implements FeatureMatching {
 
 		int m = men.size();
 		int n = women.size();
-		Matrix scoreArr = new DenseMatrix(m, n);
-		
-    	System.out.print("\tComputing distances ");
+
+		if (!quiet) {
+	    	System.out.print("\tComputing distances ");			
+		}
     	double maxDist = 0;
-		Matrix distArr = new DenseMatrix(m, n);
-//		Matrix distArr = new LinkedSparseMatrix(m, n);
+    	Matrix distArr = null;
+    	if (m < 10000 & n < 10000) {
+    		distArr = new DenseMatrix(m, n);    		
+    	} else {
+    		distArr = new LinkedSparseMatrix(m, n);    		
+    	}
 		for (int i = 0; i < m; i++) {
 			
 			for (int j = 0; j < n; j++) {
@@ -329,33 +311,40 @@ public class MaximumWeightMatching implements FeatureMatching {
 				}
 			}
 			
-            if (i % 1000 == 0) {
+            if (i % 1000 == 0 & !quiet) {
             	System.out.print('.');
             }
 			
 		}
-		System.out.println();
+		if (!quiet) {
+			System.out.println();			
+	    	System.out.print("\tComputing scores ");
+		}
 
-    	System.out.print("\tComputing scores ");
-//		scoreArr = new DoubleMatrix(m, n);
-		scoreArr = new DenseMatrix(m, n);
+    	Matrix scoreArr = null;
+    	if (m < 10000 & n < 10000) {
+    		scoreArr = new DenseMatrix(m, n);    		
+    	} else {
+    		scoreArr = new LinkedSparseMatrix(m, n);    		
+    	}
 		for (int i = 0; i < m; i++) {		
 			
 			for (int j = 0; j < n; j++) {
 				double dist = distArr.get(i, j);
 				if (dist > 0) {
 					double score = 1-(dist/maxDist);
-//					scoreArr.put(i, j, score);
 					scoreArr.set(i, j, score);
 				}
 			}
 
-            if (i % 1000 == 0) {
+            if (i % 1000 == 0 & !quiet) {
             	System.out.print('.');
             }
 		
 		}
-		System.out.println();
+		if (!quiet) {
+			System.out.println();			
+		}
 		distArr = null;
 		
 		// normalise score to 0..1
@@ -369,38 +358,60 @@ public class MaximumWeightMatching implements FeatureMatching {
 	private Matrix combineScoreMtj(Matrix scoreArr, Matrix clusteringMen,
 			Matrix clusteringWomen) {
 
-    	System.out.println("\tCombining scores ");
+		if (!quiet) {
+	    	System.out.println("\tCombining scores ");			
+		}
 		long startTime = System.nanoTime();
 
 		Matrix W = scoreArr;
 		double maxScore = getMax(W);
 		W.scale(1/maxScore);
-		System.out.println("\t\tW = " + W.numRows() + "x" + W.numColumns());
-
-//		Matrix A = clusteringMen.copy();
-		Matrix A = clusteringMen;
+		if (!quiet) {
+			System.out.println("\t\tW = " + W.numRows() + "x" + W.numColumns());
+		}
+		
+		Matrix A = clusteringMen.copy();
 		for (int i = 0; i < A.numRows(); i++) {
 			A.set(i, i, 0);
 		}
-		System.out.println("\t\tA = " + A.numRows() + "x" + A.numColumns());
-		 
-//		Matrix B = clusteringWomen.copy();
-		Matrix B = clusteringWomen;
+		if (!quiet) {
+			System.out.println("\t\tA = " + A.numRows() + "x" + A.numColumns());
+		}
+		
+		Matrix B = clusteringWomen.copy();
 		for (int i = 0; i < B.numRows(); i++) {
 			B.set(i, i, 0);
 		}
-		System.out.println("\t\tB = " + B.numRows() + "x" + B.numColumns());
-
+		if (!quiet) {
+			System.out.println("\t\tB = " + B.numRows() + "x" + B.numColumns());
+		}
+		
 		// D = (A*W)*B;
-		System.out.println("\t\tComputing D=(AW)");
-		Matrix AW = new DenseMatrix(A.numRows(), W.numColumns());
+		if (!quiet) {
+			System.out.println("\t\tComputing D=(AW)");
+		}
+		Matrix AW = null;
+    	if (A.numRows() < 10000 & W.numColumns() < 10000) {
+    		AW = new DenseMatrix(A.numRows(), W.numColumns());
+    	} else {
+    		AW = new LinkedSparseMatrix(A.numRows(), W.numColumns());
+    	}		
 		A.mult(W, AW);
-		System.out.println("\t\tComputing D=(AW)B");
-		Matrix D = new DenseMatrix(AW.numRows(), B.numColumns());
+		if (!quiet) {
+			System.out.println("\t\tComputing D=(AW)B");			
+		}
+		Matrix D = null;
+    	if (AW.numRows() < 10000 & B.numColumns() < 10000) {
+    		D = new DenseMatrix(AW.numRows(), B.numColumns());
+    	} else {
+    		D = new LinkedSparseMatrix(AW.numRows(), B.numColumns());
+    	}		
 		AW.mult(B, D);
 
 		// D = Q .* D;
-		System.out.println("\t\tComputing D.*Q");
+		if (!quiet) {
+			System.out.println("\t\tComputing D.*Q");			
+		}
 		for (MatrixEntry e : W) {
 			if (e.get() > 0) {
 				// leave as it is
@@ -416,10 +427,14 @@ public class MaximumWeightMatching implements FeatureMatching {
 		D.scale(1/maxScore);
 
 		// Wp = (alpha .* W) + ((1-alpha) .* D);
-		System.out.println("\t\tComputing W'=(alpha.*W)+((1-alpha).*D)");
+		if (!quiet) {
+			System.out.println("\t\tComputing W'=(alpha.*W)+((1-alpha).*D)");			
+		}
 		W.scale(alpha);
 		D.scale(1-alpha);
 		scoreArr = W.add(D);
+		maxScore = getMax(scoreArr);
+		scoreArr.scale(1/maxScore);
 
 		// alternatively, Wp = W .* D
 //		System.out.println("\t\tComputing W'=W.*D");
@@ -431,109 +446,15 @@ public class MaximumWeightMatching implements FeatureMatching {
 //			double wNew = dCurr * wCurr;
 //			e.set(wNew);
 //		}
+//		scoreArr = W;
 		
 		long elapsedTime = (System.nanoTime()-startTime)/1000000000;
-		System.out.println("\tElapsed time = " + elapsedTime + "s");
+		if (!quiet) {
+			System.out.println("\tElapsed time = " + elapsedTime + "s");			
+		}
 		
 		return scoreArr;
 		
-	}	
-
-	private Matrix combineScoreLa4j(Matrix scoreArr, Matrix clusteringMen,
-			Matrix clusteringWomen) {
-
-    	System.out.println("\tCombining scores ");
-		long startTime = System.nanoTime();
-		
-		double[][] arr = matrixToArray(scoreArr);
-		org.la4j.matrix.Matrix W = new CCSMatrix(arr);
-		double maxScore = W.max();
-		
-		W.multiply(1/maxScore);
-		System.out.println("\t\tW = " + W.rows() + "x" + W.columns());
-
-		arr = matrixToArray(clusteringMen);
-		org.la4j.matrix.Matrix A = new CCSMatrix(arr);
-		for (int i = 0; i < A.rows(); i++) {
-			A.set(i, i, 0);
-		}
-		System.out.println("\t\tA = " + A.rows() + "x" + A.columns());
-		 
-		arr = matrixToArray(clusteringWomen);
-		org.la4j.matrix.Matrix B = new CCSMatrix(arr);
-		for (int i = 0; i < B.rows(); i++) {
-			B.set(i, i, 0);
-		}
-		System.out.println("\t\tB = " + B.rows() + "x" + B.columns());
-
-		// D = (A*W)*B;
-		System.out.println("\t\tComputing D=(AW)");
-		org.la4j.matrix.Matrix AW = new CCSMatrix(A.rows(), W.columns());
-		AW = A.multiply(W);
-		System.out.println("\t\tComputing D=(AW)B");
-		org.la4j.matrix.Matrix D = new CCSMatrix(AW.rows(), B.columns());
-		D = AW.multiply(B);
-
-		// D = Q .* D;
-		System.out.println("\t\tComputing D.*Q");
-		for (int i = 0; i < D.rows(); i++) {
-			for (int j = 0; j < D.columns(); j++) {
-				double val = W.get(i, j);
-				if (val > 0) {
-					// leave as it is
-				} else {
-					D.set(i, j, 0);
-				}
-			}
-		}
-		
-		// D = D ./ max(max(D));
-		maxScore = D.max();
-		D.multiply(1/maxScore);
-
-		// Wp = (alpha .* W) + ((1-alpha) .* D);
-		System.out.println("\t\tComputing W'=(alpha.*W)+((1-alpha).*D)");
-		W.multiply(alpha);
-		D.multiply(1-alpha);
-		org.la4j.matrix.Matrix temp = W.add(D);
-		scoreArr = toOld(temp);
-
-		// alternatively, Wp = W .* D
-//		System.out.println("\t\tComputing W'=W.*D");
-//		for (MatrixEntry e : W) {
-//			int row = e.row();
-//			int col = e.column();
-//			double dCurr = D.get(row, col);
-//			double wCurr = e.get();
-//			double wNew = dCurr * wCurr;
-//			e.set(wNew);
-//		}
-		
-		long elapsedTime = (System.nanoTime()-startTime)/1000000000;
-		System.out.println("\tElapsed time = " + elapsedTime + "s");
-		
-		return scoreArr;
-		
-	}
-
-	private Matrix toOld(org.la4j.matrix.Matrix temp) {
-		Matrix oldMat = new DenseMatrix(temp.rows(), temp.columns());
-		for (int i = 0; i < temp.rows(); i++) {
-			for (int j = 0; j < temp.columns(); j++) {
-				oldMat.set(i, j, temp.get(i, j));
-			}
-		}
-		return oldMat;
-	}
-
-	private double[][] matrixToArray(Matrix matrix) {
-		double[][] arr = new double[matrix.numRows()][matrix.numColumns()];
-		Iterator<MatrixEntry> iter = matrix.iterator();
-		while (iter.hasNext()) {
-			MatrixEntry entry = iter.next();
-			arr[entry.row()][entry.column()] = entry.get();
-		}
-		return arr;
 	}	
 	
 	private double getMax(Matrix matrix) {
@@ -545,6 +466,15 @@ public class MaximumWeightMatching implements FeatureMatching {
 			}
 		}
 		return maxScore;
+	}
+	
+	private void normalise(Matrix matrix) {
+		double maxScore = this.getMax(matrix);
+		for (MatrixEntry e : matrix) {
+			double val = e.get();
+			val = val / maxScore;
+			e.set(val);
+		}
 	}
 	
 	private double[][] toArray(Matrix matrix) {

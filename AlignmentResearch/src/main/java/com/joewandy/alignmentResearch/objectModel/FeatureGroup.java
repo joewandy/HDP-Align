@@ -12,6 +12,7 @@ public class FeatureGroup {
 	protected Set<Feature> members;
 	private boolean deleted;
 	private boolean matched;
+	private double score;
 	
 	public FeatureGroup(int groupId) {
 		this.groupId = groupId;
@@ -74,6 +75,14 @@ public class FeatureGroup {
 
 	public void setMatched(boolean matched) {
 		this.matched = matched;
+	}
+
+	public double getScore() {
+		return score;
+	}
+
+	public void setScore(double score) {
+		this.score = score;
 	}
 
 	public double getAverageMz() {
@@ -146,6 +155,7 @@ public class FeatureGroup {
 		return "FeatureGroup [groupId=" + groupId 
 				+ ", alignedCount=" + this.getAlignedFeatureCount() 
 				+ ", features=" + this.getFeatureIDs() 
+				+ ", score=" + this.getScore()
 				+ "]";
 	}
 	

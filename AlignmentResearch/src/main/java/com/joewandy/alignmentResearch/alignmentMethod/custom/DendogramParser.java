@@ -17,9 +17,8 @@ public class DendogramParser {
 	private double massTol;
 	private double rtTol;
 	private boolean useGroup;
+	private boolean exactMatch;
 	private double alpha;
-	private String groupingMethod;
-	private FeatureGroupingMethod featureGroupingMethod;
 
 	// TODO: ugly hack. Map between the filename (without extension) and the file object. 
 	// should rewrite the hierarchical clustering code ourselves to deal with the alignment file object directly
@@ -27,8 +26,8 @@ public class DendogramParser {
 	private Map<String, AlignmentFile> dataMap;
 
 	public DendogramParser(Cluster cluster, Map<String, AlignmentFile> dataMap, 
-			ExtendedLibrary library, double massTol, double rtTol, boolean useGroup, 
-			double alpha, String groupingMethod, FeatureGroupingMethod featureGroupingMethod) {
+			ExtendedLibrary library, double massTol, double rtTol, boolean useGroup, boolean exactMatch,
+			double alpha) {
 		this.cluster = cluster;
 		this.dataMap = dataMap;
 		this.library = library;
@@ -36,8 +35,6 @@ public class DendogramParser {
 		this.rtTol = rtTol;
 		this.useGroup = useGroup;
 		this.alpha = alpha;
-		this.groupingMethod = groupingMethod;
-		this.featureGroupingMethod = featureGroupingMethod;
 	}
 
 	public String traverse(int indent) {
@@ -57,7 +54,7 @@ public class DendogramParser {
 		output += "\n";
 		for (Cluster child : cluster.getChildren()) {
 			DendogramParser parser = new DendogramParser(child, dataMap, 
-					library, massTol, rtTol, useGroup, alpha, groupingMethod, featureGroupingMethod);
+					library, massTol, rtTol, useGroup, exactMatch, alpha);
 			output += parser.traverse(indent + 1);
 		}
 		return output;
@@ -95,16 +92,17 @@ public class DendogramParser {
 			}
 			
 			// now then actually do the merging
+			boolean quiet = false;
 			for (Cluster child : reordered) {
 
 				DendogramParser parser = new DendogramParser(child, dataMap, 
-						library, massTol, rtTol, useGroup, alpha, groupingMethod, featureGroupingMethod);
+						library, massTol, rtTol, useGroup, exactMatch, alpha);
 				AlignmentList childList = parser.buildAlignment();
 
 //				FeatureMatching matcher = new StableMatching(clusterName, alignedList, childList, 
 //						library, massTol, rtTol, useGroup, alpha);
 				FeatureMatching matcher = new MaximumWeightMatching(clusterName, alignedList, childList, 
-						library, massTol, rtTol, useGroup, alpha, featureGroupingMethod);
+						massTol, rtTol, useGroup, exactMatch, alpha, quiet);
 //				FeatureMatching matcher = new DynamicProgrammingMatching(clusterName, alignedList, childList, 
 //						library, massTol, rtTol);
 //				FeatureMatching matcher = new GreedyScoreMatching(clusterName, alignedList, childList, 

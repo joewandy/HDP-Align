@@ -1,16 +1,19 @@
 package com.joewandy.alignmentResearch.main.experiment;
 
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
 
 import com.joewandy.alignmentResearch.alignmentExperiment.AlignmentData;
-import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodFactory;
 import com.joewandy.alignmentResearch.main.MultiAlign;
 import com.joewandy.alignmentResearch.main.MultiAlignCmdOptions;
-import com.joewandy.alignmentResearch.main.MultiAlignConstants;
+import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.EvaluationResult;
 
 public abstract class GenerativeExperiment extends MultiAlignBaseExp implements MultiAlignExperiment {
@@ -55,11 +58,58 @@ public abstract class GenerativeExperiment extends MultiAlignBaseExp implements 
 				
 			}
 			results.add(tempResult);
+			
+			// save generated input files and ground truth
+			saveOutput(data, options, i);
 																			
 		} 
 		
+		
 		return results;
 		
+	}
+
+	private void saveOutput(AlignmentData data, MultiAlignCmdOptions options,
+			int i) {
+
+		System.out.println("Saving generated data to " + options.output);
+		try {
+		
+			// save features in sima format
+			String inputPath = options.output + "/rep_" + i + "/input";
+			createDir(inputPath);
+			for (AlignmentFile file : data.getAlignmentDataList()) {
+				String destPath = inputPath + "/" + file.getFilenameWithoutExtension() + ".txt";
+				file.saveSimaFeatures(destPath);
+				System.out.println("\t" + destPath + " saved");
+			}
+
+			// save features in csv format
+			inputPath = options.output + "/rep_" + i + "/input/csv";
+			createDir(inputPath);
+			for (AlignmentFile file : data.getAlignmentDataList()) {
+				String destPath = inputPath + "/" + file.getFilenameWithoutExtension() + ".csv";
+				file.saveCsvFeatures(destPath);
+				System.out.println("\t" + destPath + " saved");
+			}
+			
+			// save ground truth
+			final String gtPath = options.output + "/rep_" + i + "/ground_truth.txt";
+			data.saveGroundTruth(gtPath);
+			System.out.println("\t" + gtPath + " saved");
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+								
+	}
+
+	private void createDir(final String inputPath) throws IOException {
+		final File tempDir = new File(inputPath);
+		if (!tempDir.exists() && !tempDir.mkdirs()) {
+		    throw new IOException("Unable to create " + tempDir.getAbsolutePath());
+		}
+		FileUtils.cleanDirectory(tempDir);
 	}
 
 	@Override

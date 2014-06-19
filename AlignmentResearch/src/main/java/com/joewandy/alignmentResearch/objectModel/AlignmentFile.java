@@ -1,6 +1,7 @@
 package com.joewandy.alignmentResearch.objectModel;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -358,6 +359,27 @@ public class AlignmentFile {
 		
 	}
 
+	public void saveCsvFeatures(String path) throws IOException {
+		
+		PrintWriter pw = new PrintWriter(new FileOutputStream(path));
+		pw.println("peakID, mass, rt, intensity");
+		for (Feature feature : this.features) {
+			pw.println(feature.csvForm());						
+		}
+		pw.close();
+		
+	}
+	
+	public void saveSimaFeatures(String path) throws IOException {
+		
+		PrintWriter pw = new PrintWriter(new FileOutputStream(path));
+		for (Feature feature : this.features) {
+			pw.println(feature.csvFormForSima());						
+		}
+		pw.close();
+		
+	}
+	
 
 	@Override
 	public int hashCode() {

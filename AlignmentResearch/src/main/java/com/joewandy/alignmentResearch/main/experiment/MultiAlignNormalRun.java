@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.joewandy.alignmentResearch.alignmentExperiment.AlignmentData;
+import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
 import com.joewandy.alignmentResearch.main.MultiAlign;
 import com.joewandy.alignmentResearch.main.MultiAlignCmdOptions;
 import com.joewandy.alignmentResearch.main.MultiAlignConstants;
@@ -20,6 +21,7 @@ public class MultiAlignNormalRun extends MultiAlignBaseExp implements MultiAlign
 		AlignmentData data = getData(options, null);
 
 		final long startTime = System.currentTimeMillis();
+		// cluster peaks within files
 		MultiAlign multiAlign = new MultiAlign(options, data);
 		EvaluationResult evalRes = multiAlign.runExperiment();	
 		if (evalRes != null) {

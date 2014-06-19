@@ -94,11 +94,7 @@ public class SimaAlignment extends BaseAlignment implements AlignmentMethod {
 		for (AlignmentFile data : dataList) {
 			String out = SimaAlignment.TEMP_INPUT_DIR + "/" + 
 					data.getFilenameWithoutExtension() + ".csv";
-			PrintWriter pw = new PrintWriter(new FileOutputStream(out));
-			for (Feature feature : data.getFeatures()) {
-				pw.println(feature.csvFormForSima());						
-			}
-			pw.close();
+			data.saveSimaFeatures(out);
 			System.out.println("Written to " + out);
 		}
 		return tempDirPath;

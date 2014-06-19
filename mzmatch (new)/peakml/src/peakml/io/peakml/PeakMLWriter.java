@@ -15,6 +15,7 @@ import domsax.*;
 import peakml.*;
 import peakml.io.*;
 import peakml.util.*;
+import peakml.util.Base64;
 
 
 

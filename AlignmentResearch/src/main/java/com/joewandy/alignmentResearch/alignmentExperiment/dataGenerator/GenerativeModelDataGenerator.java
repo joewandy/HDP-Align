@@ -307,9 +307,6 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 			// features are observed only if it's below the intensity threshold and by its probability
 			if (theoFeature.getIntensity() > params.getThreshold_q() && 
 					Math.random() < params.getProbP()) {
-
-				Feature observedFeature = new Feature(observedPeakID);
-				observedPeakID++;
 				
 				// get the observed mass, intensity and RT
 				int id = theoFeature.getPeakID();
@@ -326,11 +323,17 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 					continue;
 				}
 				
+				if (observedIntensity < 0) {
+					continue;
+				}
+
+				Feature observedFeature = new Feature(observedPeakID);
 				observedFeature.setMass(observedMass);
 				observedFeature.setIntensity(observedIntensity);
 				observedFeature.setRt(observedRT);
 				observedFeature.setTheoPeakID(id);
 				observedFeatures.add(observedFeature);
+				observedPeakID++;
 				
 				GenerativeFeatureGroup group = (GenerativeFeatureGroup) theoFeature.getFirstGroup();
 				GenerativeMolecule mol = group.getParent();

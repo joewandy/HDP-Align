@@ -1,6 +1,6 @@
 package com.joewandy.alignmentResearch.alignmentMethod.custom;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -45,7 +45,7 @@ public class HdpSimpleMatching implements FeatureMatching {
 	}
 
 	public AlignmentList getMatchedList() {
-			
+		
 		// nothing in masterlist to match against, just return the childlist directly
 		if (masterList.getRowsCount() == 0) {
 			return childList;
@@ -54,17 +54,17 @@ public class HdpSimpleMatching implements FeatureMatching {
 		// do max weight matching here ...
 		
 		System.out.println("Running maximum weight matching on " + listId);
-		Map<AlignmentRow, AlignmentRow> stableMatch = match(masterList, childList);
+		List<MatchResult> matchResults = match(masterList, childList);
 		
 		// construct a new list and merge the matched entries together
-		System.out.println("\tMerging matched results = " + stableMatch.size() + " entries");
+		System.out.println("\tMerging matched results = " + matchResults.size() + " entries");
 		AlignmentList matchedList = new AlignmentList(listId);
 		int rowId = 0;
 		int rejectedCount = 0;		
-		for (Entry<AlignmentRow, AlignmentRow> match : stableMatch.entrySet()) {
+		for (MatchResult match : matchResults) {
 
-			AlignmentRow row1 = match.getKey();
-			AlignmentRow row2 = match.getValue();
+			AlignmentRow row1 = match.getRow1();
+			AlignmentRow row2 = match.getRow2();
 						
 			row1.setAligned(true);
 			row2.setAligned(true);
@@ -72,6 +72,24 @@ public class HdpSimpleMatching implements FeatureMatching {
 			AlignmentRow merged = new AlignmentRow(masterList, rowId++);
 			merged.addAlignedFeatures(row1.getFeatures());
 			merged.addAlignedFeatures(row2.getFeatures());
+			
+			// this won't work if aligning more than 2 files ?
+			Feature feature1 = row1.getFirstFeature();
+			Feature feature2 = row2.getFirstFeature();
+			HdpResult example = new HdpResult(feature1, feature2);
+			HdpResult searched = hdpResults.get(example);
+
+			// assign score
+			double sim = 0;
+			if (searched != null) {
+				sim = searched.getSimilarity();
+			}			
+			double score = 0;
+//			score = match.getScore();
+			score = sim;
+//			score = (sim + match.getScore()) / 2;
+//			score = (sim * match.getScore());			
+			merged.setScore(score);			
 			
 			matchedList.addRow(merged);
 
@@ -105,8 +123,7 @@ public class HdpSimpleMatching implements FeatureMatching {
 		System.out.println("\tRejected rows = " + rejectedCount);
 		return matchedList;
 
-	}
-	
+	}	
 	private List<AlignmentRow> getMen(AlignmentList masterList, AlignmentList childList) {
 		List<AlignmentRow> men = masterList.getRows();
 		return men;
@@ -117,28 +134,28 @@ public class HdpSimpleMatching implements FeatureMatching {
 		return women;
 	}
 		
-    private Map<AlignmentRow, AlignmentRow> match(AlignmentList masterList, AlignmentList childList) {
+    private List<MatchResult> match(AlignmentList masterList, AlignmentList childList) {
 
 		System.out.println("\tmasterList " + masterList.getId());
 		System.out.println("\tchildList " + childList.getId());		
 		List<AlignmentRow> men = getMen(masterList, childList);
 		List<AlignmentRow> women = getWomen(masterList, childList);
     	
-        Map<AlignmentRow, AlignmentRow> matches = new HashMap<AlignmentRow, AlignmentRow>();        
+        List<MatchResult> matches = new ArrayList<MatchResult>();        
 		Matrix scoreArr = computeScores(men, women);  
 		matches = approxMaxMatching(scoreArr, men, women);        				        
         return matches;
         
     }
     
-	private Map<AlignmentRow, AlignmentRow> approxMaxMatching(Matrix scoreArr, 
+	private List<MatchResult> approxMaxMatching(Matrix scoreArr, 
 			List<AlignmentRow> men, 
 			List<AlignmentRow> women) {
 		
 		// running matching
 		System.out.println("\tRunning approximately maximum greedy matching ");
 		PathGrowing algo = new PathGrowing(scoreArr, men, women, massTol, rtTol);
-		Map<AlignmentRow, AlignmentRow> matches = algo.executeGreedy();
+		List<MatchResult> matches = algo.executeGreedy();
 		return matches;
 		
 	}
@@ -206,28 +223,12 @@ public class HdpSimpleMatching implements FeatureMatching {
 		double mass1 = row1.getAverageMz();
 		double mass2 = row2.getAverageMz();
 		
-		/*
 		double rt1 = row1.getAverageRt();
 		double rt2 = row2.getAverageRt();
 		double rt = rt1 - rt2;
 		double mz = mass1 - mass2;
         double dist = Math.sqrt((rt*rt)/(rtTol*rtTol) + (mz*mz)/(massTol*massTol));
-        */
-		
-		// this won't work if aligning more than 2 files
-		Feature feature1 = row1.getFirstFeature();
-		Feature feature2 = row2.getFirstFeature();
-		HdpResult example = new HdpResult(feature1, feature2);
-		HdpResult searched = hdpResults.get(example);
-		double rt = 0;
-		if (searched != null) {
-			rt = searched.getDistance();
-		} else {
-			rt = 1.0;
-		}
-		double mz = mass1 - mass2;
-        double dist = Math.sqrt((rt*rt)/(distStdev*distStdev) + (mz*mz)/(massTol*massTol));
-        
+				
         return dist;
 
 	}

@@ -29,15 +29,19 @@ public class GroundTruth {
 	
 	public GroundTruth(List<GroundTruthFeatureGroup> groundTruthEntries) {		
 		
-		this.groundTruth = groundTruthEntries;
-		Map<Integer, Integer> sizeMap = new HashMap<Integer, Integer>();
+		this.groundTruth = groundTruthEntries;		
+		buildPairwise();
 		
+	}
+
+	public void buildPairwise() {
+		
+		Map<Integer, Integer> sizeMap = new HashMap<Integer, Integer>();		
 		this.G = new HashSet<Feature>();
 		G.addAll(this.getAllUniqueFeatures());
 				
 		// convert ground truth entries into a pairwise of aligned features
 		this.pairwiseGroundTruth = new ArrayList<GroundTruthPair>();
-		int groupID = 1;
 		System.out.print("Generating all positive pairwise combinations ");
 		for (GroundTruthFeatureGroup g : this.groundTruth) {
 
@@ -63,14 +67,12 @@ public class GroundTruth {
 				Feature f2 = combination.getValue(1);	
 				GroundTruthPair pairwise = getGroundTruthPair(f1, f2);
 				pairwiseGroundTruth.add(pairwise);
-				groupID++;
 			}
 						
 		}		
 		System.out.println();
 		System.out.println("Total pairwise ground truth combinations = " + pairwiseGroundTruth.size());
 		System.out.println(sizeMap);
-		
 	}
 
 	private GroundTruthPair getGroundTruthPair(Feature f1, Feature f2) {
@@ -134,6 +136,10 @@ public class GroundTruth {
 	public int getGroundTruthGroupsCount() {
 		return groundTruth.size();
 	}
+	
+	public List<GroundTruthFeatureGroup> getGroundTruthFeatureGroups() {
+		return this.groundTruth;
+	}
 
 	public void clearFeature(Feature example) {
 		Iterator<GroundTruthFeatureGroup> it = this.groundTruth.iterator();
@@ -145,6 +151,16 @@ public class GroundTruth {
 				if (group.getFeatureCount() == 0) {
 					it.remove();
 				}
+			}
+		}
+	}
+
+	public void removeFeature(Feature example) {
+		boolean found = false;
+		for (GroundTruthFeatureGroup gtg : this.groundTruth) {
+			found = gtg.clearFeature(example);
+			if (found) {
+				break;
 			}
 		}
 	}
@@ -195,6 +211,7 @@ public class GroundTruth {
 				}								
 				int count = getIntersectCount(toolConsensus, gtConsensus);
 				if (count > 0) {
+//					System.out.println(toolConsensus);
 					toolAll.addFeatures(toolConsensus.getFeatures());
 					m++;
 				}
@@ -217,6 +234,9 @@ public class GroundTruth {
 
 			totalTp += tp;
 			totalFp += fp;
+//			if (fp > 0) {
+//				System.out.println();
+//			}
 			totalPositives += toolAllCount;
 			
 			// total number of groups that are aligned from tool for all gold_i
@@ -339,6 +359,7 @@ public class GroundTruth {
 			FeatureGroup group = new FeatureGroup(groupID);
 			groupID++;
 			group.addFeatures(alignedFeatures);
+			group.setScore(row.getScore());
 			tool.add(group);
 
 		}
@@ -492,24 +513,31 @@ public class GroundTruth {
 	
 	public static boolean compareFeature(Feature f1, Feature f2) {
 
-		double mass1 = f1.getMass();
-		double rt1 = f1.getRt();
-		double intense1 = f1.getIntensity();
+//		double mass1 = f1.getMass();
+//		double rt1 = f1.getRt();
+//		double intense1 = f1.getIntensity();
+//		
+//		double mass2 = f2.getMass();
+//		double rt2 = f2.getRt();
+//		double intense2 = f2.getIntensity();
+//	
+//		boolean massOk = compareDouble(mass1, mass2);
+//		boolean rtOk = compareDouble(rt1, rt2);
+//		boolean intenseOk = compareDouble(intense1, intense2);
+//		
+//		return (massOk && rtOk && intenseOk);
 		
-		double mass2 = f2.getMass();
-		double rt2 = f2.getRt();
-		double intense2 = f2.getIntensity();
-	
-		boolean massOk = compareDouble(mass1, mass2);
-		boolean rtOk = compareDouble(rt1, rt2);
-		boolean intenseOk = compareDouble(intense1, intense2);
+		if (f1.getPeakID() == f2.getPeakID() && 
+				f1.getData().equals(f2.getData())) {
+			return true;
+		} else {
+			return false;
+		}
 		
-		return (massOk && rtOk && intenseOk);
-	
 	}
 		
 	public static boolean compareDouble(double a, double b){
 	    return a == b ? true : Math.abs(a - b) < EPSILON;
 	}	
-	
+			
 }

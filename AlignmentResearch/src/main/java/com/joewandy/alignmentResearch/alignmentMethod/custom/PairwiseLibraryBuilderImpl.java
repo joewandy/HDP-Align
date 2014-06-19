@@ -20,22 +20,19 @@ public abstract class PairwiseLibraryBuilderImpl implements Runnable, PairwiseLi
 	protected BlockingQueue<AlignmentLibrary> queue;
 
 	protected int libraryID;
-	protected double massTolerance;
-	protected double rtTolerance;
+	protected AlignmentMethodParam param;
 	protected AlignmentFile data1;
 	protected AlignmentFile data2;
 
 	public PairwiseLibraryBuilderImpl(BlockingQueue<AlignmentLibrary> queue,
-			int libraryID, double massTolerance, double rtTolerance, AlignmentFile data1, AlignmentFile data2) {
+			int libraryID, AlignmentMethodParam param, AlignmentFile data1, AlignmentFile data2) {
 		this.queue = queue;
 		this.libraryID = libraryID;
-		this.massTolerance = massTolerance;
-		this.rtTolerance = rtTolerance;
+		this.param = param;
 		this.data1 = data1;
 		this.data2 = data2;
 	}
 
-	
 	public void run() {
 		try {
 			queue.put(producePairwiseLibrary());
@@ -51,19 +48,13 @@ public abstract class PairwiseLibraryBuilderImpl implements Runnable, PairwiseLi
 		List<AlignmentFile> files = new ArrayList<AlignmentFile>();
 		files.add(data1);
 		files.add(data2);
-
-		AlignmentMethodParam.Builder paramBuilder = new AlignmentMethodParam.Builder(massTolerance, rtTolerance);
-		paramBuilder.usePpm(MultiAlignConstants.ALIGN_BY_RELATIVE_MASS_TOLERANCE);
-		AlignmentMethodParam param = paramBuilder.build();
-		AlignmentMethod pairwiseAligner = getAlignmentMethod(files, param);
+		AlignmentMethod pairwiseAligner = getAlignmentMethod(files);
 
 		AlignmentList result = pairwiseAligner.align();
 		List<AlignmentRow> rows = result.getRows();
 
 		AlignmentLibrary library = new AlignmentLibrary(libraryID, data1, data2);
-
-		// find max dist and set some flags
-		double maxDist = 0;
+		int count = 0;
 		for (AlignmentRow row : rows) {
 
 			// TODO: hack .. mark all features as unaligned, necessary when doing the final alignment later
@@ -71,50 +62,28 @@ public abstract class PairwiseLibraryBuilderImpl implements Runnable, PairwiseLi
 			for (Feature f : row.getFeatures()) {
 				f.setAligned(false);
 			}
-			
+
+			if (row.getScore() > 0) {
+				count++;
+			}
+
 			// consider only rows containing pairwise alignment
 			if (row.getFeaturesCount() == 2) {
 				Feature[] features = row.getFeatures().toArray(new Feature[0]);
 				Feature f1 = features[0];
 				Feature f2 = features[1];
-				double dist = computeDist(f1, f2);
-				if (dist > maxDist) {
-					maxDist = dist;
-				}
+				double score = row.getScore();
+				library.addAlignedPair(f1, f2, score, 1);					
 			}
 			
 		}
-		
-		// compute similarities and add to library
-		final double weight = 1;
-		for (AlignmentRow row : rows) {
-			// consider only rows containing pairwise alignment
-			if (row.getFeaturesCount() == 2) {
-				Feature[] features = row.getFeatures().toArray(new Feature[0]);
-				Feature f1 = features[0];
-				Feature f2 = features[1];
-				double dist = computeDist(f1, f2);
-				double score = 1-(dist/maxDist);
-				library.addAlignedPair(f1, f2, score, weight);					
-			}
-		}
-		
-		System.out.println("#" + String.format("%04d ", libraryID) + 
-				"(" + data1.getFilenameWithoutExtension() + ", " + data2.getFilenameWithoutExtension() + ")" +  
-				" pairwise alignments = " + library.getAlignedPairCount() + 
-				" average library weight = " + String.format("%.3f", library.getAvgWeight()));
+
+		// just to make sure that scores set correctly ..
+//		assert(count>0);		
 		return library;
 		
 	}
 
-	protected abstract AlignmentMethod getAlignmentMethod(List<AlignmentFile> files, AlignmentMethodParam param);
-
-	protected double computeDist(Feature f1, Feature f2) {
-
-		DistanceCalculator calc = new MahalanobisDistanceCalculator(massTolerance, rtTolerance);
-		double dist = calc.compute(f1.getMass(), f2.getMass(), f1.getRt(), f2.getRt());
-		return dist;
-		
-	}
+	protected abstract AlignmentMethod getAlignmentMethod(List<AlignmentFile> files);
 
 }

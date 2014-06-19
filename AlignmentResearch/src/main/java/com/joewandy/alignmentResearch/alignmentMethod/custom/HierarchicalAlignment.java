@@ -12,56 +12,27 @@ import com.joewandy.alignmentResearch.objectModel.ExtendedLibrary;
 import com.joewandy.alignmentResearch.objectModel.FeatureGroupingMethod;
 
 public class HierarchicalAlignment extends MyMaximumMatchingAlignment implements AlignmentMethod {
-
-	private boolean useGroup;
-	private double alpha;
 	
-	/**
-	 * Creates a simple aligner
-	 * @param dataList List of feature data to align
-	 * @param massTolerance Mass tolerance in ppm
-	 * @param rtTolerance Retention time tolerance in seconds
-	 * @param rtDrift 
-	 */
-	public HierarchicalAlignment(List<AlignmentFile> dataList, AlignmentMethodParam param) {		
+	public HierarchicalAlignment(List<AlignmentFile> dataList, AlignmentMethodParam param, ExtendedLibrary extendedLibrary) {		
 		super(dataList, param);
-		this.useGroup = param.isUseGroup();
-		this.alpha = param.getAlpha();
+		this.library = extendedLibrary;
 	}
 	
 	@Override
 	public AlignmentList matchFeatures() {
-
-		FeatureGroupingMethod groupingMethod = null;
-		if (useGroup) {
-			groupingMethod = groupFeatures();			
-		}
 		
-		ExtendedLibraryBuilder builder = new ExtendedLibraryBuilder(dataList, massTolerance, rtTolerance);		
-		Map<Double, List<AlignmentLibrary>> metaLibraries = builder.buildPrimaryLibrary();
-		ExtendedLibrary extendedLibrary = builder.combineLibraries(metaLibraries);
-//		ExtendedLibrary extendedLibrary = builder.extendLibrary(builder.combineLibraries(metaLibraries));
-
 		System.out.println("ALIGNMENT");
-		AlignmentList alignedList = align(extendedLibrary, groupingMethod);
-
-		return alignedList;
-				
-	}
-
-	private AlignmentList align(ExtendedLibrary extendedLibrary, FeatureGroupingMethod featureGroupingMethod) {
-
 		AlignmentList alignedList = new AlignmentList("");
 		
 		// using guide tree and maximum matching
 		DendogramBuilder builder = new DendogramBuilder(dataList, 
-				extendedLibrary, massTolerance, rtTolerance, useGroup, alpha, groupingMethod, featureGroupingMethod);
+				library, massTolerance, rtTolerance, useGroup, exactMatch, alpha);
 		if (!dataList.isEmpty()) {
 			alignedList = builder.align();			
 		}
 				
 		return alignedList;
-
+				
 	}
 		
 }

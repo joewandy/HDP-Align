@@ -67,10 +67,6 @@ public class BaselineAlignment extends BaseAlignment implements AlignmentMethod 
 		for (int i = 0; i < dataList.size(); i++) {
 
 			AlignmentFile data = dataList.get(i);
-			if (!silent) {
-				System.out.println("Aligning #" + (i+1) + ": " + data);				
-			}
-
 			for (Feature feature : data.getSortedFeatures()) {
 
 				// process unaligned features

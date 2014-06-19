@@ -23,7 +23,7 @@ function hdp = assign_clusters(hdp)
                 hdp.fi(parent_i) = [];
                 hdp.ti(parent_i) = [];
                 hdp.I = hdp.I - 1;
-
+                
             end
                         
             % for existing metabolite

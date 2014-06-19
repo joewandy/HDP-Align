@@ -5,18 +5,35 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.joewandy.alignmentResearch.alignmentExperiment.AlignmentData;
+import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
 import com.joewandy.alignmentResearch.main.MultiAlign;
-import com.joewandy.alignmentResearch.main.MultiAlignCmd;
 import com.joewandy.alignmentResearch.main.MultiAlignCmdOptions;
+import com.joewandy.alignmentResearch.main.MultiAlignConstants;
 import com.joewandy.alignmentResearch.objectModel.EvaluationResult;
 
 public class M1Experiment extends MultiAlignBaseExp implements MultiAlignExperiment {
 
+	public static final double[] ALL_ALPHA = { 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0  };
+	public static final double[] ALL_GROUPING_RT = { 
+		1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+	};
+	public static final double[] ALL_ALIGNMENT_MZ = { 0.05, 0.1, 0.25 };
+	public static final double[] ALL_ALIGNMENT_RT = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
+	
 	public List<MultiAlignExpResult> performExperiment(
 			MultiAlignCmdOptions options) throws FileNotFoundException {
 		
 		List<MultiAlignExpResult> results = new ArrayList<MultiAlignExpResult>();
 		MultiAlignExpResult expResult = new MultiAlignExpResult("");
+		
+		double[] alphas = new double[] { options.alpha };	
+		double[] groupingRts = new double[] { options.groupingRtWindow };														
+		if (options.autoAlpha) {
+			alphas = ALL_ALPHA;
+		}
+		if (options.autoOptimiseGreedy && options.useGroup && MultiAlignConstants.GROUPING_METHOD_GREEDY.equals(options.groupingMethod)) {
+			groupingRts = ALL_GROUPING_RT;
+		}		
 		
 		// quick hack: obtained from randsample(44, 2)
 		// only works for M1 !!
@@ -38,8 +55,9 @@ public class M1Experiment extends MultiAlignBaseExp implements MultiAlignExperim
 		};
 		
 		assert(trainingIndices.length == testingIndices.length);
+		
 		for (int i = 0; i < trainingIndices.length; i++) {
-								
+			
 			System.out.println();
 			System.out.println("################## TRAINING PHASE iter " + (i+1) + " ################## ");
 			
@@ -49,22 +67,34 @@ public class M1Experiment extends MultiAlignBaseExp implements MultiAlignExperim
 			// pick n files randomly to 'train'
 			MultiAlignExpResult tempResult = new MultiAlignExpResult("test");	
 			AlignmentData data = getData(options, trainingSet);	
-			for (double alignmentRt : MultiAlignExperiment.ALL_ALIGNMENT_RT) {
+			// cluster peaks within files
+			for (double alignmentMz : ALL_ALIGNMENT_MZ) {
+				for (double alignmentRt : ALL_ALIGNMENT_RT) {
+					for (int k = 0; k < groupingRts.length; k++) {
+						for (int j = 0; j < alphas.length; j++) {
 				
-				System.out.println();
-				System.out.println("--- alignmentRt = " + alignmentRt + " ---");
-				System.out.println();
+							System.out.println();
+							System.out.println("--- alignmentMz = " + alignmentMz + " alignmentRt = " + alignmentRt + 
+									" groupingRt = " + groupingRts[k] + " alpha = " + alphas[j] + " ---");
+							System.out.println();
 
-				options.alignmentRtWindow = alignmentRt;
-				MultiAlign multiAlign = new MultiAlign(options, data);
-				EvaluationResult evalRes = multiAlign.runExperiment();	
-				if (evalRes != null) {
-					evalRes.setTh(options.alpha);
-					String note = options.alpha + ", " + options.groupingRtWindow;
-					evalRes.setNote(note);
-					tempResult.addResult(evalRes);	
-				}						
-				
+							options.alignmentPpm = alignmentMz;
+							options.alignmentRtWindow = alignmentRt;
+							options.alpha = alphas[j];
+							options.groupingRtWindow = groupingRts[k];
+							MultiAlign multiAlign = new MultiAlign(options, data);
+							EvaluationResult evalRes = multiAlign.runExperiment();	
+							if (evalRes != null) {
+								evalRes.setTh(options.alpha);
+								String note = options.alpha + ", " + options.groupingRtWindow;
+								evalRes.setNote(note);
+								tempResult.addResult(evalRes);	
+							}		
+					
+						}
+					}
+
+				}
 			}
 			
 			// report the result on another set of random n files
@@ -73,13 +103,24 @@ public class M1Experiment extends MultiAlignBaseExp implements MultiAlignExperim
 			data = getData(options,	testingSet);	
 			if (bestResult != null) {
 
+				double bestMz = bestResult.getDmz();
 				double bestRt = bestResult.getDrt();
+				options.alignmentPpm = bestMz;
 				options.alignmentRtWindow = bestRt;
+				String bestNote = bestResult.getNote();
+				String[] toks = bestNote.split(",");
+				double bestAlpha = Double.parseDouble(toks[0].trim());
+				double bestGroupingRtWindow = Double.parseDouble(toks[1].trim());
+				options.alpha = bestAlpha;
+				options.groupingRtWindow = bestGroupingRtWindow;
 				System.out.println();
 				System.out.println("##################  TESTING PHASE ################## ");
-				System.out.println("################## bestRt = " + bestRt + " ##################");
+				System.out.println("--- alignmentMz = " + bestMz + " alignmentRt = " + bestRt + 
+						" groupingRt = " + bestGroupingRtWindow + " alpha = " + bestAlpha + " ---");
 				System.out.println();
+				// cluster peaks within files
 				MultiAlign multiAlign = new MultiAlign(options, data);
+				multiAlign = new MultiAlign(options, data);
 				EvaluationResult evalRes = multiAlign.runExperiment();	
 				if (evalRes != null) {
 					evalRes.setTh(options.alpha);

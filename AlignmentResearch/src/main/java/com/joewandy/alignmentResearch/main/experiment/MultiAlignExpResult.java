@@ -24,7 +24,7 @@ public class MultiAlignExpResult {
 		EvaluationResult best = null;
 		System.out.println("Finding best result");
 		for (EvaluationResult res : results) {
-			System.out.println("\talignmentRt=" + res.getDrt() + " f1=" + res.getF1());
+			System.out.println("\tmz=" + res.getDmz() + " rt=" + res.getDrt() + " note=" + res.getNote() + " f1=" + res.getF1());
 			if (res.getF1() > lowest) {
 				best = res;
 				lowest = best.getF1();
@@ -66,6 +66,15 @@ public class MultiAlignExpResult {
 		}
 		System.out.println(" ]';");		
 
+		System.out.print(label + "_f05 = [ ");
+		for (EvaluationResult result : results) {
+			if (result == null) {
+				continue;
+			}
+			System.out.print(String.format("%.3f,", result.getF05()));
+		}
+		System.out.println(" ]';");		
+		
 		System.out.print(label + "_total_tp = [ ");
 		for (EvaluationResult result : results) {
 			if (result == null) {

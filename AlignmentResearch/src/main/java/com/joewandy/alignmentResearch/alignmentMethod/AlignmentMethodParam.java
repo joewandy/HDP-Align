@@ -52,6 +52,11 @@ public class AlignmentMethodParam {
 	 * Use grouping information during alignment ?
 	 */
 	public static final boolean USE_GROUP = false;	
+
+	/**
+	 * Exact or approximate matching
+	 */
+	public static final boolean EXACT_MATCH = false;	
 	
 	/**
 	 * Use peak shape info during grouping ?
@@ -67,6 +72,7 @@ public class AlignmentMethodParam {
 	private double rtTolerance;
 	private boolean usePpm;
 	private boolean useGroup;
+	private boolean exactMatch;
 	private boolean usePeakShape;
 	private String groupingMethod;
 	private double groupingRtTolerance;
@@ -93,7 +99,8 @@ public class AlignmentMethodParam {
 		private boolean usePpm;
 		
 		// optional parameters
-		private boolean useGroup;		
+		private boolean useGroup;
+		private boolean exactMatch;
 		private boolean usePeakShape;		
 		private String groupingMethod;
 		private double groupingRtTolerance;
@@ -134,6 +141,7 @@ public class AlignmentMethodParam {
 			
 			// set parameter for other alignment methods
 			this.useGroup = AlignmentMethodParam.USE_GROUP;
+			this.exactMatch = AlignmentMethodParam.EXACT_MATCH;
 			this.usePeakShape = AlignmentMethodParam.USE_PEAK_SHAPE;
 			this.groupingMethod = MultiAlignConstants.GROUPING_METHOD_GREEDY;
 			this.alpha = AlignmentMethodParam.PARAM_ALPHA;
@@ -150,6 +158,11 @@ public class AlignmentMethodParam {
 			return this;
 		}		
 
+		public Builder exactMatch(boolean exactMatch) {
+			this.exactMatch = exactMatch;
+			return this;
+		}		
+		
 		public Builder usePeakShape(boolean usePeakShape) {
 			this.usePeakShape = usePeakShape;
 			return this;
@@ -221,6 +234,7 @@ public class AlignmentMethodParam {
 		this.rtTolerance = builder.rtTolerance;
 		this.usePpm = builder.usePpm;
 		this.useGroup = builder.useGroup;
+		this.exactMatch = builder.exactMatch;
 		this.usePeakShape = builder.usePeakShape;
 		this.groupingMethod = builder.groupingMethod;
 		this.groupingRtTolerance = builder.groupingRtTolerance;
@@ -251,6 +265,10 @@ public class AlignmentMethodParam {
 		return useGroup;
 	}
 
+	public boolean isExactMatch() {
+		return exactMatch;
+	}
+	
 	public boolean isUsePeakShape() {
 		return usePeakShape;
 	}

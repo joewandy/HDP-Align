@@ -31,9 +31,9 @@ public class GenerativeTechnicalExperiment extends GenerativeExperiment implemen
 	@Override
 	protected List<String> getAllMethods() {
 		List<String> methods = new ArrayList<String>();
-		methods.add(AlignmentMethodFactory.ALIGNMENT_METHOD_MZMINE_JOIN);
-		methods.add(AlignmentMethodFactory.ALIGNMENT_METHOD_OPENMS);		
-		methods.add(AlignmentMethodFactory.ALIGNMENT_METHOD_SIMA);	
+//		methods.add(AlignmentMethodFactory.ALIGNMENT_METHOD_MZMINE_JOIN);
+//		methods.add(AlignmentMethodFactory.ALIGNMENT_METHOD_OPENMS);		
+//		methods.add(AlignmentMethodFactory.ALIGNMENT_METHOD_SIMA);	
 //		methods.add(AlignmentMethodFactory.ALIGNMENT_METHOD_MY_MAXIMUM_WEIGHT_MATCHING_HIERARCHICAL);				
 		return methods;
 	}

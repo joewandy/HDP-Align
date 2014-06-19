@@ -28,7 +28,6 @@ import java.util.Vector;
 
 import mzmatch.ipeak.combineMethod.CombineCustomJoinMethod;
 import mzmatch.ipeak.combineMethod.CombineGreedyMethod;
-import mzmatch.ipeak.combineMethod.CombineGroupingInfoMethod;
 import mzmatch.ipeak.combineMethod.CombineMethod;
 import mzmatch.ipeak.combineMethod.CombineMzMineJoinMethod;
 import mzmatch.ipeak.combineMethod.CombineMzMineRANSACMethod;
@@ -274,8 +273,6 @@ public class Combine {
 				task = new CombineMzMineRANSACMethod();
 			} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_SIMA.equals(options.method)) {
 				task = new CombineSIMAMethod();				
-			} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_STABLE_MARRIAGE.equals(options.method)) {
-				task = new CombineGroupingInfoMethod();				
 			}
 			task.process(options, header, peaksets, results, random, measure,
 					rangeMin, rangeMax, totalPeaks, output);

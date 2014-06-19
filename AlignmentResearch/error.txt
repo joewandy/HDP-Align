@@ -1,5 +1,8 @@
-cmdline.CmdLineException: Unhandled situation:
-java.lang.NumberFormatException: For input string: "-rtWindow"
-	at cmdline.CmdLineParser.parse(CmdLineParser.java:227)
-	at com.joewandy.alignmentResearch.main.MultiAlignCmd.parseCommandLine(MultiAlignCmd.java:85)
-	at com.joewandy.alignmentResearch.main.MultiAlignCmd.main(MultiAlignCmd.java:31)
+java.lang.NullPointerException
+	at com.joewandy.alignmentResearch.objectModel.AlignmentRow.addAlignedFeatures(AlignmentRow.java:69)
+	at com.joewandy.alignmentResearch.objectModel.AlignmentList.<init>(AlignmentList.java:121)
+	at com.joewandy.alignmentResearch.alignmentMethod.external.SimaAlignment.matchFeatures(SimaAlignment.java:70)
+	at com.joewandy.alignmentResearch.alignmentMethod.BaseAlignment.align(BaseAlignment.java:46)
+	at com.joewandy.alignmentResearch.main.MultiAlign.runExperiment(MultiAlign.java:123)
+	at com.joewandy.alignmentResearch.main.experiment.MultiAlignNormalRun.performExperiment(MultiAlignNormalRun.java:26)
+	at com.joewandy.alignmentResearch.main.MultiAlignCmd.main(MultiAlignCmd.java:39)

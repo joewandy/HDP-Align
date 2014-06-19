@@ -20,6 +20,9 @@ import peakml.IPeakSet;
 import peakml.io.Header;
 import peakml.io.ParseResult;
 import peakml.io.peakml.PeakMLParser;
+
+import com.joewandy.alignmentResearch.matrix.LinkedSparseMatrix;
+
 import domsax.XmlParserException;
 
 public class GreedyFeatureGroupingMethod extends BaseFeatureGroupingMethod implements FeatureGroupingMethod {
@@ -181,7 +184,12 @@ public class GreedyFeatureGroupingMethod extends BaseFeatureGroupingMethod imple
 		if (data.getZZProb() == null) {
 		
 			System.out.println("Computing Z");
-			DenseMatrix Z = new DenseMatrix(data.getFeaturesCount(), fileGroups.size());
+			Matrix Z = null;
+			if (data.getFeaturesCount() < 10000) {
+				Z = new DenseMatrix(data.getFeaturesCount(), fileGroups.size());				
+			} else {
+				Z = new LinkedSparseMatrix(data.getFeaturesCount(), fileGroups.size());				
+			}
 			for (int j = 0; j < fileGroups.size(); j++) {
 				FeatureGroup group = fileGroups.get(j);
 				for (Feature f : group.getFeatures()) {
@@ -191,7 +199,11 @@ public class GreedyFeatureGroupingMethod extends BaseFeatureGroupingMethod imple
 			}
 			
 			System.out.println("Computing ZZprob");
-			ZZprob = new DenseMatrix(data.getFeaturesCount(), data.getFeaturesCount());
+			if (data.getFeaturesCount() < 10000) {
+				ZZprob = new DenseMatrix(data.getFeaturesCount(), data.getFeaturesCount());
+			} else {
+				ZZprob = new LinkedSparseMatrix(data.getFeaturesCount(), data.getFeaturesCount());				
+			}
 			Z.transBmult(Z, ZZprob);		
 			data.setZZProb(ZZprob);
 

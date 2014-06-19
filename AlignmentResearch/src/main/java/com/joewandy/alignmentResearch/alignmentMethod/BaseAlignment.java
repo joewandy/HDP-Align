@@ -7,18 +7,18 @@ import com.joewandy.alignmentResearch.filter.AlignmentResultFilter;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
+import com.joewandy.alignmentResearch.objectModel.Feature;
 
 public abstract class BaseAlignment implements AlignmentMethod {
 
 	protected double massTolerance;
 	protected boolean usePpm;
 	protected double rtTolerance;
-	protected boolean silent;
 
 	protected List<AlignmentFile> dataList;	
 	protected List<AlignmentResultFilter> filters;
 	protected List<AlignmentRow> filteredResult;
-	
+		
 	/**
 	 * Initialise our aligner
 	 * @param dataList List of feature data to align
@@ -36,10 +36,10 @@ public abstract class BaseAlignment implements AlignmentMethod {
 		this.rtTolerance = param.getRtTolerance();
 		
 		this.filters = new ArrayList<AlignmentResultFilter>();
-		this.filteredResult = new ArrayList<AlignmentRow>();				
-	
+		this.filteredResult = new ArrayList<AlignmentRow>();	
+			
 	}
-	
+			
 	public AlignmentList align() {
 				
 		// match features provided by subclasses implementations
@@ -59,10 +59,10 @@ public abstract class BaseAlignment implements AlignmentMethod {
 
 			System.out.println("Applying " + filter.getLabel() + ", initial size = " 
 					+ alignmentResult.getRowsCount());
-			
+						
 			filter.process(alignmentResult);	
 			List<AlignmentRow> accepted = filter.getAccepted();
-			accepted.addAll(filter.getRejected());
+//			accepted.addAll(filter.getRejected());			
 
 			// realign the rejected
 //			Set<Feature> whiteList = new HashSet<Feature>();
@@ -84,11 +84,23 @@ public abstract class BaseAlignment implements AlignmentMethod {
 //			List<AlignmentRow> deletedRows = list.getRows();
 //			accepted.addAll(deletedRows);				
 			
-			alignmentResult.setRows(accepted);
-			this.filteredResult = accepted;
-			
-			System.out.println("Remaining rows " + accepted.size());
-		
+			List<AlignmentRow> combined = new ArrayList<AlignmentRow>();
+			combined.addAll(accepted);			
+			// find last row id
+			int lastRowId = alignmentResult.getLastRowId() + 1;
+			// rejected got broken down into individual features
+			List<AlignmentRow> rejected = filter.getRejected();
+			for (AlignmentRow rej : rejected) {
+				for (Feature f : rej.getFeatures()) {
+					AlignmentRow newRow = new AlignmentRow(rej.getParent(), lastRowId);
+					newRow.addFeature(f);
+					lastRowId++;
+					combined.add(newRow);
+				}
+			}			
+			alignmentResult.setRows(combined);
+			this.filteredResult = combined;
+					
 		}		
 		return alignmentResult;
 		
@@ -102,14 +114,10 @@ public abstract class BaseAlignment implements AlignmentMethod {
 		return filteredResult;
 	}
 		
-	public void setSilentMode(boolean silent) {
-		this.silent = silent;
-	}
-
 	/**
 	 * Implemented by subclasses to do the actual peak matching
 	 * @return a list of aligned features in every row
 	 */
 	protected abstract AlignmentList matchFeatures();
-	
+		
 }

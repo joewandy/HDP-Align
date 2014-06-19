@@ -269,10 +269,14 @@ public class AlignmentRow {
 
 	@Override
 	public String toString() {
-		String output = "SimpleAlignmentRow [parent=" + parent.getId() + ", rowId=" + rowId + ", size=" + features.size() + ", featureIDs=";
+		String output = "SimpleAlignmentRow [rowId=" + rowId + 
+				", SCORE=" + this.getScore() + ", featureIDs=[";
 		for (Feature f : this.features) {
-			output += f.getPeakID() + ",";
+			output += " data " + f.getData().getFilenameWithoutExtension() + " peakID " + f.getPeakID() +
+					" mz " + f.getMass() + " rt " + f.getRt()
+					+ " -- ";
 		}
+		output += "]";
 		output = output.substring(0, output.length()-1);
 		output += "]";
 		return output;

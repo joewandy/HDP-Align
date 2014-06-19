@@ -674,9 +674,9 @@ reference "eq:12"
 \begin_layout Standard
 \begin_inset Formula 
 \begin{eqnarray}
-p(x_{n}^{j}|v_{jni}=1) & \propto & \int\left[p(x_{n}^{j}|t_{k}^{j},\gamma)p(t_{k}^{j}|t_{i},\delta)\right]\, dt_{k}^{j}\label{eq:10}\\
- & \propto & \int\left[\mathcal{N}(x_{n}^{j}|t_{k}^{j},\gamma^{-1})\cdot\mathcal{N}(t_{k}^{j}|t_{i},\delta^{-1})\right]\, dt_{k}^{j}\label{eq:11}\\
- & \propto & \mathcal{N}(x_{n}^{j}|t_{i},(\gamma^{-1}+\delta^{-1}))\label{eq:12}
+p(x_{n}^{j}|v_{jni}=1) & = & \int\left[p(x_{n}^{j}|t_{k}^{j},\gamma)\,\cdot\, p(t_{k}^{j}|t_{i},\delta)\right]\, dt_{k}^{j}\label{eq:10}\\
+ & = & \int\left[\mathcal{N}(x_{n}^{j}|t_{k}^{j},\gamma^{-1})\cdot\mathcal{N}(t_{k}^{j}|t_{i},\delta^{-1})\right]\, dt_{k}^{j}\label{eq:11}\\
+ & = & \mathcal{N}(x_{n}^{j}|t_{i},(\gamma^{-1}+\delta^{-1}))\label{eq:12}
 \end{eqnarray}
 
 \end_inset
@@ -704,9 +704,9 @@ For new metabolite
 \begin_layout Standard
 \begin_inset Formula 
 \begin{eqnarray}
-p(x_{n}^{j}|v_{jni^{*}}=1) & \propto & \int\int\left[p(x_{n}^{j}|t_{k}^{j},\gamma)p(t_{k}^{j}|t_{i},\delta)\right]\, dt_{k}^{j}\, dt_{i}\label{eq:13}\\
- & \propto & \int\int\left[\mathcal{N}(x_{n}^{j}|t_{k}^{j},\gamma^{-1})\cdot\mathcal{N}(t_{k}^{j}|t_{i},\delta^{-1})\cdot\mathcal{N}(t_{i}|\mu_{0},\sigma_{0}^{-1})\right]\, dt_{k}^{j}\, dt_{i}\\
- & \propto & \mathcal{N}(x_{n}^{j}|\mu_{0},(\sigma_{0}^{-1}+\gamma^{-1}+\delta^{-1}))
+p(x_{n}^{j}|v_{jni^{*}}=1) & = & \int\int\left[p(x_{n}^{j}|t_{k}^{j},\gamma)\,\cdot\, p(t_{k}^{j}|t_{i},\delta)\right]\, dt_{k}^{j}\, dt_{i}\label{eq:13}\\
+ & = & \int\int\left[\mathcal{N}(x_{n}^{j}|t_{k}^{j},\gamma^{-1})\cdot\mathcal{N}(t_{k}^{j}|t_{i},\delta^{-1})\cdot\mathcal{N}(t_{i}|\mu_{0},\sigma_{0}^{-1})\right]\, dt_{k}^{j}\, dt_{i}\\
+ & = & \mathcal{N}(x_{n}^{j}|\mu_{0},(\sigma_{0}^{-1}+\gamma^{-1}+\delta^{-1}))
 \end{eqnarray}
 
 \end_inset
@@ -894,7 +894,7 @@ across restaurants
 \begin_layout Standard
 \begin_inset Formula 
 \begin{eqnarray}
-p(t_{i}|x_{n}^{j}) & \propto & p(x_{n}^{j}|t_{i})p(t_{i})\\
+p(t_{i}|x_{n}^{j}) & \propto & p(x_{n}^{j}|t_{i})\,\cdot\, p(t_{i})\\
  & \propto & \left[\int p(x_{n}^{j}|t_{k}^{j})p(t_{k}^{j}|t_{i})\, dt_{k}^{j}\right]\,\cdot\, p(t_{i})\\
  & \propto & \left[\int\mathcal{N}(x_{n}^{j}|t_{k}^{j},\gamma^{-1})\cdot\mathcal{N}(t_{k}^{j}|t_{i},\delta^{-1})\, dt_{k}^{j}\right]\,\cdot\,\mathcal{N}(t_{i}|\mu_{0},\sigma_{0}^{-1})\\
  & \propto & \mathcal{N}(x_{n}^{j}|t_{i},\gamma^{-1}+\delta^{-1})\,\cdot\,\mathcal{N}(t_{i}|\mu_{0},\sigma_{0}^{-1})
@@ -2423,17 +2423,8 @@ reference "sub:Inference"
  in this mixture model correspond to groupings of peaks by their masses.
  The Normal distribution is used as the component in the linked DP mixture.
  Individual peaks are now assigned to an RT cluster (and its respective
- parent metabolite) and put into a mass cluster.
-\end_layout
-
-\begin_layout Standard
-
-\emph on
-[draw the plate diagram here]
-\end_layout
-
-\begin_layout Standard
-Table 
+ parent metabolite) and after that put into a mass cluster.
+ Table 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "tab:CRF-analogy-for"
@@ -2460,9 +2451,7 @@ reference "tab:CRF-analogy-for"
 \end_inset
 
  which is shared across the restaurant franchise.
- Additionally, the dish now also comes in seasoned varieties (e.g.
- less salt, spicier).
- 
+ The dish is then split into separate plates before eating.
 \end_layout
 
 \begin_layout Standard
@@ -2664,7 +2653,7 @@ Mass cluster
 \begin_inset Text
 
 \begin_layout Plain Layout
-Seasoned dish
+Plate
 \end_layout
 
 \end_inset
@@ -2695,10 +2684,6 @@ CRF analogy for the RT + mass HDP model
 
 \end_layout
 
-\begin_layout Plain Layout
-
-\end_layout
-
 \end_inset
 
 
@@ -2709,7 +2694,7 @@ Let the indicator
 \begin_inset Formula $v_{jnia}=1$
 \end_inset
 
- denotes the assignment of peak 
+ now denotes denotes the assignment of peak 
 \begin_inset Formula $n$
 \end_inset
 
@@ -2730,18 +2715,28 @@ Let the indicator
 \end_inset
 
 .
- Then following equation 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "eq:table_likelihood"
-
+ First, a peak 
+\begin_inset Formula $n$
 \end_inset
 
-, the likelihood of peak data point 
+ is assigned to RT cluster 
+\begin_inset Formula $k$
+\end_inset
+
+ (
+\begin_inset Formula $z_{nk}=1$
+\end_inset
+
+).
+ The likelihood of a data point 
 \begin_inset Formula $\mathbf{d}_{n}^{j}$
 \end_inset
 
- going into an existing cluster is proportional to 
+ going into an RT cluster 
+\begin_inset Formula $k$
+\end_inset
+
+ is proportional to 
 \begin_inset Formula $c_{jk}$
 \end_inset
 
@@ -2751,23 +2746,8 @@ reference "eq:table_likelihood"
 
 \begin_layout Standard
 \begin_inset Formula 
-\begin{eqnarray}
-L(\mathbf{d}_{n}^{j}|z_{jnk}=1) & = & p(x_{n}^{j}|z_{jnk}=1)p(y_{n}^{j}|v_{jnia}=1)
-\end{eqnarray}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-where the RT term is
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
 \begin{equation}
-p(x_{n}^{j}|z_{jnk}=1)=\mathcal{N}(x_{n}^{j}|t_{k}^{j},\gamma^{-1})\label{eq:existing_table-1}
+L(\mathbf{d}_{n}^{j}|z_{jnk}=1)=p(x_{n}^{j}|z_{jnk}=1)\left(\sum_{a}\left[\frac{c_{ia}}{\alpha_{m}+\sum_{a}c_{ia}}p(y_{n}^{j}|v_{jnia}=1)\right]+\frac{\alpha_{m}}{\alpha_{m}+\sum_{a}c_{ia}}p(y_{n}^{j}|v_{jnia^{*}}=1)\right)\label{eq:existing_table-1}
 \end{equation}
 
 \end_inset
@@ -2776,28 +2756,22 @@ p(x_{n}^{j}|z_{jnk}=1)=\mathcal{N}(x_{n}^{j}|t_{k}^{j},\gamma^{-1})\label{eq:exi
 \end_layout
 
 \begin_layout Standard
-and the mass term is 
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\begin{equation}
-p(y_{n}^{j}|v_{jnia}=1)=\sum_{a}\left[\frac{c_{ia}}{\alpha_{m}^{'}+\sum_{a}c_{ia}}p(y_{n}^{j}|v_{jnia}=1)\right]+\frac{\alpha_{m}}{\alpha_{m}+\sum_{a}c_{ia}}p(y_{n}^{j}|v_{jnia^{*}}=1)\label{eq:9-1}
-\end{equation}
-
+For existing mass cluster 
+\begin_inset Formula $a$
 \end_inset
 
+, the likelihood of the peak is proportional to 
+\begin_inset Formula $c_{ia}$
+\end_inset
 
-\end_layout
-
-\begin_layout Standard
-Then
+, the number of peaks inside that cluster.
+ 
 \end_layout
 
 \begin_layout Standard
 \begin_inset Formula 
 \begin{equation}
-p(y_{n}^{j}|v_{jnia}=1)=\mathcal{N}(y_{n}^{j}|\theta_{ia},\rho^{-1})
+L(y_{n}^{j}|v_{jnia}=1)=\mathcal{N}(y_{n}^{j}|\theta_{ia},\rho^{-1})
 \end{equation}
 
 \end_inset
@@ -2830,7 +2804,7 @@ where
 \begin_layout Standard
 \begin_inset Formula 
 \begin{equation}
-p(\theta_{ia}|\theta_{0},\rho_{0})=\mathcal{N}(\theta_{ia}|\psi_{0},\rho_{0}^{-1})
+\theta_{ia}|\psi_{0},\rho_{0})\sim\mathcal{N}(\theta_{ia}|\psi_{0},\rho_{0}^{-1})
 \end{equation}
 
 \end_inset
@@ -2839,19 +2813,28 @@ p(\theta_{ia}|\theta_{0},\rho_{0})=\mathcal{N}(\theta_{ia}|\psi_{0},\rho_{0}^{-1
 \end_layout
 
 \begin_layout Standard
-Similar to how it's done for RT clustering previously, once a customer has
- been offered a dish 
-\begin_inset Formula $i$
+For new mass cluster 
+\begin_inset Formula $a^{*},$
 \end_inset
 
-, we compute the likelihood for the customer to be assigned existing or
- new seasoned dishes.
- The seasoned dish 
-\begin_inset Formula $a$
+ we integrate over all possible mass clusters
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{eqnarray}
+p(y_{n}^{j}|v_{jnia^{*}}=1) & = & \int\left[p(y_{n}^{j}|\theta_{ia},\rho)\,\cdot\, p(\theta_{ia}|\psi_{0},\rho_{0})\right]\, d\theta_{ia}\label{eq:10-1}\\
+ & = & \int\left[\mathcal{N}(y_{n}^{j}|\theta_{ia},\rho^{-1})\cdot\mathcal{N}(\theta_{ia}|\psi_{0},\rho_{0}^{-1})\right]\, d\theta_{ia}\label{eq:11-1}\\
+ & = & \mathcal{N}(y_{n}^{j}|\psi_{0},(\rho^{-1}+\rho_{0}^{-1}))\label{eq:12-1}
+\end{eqnarray}
+
 \end_inset
 
- is selected via a cointoss.
- For each dish 
+
+\end_layout
+
+\begin_layout Standard
+For each metabolite 
 \begin_inset Formula $i,$
 \end_inset
 
@@ -2859,22 +2842,16 @@ Similar to how it's done for RT clustering previously, once a customer has
 \begin_inset Formula $A_{i}$
 \end_inset
 
- maintains the number of seasoned dish variations that exist.
- If the new seasoned dish is required (
-\begin_inset Formula $a>A_{i}$
-\end_inset
-
-), we create one and serves that the customer 
-\begin_inset Formula $n$
+ maintains the number of mass clusters that exist for 
+\begin_inset Formula $i$
 \end_inset
 
 .
- When creating a new seasoned dish, we need to set its mixture parameter
- 
-\begin_inset Formula $\theta_{ia}$
+ If a new mass cluster is required (
+\begin_inset Formula $a>A_{i}$
 \end_inset
 
- 
+), we create one by sampling from the posterior
 \end_layout
 
 \begin_layout Standard
@@ -2915,7 +2892,7 @@ where
 \end_layout
 
 \begin_layout Standard
-Then 
+Also, 
 \family roman
 \series medium
 \shape up
@@ -2935,7 +2912,11 @@ for every mass cluster
 \begin_inset Formula $i$
 \end_inset
 
-, we update its mixture parameter:
+, we update its mixture parameter 
+\begin_inset Formula $\theta_{ia}$
+\end_inset
+
+ given the data 
 \end_layout
 
 \begin_layout Standard
@@ -2972,8 +2953,7 @@ p(\theta_{ia}|\ldots)\propto p(\theta_{ia}|\psi_{0},\rho_{0})\prod_{n}^{N}p(y_{n
 \end_layout
 
 \begin_layout Standard
-It is also possible for a customer or a set of customers to reject the seasoned
- dish served.
+It is also possible for a customer or a set of customers to reject the plate.
  This happens when a customer 
 \begin_inset Formula $n$
 \end_inset
@@ -3014,6 +2994,544 @@ It is also possible for a customer or a set of customers to reject the seasoned
 \end_inset
 
  is deleted.
+\end_layout
+
+\begin_layout Subsubsection
+Results
+\end_layout
+
+\begin_layout Standard
+Quick results:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float table
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\noindent
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="3" columns="7">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<column alignment="center" valignment="top" width="0">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Fraction
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Join
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+OpenMS
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+SIMA
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+MW
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+HDP (RT)
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+HDP (RT+Mass)
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+080
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.944
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.882
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.944
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.944
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.924
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.938
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+100
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.950
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.920
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.950
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.950
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.960
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+0.950
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption
+
+\begin_layout Plain Layout
+F1 scores
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We need to conduct experiments.
+ Some thoughts:
+\end_layout
+
+\begin_layout Enumerate
+PREDICT hypothesis.
+ 
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Look at every pair of peak, look at alignment, compute ROC --> lots of TN
+ 
+\end_layout
+
+\begin_layout Enumerate
+random baseline
+\end_layout
+
+\begin_layout Enumerate
+comparison: 
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+greedy 
+\end_layout
+
+\begin_layout Enumerate
+mass 
+\end_layout
+
+\begin_layout Enumerate
+RT 
+\end_layout
+
+\begin_layout Enumerate
+mass + RT (performance better?)
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Standard
+Hypothesis: 
+\end_layout
+
+\begin_layout Standard
+?
+\end_layout
+
+\begin_layout Standard
+The ROC curve angle is far more interesting, even if average F1 score is
+ lower.
+ How do we produce a ROC curve ?
+\end_layout
+
+\begin_layout Section
+Previous works
+\end_layout
+
+\begin_layout Standard
+Reviewers pointed out some weaknesses with the M1 and P1,P2 datasets.
+ We can use additional datasets for evaluation in our pipeline.
+ They are:
+\end_layout
+
+\begin_layout Enumerate
+Proteomic and glycomic datasets from 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Tsai"
+
+\end_inset
+
+.
+ 
+\begin_inset CommandInset href
+LatexCommand href
+name "Available online"
+target "http://omics.georgetown.edu/alignLCMS.html"
+
+\end_inset
+
+, easiest to add to our pipeline.
+ 
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+The peak lists are available in SIMA format, and ground truth is provided
+ as matlab data.
+ 
+\end_layout
+
+\begin_layout Enumerate
+The proteomics dataset comes in 20 replicates, each having ~ 20000 peaks
+ or so.
+ 
+\end_layout
+
+\begin_layout Enumerate
+The ground truth is 273 peaksets.
+ However, the RT drift across runs do not seem to be that big (<30s).
+ SIMA when run on the datasets produce high precision (0.94) and recall (0.85)
+ results if we set the RT window to be pretty wide (120s) -- before RT correctio
+n.
+ After RT correction using the proposed method in their paper, the precision
+ & recall improves to 0.990 & 0.970 respectively according to their results.
+ Pairwise alignments seem to be too easy for the proteomic datasets ..
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+The standard protein mix from 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Wang2013"
+
+\end_inset
+
+.
+ A bit tricky because we need to do the feature detection first (from MZXML
+ format), although we supposedly know the relevant parameters that they
+ used.
+ Useful for alignment comparisons from 'heterogenous' platforms.
+\end_layout
+
+\begin_layout Enumerate
+The paper 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Zhang2012b"
+
+\end_inset
+
+ have datasets which might be useful but they're not available online.
+ Have not contacted the authors before.
+ 
+\end_layout
+
+\begin_layout Enumerate
+The paper 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Yang2012,Perera2011"
+
+\end_inset
+
+ also have some data.
+ Have contacted the author before, but the site is still down -- can't retrieve
+ the tools & the datasets from the site.
+\end_layout
+
+\begin_layout Enumerate
+The paper 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Lin2013"
+
+\end_inset
+
+ has some useful datasets on cross-platform 'heterogenous' alignments.
+ Neither the data nor the tool available online.
+ Have contacted the authors before, who didn't respond ..
+ 
+\end_layout
+
+\begin_layout Section
+Future works
+\end_layout
+
+\begin_layout Standard
+Also, look into MSClust paper for incorporating differential expression
+ into the method.
+\end_layout
+
+\begin_layout Standard
+Report writing
+\end_layout
+
+\begin_layout Enumerate
+Summarise the paper + findings
+\end_layout
+
+\begin_layout Enumerate
+The reviews + plan to get the paper published (the new data)
+\end_layout
+
+\begin_layout Enumerate
+Put all the data online
+\end_layout
+
+\begin_layout Enumerate
+HDP
+\end_layout
+
+\begin_layout Enumerate
+Table of contents of thesis: 
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Using grouping information helps alignment
+\end_layout
+
+\begin_layout Enumerate
+Producing confidence from HDP
+\end_layout
+
+\begin_layout Enumerate
+Inferring effects from HDP + something else 
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+Get paper from tommi
+\end_layout
+
+\begin_layout Section
+Note
+\end_layout
+
+\begin_layout Standard
+Why lange's measures don't work ?
+\end_layout
+
+\begin_layout Itemize
+gt {0, 2} 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+synthdata_1=Feature [peakID=2, mass=69.0369605575872, rt=739.5271575171472,
+ intensity=11905.052572287621, data=synthdata_1], 
+\end_layout
+
+\begin_layout Itemize
+synthdata_0=Feature [peakID=0, mass=69.046483823126, rt=737.2442875252063,
+ intensity=3381.2909469172732, data=synthdata_0] 
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+tool 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+{0, 1} 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Feature [peakID=1, mass=69.0417432806505, rt=740.1314879492897, intensity=3550.1997
+96499998, data=synthdata_1], 
+\end_layout
+
+\begin_layout Itemize
+Feature [peakID=0, mass=69.046483823126, rt=737.2442875252063, intensity=3381.29094
+69172732, data=synthdata_0] 
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+{2} 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Feature [peakID=2, mass=69.0369605575872, rt=739.5271575171472, intensity=11905.052
+572287621, data=synthdata_1] 
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Standard
+toolMatchingCount = 1 
+\end_layout
+
+\begin_layout Standard
+toolAllCount = 2
+\end_layout
+
+\begin_layout Standard
+prec = 1/2 
+\end_layout
+
+\begin_layout Standard
+rec = 1/2
 \end_layout
 
 \begin_layout Standard

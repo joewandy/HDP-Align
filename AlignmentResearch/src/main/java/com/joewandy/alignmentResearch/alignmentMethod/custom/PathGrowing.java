@@ -24,8 +24,6 @@ public class PathGrowing {
 
 	private List<AlignmentRow> men;
 	private List<AlignmentRow> women;
-	private double massTol;
-	private double rtTol;
 	private Graph<AlignmentRow, MyLink> graph;
 	private int edgeCount;
 
@@ -36,13 +34,11 @@ public class PathGrowing {
 
 		this.men = men;
 		this.women = women;
-		this.massTol = massTol;
-		this.rtTol = rtTol;
 		this.graph = getGraph(scoreArr);
 
 	}
 
-	public Map<AlignmentRow, AlignmentRow> execute() {
+	public List<MatchResult> execute() {
 		
 		// as per the Path Growing algorithm in http://www.or.uni-bonn.de/~hougardy/paper/maxmatch.pdf
 		Graph<AlignmentRow, MyLink> M1 = new UndirectedOrderedSparseMultigraph<AlignmentRow, MyLink>();
@@ -97,15 +93,17 @@ public class PathGrowing {
 		}
 		
 		// convert matching to row mapping of men -> women
-		Map<AlignmentRow, AlignmentRow> matches = new HashMap<AlignmentRow, AlignmentRow>();
+		List<MatchResult> matches = new ArrayList<MatchResult>();
 		for (MyLink link : maxMatching.getEdges()) {
 			Pair<AlignmentRow> pair = maxMatching.getEndpoints(link);
 			if (men.contains(pair.getFirst())) {
 				// pair is {man, woman}
-				matches.put(pair.getFirst(), pair.getSecond());
+				MatchResult res = new MatchResult(pair.getFirst(), pair.getSecond(), link.getWeight());
+				matches.add(res);
 			} else {
 				// pair is {woman, man}
-				matches.put(pair.getSecond(), pair.getFirst());
+				MatchResult res = new MatchResult(pair.getSecond(), pair.getFirst(), link.getWeight());
+				matches.add(res);
 			}
 		}
 		
@@ -113,7 +111,7 @@ public class PathGrowing {
 
 	}
 
-	public Map<AlignmentRow, AlignmentRow> executeGreedy() {
+	public List<MatchResult> executeGreedy() {
 		
 		// as per the Path Growing algorithm in http://www.or.uni-bonn.de/~hougardy/paper/maxmatch.pdf
 		Graph<AlignmentRow, MyLink> M = new UndirectedOrderedSparseMultigraph<AlignmentRow, MyLink>();
@@ -141,15 +139,17 @@ public class PathGrowing {
 		
 		// convert matching to row mapping of men -> women
 		Graph<AlignmentRow, MyLink> maxMatching = M;
-		Map<AlignmentRow, AlignmentRow> matches = new HashMap<AlignmentRow, AlignmentRow>();
+		List<MatchResult> matches = new ArrayList<MatchResult>();
 		for (MyLink link : maxMatching.getEdges()) {
 			Pair<AlignmentRow> pair = maxMatching.getEndpoints(link);
 			if (men.contains(pair.getFirst())) {
 				// pair is {man, woman}
-				matches.put(pair.getFirst(), pair.getSecond());
+				MatchResult res = new MatchResult(pair.getFirst(), pair.getSecond(), link.getWeight());
+				matches.add(res);
 			} else {
 				// pair is {woman, man}
-				matches.put(pair.getSecond(), pair.getFirst());
+				MatchResult res = new MatchResult(pair.getSecond(), pair.getFirst(), link.getWeight());
+				matches.add(res);
 			}
 		}
 		
@@ -197,16 +197,12 @@ public class PathGrowing {
 				int i = entry.row();
 				int j = entry.column();
 
-				// and they're within tolerances
 				AlignmentRow man = men.get(i);
 				AlignmentRow woman = women.get(j);
-				if (man.rowInRange(woman, massTol, rtTol, MultiAlignConstants.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
 				
-					// then add the edge in graph
-					MyLink link = new MyLink(val);
-					graph.addEdge(link, man, woman, EdgeType.UNDIRECTED);
-					
-				}
+				// then add the edge in graph
+				MyLink link = new MyLink(val);
+				graph.addEdge(link, man, woman, EdgeType.UNDIRECTED);					
 				
 			}
 		}

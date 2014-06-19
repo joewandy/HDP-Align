@@ -11,13 +11,12 @@ import com.joewandy.alignmentResearch.objectModel.AlignmentLibrary;
 public class BaselineMethodLibraryBuilder extends PairwiseLibraryBuilderImpl implements Runnable, PairwiseLibraryBuilder {
 
 	public BaselineMethodLibraryBuilder(BlockingQueue<AlignmentLibrary> queue,
-			int libraryID, double massTolerance, double rtTolerance, AlignmentFile data1, AlignmentFile data2) {
-		super(queue, libraryID, massTolerance, rtTolerance, data1, data2);
+			int libraryID, AlignmentMethodParam param, AlignmentFile data1, AlignmentFile data2) {
+		super(queue, libraryID, param, data1, data2);
 	}
 
 	@Override
-	protected AlignmentMethod getAlignmentMethod(List<AlignmentFile> files,
-			AlignmentMethodParam param) {
+	protected AlignmentMethod getAlignmentMethod(List<AlignmentFile> files) {
 		AlignmentMethod pairwiseAligner = new BaselineAlignment(files, param);
 		return pairwiseAligner;
 	}

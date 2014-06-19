@@ -29,10 +29,15 @@ import com.joewandy.alignmentResearch.alignmentExperiment.AlignmentData;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodFactory;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
+import com.joewandy.alignmentResearch.alignmentMethod.FeatureGrouper;
+import com.joewandy.alignmentResearch.alignmentMethod.custom.ExtendedLibraryBuilder;
 import com.joewandy.alignmentResearch.filter.AlignmentResultFilter;
+import com.joewandy.alignmentResearch.filter.ScoreResultFilter;
+import com.joewandy.alignmentResearch.objectModel.AlignmentLibrary;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
 import com.joewandy.alignmentResearch.objectModel.EvaluationResult;
+import com.joewandy.alignmentResearch.objectModel.ExtendedLibrary;
 import com.joewandy.alignmentResearch.objectModel.Feature;
 import com.joewandy.alignmentResearch.objectModel.GroundTruth;
 
@@ -42,14 +47,16 @@ public class MultiAlign {
 	private MultiAlignCmdOptions options;
 	private AlignmentData data;
 	private String method;
-	private AlignmentMethodParam.Builder paramBuilder;
+	private AlignmentMethodParam param;
 	private List<AlignmentResultFilter> filters;
 	
 	private double massTolerance;
 	private double rtTolerance;
-
 	private double groupingRtWindow;
 	private double alpha;
+	
+	private AlignmentMethod aligner;
+	private ExtendedLibrary extendedLibrary;
 		
 	public MultiAlign(MultiAlignCmdOptions options, AlignmentData data) {
 
@@ -61,18 +68,62 @@ public class MultiAlign {
 		this.groupingRtWindow = options.groupingRtWindow;
 		this.alpha = options.alpha;
 		
-		this.paramBuilder = new AlignmentMethodParam.Builder(
+		AlignmentMethodParam.Builder paramBuilder = new AlignmentMethodParam.Builder(
 				options.alignmentPpm, options.alignmentRtWindow);
-		setToolParams(options);
+		paramBuilder.usePpm(MultiAlignConstants.ALIGN_BY_RELATIVE_MASS_TOLERANCE);
+		paramBuilder.ransacRtToleranceBefore(options.ransacRtToleranceBeforeCorrection);
+		paramBuilder.ransacRtToleranceAfter(options.alignmentRtWindow);
+		paramBuilder.ransacIteration(options.ransacIteration);
+		paramBuilder.ransacNMinPoints(options.ransacNMinPoints);
+		paramBuilder.ransacThreshold(options.ransacThreshold);
+		paramBuilder.ransacLinearModel(options.ransacLinearModel);
+		paramBuilder.ransacSameChargeRequired(options.ransacSameChargeRequired);
+		paramBuilder.openMsMzPairMaxDistance(options.openMsMzPairMaxDistance);
+		paramBuilder.useGroup(options.useGroup);
+		paramBuilder.exactMatch(options.exactMatch);		
+		paramBuilder.usePeakShape(options.usePeakShape);
+		paramBuilder.groupingMethod(options.groupingMethod);
+		paramBuilder.groupingRtTolerance(options.groupingRtWindow);
+		paramBuilder.alpha(options.alpha);
+		this.param = paramBuilder.build();
+				
+		if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_MAXIMUM_WEIGHT_MATCHING_HIERARCHICAL.equals(method)) {
+
+			// cluster peaks within files
+			if (param.isUseGroup()) {
+				FeatureGrouper grouper = new FeatureGrouper(data.getAlignmentDataList(), param);
+				grouper.groupFeatures();				
+			}
+			
+			// build pairwise library
+			ExtendedLibraryBuilder builder = new ExtendedLibraryBuilder(data.getAlignmentDataList(), param);		
+			List<AlignmentLibrary> allLibraries = builder.buildPrimaryLibrary();
+			extendedLibrary = builder.combineLibraries(allLibraries);			
+			this.aligner = AlignmentMethodFactory.getAlignmentMethod(method, param, data, extendedLibrary);			
+
+		} else {
+
+			this.aligner = AlignmentMethodFactory.getAlignmentMethod(method, param, data, null);			
+					
+		}
 		
 		// add whatever you want here to filter the alignment results
-		this.filters = new ArrayList<AlignmentResultFilter>();
-		
+		this.filters = new ArrayList<AlignmentResultFilter>();		
+//		this.filters.add(new ScoreResultFilter(0.9, data));
+		for (AlignmentResultFilter filter : filters) {
+			aligner.addFilter(filter);							
+		}
+
+				
 	}
-	
+			
 	public EvaluationResult runExperiment() throws FileNotFoundException {
 		
-		AlignmentList result = align(false);
+		// actually do the alignment now, filtering of alignment results also happen inside align()
+		AlignmentList result = aligner.align();
+		if (result != null) {
+			System.out.println("Total " + result.getRowsCount() + " rows aligned");			
+		}
 		if (result != null) {
 			writeAlignmentResult(result, options.output);
 			EvaluationResult evalRes = evaluate(result, options.measureType);
@@ -82,25 +133,7 @@ public class MultiAlign {
 		}
 		
 	}
-	
-	private AlignmentList align(boolean silent) {
-
-		// set filters if necessary
-		AlignmentMethod aligner = AlignmentMethodFactory.getAlignmentMethod(method, paramBuilder, data);
-		for (AlignmentResultFilter filter : filters) {
-			aligner.addFilter(filter);							
-		}
-		aligner.setSilentMode(silent);
-		
-		// actually do the alignment now, filtering of alignment results also happen inside align()
-		AlignmentList result = aligner.align();
-		if (result != null) {
-			System.out.println("Total " + result.getRowsCount() + " rows aligned");			
-		}
-		return result;
 				
-	}
-		
 	private EvaluationResult evaluate(AlignmentList result, String measureType) {
 		
 		EvaluationResult evalRes = null;
@@ -132,24 +165,6 @@ public class MultiAlign {
 		return evalRes;
 		
 	}		
-		
-	private void setToolParams(MultiAlignCmdOptions options) {
-		this.paramBuilder.usePpm(MultiAlignConstants.ALIGN_BY_RELATIVE_MASS_TOLERANCE);
-		this.paramBuilder.ransacRtToleranceBefore(options.ransacRtToleranceBeforeCorrection);
-		this.paramBuilder.ransacRtToleranceAfter(options.alignmentRtWindow);
-		this.paramBuilder.ransacIteration(options.ransacIteration);
-		this.paramBuilder.ransacNMinPoints(options.ransacNMinPoints);
-		this.paramBuilder.ransacThreshold(options.ransacThreshold);
-		this.paramBuilder.ransacLinearModel(options.ransacLinearModel);
-		this.paramBuilder.ransacSameChargeRequired(options.ransacSameChargeRequired);
-		this.paramBuilder.openMsMzPairMaxDistance(options.openMsMzPairMaxDistance);
-		this.paramBuilder.useGroup(options.useGroup);
-		this.paramBuilder.usePeakShape(options.usePeakShape);
-		this.paramBuilder.groupingMethod(options.groupingMethod);
-		this.paramBuilder.groupingRtTolerance(options.groupingRtWindow);
-		this.paramBuilder.alpha(options.alpha);
-	}
-
 	
 	private void writeAlignmentResult(AlignmentList result, 
 			String outputPath) throws FileNotFoundException {

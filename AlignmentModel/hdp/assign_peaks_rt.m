@@ -1,4 +1,4 @@
-function hdp = assign_peaks(hdp)
+function hdp = assign_peaks_rt(hdp, debug)
 
     for j = randperm(hdp.J)
                             
@@ -7,16 +7,21 @@ function hdp = assign_peaks(hdp)
             % get the peak data
             this_peak.rt = hdp.file{j}.data_rt(n);
             this_peak.mass = hdp.file{j}.data_mass(n);
+            this_peak.intensity = hdp.file{j}.data_intensity(n);
+            this_peak.peakID = hdp.file{j}.peakID(n);
+            if debug
+                this_peak.ground_truth = hdp.file{j}.ground_truth(n);
+            end
 
             % remove peak from model
             k = find(hdp.file{j}.Z(n, :));
             hdp.file{j}.Z(n, :) = 0;
             hdp.file{j}.count_Z = sum(hdp.file{j}.Z, 1);
                         
-            % does this result in an empty RT cluster ?
+            % does this result in an empty cluster ?
             if (hdp.file{j}.count_Z(k) == 0)
             
-                % delete the RT cluster
+                % delete the cluster
                 hdp.file{j}.K = hdp.file{j}.K - 1; % decrease count of clusters in file j
                 hdp.file{j}.Z(:, k) = []; % delete the whole column from peaks-cluster assignment        
 
@@ -24,7 +29,7 @@ function hdp = assign_peaks(hdp)
                 hdp.file{j}.count_Z = sum(hdp.file{j}.Z, 1);
                 hdp.file{j}.ti(k) = [];
 
-                % find RT cluster's parent metabolite
+                % find cluster's parent metabolite
                 i = find(hdp.file{j}.top_Z(k, :));
                 hdp.file{j}.top_Z(k, :) = []; % remove assignment of cluster to parent metabolite
                 hdp.fi(i) = hdp.fi(i) - 1; % decrease count of clusters under parent metabolite
@@ -49,12 +54,12 @@ function hdp = assign_peaks(hdp)
             cluster_prior = [hdp.file{j}.count_Z hdp.alpha_rt];
             cluster_prior = cluster_prior./sum(cluster_prior);
             
-            % for current RT cluster
+            % for current cluster
             ti = hdp.file{j}.ti;
             prec = hdp.gamma_prec;
             current_cluster_log_like = -0.5*log(2*pi) + 0.5*log(prec) - 0.5*prec.*(this_peak.rt - ti).^2;
                         
-            % for new RT cluster: compute p( xnj | existing metabolite )
+            % for new cluster: compute p( xnj | existing metabolite )
             Q = sum(hdp.fi) + hdp.top_alpha;
             current_metabolite_post = [];
             for i = 1:hdp.I
@@ -66,14 +71,14 @@ function hdp = assign_peaks(hdp)
                 current_metabolite_post = [current_metabolite_post, posterior];
             end
 
-            % for new RT cluster: compute p( xnj | new metabolite )
+            % for new cluster: compute p( xnj | new metabolite )
             prior = hdp.top_alpha/Q;
             mu = hdp.mu_0;
             prec = 1/(1/hdp.gamma_prec + 1/hdp.delta_prec + 1/hdp.sigma_0_prec);
             likelihood = sqrt(prec/(2*pi)) * exp((-prec*(this_peak.rt-mu)^2)/2);
             new_metabolite_post = prior * likelihood;
 
-            % pick the RT cluster
+            % pick the cluster
             metabolite_post = [current_metabolite_post, new_metabolite_post];
             new_cluster_like = sum(metabolite_post);
             cluster_log_like = [current_cluster_log_like, log(new_cluster_like)];
@@ -98,7 +103,8 @@ function hdp = assign_peaks(hdp)
 
                 % decide which metabolite to assign the new cluster to
                 metabolite_post = metabolite_post./sum(metabolite_post);
-                i = find(rand<=cumsum(metabolite_post), 1); % sample from the posterior with a cointoss
+                i = find(rand<=cumsum(metabolite_post)); % sample from the posterior with a cointoss
+                i = i(1);
 
                 if (i <= hdp.I)
 
@@ -121,7 +127,7 @@ function hdp = assign_peaks(hdp)
                     hdp.file{j}.top_Z(k, i) = 1;
                     hdp.fi = [hdp.fi, 1];
                     
-                    % generate ti given data RT
+                    % generate ti given data
                     temp = 1 / (1/hdp.gamma_prec + 1/hdp.delta_prec);
                     prec = temp + hdp.sigma_0_prec;
                     mu = 1/prec * (temp*this_peak.rt + hdp.sigma_0_prec*hdp.mu_0);
@@ -130,34 +136,18 @@ function hdp = assign_peaks(hdp)
 
                 end               
                 
-                % generate tij given ti and data RT
+                % generate tij from tij and data
                 prec = hdp.gamma_prec + hdp.delta_prec;
                 mu = 1/prec * (hdp.gamma_prec*this_peak.rt + hdp.delta_prec*hdp.ti(i));
                 new_tij = normrnd(mu, sqrt(1/prec));
                 hdp.file{j}.ti = [hdp.file{j}.ti, new_tij];
 
             end
-            
-            % then further assign peak to the mass cluster within metabolite
-            selected_i = find(hdp.file{j}.top_Z(k, :)); % find the metabolite
-            log_prior = log([hdp.metabolite{selected_i}.fa hdp.alpha_mass]);
-            
-            % for current mass cluster
-            sigma_b = hdp.rho_0 + (hdp.rho_prec*hdp.metabolite{i}.fa);
-            mu_b = (1./sigma_b).*((hdp.rho_0*hdp.psi_0) +  (hdp.rho_prec*sum(hdp.metabolite{selected_i}.sa));
-
-            % for new mass cluster
-            sigma_b = [sigma_b, hdp.rho_0];
-            mu_b = [mu_b, hdp.psi_0];
-            
-            % pick new a
-            prec = 1./((1./sigma_b)+(1/hdp.rho_prec));
-            log_likelihood = -0.5*log(2*pi) + 0.5*log(prec) - 0.5*prec.*(this_data - param_alpha).^2;                    
 
             % add peak back into model            
             hdp.file{j}.Z(n, :) = 0;
             hdp.file{j}.Z(n, k) = 1;
-            hdp.file{j}.count_Z = sum(hdp.file{j}.Z, 1);            
+            hdp.file{j}.count_Z = sum(hdp.file{j}.Z, 1);
 
         end % end peak loop
                         

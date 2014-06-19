@@ -1,63 +1,58 @@
 %% data is N x J matrix
-function samples = do_hdp(hdp)
+function samples = do_hdp(hdp, cluster_rt, cluster_mass, debug)
     
     % check if octave or matlab
     isOctave = exist('OCTAVE_VERSION', 'builtin') ~= 0;
-    
     samples = [];
     for s = 1:hdp.NSAMPS
 
         tic;
-
-        fprintf('Sample %d', s);
                        
-        %%% update peak to cluster assignment
-        hdp = assign_peaks(hdp);                
-                                                       
-        %%% update cluster RT        
-        for j = 1:hdp.J
-            hdp.file{j}.sum_Z = sum( repmat(hdp.file{j}.data_rt, 1, hdp.file{j}.K) .* hdp.file{j}.Z, 1);        
-            for k = 1:hdp.file{j}.K
-                % find parent metabolite of this cluster
-                i = find(hdp.file{j}.top_Z(k, :));
-                ti = hdp.ti(i);
-                % find the peaks under this cluster
-                child_peaks = find(hdp.file{j}.Z(:, k));
-                sum_xn = sum(hdp.file{j}.data_rt(child_peaks));
-                count_peaks = length(child_peaks);
-                % draw new tij
-                prec = hdp.delta_prec + count_peaks*hdp.gamma_prec;
-                mu = (1/prec) .* ( ti*hdp.delta_prec + hdp.gamma_prec*sum_xn );
-                hdp.file{j}.ti(k) = normrnd(mu, sqrt(1/prec));
+
+        if cluster_rt & cluster_mass
+
+            % update peak to cluster assignment
+            hdp = assign_peaks_mass_rt(hdp, debug);                        
+
+            % update mixture component parameters
+            hdp = update_parameters_mass_rt(hdp, debug);
+
+            % print stuffs
+            time_taken = toc;        
+            if s > hdp.BURN_IN
+                fprintf('S#%d\tI=%d\t', s, hdp.I);
+                samples = [samples, hdp]; 
+            else
+                fprintf('B#%d\tI=%d\t', s, hdp.I);        
+            end        
+            all_A = [];
+            for i = 1:hdp.I
+                all_A = [all_A, hdp.metabolite(i).A];
             end
-        end                          
+            disp(strrep(['all_A = [' sprintf(' %3d', all_A) ']'], ']', ' ]'));
         
-        %%% update cluster to metabolite assignment
-        hdp = assign_clusters(hdp);            
+        elseif cluster_rt
+
+            % update peak to cluster assignment
+            hdp = assign_peaks_rt(hdp, debug);                
+
+            % update mixture component parameters
+            hdp = update_parameters_rt(hdp, debug);
+
+            % print stuffs
+            time_taken = toc;        
+            if s > hdp.BURN_IN
+                fprintf('S#%d\tI=%d\n', s, hdp.I);
+                samples = [samples, hdp]; 
+            else
+                fprintf('B#%d\tI=%d\n', s, hdp.I);        
+            end        
         
-        % update all metabolite RT given clusters
-        for i = 1:hdp.I
-            % find all clusters under metabolite i
-            sum_clusters = 0;
-            count_clusters = 0;
-            for j = 1:hdp.J
-                child_clusters = find(hdp.file{j}.top_Z(:, i)); % find the clusters
-                sum_clusters = sum_clusters + sum(hdp.file{j}.ti(child_clusters)); % sum the cluster RTs 
-                count_clusters = count_clusters + length(child_clusters); % count the clusters
-            end
-            % draw new ti given the cluster RTs
-            prec = hdp.sigma_0_prec + count_clusters*hdp.delta_prec;
-            mu = (1/prec) .* ( hdp.mu_0*hdp.sigma_0_prec + hdp.delta_prec*sum_clusters );
-            hdp.ti(i) = normrnd(mu, sqrt(1/prec));
-        end                    
-                   
-        fprintf('\t(I=%d)\n', hdp.I);
-        time_taken = toc;
+        elseif cluster_mass
         
-        if s > hdp.BURN_IN
-            samples = [samples, hdp];
-        end
-        
+        end                                                       
+                                       
+        % show message in octave before program ends
         if isOctave
             fflush(stdout);
         end

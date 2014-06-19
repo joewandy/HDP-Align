@@ -36,8 +36,8 @@ public class GenerativeModelParameter {
 	private int maxValues = 10;
 
 	// Option to specify which adducts to search for."
-//	private String adducts = "M+2H,M+H+NH4,M+ACN+2H,M+2ACN+2H,M+H,M+NH4,M+Na,M+CH3OH+H,M+ACN+H,M+ACN+Na,M+2ACN+H,2M+H,2M+Na,2M+ACN+H";
-	private String adducts = "M+2H,M+H+NH4,M+ACN+2H,M+H,M+Na";
+	private String adducts = "M+2H,M+H+NH4,M+ACN+2H,M+2ACN+2H,M+H,M+NH4,M+Na,M+CH3OH+H,M+ACN+H,M+ACN+Na,M+2ACN+H,2M+H,2M+Na,2M+ACN+H";
+//	private String adducts = "M+2H,M+H+NH4,M+ACN+2H,M+H,M+Na";
 //	private String adducts = "M+H,M+2H,M+Na";
 
 	private String replacementMolsPath = "/home/joewandy/Dropbox/Project/mzMatch/scripts/standards/kegg.xml";

@@ -28,6 +28,7 @@ import java.security.*;
 // peakml
 import peakml.io.*;
 import peakml.util.*;
+import peakml.util.Base64;
 import peakml.math.*;
 import peakml.chemistry.*;
 

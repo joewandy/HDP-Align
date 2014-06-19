@@ -33,7 +33,7 @@ public class TestHdpAlignment extends BaseAlignment implements AlignmentMethod {
 		resultMap = new HashMap<>();
 		MatFileReader mfr = null;
 		try {
-			mfr = new MatFileReader(parentPath + "/hdp_result.mat");
+			mfr = new MatFileReader(parentPath + "/csv/hdp_result_rt_mass.mat");
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(1);

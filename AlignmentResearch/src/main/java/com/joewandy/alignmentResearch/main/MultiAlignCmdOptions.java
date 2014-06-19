@@ -125,6 +125,10 @@ public class MultiAlignCmdOptions {
 			usage="Whether to use grouping")
 	public boolean useGroup = AlignmentMethodParam.USE_GROUP;
 
+	@Option(name="exactMatch", param="boolean", type=Option.Type.NO_ARGUMENT, 
+			usage="Exact or approximate matching ?")
+	public boolean exactMatch = AlignmentMethodParam.EXACT_MATCH;
+	
 	@Option(name="usePeakShape", param="boolean", type=Option.Type.REQUIRED_ARGUMENT, 
 			usage="Whether to use peak shape correlation when grouping")
 	public boolean usePeakShape = AlignmentMethodParam.USE_PEAK_SHAPE;

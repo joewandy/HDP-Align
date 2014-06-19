@@ -31,9 +31,10 @@ public class CombineMzMineJoinMethod extends CombineBaseMethod implements Combin
 		AlignmentMethodParam.Builder paramBuilder = new AlignmentMethodParam.Builder(
 				options.ppm, options.rtwindow);
 		paramBuilder.usePpm(true);
+		AlignmentMethodParam param = paramBuilder.build();		
 		AlignmentMethod aligner = AlignmentMethodFactory.getAlignmentMethod(
 				AlignmentMethodFactory.ALIGNMENT_METHOD_MZMINE_JOIN, 
-				paramBuilder, data);
+				param, data, null);
 		AlignmentList result = aligner.align();
 		List<AlignmentRow> resultRows = result.getRows();
 		System.out.println("Total " + result.getRowsCount() + " rows aligned");

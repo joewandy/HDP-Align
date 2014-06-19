@@ -31,9 +31,10 @@ public class CombineSIMAMethod extends CombineBaseMethod implements CombineMetho
 		AlignmentMethodParam.Builder paramBuilder = new AlignmentMethodParam.Builder(
 				options.ppm, options.rtwindow);
 		paramBuilder.usePpm(false);
+		AlignmentMethodParam param = paramBuilder.build();		
 		AlignmentMethod aligner = AlignmentMethodFactory.getAlignmentMethod(
 				AlignmentMethodFactory.ALIGNMENT_METHOD_SIMA, 
-				paramBuilder, data);
+				param, data, null);
 		AlignmentList result = aligner.align();
 		List<AlignmentRow> resultRows = result.getRows();
 		System.out.println("Total " + result.getRowsCount() + " rows aligned");
