@@ -10,5 +10,7 @@ public interface AlignmentDataGenerator {
 	public AlignmentData generate();
 		
 	public AlignmentData generateByIndices(int[] indices);
+
+	public AlignmentData generateByIteration(int currentIter);
 	
 }

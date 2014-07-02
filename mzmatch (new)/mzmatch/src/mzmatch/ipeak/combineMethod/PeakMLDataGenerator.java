@@ -23,7 +23,7 @@ public class PeakMLDataGenerator extends BaseDataGenerator implements AlignmentD
 	}
 	
 	@Override
-	protected List<AlignmentFile> getAlignmentFiles() {
+	protected List<AlignmentFile> getAlignmentFiles(int currentIter) {
 
 		List<AlignmentFile> dataList = new ArrayList<AlignmentFile>();
 		int sampleId = 0;

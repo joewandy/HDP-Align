@@ -33,6 +33,10 @@ public class MultiAlignConstants {
 	public static final double GROUPING_METHOD_ALPHA = 1;
 	public static final int GROUPING_METHOD_NUM_SAMPLES = 20;
 	public static final int GROUPING_METHOD_BURN_IN = 10;
+
+	public static final String SCORING_METHOD_HDP_MASS_RT = "hdpmassrt";
+	public static final String SCORING_METHOD_HDP_RT = "hdprt";
+	public static final String SCORING_METHOD_DIST = "dist";
 	
 	// use Lange, et al. (2008) measure
 	public static final String PERFORMANCE_MEASURE_LANGE = "lange";

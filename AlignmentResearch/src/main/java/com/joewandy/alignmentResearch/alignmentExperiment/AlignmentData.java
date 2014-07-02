@@ -93,7 +93,7 @@ public class AlignmentData {
 			for (Feature f : gt.getFeatures()) {
 				AlignmentFile file = f.getData();
 				int fileIdx = fileMap.get(file);
-				int peakID = f.getPeakID() + 1; // starts from 1 in the ground truth
+				int peakID = f.getPeakID(); // starts from 0 too in the ground truth
 				sb.append(fileIdx + " " + peakID + " ");
 			}
 			pw.println(sb.toString());

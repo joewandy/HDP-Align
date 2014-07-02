@@ -154,6 +154,12 @@ public class MultiAlignCmdOptions {
 	public int groupingNSamples = MultiAlignConstants.GROUPING_METHOD_NUM_SAMPLES;
 	
 	/*
+	 * Scoring options
+	 */
+	@Option(name = "scoringMethod", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Scoring method")
+	public String scoringMethod = MultiAlignConstants.SCORING_METHOD_DIST;	
+	
+	/*
 	 * Generative model parameters
 	 */
 

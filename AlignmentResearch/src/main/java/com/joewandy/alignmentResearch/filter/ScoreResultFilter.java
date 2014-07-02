@@ -52,13 +52,13 @@ public class ScoreResultFilter implements AlignmentResultFilter {
 				rejected.add(row);
 				System.out.println("REJECT " + row);				
 				// remove from ground truth as well
-				for (Feature f : row.getFeatures()) {
-					gt.clearFeature(f);
-				}				
+//				for (Feature f : row.getFeatures()) {
+//					gt.clearFeature(f);
+//				}				
 			}
 			counter++;			
 		}
-		gt.buildPairwise();
+//		gt.buildPairwise();
 		System.out.println("accepted.size() = " + accepted.size());
 		System.out.println("rejected.size() = " + rejected.size());
 	}

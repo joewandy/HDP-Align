@@ -1,4 +1,4 @@
-function [sorted_res, samples] = run_hdp(path, cluster_rt, cluster_mass, debug, label)
+function [sorted_res, samples] = run_hdp(path, cluster_rt, cluster_mass, debug, label, NSAMPS, BURN_IN)
 
 % read all the csv files in path
 input_hdp.J = 0;                      % number of replicates
@@ -35,21 +35,35 @@ end
 
 % model parameters
 
-input_hdp.NSAMPS = 200;               % total number of samples
-input_hdp.BURN_IN = 100;              % burn-in samples  
+input_hdp.NSAMPS = NSAMPS;               % total number of samples
+input_hdp.BURN_IN = BURN_IN;              % burn-in samples  
 
 input_hdp.mu_0 = mean(data_rt_all);   % base distribution mean for RT
 input_hdp.sigma_0_prec = 1/5e6;      % base distribution prec for RT
 input_hdp.psi_0 = mean(data_mass_all);% base distribution mean for mass
 input_hdp.rho_0_prec = 1/5e6;         % base distribution prec for mass
 
-input_hdp.alpha_rt = 1;               % RT cluster DP concentration param
-input_hdp.alpha_mass = 1;             % mass cluster DP concentration param
-input_hdp.top_alpha = 1;              % top-level DP concentration
+input_hdp.alpha_rt = 10;               % RT cluster DP concentration param
+input_hdp.alpha_mass = 10;             % mass cluster DP concentration param
+input_hdp.top_alpha = 10;              % top-level DP concentration
 
-input_hdp.delta_prec = 1/10;          % precision for top components
-input_hdp.gamma_prec = 1/10;          % precision for RT cluster mixture components
-input_hdp.rho_prec = 1/0.1;           % precision for mass cluster mixture components
+% synth data
+
+input_hdp.delta_prec = 1/(10*10);          % precision for top components
+input_hdp.gamma_prec = 1/(10*10);          % precision for RT cluster mixture components
+input_hdp.rho_prec = 1/(0.015*0.015);      % precision for mass cluster mixture components
+
+% lange data P1
+
+% input_hdp.delta_prec = 1/100;          % precision for top components
+% input_hdp.gamma_prec = 1/100;          % precision for RT cluster mixture components
+% input_hdp.rho_prec = 1/(1.5*1.5);      % precision for mass cluster mixture components
+
+% glyco data -- shit result
+
+% input_hdp.delta_prec = 1/100;           % precision for top components
+% input_hdp.gamma_prec = 1/100;          % precision for RT cluster mixture components
+% input_hdp.rho_prec = 1/1;            % precision for mass cluster mixture components
 
 % run HDP
 fprintf('Run HDP\n');

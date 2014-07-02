@@ -47,14 +47,14 @@ public abstract class MultiAlignBaseExp implements MultiAlignExperiment {
 		AlignmentDataGenerator dataGenerator = AlignmentDataGeneratorFactory
 				.getAlignmentDataGenerator(options);
 		AlignmentData data;
-		if (fileIndices == null) {
-			data = dataGenerator.generate();
+		if (fileIndices != null) {
+			// pick files according to file indices
+			data = dataGenerator.generateByIndices(fileIndices);
 			for (AlignmentFile file : data.getAlignmentDataList()) {
 				System.out.println("test on " + file.getFilename());
 			}
 		} else {
-			// pick files according to file indices
-			data = dataGenerator.generateByIndices(fileIndices);
+			data = dataGenerator.generate();
 			for (AlignmentFile file : data.getAlignmentDataList()) {
 				System.out.println("test on " + file.getFilename());
 			}

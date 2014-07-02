@@ -1,8 +1,7 @@
-java.lang.NullPointerException
-	at com.joewandy.alignmentResearch.objectModel.AlignmentRow.addAlignedFeatures(AlignmentRow.java:69)
-	at com.joewandy.alignmentResearch.objectModel.AlignmentList.<init>(AlignmentList.java:121)
-	at com.joewandy.alignmentResearch.alignmentMethod.external.SimaAlignment.matchFeatures(SimaAlignment.java:70)
-	at com.joewandy.alignmentResearch.alignmentMethod.BaseAlignment.align(BaseAlignment.java:46)
-	at com.joewandy.alignmentResearch.main.MultiAlign.runExperiment(MultiAlign.java:123)
-	at com.joewandy.alignmentResearch.main.experiment.MultiAlignNormalRun.performExperiment(MultiAlignNormalRun.java:26)
-	at com.joewandy.alignmentResearch.main.MultiAlignCmd.main(MultiAlignCmd.java:39)
+java.lang.ArrayIndexOutOfBoundsException: 0
+	at com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.GenerativeModelParameter.getA(GenerativeModelParameter.java:102)
+	at com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.GenerativeModelDataGenerator.getAlignmentFiles(GenerativeModelDataGenerator.java:74)
+	at com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.BaseDataGenerator.generateByIteration(BaseDataGenerator.java:45)
+	at com.joewandy.alignmentResearch.main.experiment.GenerativeExperiment.getData(GenerativeExperiment.java:80)
+	at com.joewandy.alignmentResearch.main.experiment.GenerativeExperiment.performExperiment(GenerativeExperiment.java:33)
+	at com.joewandy.alignmentResearch.main.MultiAlignCmd.main(MultiAlignCmd.java:40)

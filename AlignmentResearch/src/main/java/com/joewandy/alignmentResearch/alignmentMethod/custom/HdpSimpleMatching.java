@@ -23,11 +23,13 @@ public class HdpSimpleMatching implements FeatureMatching {
 	private String listId;
 	private double massTol;
 	private double rtTol;	
-	private double distStdev;
 	private Map<HdpResult, HdpResult> hdpResults;
+	private String scoringMethod;
+	private boolean exactMatch;
 		
 	public HdpSimpleMatching(String listId, AlignmentList masterList, AlignmentList childList,
-			double massTol, double rtTol, Map<HdpResult, HdpResult> resultMap) {			
+			double massTol, double rtTol, Map<HdpResult, HdpResult> resultMap, String scoringMethod,
+			boolean exactMatch) {			
 
 		this.listId = listId;
 		this.masterList = masterList;
@@ -35,12 +37,8 @@ public class HdpSimpleMatching implements FeatureMatching {
 		this.massTol = massTol;
 		this.rtTol = rtTol;		
 		this.hdpResults = resultMap;
-
-		DescriptiveStatistics stats = new DescriptiveStatistics();
-		for (Entry<HdpResult, HdpResult> e : resultMap.entrySet()) {
-			stats.addValue(e.getKey().getDistance());
-		}
-		distStdev = stats.getStandardDeviation();
+		this.scoringMethod = scoringMethod;
+		this.exactMatch = exactMatch;
 		
 	}
 
@@ -73,24 +71,9 @@ public class HdpSimpleMatching implements FeatureMatching {
 			merged.addAlignedFeatures(row1.getFeatures());
 			merged.addAlignedFeatures(row2.getFeatures());
 			
-			// this won't work if aligning more than 2 files ?
-			Feature feature1 = row1.getFirstFeature();
-			Feature feature2 = row2.getFirstFeature();
-			HdpResult example = new HdpResult(feature1, feature2);
-			HdpResult searched = hdpResults.get(example);
-
 			// assign score
-			double sim = 0;
-			if (searched != null) {
-				sim = searched.getSimilarity();
-			}			
-			double score = 0;
-//			score = match.getScore();
-			score = sim;
-//			score = (sim + match.getScore()) / 2;
-//			score = (sim * match.getScore());			
-			merged.setScore(score);			
-			
+			double score = match.getScore();
+			merged.setScore(score);						
 			matchedList.addRow(merged);
 
 		}
@@ -143,7 +126,11 @@ public class HdpSimpleMatching implements FeatureMatching {
     	
         List<MatchResult> matches = new ArrayList<MatchResult>();        
 		Matrix scoreArr = computeScores(men, women);  
-		matches = approxMaxMatching(scoreArr, men, women);        				        
+		if (!exactMatch) {
+	    	matches = approxMaxMatching(scoreArr, men, women);				
+		} else {
+			matches = hungarianMatching(scoreArr, men, women);				
+		}
         return matches;
         
     }
@@ -159,6 +146,42 @@ public class HdpSimpleMatching implements FeatureMatching {
 		return matches;
 		
 	}
+	
+	private List<MatchResult> hungarianMatching(Matrix scoreArr,
+			List<AlignmentRow> men, List<AlignmentRow> women) {
+		
+        double maxScore = getMax(scoreArr);
+        
+    	// normalise 
+    	for (int i = 0; i < men.size(); i++) {
+    		for (int j = 0; j < women.size(); j++) {
+    			scoreArr.set(i, j, maxScore - scoreArr.get(i, j));
+    		}
+    	}
+		// running matching
+		System.out.print("\tRunning maximum weighted matching ");    		
+		HungarianAlgorithm algo = new HungarianAlgorithm(toArray(scoreArr));
+		int[] res = algo.execute();
+		System.out.println();
+		
+		// store the result
+		List<MatchResult> matches = new ArrayList<MatchResult>();
+		for (int i=0; i<men.size(); i++) {
+			int matchIndex = res[i];
+			// if there's a match
+			if (matchIndex != -1) {
+				AlignmentRow row1 = men.get(i);
+				AlignmentRow row2 = women.get(matchIndex);
+				// and they are within tolerance to each other
+				if (row1.rowInRange(row2, massTol, -1, MultiAlignConstants.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
+					MatchResult matchRes = new MatchResult(row1, row2, scoreArr.get(i, matchIndex));
+					matches.add(matchRes);
+				}
+			}
+		}
+		return matches;
+
+	}
 
 	private Matrix computeScores(List<AlignmentRow> men, List<AlignmentRow> women) {
 
@@ -166,54 +189,106 @@ public class HdpSimpleMatching implements FeatureMatching {
 		int n = women.size();
 		Matrix scoreArr = new DenseMatrix(m, n);
 		
-    	System.out.print("\tComputing distances ");
-    	double maxDist = 0;
-		Matrix distArr = new DenseMatrix(m, n);
-		for (int i = 0; i < m; i++) {
-			
-			for (int j = 0; j < n; j++) {
-				AlignmentRow man = men.get(i);
-				AlignmentRow woman = women.get(j);
-				if (man.rowInRange(woman, massTol, -1, MultiAlignConstants.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
-					double dist = computeDist(man, woman);
-					if (dist > maxDist) {
-						maxDist = dist;
-					}
-					distArr.set(i, j, dist);				
-				}
-			}
-			
-            if (i % 1000 == 0) {
-            	System.out.print('.');
-            }
-			
-		}
-		System.out.println();
-
-    	System.out.print("\tComputing scores ");
-		scoreArr = new DenseMatrix(m, n);
-		for (int i = 0; i < m; i++) {		
-			
-			for (int j = 0; j < n; j++) {
-				double dist = distArr.get(i, j);
-				if (dist > 0) {
-					double score = 1-(dist/maxDist);
-					scoreArr.set(i, j, score);
-				}
-			}
-
-            if (i % 1000 == 0) {
-            	System.out.print('.');
-            }
+		System.out.println("Scoring method = " + this.scoringMethod);
 		
+		if (scoringMethod.equals(MultiAlignConstants.SCORING_METHOD_DIST)) {
+			
+	    	System.out.print("\tComputing distances ");
+	    	double maxDist = 0;
+			Matrix distArr = new DenseMatrix(m, n);
+			for (int i = 0; i < m; i++) {
+				
+				for (int j = 0; j < n; j++) {
+					AlignmentRow man = men.get(i);
+					AlignmentRow woman = women.get(j);
+					if (man.rowInRange(woman, massTol, rtTol, MultiAlignConstants.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
+						double dist = computeDist(man, woman);
+						if (dist > maxDist) {
+							maxDist = dist;
+						}
+						distArr.set(i, j, dist);				
+					}
+				}
+				
+	            if (i % 1000 == 0) {
+	            	System.out.print('.');
+	            }
+				
+			}
+			System.out.println();
+
+	    	System.out.print("\tComputing scores ");
+			scoreArr = new DenseMatrix(m, n);
+			for (int i = 0; i < m; i++) {		
+				
+				for (int j = 0; j < n; j++) {
+					double dist = distArr.get(i, j);
+					if (dist > 0) {
+						double score = 1-(dist/maxDist);
+						scoreArr.set(i, j, score);
+					}
+				}
+
+	            if (i % 1000 == 0) {
+	            	System.out.print('.');
+	            }
+			
+			}
+			System.out.println();
+			distArr = null;
+						
+		} else if (scoringMethod.equals(MultiAlignConstants.SCORING_METHOD_HDP_RT)) {
+			
+			// matching by posterior 'score' -- RT only
+	    	System.out.print("\tComputing scores ");
+			scoreArr = new DenseMatrix(m, n);
+			for (int i = 0; i < m; i++) {		
+				
+				for (int j = 0; j < n; j++) {
+					AlignmentRow man = men.get(i);
+					AlignmentRow woman = women.get(j);
+					if (man.rowInRange(woman, massTol, rtTol, MultiAlignConstants.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
+						double score = this.computePosteriorScore(man, woman);
+						scoreArr.set(i, j, score);
+					}
+				}
+
+	            if (i % 1000 == 0) {
+	            	System.out.print('.');
+	            }
+			
+			}
+			System.out.println();			
+				
+		} else if (scoringMethod.equals(MultiAlignConstants.SCORING_METHOD_HDP_MASS_RT)) {
+			
+			// matching by posterior 'score' -- RT + mass
+	    	System.out.print("\tComputing scores ");
+			scoreArr = new DenseMatrix(m, n);
+			for (int i = 0; i < m; i++) {		
+				
+				for (int j = 0; j < n; j++) {
+					AlignmentRow man = men.get(i);
+					AlignmentRow woman = women.get(j);
+					if (man.rowInRange(woman, massTol, rtTol, MultiAlignConstants.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
+						double score = this.computePosteriorScore(man, woman);
+						scoreArr.set(i, j, score);
+					}
+				}
+
+	            if (i % 1000 == 0) {
+	            	System.out.print('.');
+	            }
+			
+			}
+			System.out.println();			
+										
 		}
-		System.out.println();
-		distArr = null;
 		
 		// normalise score to 0..1
 		double maxScore = getMax(scoreArr);
 		scoreArr.scale(1/maxScore);
-		
+				
 		return scoreArr;
 			
 	}
@@ -233,6 +308,52 @@ public class HdpSimpleMatching implements FeatureMatching {
 
 	}
 
+	private double computeShit(AlignmentRow row1, AlignmentRow row2) {
+		
+		double mass1 = row1.getAverageMz();
+		double mass2 = row2.getAverageMz();
+
+		// this won't work if aligning more than 2 files ?
+		Feature feature1 = row1.getFirstFeature();
+		Feature feature2 = row2.getFirstFeature();
+		HdpResult example = new HdpResult(feature1, feature2);
+		HdpResult searched = hdpResults.get(example);
+
+		// assign dist
+		double rt = 0;
+		if (searched != null) {
+			rt = searched.getDistance();
+		}			
+		
+//		double rt1 = row1.getAverageRt();
+//		double rt2 = row2.getAverageRt();
+//		double rt = rt1 - rt2;
+		double mz = mass1 - mass2;
+        double dist = Math.sqrt((rt*rt) + (mz*mz));
+				
+        return dist;
+
+	}
+	
+	private double computePosteriorScore(AlignmentRow row1, AlignmentRow row2) {
+
+		double score = 0;
+
+		// this won't work if aligning more than 2 files ?
+		Feature feature1 = row1.getFirstFeature();
+		Feature feature2 = row2.getFirstFeature();
+		HdpResult example = new HdpResult(feature1, feature2);
+		HdpResult searched = hdpResults.get(example);
+
+		// assign dist
+		if (searched != null) {
+			score = searched.getSimilarity();
+		}			
+		
+        return score;
+
+	}
+
 	private double getMax(Matrix matrix) {
 		double maxScore = 0;
 		for (MatrixEntry e : matrix) {
@@ -242,6 +363,17 @@ public class HdpSimpleMatching implements FeatureMatching {
 			}
 		}
 		return maxScore;
+	}
+	
+	private double[][] toArray(Matrix matrix) {
+		double[][] arr = new double[matrix.numRows()][matrix.numColumns()];
+		for (MatrixEntry e : matrix) {
+			int i = e.row();
+			int j = e.column();
+			double val = e.get();
+			arr[i][j] = val;
+		}
+		return arr;
 	}
 	
 }

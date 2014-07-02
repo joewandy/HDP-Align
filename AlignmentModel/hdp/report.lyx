@@ -2771,7 +2771,7 @@ For existing mass cluster
 \begin_layout Standard
 \begin_inset Formula 
 \begin{equation}
-L(y_{n}^{j}|v_{jnia}=1)=\mathcal{N}(y_{n}^{j}|\theta_{ia},\rho^{-1})
+L(y_{n}^{j}|v_{jnia}=1)=\mathcal{N}(y_{n}^{j}|\mu_{ia},\rho^{-1})
 \end{equation}
 
 \end_inset
@@ -2781,7 +2781,7 @@ L(y_{n}^{j}|v_{jnia}=1)=\mathcal{N}(y_{n}^{j}|\theta_{ia},\rho^{-1})
 
 \begin_layout Standard
 where 
-\begin_inset Formula $\theta_{ia}$
+\begin_inset Formula $\mu_{ia}$
 \end_inset
 
  is the mean of the component 
@@ -2804,7 +2804,7 @@ where
 \begin_layout Standard
 \begin_inset Formula 
 \begin{equation}
-\theta_{ia}|\psi_{0},\rho_{0})\sim\mathcal{N}(\theta_{ia}|\psi_{0},\rho_{0}^{-1})
+\mu_{ia}|\psi_{0},\rho_{0})\sim\mathcal{N}(\mu_{ia}|\psi_{0},\rho_{0}^{-1})
 \end{equation}
 
 \end_inset
@@ -2823,8 +2823,8 @@ For new mass cluster
 \begin_layout Standard
 \begin_inset Formula 
 \begin{eqnarray}
-p(y_{n}^{j}|v_{jnia^{*}}=1) & = & \int\left[p(y_{n}^{j}|\theta_{ia},\rho)\,\cdot\, p(\theta_{ia}|\psi_{0},\rho_{0})\right]\, d\theta_{ia}\label{eq:10-1}\\
- & = & \int\left[\mathcal{N}(y_{n}^{j}|\theta_{ia},\rho^{-1})\cdot\mathcal{N}(\theta_{ia}|\psi_{0},\rho_{0}^{-1})\right]\, d\theta_{ia}\label{eq:11-1}\\
+p(y_{n}^{j}|v_{jnia^{*}}=1) & = & \int\left[p(y_{n}^{j}|\mu_{ia},\rho)\,\cdot\, p(\mu_{ia}|\psi_{0},\rho_{0})\right]\, d\theta_{ia}\label{eq:10-1}\\
+ & = & \int\left[\mathcal{N}(y_{n}^{j}|\mu_{ia},\rho^{-1})\cdot\mathcal{N}(\mu_{ia}|\psi_{0},\rho_{0}^{-1})\right]\, d\theta_{ia}\label{eq:11-1}\\
  & = & \mathcal{N}(y_{n}^{j}|\psi_{0},(\rho^{-1}+\rho_{0}^{-1}))\label{eq:12-1}
 \end{eqnarray}
 
@@ -2857,7 +2857,7 @@ For each metabolite
 \begin_layout Standard
 \begin_inset Formula 
 \begin{eqnarray}
-p(\theta_{ia}|y_{n}^{j}) & \propto & p(y_{n}^{j}|\theta_{ia},\rho)p(\theta_{ia}|\psi_{0},\rho_{0})=\mathcal{N}(\theta_{ia}|\mu_{a},\sigma_{a}^{-1})
+p(\mu_{ia}|y_{n}^{j}) & \propto & p(y_{n}^{j}|\mu_{ia},\rho)p(\mu_{ia}|\psi_{0},\rho_{0})=\mathcal{N}(\mu_{ia}|\mu_{a},\sigma_{a}^{-1})
 \end{eqnarray}
 
 \end_inset
@@ -2913,7 +2913,7 @@ for every mass cluster
 \end_inset
 
 , we update its mixture parameter 
-\begin_inset Formula $\theta_{ia}$
+\begin_inset Formula $\mu_{ia}$
 \end_inset
 
  given the data 
@@ -2922,7 +2922,7 @@ for every mass cluster
 \begin_layout Standard
 \begin_inset Formula 
 \begin{equation}
-p(\theta_{ia}|\ldots)\propto p(\theta_{ia}|\psi_{0},\rho_{0})\prod_{n}^{N}p(y_{n}^{j}|\theta_{ia},\rho)=\mathcal{N}(\mu_{b},\sigma_{b}^{-1})
+p(\mu_{ia}|\ldots)\propto p(\mu_{ia}|\psi_{0},\rho_{0})\prod_{n}^{N}p(y_{n}^{j}|\theta_{ia},\rho)=\mathcal{N}(\mu_{b},\sigma_{b}^{-1})
 \end{equation}
 
 \end_inset
@@ -2981,7 +2981,7 @@ It is also possible for a customer or a set of customers to reject the plate.
 .
  In this case, we have to perform the necessary book-keeping such as recomputing
  the mixture parameter 
-\begin_inset Formula $\theta_{ia}$
+\begin_inset Formula $\mu_{ia}$
 \end_inset
 
  when its customer membership changes, and deleting the whole lot of dish

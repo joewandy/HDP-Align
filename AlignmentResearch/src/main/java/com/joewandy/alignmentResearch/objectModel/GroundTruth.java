@@ -77,19 +77,19 @@ public class GroundTruth {
 
 	private GroundTruthPair getGroundTruthPair(Feature f1, Feature f2) {
 		GroundTruthPair pairwise = null;
-		if (f1.getPeakID() == f2.getPeakID()) {
+//		if (f1.getPeakID() == f2.getPeakID()) {
 			if (f1.getData().getId() < f2.getData().getId()) {
 				pairwise = new GroundTruthPair(f1, f2);
 			} else {
 				pairwise = new GroundTruthPair(f2, f1);					
 			}
-		} else {
-			if (f1.getPeakID() < f2.getPeakID()) {
-				pairwise = new GroundTruthPair(f1, f2);
-			} else {
-				pairwise = new GroundTruthPair(f2, f1);					
-			}			
-		}
+//		} else {
+//			if (f1.getPeakID() < f2.getPeakID()) {
+//				pairwise = new GroundTruthPair(f1, f2);
+//			} else {
+//				pairwise = new GroundTruthPair(f2, f1);					
+//			}			
+//		}
 		return pairwise;
 	}
 		

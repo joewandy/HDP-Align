@@ -40,7 +40,7 @@ public class SimaFormatDataGenerator extends BaseDataGenerator implements Alignm
 	}
 	
 	@Override
-	protected List<AlignmentFile> getAlignmentFiles() {
+	protected List<AlignmentFile> getAlignmentFiles(int currentIter) {
 		
 		// sort input file alphabetically to look nicer
 		File inputDirectory = new File(this.inputDirectory);
@@ -137,7 +137,7 @@ public class SimaFormatDataGenerator extends BaseDataGenerator implements Alignm
 							AlignmentFile data = alignmentDataMap.get(filename);
 							if (data != null) {
 								Feature featureFromData = data.getFeatureByPeakID(peakIdx);
-								assert(featureFromData != null);
+								assert featureFromData != null : "fileIdx " + fileIdx + " peakIdx " + peakIdx;
 								gtFeatures.addFeature(featureFromData);
 							}
 							

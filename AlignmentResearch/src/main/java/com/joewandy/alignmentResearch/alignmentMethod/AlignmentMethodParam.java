@@ -76,6 +76,7 @@ public class AlignmentMethodParam {
 	private boolean usePeakShape;
 	private String groupingMethod;
 	private double groupingRtTolerance;
+	private String scoringMethod;
 	private double alpha;
 	
 	// for ransac alignment
@@ -104,6 +105,7 @@ public class AlignmentMethodParam {
 		private boolean usePeakShape;		
 		private String groupingMethod;
 		private double groupingRtTolerance;
+		private String scoringMethod;
 		private double alpha;
 
 		// for ransac alignment
@@ -144,6 +146,7 @@ public class AlignmentMethodParam {
 			this.exactMatch = AlignmentMethodParam.EXACT_MATCH;
 			this.usePeakShape = AlignmentMethodParam.USE_PEAK_SHAPE;
 			this.groupingMethod = MultiAlignConstants.GROUPING_METHOD_GREEDY;
+			this.scoringMethod = MultiAlignConstants.SCORING_METHOD_DIST;
 			this.alpha = AlignmentMethodParam.PARAM_ALPHA;
 			
 		}
@@ -175,6 +178,11 @@ public class AlignmentMethodParam {
 
 		public Builder groupingRtTolerance(double groupingRtTolerance) {
 			this.groupingRtTolerance = groupingRtTolerance;
+			return this;
+		}				
+
+		public Builder scoringMethod(String scoringMethod) {
+			this.scoringMethod = scoringMethod;
 			return this;
 		}				
 		
@@ -237,6 +245,7 @@ public class AlignmentMethodParam {
 		this.exactMatch = builder.exactMatch;
 		this.usePeakShape = builder.usePeakShape;
 		this.groupingMethod = builder.groupingMethod;
+		this.scoringMethod = builder.scoringMethod;
 		this.groupingRtTolerance = builder.groupingRtTolerance;
 		this.alpha = builder.alpha;
 		this.ransacRtToleranceBeforeMinute = builder.ransacRtToleranceBeforeMinute;
@@ -275,6 +284,10 @@ public class AlignmentMethodParam {
 	
 	public String getGroupingMethod() {
 		return groupingMethod;
+	}
+	
+	public String getScoringMethod() {
+		return scoringMethod;
 	}
 
 	public double getGroupingRtTolerance() {

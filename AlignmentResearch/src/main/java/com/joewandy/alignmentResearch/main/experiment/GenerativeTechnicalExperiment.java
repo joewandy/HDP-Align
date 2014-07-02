@@ -17,6 +17,7 @@ public class GenerativeTechnicalExperiment extends GenerativeExperiment implemen
 	@Override
 	protected void setCommonExperimentalSettings(MultiAlignCmdOptions options) {
 		options.dataType = AlignmentDataGeneratorFactory.GENERATIVE_MODEL_DATA;
+		options.exactMatch = false;
 		options.generativeParams.setExpType(GenerativeModelParameter.ExperimentType.TECHNICAL);
 	}
 	
@@ -34,7 +35,7 @@ public class GenerativeTechnicalExperiment extends GenerativeExperiment implemen
 //		methods.add(AlignmentMethodFactory.ALIGNMENT_METHOD_MZMINE_JOIN);
 //		methods.add(AlignmentMethodFactory.ALIGNMENT_METHOD_OPENMS);		
 //		methods.add(AlignmentMethodFactory.ALIGNMENT_METHOD_SIMA);	
-//		methods.add(AlignmentMethodFactory.ALIGNMENT_METHOD_MY_MAXIMUM_WEIGHT_MATCHING_HIERARCHICAL);				
+//		methods.add(AlignmentMethodFactory.ALIGNMENT_METHOD_kMY_MAXIMUM_WEIGHT_MATCHING_HIERARCHICAL);				
 		return methods;
 	}
 

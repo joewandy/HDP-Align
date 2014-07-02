@@ -268,7 +268,9 @@ public class Feature {
 	public String toString() {
 		if (data != null) {
 			return "Feature [peakID=" + peakID + ", mass=" + mass + ", rt=" + rt
-					+ ", intensity=" + intensity + ", data=" + data.getFilenameWithoutExtension() + "]";			
+					+ ", intensity=" + intensity + ", data=" + data.getFilenameWithoutExtension()
+					+ ", theoPeakID=" + theoPeakID
+					+ "]";			
 		} else {
 			return "Feature [peakID=" + peakID + ", mass=" + mass + ", rt=" + rt
 					+ ", intensity=" + intensity + "]";			

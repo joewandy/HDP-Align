@@ -9,6 +9,7 @@ import cmdline.CmdLineParser;
 import com.joewandy.alignmentResearch.main.experiment.GenerativeBiologicalExperiment;
 import com.joewandy.alignmentResearch.main.experiment.GenerativeTechnicalExperiment;
 import com.joewandy.alignmentResearch.main.experiment.GlycoExperiment;
+import com.joewandy.alignmentResearch.main.experiment.HdpExperiment;
 import com.joewandy.alignmentResearch.main.experiment.M1Experiment;
 import com.joewandy.alignmentResearch.main.experiment.MultiAlignExpResult;
 import com.joewandy.alignmentResearch.main.experiment.MultiAlignExperiment;
@@ -64,13 +65,16 @@ public class MultiAlignCmd {
 				exp = new GenerativeTechnicalExperiment();
 			} else if (MultiAlignExperiment.EXPERIMENT_TYPE_GENERATIVE_BIOLOGICAL_REPLICATES.equals(options.experimentType)) {
 				// generative model alignment with retention time warping
-				exp = new GenerativeBiologicalExperiment();
+				exp = new GenerativeBiologicalExperiment(options);
 			} else if (MultiAlignExperiment.EXPERIMENT_TYPE_STANDARD.equals(options.experimentType)) {
 				// standard experiment
 				exp = new StandardExperiment();
 			} else if (MultiAlignExperiment.EXPERIMENT_TYPE_GLYCO.equals(options.experimentType)) {
 				// glyco experiment
 				exp = new GlycoExperiment();
+			} else if (MultiAlignExperiment.EXPERIMENT_TYPE_HDP.equals(options.experimentType)) {
+				// hdp experiment
+				exp = new HdpExperiment();
 			}
 		} 
 		

@@ -13,6 +13,7 @@ import com.joewandy.alignmentResearch.alignmentMethod.BaseAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.custom.FeatureMatching;
 import com.joewandy.alignmentResearch.alignmentMethod.custom.HdpResult;
 import com.joewandy.alignmentResearch.alignmentMethod.custom.HdpSimpleMatching;
+import com.joewandy.alignmentResearch.main.MultiAlignConstants;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.Feature;
@@ -21,11 +22,15 @@ public class TestHdpAlignment extends BaseAlignment implements AlignmentMethod {
 
 	protected List<AlignmentFile> dataList;
 	private Map<HdpResult, HdpResult> resultMap;
+	private String scoringMethod;
+	private boolean exactMatch;
 	
 	public TestHdpAlignment(List<AlignmentFile> dataList, AlignmentMethodParam param) {
 
 		super(dataList, param);
 		this.dataList = dataList;
+		this.scoringMethod = param.getScoringMethod();
+		this.exactMatch = param.isExactMatch();
 
 		// load from matlab
 		AlignmentFile firstFile = dataList.get(0);
@@ -33,7 +38,13 @@ public class TestHdpAlignment extends BaseAlignment implements AlignmentMethod {
 		resultMap = new HashMap<>();
 		MatFileReader mfr = null;
 		try {
-			mfr = new MatFileReader(parentPath + "/csv/hdp_result_rt_mass.mat");
+			if (MultiAlignConstants.SCORING_METHOD_HDP_MASS_RT.equals(this.scoringMethod)) {
+				// clustering results by RT + mass
+				mfr = new MatFileReader(parentPath + "/csv/hdp_result_rt_mass.mat");				
+			} else if (MultiAlignConstants.SCORING_METHOD_HDP_RT.equals(this.scoringMethod)) {
+				// clustering results by RT only
+				mfr = new MatFileReader(parentPath + "/csv/hdp_result_rt.mat");				
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -73,7 +84,7 @@ public class TestHdpAlignment extends BaseAlignment implements AlignmentMethod {
 			AlignmentList peakList = new AlignmentList(data);
 			System.out.println("Aligning #" + (counter+1) + ": " + peakList);
 			FeatureMatching matcher = new HdpSimpleMatching(masterList.getId() + ", " + peakList.getId(), masterList, peakList, 
-					massTolerance, rtTolerance, resultMap);
+					massTolerance, rtTolerance, resultMap, scoringMethod, exactMatch);
 			masterList = matcher.getMatchedList();			            
 			counter++;
 		}

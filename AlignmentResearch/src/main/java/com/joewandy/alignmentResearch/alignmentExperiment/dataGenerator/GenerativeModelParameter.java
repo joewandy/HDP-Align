@@ -10,23 +10,21 @@ public class GenerativeModelParameter {
 	private ExperimentType expType = ExperimentType.TECHNICAL;	
 	private int S = 2;					// how many replicates to produce
 	
-	private double probP = 0.8;			// probaiblity of each individiual observed peak
-	private double threshold_q = 1000;	// threshold for filtering low intensity peaks
+	private double threshold_q = 5000;	// threshold for filtering low intensity peaks
 	private double [] g = {1, 1, 1};	// warping scaling coeff in each replicate
 	private double[] h = {0, 0, 0};		// warping translation coeff in each replicate
 
-	private double a = -1;				// proportion of the metabolites that are not identical across runs
-	private double alpha_a = 4;			// Beta distribution parameter to draw a from
-	private double alpha_b = 2;			// Beta distribution parameter to draw b from
+	private double[] as = null;			// proportion of the metabolites that are not identical across runs
+	private double a = 0.5;
 	
 	private double b = 11;				// mean of metabolite's concentration (log-Normal)
 	private double c = 1;				// standard deviation of metabolite concentration (log-Normal)
 	private double alpha = 10;			// DP concentration parameter for clustering
-	private double d = 1000; 			// mean of predicted retention time of metabolite (Normal)
+	private double d = 1000; 				// mean of predicted retention time of metabolite (Normal)
 	private double e = 250;				// standard deviation of predicted retention time of metabolite (Normal)
-	private double sigma_c = 2;  	  	// standard deviation of cluster's RT (Normal)
+	private double sigma_c = 10;  	  	// standard deviation of cluster's RT (Normal)
+	private double sigma_t = 10;			// standard deviation of observed peak's RT (Normal)
 	private double sigma_q = 1000;		// standard deviation of observed peak's intensity (Normal)
-	private double sigma_t = 1;			// standard deviation of observed peak's RT (Normal)
 	private double sigma_m = 0.015;		// standard deviation of observed peak's mass (Normal)
 
 	// The minimum probability mass that a mass needs to be kept in the distribution of the spectrum
@@ -60,14 +58,6 @@ public class GenerativeModelParameter {
 		S = s;
 	}
 
-	public double getProbP() {
-		return probP;
-	}
-
-	public void setProbP(double probP) {
-		this.probP = probP;
-	}
-
 	public double getThreshold_q() {
 		return threshold_q;
 	}
@@ -92,28 +82,24 @@ public class GenerativeModelParameter {
 		this.h = h;
 	}
 
-	public double getA() {
-		return a;
+	public double[] getAs() {
+		return as;
 	}
-
+	
+	public double getA(int i) {
+		if (as == null) {
+			return a;
+		} else {
+			return as[i];			
+		}
+	}
+	
 	public void setA(double a) {
 		this.a = a;
 	}
 
-	public double getAlpha_a() {
-		return alpha_a;
-	}
-
-	public void setAlpha_a(double alpha_a) {
-		this.alpha_a = alpha_a;
-	}
-
-	public double getAlpha_b() {
-		return alpha_b;
-	}
-
-	public void setAlpha_b(double alpha_b) {
-		this.alpha_b = alpha_b;
+	public void setAs(double[] as) {
+		this.as = as;
 	}
 
 	public double getB() {

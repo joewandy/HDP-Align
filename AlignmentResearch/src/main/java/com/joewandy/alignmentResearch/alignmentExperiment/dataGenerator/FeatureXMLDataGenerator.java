@@ -41,7 +41,7 @@ public class FeatureXMLDataGenerator extends BaseDataGenerator implements Alignm
 	}
 	
 	@Override
-	protected List<AlignmentFile> getAlignmentFiles() {
+	protected List<AlignmentFile> getAlignmentFiles(int currentIter) {
 		
 		// sort input file alphabetically to look nicer
 		File inputDirectory = new File(this.inputDirectory);

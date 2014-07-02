@@ -13,13 +13,11 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 
-import org.apache.commons.math3.distribution.BetaDistribution;
 import org.apache.commons.math3.distribution.NormalDistribution;
 
 import peakml.chemistry.Molecule;
 import peakml.io.chemistry.MoleculeIO;
 
-import com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.GenerativeModelParameter.ExperimentType;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.Feature;
 import com.joewandy.alignmentResearch.objectModel.GenerativeFeatureClusterer;
@@ -29,6 +27,7 @@ import com.joewandy.alignmentResearch.objectModel.GenerativeMoleculeDB;
 import com.joewandy.alignmentResearch.objectModel.GroundTruth;
 import com.joewandy.alignmentResearch.objectModel.GroundTruthFeatureGroup;
 import com.joewandy.alignmentResearch.rtPrediction.RTPredictor;
+import com.rits.cloning.Cloner;
 
 import domsax.XmlParserException;
 
@@ -45,30 +44,42 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 	
 	// RT predictor
 	private RTPredictor predictor;
-	
-	private Random r;
 		
+	private Random r;
+	
+	private List<Molecule> molecules;
+	private List<Molecule> replacement;
+	
+	private Cloner cloner;
+	
 	public GenerativeModelDataGenerator(String molPath, GenerativeModelParameter params) {
+
 		super();
+		
 		this.molPath = molPath;
 		this.subsPath = params.getReplacementMolsPath();
 		this.params = params;
 		this.predictor = new RTPredictor(params);
 		this.r = new Random();
+		
+		System.out.println();
+		System.out.println("Loading molecules");
+		this.molecules = loadMolecules(molPath);
+
+		System.out.println("Loading replacement");
+		this.replacement = loadMolecules(subsPath);
+		
+		this.cloner = new Cloner();
+
 	}
 	
 	@Override
-	protected List<AlignmentFile> getAlignmentFiles() {
-
-		System.out.println("Loading molecules");
-		List<Molecule> molecules = loadMolecules(molPath);
-
-		System.out.println("Loading replacement");
-		List<Molecule> replacement = loadMolecules(subsPath);
+	protected List<AlignmentFile> getAlignmentFiles(int currentIter) {
 		
 		int numFiles = params.getS();
+		double a = params.getA(currentIter);
 		GenerativeMoleculeDB database = createDatabase(molecules, replacement,
-				numFiles);
+				numFiles, a);
 						
 		// generate the theoretical features for all metabolites
 		System.out.println("Generating theoretical features");
@@ -191,7 +202,7 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 	}
 	
 	private GenerativeMoleculeDB createDatabase(List<Molecule> molecules,
-			List<Molecule> replacement, int numFiles) {
+			List<Molecule> replacement, int numFiles, double a) {
 		
 		GenerativeMoleculeDB database = new GenerativeMoleculeDB(params.getAdducts(), params);
 		int subsIndex = 0;
@@ -210,29 +221,33 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 			} else if (params.getExpType() == GenerativeModelParameter.ExperimentType.BIOLOGICAL) {
 
 				System.out.println("Biological replicate #" + i);
-				BetaDistribution beta = new BetaDistribution(params.getAlpha_a(), params.getAlpha_b());
-				double a = beta.sample();
-				if (params.getA() > 0) {
-					a = params.getA();
-				}
 				System.out.println("a = " + a);
 				originalCount = (int) (molecules.size() * a);
 				substituteCount = molecules.size() - originalCount;
 				
 				// take originalCount amount of molecules from the original
 				for (int j = 0; j < originalCount; j++) {
-					selected.add(molecules.get(j));
+					Molecule original = molecules.get(j);
+					Molecule clone = cloner.deepClone(original);
+					selected.add(clone);
 				}
 				
 				// take substituteCount amount of molecules from the replacement
 				int taken = 0;
+				Collections.shuffle(replacement); // remember to shuffle this to get random pick
 				while (taken < substituteCount) {
-					selected.add(replacement.get(subsIndex));
+					Molecule original = replacement.get(subsIndex);
+					if (selected.contains(original)) {
+						System.out.println("\t" + original + " already exists ... retrying");
+					} else {
+						Molecule clone = cloner.deepClone(original);
+						selected.add(clone);
+						taken++;						
+					}
 					subsIndex++;
-					taken++;
 				}
 				
-				// shuffle just to mess up the ordering
+				// shuffle again just to mess up the ordering
 				Collections.shuffle(selected);
 				
 			}
@@ -303,49 +318,45 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 		int observedPeakID = 0;
 //		Map<GenerativeMolecule, List<Feature>> molFeatures = new HashMap<GenerativeMolecule, List<Feature>>();
 		for (Feature theoFeature : theoFeatures) {
-			
-			// features are observed only if it's below the intensity threshold and by its probability
-			if (theoFeature.getIntensity() > params.getThreshold_q() && 
-					Math.random() < params.getProbP()) {
-				
-				// get the observed mass, intensity and RT
-				int id = theoFeature.getPeakID();
-				double mass = theoFeature.getMass();
-				double intensity = theoFeature.getIntensity();
+										
+			// get the observed mass, intensity and RT
+			int id = theoFeature.getPeakID();
+			double mass = theoFeature.getMass();
+			double intensity = theoFeature.getIntensity();
 
-				NormalDistribution massDist = new NormalDistribution(mass, params.getSigma_m());
-				NormalDistribution intensityDist = new NormalDistribution(intensity, params.getSigma_q());
-				double observedMass = massDist.sample();
-				double observedIntensity = intensityDist.sample();
-				double observedRT = predictor.predict(theoFeature);
-				
-				if (observedRT < 0) {
-					continue;
-				}
-				
-				if (observedIntensity < 0) {
-					continue;
-				}
-
-				Feature observedFeature = new Feature(observedPeakID);
-				observedFeature.setMass(observedMass);
-				observedFeature.setIntensity(observedIntensity);
-				observedFeature.setRt(observedRT);
-				observedFeature.setTheoPeakID(id);
-				observedFeatures.add(observedFeature);
-				observedPeakID++;
-				
-				GenerativeFeatureGroup group = (GenerativeFeatureGroup) theoFeature.getFirstGroup();
-				GenerativeMolecule mol = group.getParent();
-//				if (molFeatures.containsKey(mol)) {
-//					molFeatures.get(mol).add(observedFeature);
-//				} else {
-//					List<Feature> newList = new ArrayList<Feature>();
-//					newList.add(observedFeature);
-//					molFeatures.put(mol, newList);
-//				}
-
+			NormalDistribution massDist = new NormalDistribution(mass, params.getSigma_m());
+			NormalDistribution intensityDist = new NormalDistribution(intensity, params.getSigma_q());
+			double observedMass = massDist.sample();
+			double observedIntensity = intensityDist.sample();
+			double observedRT = predictor.predict(theoFeature);
+						
+			// skip if feature has intensity below threshold 
+			if (observedIntensity < params.getThreshold_q()) {
+				continue;
 			}
+			
+			// or negative elution time (never appears)
+			if (observedRT < 0) {
+				continue;
+			}
+			
+			Feature observedFeature = new Feature(observedPeakID);
+			observedFeature.setMass(observedMass);
+			observedFeature.setIntensity(observedIntensity);
+			observedFeature.setRt(observedRT);
+			observedFeature.setTheoPeakID(id);
+			observedFeatures.add(observedFeature);
+			observedPeakID++;
+			
+			GenerativeFeatureGroup group = (GenerativeFeatureGroup) theoFeature.getFirstGroup();
+			GenerativeMolecule mol = group.getParent();
+//			if (molFeatures.containsKey(mol)) {
+//				molFeatures.get(mol).add(observedFeature);
+//			} else {
+//				List<Feature> newList = new ArrayList<Feature>();
+//				newList.add(observedFeature);
+//				molFeatures.put(mol, newList);
+//			}
 				
 		}
 		

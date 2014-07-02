@@ -15,7 +15,7 @@ public class M1Experiment extends MultiAlignBaseExp implements MultiAlignExperim
 
 	public static final double[] ALL_ALPHA = { 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0  };
 	public static final double[] ALL_GROUPING_RT = { 
-		1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+		2, 4, 6, 8, 10
 	};
 	public static final double[] ALL_ALIGNMENT_MZ = { 0.05, 0.1, 0.25 };
 	public static final double[] ALL_ALIGNMENT_RT = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
@@ -25,6 +25,7 @@ public class M1Experiment extends MultiAlignBaseExp implements MultiAlignExperim
 		
 		List<MultiAlignExpResult> results = new ArrayList<MultiAlignExpResult>();
 		MultiAlignExpResult expResult = new MultiAlignExpResult("");
+		results.add(expResult);
 		
 		double[] alphas = new double[] { options.alpha };	
 		double[] groupingRts = new double[] { options.groupingRtWindow };														

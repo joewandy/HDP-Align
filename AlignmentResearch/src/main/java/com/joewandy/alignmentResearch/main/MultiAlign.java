@@ -84,6 +84,7 @@ public class MultiAlign {
 		paramBuilder.usePeakShape(options.usePeakShape);
 		paramBuilder.groupingMethod(options.groupingMethod);
 		paramBuilder.groupingRtTolerance(options.groupingRtWindow);
+		paramBuilder.scoringMethod(options.scoringMethod);		
 		paramBuilder.alpha(options.alpha);
 		this.param = paramBuilder.build();
 				
@@ -106,14 +107,6 @@ public class MultiAlign {
 			this.aligner = AlignmentMethodFactory.getAlignmentMethod(method, param, data, null);			
 					
 		}
-		
-		// add whatever you want here to filter the alignment results
-		this.filters = new ArrayList<AlignmentResultFilter>();		
-//		this.filters.add(new ScoreResultFilter(0.9, data));
-		for (AlignmentResultFilter filter : filters) {
-			aligner.addFilter(filter);							
-		}
-
 				
 	}
 			
@@ -132,6 +125,10 @@ public class MultiAlign {
 			return null;
 		}
 		
+	}
+	
+	public void addResultFilter(AlignmentResultFilter filter) {
+		aligner.addFilter(filter);							
 	}
 				
 	private EvaluationResult evaluate(AlignmentList result, String measureType) {

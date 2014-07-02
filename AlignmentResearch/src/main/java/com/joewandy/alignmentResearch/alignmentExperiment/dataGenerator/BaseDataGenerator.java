@@ -26,7 +26,23 @@ public abstract class BaseDataGenerator implements AlignmentDataGenerator {
 	public AlignmentData generate() {
 		
 		//generate alignment data
-		List<AlignmentFile> alignmentFiles = this.getAlignmentFiles();
+		List<AlignmentFile> alignmentFiles = this.getAlignmentFiles(-1);
+		GroundTruth groundTruth = this.getGroundTruth();
+		AlignmentData alignmentData = new AlignmentData(alignmentFiles, groundTruth);
+		
+		// introduce noise to the generated data
+		for (AlignmentNoise noiseModel : noiseModels) {
+			noiseModel.addNoise(alignmentData);
+		}
+		
+		return alignmentData;
+		
+	}
+
+	public AlignmentData generateByIteration(int currentIter) {
+		
+		//generate alignment data
+		List<AlignmentFile> alignmentFiles = this.getAlignmentFiles(currentIter);
 		GroundTruth groundTruth = this.getGroundTruth();
 		AlignmentData alignmentData = new AlignmentData(alignmentFiles, groundTruth);
 		
@@ -42,7 +58,7 @@ public abstract class BaseDataGenerator implements AlignmentDataGenerator {
 	public AlignmentData generateByIndices(int[] indices) {
 
 		// pick files by indices
-		List<AlignmentFile> allFiles = this.getAlignmentFiles();
+		List<AlignmentFile> allFiles = this.getAlignmentFiles(-1);
 		List<AlignmentFile> selectedAlignmentFiles = new ArrayList<AlignmentFile>();
 		for (int i : indices) {
 			int pos = i - 1; // substract 1 since we index from 0 .. n-1 files
@@ -65,7 +81,7 @@ public abstract class BaseDataGenerator implements AlignmentDataGenerator {
 		
 	}
 	
-	protected List<AlignmentFile> getAlignmentFiles() {
+	protected List<AlignmentFile> getAlignmentFiles(int currentIter) {
 		return alignmentFiles;
 	}
 
