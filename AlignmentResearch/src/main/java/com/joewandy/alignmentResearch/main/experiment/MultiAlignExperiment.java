@@ -12,6 +12,8 @@ public interface MultiAlignExperiment {
 	public static final String EXPERIMENT_TYPE_GENERATIVE_BIOLOGICAL_REPLICATES = "GB";		
 	public static final String EXPERIMENT_TYPE_STANDARD = "standard";		
 	public static final String EXPERIMENT_TYPE_GLYCO = "glyco";		
+	public static final String EXPERIMENT_TYPE_PROTEO = "proteo";		
+
 	public static final String EXPERIMENT_TYPE_HDP = "hdp";		
 	
 	public List<MultiAlignExpResult> performExperiment(MultiAlignCmdOptions options) throws Exception;

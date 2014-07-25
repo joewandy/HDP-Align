@@ -15,6 +15,7 @@ import com.joewandy.alignmentResearch.main.experiment.MultiAlignExpResult;
 import com.joewandy.alignmentResearch.main.experiment.MultiAlignExperiment;
 import com.joewandy.alignmentResearch.main.experiment.MultiAlignNormalRun;
 import com.joewandy.alignmentResearch.main.experiment.P1P2Experiment;
+import com.joewandy.alignmentResearch.main.experiment.ProteoExperiment;
 import com.joewandy.alignmentResearch.main.experiment.StandardExperiment;
 
 /**
@@ -72,6 +73,9 @@ public class MultiAlignCmd {
 			} else if (MultiAlignExperiment.EXPERIMENT_TYPE_GLYCO.equals(options.experimentType)) {
 				// glyco experiment
 				exp = new GlycoExperiment();
+			} else if (MultiAlignExperiment.EXPERIMENT_TYPE_PROTEO.equals(options.experimentType)) {
+				// proteo experiment
+				exp = new ProteoExperiment();
 			} else if (MultiAlignExperiment.EXPERIMENT_TYPE_HDP.equals(options.experimentType)) {
 				// hdp experiment
 				exp = new HdpExperiment();

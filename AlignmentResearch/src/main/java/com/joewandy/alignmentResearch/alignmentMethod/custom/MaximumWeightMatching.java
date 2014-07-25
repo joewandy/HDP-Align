@@ -422,9 +422,9 @@ public class MaximumWeightMatching implements FeatureMatching {
 			}
 		}
 		
-		// D = D ./ max(max(D));
-		maxScore = getMax(D);
-		D.scale(1/maxScore);
+//		 D = D ./ max(max(D));
+		 maxScore = getMax(D);
+		 D.scale(1/maxScore);
 
 		// Wp = (alpha .* W) + ((1-alpha) .* D);
 		if (!quiet) {

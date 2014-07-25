@@ -37,6 +37,7 @@ import java.util.TreeSet;
 import java.util.Vector;
 
 import mzmatch.ipeak.sort.AnnotationSampleHandler.IdentifyingAnnotationSampleHandler;
+import mzmatch.ipeak.util.Identify;
 import mzmatch.util.Tool;
 import peakml.Annotation;
 import peakml.IPeak;
@@ -53,6 +54,9 @@ import com.joewandy.mzmatch.model.IdentificationResult;
 
 public class IdentifiedPeakMLToCsv {
 	
+	// defined inside Identify
+	public static String IdentificationAnnotation = "simpleIdentification";
+	
 	static class IdentificationResultComparator implements Comparator<IdentificationResult> {
 
 		public int compare(IdentificationResult o1, IdentificationResult o2) {
@@ -62,17 +66,19 @@ public class IdentifiedPeakMLToCsv {
 	}
 	
 	public static void process(IPeakSet<IPeakSet<IPeak>> peaksets,
-			OutputStream output, final double threshold) throws IOException {
+			OutputStream output, final double minProb, final double minIntensity) throws IOException {
 
 		List<IdentificationResult> results = new ArrayList<IdentificationResult>();
 		int seqNo = 0;
 		for (int i = 0; i < peaksets.size(); ++i) {
 
 			IPeakSet<IPeak> peakset = peaksets.get(i);
+
+			// try with MetAssign annotation first
 			Annotation annot = peakset
 					.getAnnotation(IdentifyingAnnotationSampleHandler.filteredAnnotation);
 			if (annot != null) {
-
+				
 				String annotStr = annot.getValue();
 
 				// split identification annotation by ;
@@ -97,6 +103,35 @@ public class IdentifiedPeakMLToCsv {
 					results.add(res);
 				}
 
+			} else {
+				
+				// then try with Identify's identification
+				annot = peakset.getAnnotation(
+						IdentifiedPeakMLToCsv.IdentificationAnnotation);
+				if (annot != null) {
+
+					String annotStr = annot.getValue();
+
+					// split each single annotation by , to get its parts
+					String[] tokens = annotStr.split(",");
+
+					// e.g. StdMix1_37, Ethanolamine phosphate, M+Na, [12C]2[1H]8[14N]1[16O]3[18O]1[31P]1[23Na]1, 0.87500
+					if (tokens.length == 5) {
+						String id = tokens[0].trim();
+						String adduct = tokens[2].trim();
+						String isotope = tokens[3].trim();
+						double prob = Double.parseDouble(tokens[4]);
+						double mass = peakset.getMass();
+						double rt = peakset.getRetentionTime();
+						double intensity = peakset.getIntensity();
+						String identification = id + ";" + adduct + ";" + isotope;
+						IdentificationResult res = new IdentificationResult(seqNo, mass, rt, intensity, identification, prob);
+						seqNo++;
+						results.add(res);
+					}
+					
+				}
+				
 			}
 
 		}
@@ -122,9 +157,9 @@ public class IdentifiedPeakMLToCsv {
 
 			IdentificationResult res = iter.next();
 
-			// remove everything lower than threshold
+			// remove everything lower than threshold probability or intensity
 			boolean belowThreshold = false;
-			if (res.getProb() < threshold) {
+			if (res.getProb() < minProb || res.getIntensity() < minIntensity) {
 				belowThreshold = true;
 			}
 			
@@ -197,6 +232,10 @@ public class IdentifiedPeakMLToCsv {
 				"The minimum posterior probability of peak annotation.")
 		public double minProb = 0.90;
 
+		@Option(name="minIntensity", param="double", type=Option.Type.REQUIRED_ARGUMENT, level=Option.Level.USER, usage=
+				"The minimum intensity of peak annotation.")
+		public double minIntensity = 10000;		
+		
 	}
 
 	public static void main(String args[]) {
@@ -251,7 +290,7 @@ public class IdentifiedPeakMLToCsv {
 				if (peaks.getContainerClass().equals(MassChromatogram.class)) {
 					;
 				} else if (peaks.getContainerClass().equals(IPeakSet.class)) {
-					process((IPeakSet<IPeakSet<IPeak>>) result.measurement, out_output, options.minProb);
+					process((IPeakSet<IPeakSet<IPeak>>) result.measurement, out_output, options.minProb, options.minIntensity);
 				} else {
 					System.err.println("Unknown IPeak type: "
 							+ peaks.getContainerClass().getClass().getName());

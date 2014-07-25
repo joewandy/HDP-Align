@@ -10,6 +10,7 @@ import com.joewandy.alignmentResearch.alignmentMethod.custom.MyMaximumMatchingAl
 import com.joewandy.alignmentResearch.alignmentMethod.external.MzMineJoinAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.external.MzMineRansacAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.external.OpenMSAlignment;
+import com.joewandy.alignmentResearch.alignmentMethod.external.PythonMW;
 import com.joewandy.alignmentResearch.alignmentMethod.external.SimaAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.external.TestHdpAlignment;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
@@ -28,6 +29,10 @@ public class AlignmentMethodFactory {
 	public static final String ALIGNMENT_METHOD_MY_MAXIMUM_WEIGHT_MATCHING_REFERENCE = "myMaxWeightRef";
 	public static final String ALIGNMENT_METHOD_MY_MAXIMUM_WEIGHT_MATCHING_HIERARCHICAL = "myMaxWeight";
 	public static final String ALIGNMENT_METHOD_MY_HDP_ALIGNMENT = "myHdp";
+
+	// same but implemented in python
+	public static final String ALIGNMENT_METHOD_PYTHON_GREEDY = "pythonGreedy";
+	public static final String ALIGNMENT_METHOD_PYTHON_MW = "pythonMW";
 	
 	// calls mzMine Join aligner
 	public static final String ALIGNMENT_METHOD_MZMINE_JOIN = "join";
@@ -65,8 +70,10 @@ public class AlignmentMethodFactory {
 			aligner = new HierarchicalAlignment(alignmentDataList, param, library);
 		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_HDP_ALIGNMENT.equals(method)) {
 			aligner = new TestHdpAlignment(alignmentDataList, param);
-		}
-		
+		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_PYTHON_MW.equals(method)) {
+			aligner = new PythonMW(alignmentDataList, param);
+		}		
+
 		return aligner;
 
 	}

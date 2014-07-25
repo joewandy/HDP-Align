@@ -17,6 +17,8 @@ import com.joewandy.alignmentResearch.main.MultiAlignConstants;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.Feature;
+import com.joewandy.alignmentResearch.objectModel.HDPClustering;
+import com.joewandy.alignmentResearch.objectModel.HDPRTClustering;
 
 public class TestHdpAlignment extends BaseAlignment implements AlignmentMethod {
 
@@ -72,6 +74,21 @@ public class TestHdpAlignment extends BaseAlignment implements AlignmentMethod {
 				resultMap.put(hdpRes, hdpRes);
 				
 			}
+		} else {
+			
+			if (MultiAlignConstants.SCORING_METHOD_HDP_MASS_RT_JAVA.equals(this.scoringMethod)) {
+
+				// use the java HDP RT+mass clustering 
+				HDPClustering clustering = new HDPRTClustering(dataList);
+				clustering.run();
+				resultMap = clustering.getSimilarityResult();
+				
+			} else if (MultiAlignConstants.SCORING_METHOD_HDP_RT_JAVA.equals(this.scoringMethod)) {
+			
+				// use the java HDP RT clustering
+				
+			}			
+			
 		}
 				
 	}

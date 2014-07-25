@@ -1,7 +1,8 @@
-java.lang.ArrayIndexOutOfBoundsException: 0
-	at com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.GenerativeModelParameter.getA(GenerativeModelParameter.java:102)
-	at com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.GenerativeModelDataGenerator.getAlignmentFiles(GenerativeModelDataGenerator.java:74)
-	at com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.BaseDataGenerator.generateByIteration(BaseDataGenerator.java:45)
-	at com.joewandy.alignmentResearch.main.experiment.GenerativeExperiment.getData(GenerativeExperiment.java:80)
-	at com.joewandy.alignmentResearch.main.experiment.GenerativeExperiment.performExperiment(GenerativeExperiment.java:33)
-	at com.joewandy.alignmentResearch.main.MultiAlignCmd.main(MultiAlignCmd.java:40)
+java.lang.NullPointerException
+	at java.util.TimSort.sort(TimSort.java:173)
+	at java.util.Arrays.sort(Arrays.java:659)
+	at com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.SimaFormatDataGenerator.getAlignmentFiles(SimaFormatDataGenerator.java:48)
+	at com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.BaseDataGenerator.generateByIndices(BaseDataGenerator.java:61)
+	at com.joewandy.alignmentResearch.main.experiment.MultiAlignBaseExp.getData(MultiAlignBaseExp.java:52)
+	at com.joewandy.alignmentResearch.main.experiment.GlycoExperiment.performExperiment(GlycoExperiment.java:72)
+	at com.joewandy.alignmentResearch.main.MultiAlignCmd.main(MultiAlignCmd.java:41)

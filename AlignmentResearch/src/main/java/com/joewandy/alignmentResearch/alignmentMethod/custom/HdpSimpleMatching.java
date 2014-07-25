@@ -3,13 +3,10 @@ package com.joewandy.alignmentResearch.alignmentMethod.custom;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import no.uib.cipr.matrix.DenseMatrix;
 import no.uib.cipr.matrix.Matrix;
 import no.uib.cipr.matrix.MatrixEntry;
-
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import com.joewandy.alignmentResearch.main.MultiAlignConstants;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;

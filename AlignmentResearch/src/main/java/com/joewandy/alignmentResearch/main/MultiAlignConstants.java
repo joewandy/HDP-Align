@@ -26,14 +26,17 @@ public class MultiAlignConstants {
 	public static final String GROUPING_METHOD_GREEDY = "greedy";
 	public static final String GROUPING_METHOD_MIXTURE = "mixture";
 	public static final String GROUPING_METHOD_POSTERIOR = "posterior";
+	public static final String GROUPING_METHOD_MATLAB_POSTERIOR = "matlabPosterior";
 	public static final String GROUPING_METHOD_METASSIGN_MIXTURE = "metAssignMixture";
 	public static final String GROUPING_METHOD_METASSIGN_POSTERIOR = "metAssignPosterior";
 	
 	public static final double GROUPING_METHOD_RT_TOLERANCE = 5;
 	public static final double GROUPING_METHOD_ALPHA = 1;
-	public static final int GROUPING_METHOD_NUM_SAMPLES = 20;
-	public static final int GROUPING_METHOD_BURN_IN = 10;
+	public static final int GROUPING_METHOD_NUM_SAMPLES = 100;
+	public static final int GROUPING_METHOD_BURN_IN = 100;
 
+	public static final String SCORING_METHOD_HDP_MASS_RT_JAVA = "hdpmassrtjava";
+	public static final String SCORING_METHOD_HDP_RT_JAVA = "hdprtjava";
 	public static final String SCORING_METHOD_HDP_MASS_RT = "hdpmassrt";
 	public static final String SCORING_METHOD_HDP_RT = "hdprt";
 	public static final String SCORING_METHOD_DIST = "dist";

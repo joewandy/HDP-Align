@@ -14,7 +14,11 @@ tmp/**/*
 local.properties
 .classpath
 .settings/
+*/.settings/
 .loadpath
+target/*
+/target/
+tar.gz
 
 # External tool builders
 .externalToolBuilders/

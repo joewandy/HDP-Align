@@ -42,7 +42,7 @@ public class SavedMatlabFeatureGroupingMethod extends BaseFeatureGroupingMethod 
 	public List<FeatureGroup> group(AlignmentFile data) {
 
 		System.out.println("Grouping " + data.getFilename() + " ");
-		final String dataPath = data.getParentPath() + "/mat/";
+		final String dataPath = "/home/joewandy/mat/";
 		List<FeatureGroup> fileGroups = new ArrayList<FeatureGroup>();
 		
 		int groupId = 1;
@@ -107,9 +107,9 @@ public class SavedMatlabFeatureGroupingMethod extends BaseFeatureGroupingMethod 
 			
 		} else if (MultiAlignConstants.GROUPING_METHOD_POSTERIOR.equals(groupingMethod)) {
 
-			String filename = data.getFilenameWithoutExtension() + ".csv.ZZprob.mat";
+			String filename = data.getFilenameWithoutExtension() + ".dense.csv.mat";
 			if (usePeakShape) {
-				filename = data.getFilenameWithoutExtension() + ".csv.corr.ZZprob.mat";
+				filename = data.getFilenameWithoutExtension() + ".dense.csv.corr.mat";
 			}
 			System.out.println("Loading " + dataPath + filename);				
 			MatFileReader mfr = null;
@@ -121,7 +121,7 @@ public class SavedMatlabFeatureGroupingMethod extends BaseFeatureGroupingMethod 
 			}
 			
 			if (mfr != null) {
-				Matrix ZZprob = new DenseMatrix(((MLDouble)mfr.getMLArray("ZZprob")).getArray());		
+				Matrix ZZprob = new DenseMatrix(((MLDouble)mfr.getMLArray("ZZ_prob")).getArray());		
 				data.setZZProb(new DenseMatrix(ZZprob));		
 			}
 			

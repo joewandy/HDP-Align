@@ -147,11 +147,18 @@ public class MultiAlignCmdOptions {
 	
 	// for greedy grouping
 	@Option(name = "groupingRtWindow", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Grouping RT window for greedy grouping")
-	public double groupingRtWindow;
+	public double groupingRtWindow = MultiAlignConstants.GROUPING_METHOD_RT_TOLERANCE;
 
 	// for model-based grouping
+
+	@Option(name = "groupingDpAlpha", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "DP concentration param")
+	public double groupingDpAlpha = MultiAlignConstants.GROUPING_METHOD_ALPHA;
+	
 	@Option(name = "groupingNSamples", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "No. of samples")
 	public int groupingNSamples = MultiAlignConstants.GROUPING_METHOD_NUM_SAMPLES;
+
+	@Option(name = "groupingBurnIn", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "No. of burn-in samples")
+	public int groupingBurnIn = MultiAlignConstants.GROUPING_METHOD_BURN_IN;
 	
 	/*
 	 * Scoring options

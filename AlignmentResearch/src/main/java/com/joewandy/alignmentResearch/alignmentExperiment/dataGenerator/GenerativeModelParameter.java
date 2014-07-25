@@ -22,8 +22,8 @@ public class GenerativeModelParameter {
 	private double alpha = 10;			// DP concentration parameter for clustering
 	private double d = 1000; 				// mean of predicted retention time of metabolite (Normal)
 	private double e = 250;				// standard deviation of predicted retention time of metabolite (Normal)
-	private double sigma_c = 10;  	  	// standard deviation of cluster's RT (Normal)
-	private double sigma_t = 10;			// standard deviation of observed peak's RT (Normal)
+	private double sigma_c = 100;  	  	// standard deviation of cluster's RT (Normal)
+	private double sigma_t = 5;			// standard deviation of observed peak's RT (Normal)
 	private double sigma_q = 1000;		// standard deviation of observed peak's intensity (Normal)
 	private double sigma_m = 0.015;		// standard deviation of observed peak's mass (Normal)
 

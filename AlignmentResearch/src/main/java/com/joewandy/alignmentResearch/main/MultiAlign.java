@@ -86,6 +86,9 @@ public class MultiAlign {
 		paramBuilder.groupingRtTolerance(options.groupingRtWindow);
 		paramBuilder.scoringMethod(options.scoringMethod);		
 		paramBuilder.alpha(options.alpha);
+		paramBuilder.groupingNSamples(options.groupingNSamples);
+		paramBuilder.groupingBurnIn(options.groupingBurnIn);
+		paramBuilder.groupingDpAlpha(options.groupingDpAlpha);		
 		this.param = paramBuilder.build();
 				
 		if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_MAXIMUM_WEIGHT_MATCHING_HIERARCHICAL.equals(method)) {
@@ -151,7 +154,7 @@ public class MultiAlign {
 		
 		System.out.println();
 		System.out.println("******************************************************");
-		System.out.println("evalRes method=" + method + " RT=" + evalRes.getDrt() + " F1=" + evalRes.getF1());
+		System.out.println("evalRes method=" + method + " mz=" + evalRes.getDmz() + " RT=" + evalRes.getDrt() + " F1=" + evalRes.getF1());
 		System.out.println("******************************************************");
 		System.out.println();
 					

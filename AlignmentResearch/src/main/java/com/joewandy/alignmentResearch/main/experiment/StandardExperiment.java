@@ -14,7 +14,7 @@ public class StandardExperiment extends MultiAlignBaseExp implements MultiAlignE
 
 	public static final double[] ALL_ALPHA = { 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0  };
 	public static final double[] ALL_GROUPING_RT = { 
-		1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+		2, 4, 6, 8, 10
 	};
 	public static final double[] ALL_ALIGNMENT_MZ = { 0.05, 0.1, 0.25 };
 	public static final double[] ALL_ALIGNMENT_RT = { 10, 20, 30, 40, 50, 60, 70, 80, 90, 100 };
@@ -55,7 +55,10 @@ public class StandardExperiment extends MultiAlignBaseExp implements MultiAlignE
 		
 		assert(trainingIndices.length == testingIndices.length);
 		
-		for (int i = 0; i < trainingIndices.length; i++) {
+		// manually set index for experiment
+		final long startTime = System.currentTimeMillis();
+		int i = options.experimentIter;	
+//		for (int i = 0; i < trainingIndices.length; i++) {
 			
 			System.out.println();
 			System.out.println("################## TRAINING PHASE iter " + (i+1) + " ################## ");
@@ -85,7 +88,7 @@ public class StandardExperiment extends MultiAlignBaseExp implements MultiAlignE
 							EvaluationResult evalRes = multiAlign.runExperiment();	
 							if (evalRes != null) {
 								evalRes.setTh(options.alpha);
-								String note = options.alpha + ", " + options.groupingRtWindow;
+								String note = options.alpha + ", " + options.groupingRtWindow + ", " + i;
 								evalRes.setNote(note);
 								tempResult.addResult(evalRes);	
 							}		
@@ -123,7 +126,7 @@ public class StandardExperiment extends MultiAlignBaseExp implements MultiAlignE
 				EvaluationResult evalRes = multiAlign.runExperiment();	
 				if (evalRes != null) {
 					evalRes.setTh(options.alpha);
-					String note = options.alpha + ", " + options.groupingRtWindow;
+					String note = options.alpha + ", " + options.groupingRtWindow + ", " + i;
 					evalRes.setNote(note);
 					expResult.addResult(evalRes);	
 				}
@@ -134,7 +137,13 @@ public class StandardExperiment extends MultiAlignBaseExp implements MultiAlignE
 				
 			}
 																
-		} 
+//		} 
+			
+		final long endTime = System.currentTimeMillis();
+		double totalTime = (endTime - startTime);
+		System.out.println("==================================================");
+		System.out.println("Total execution time: " + totalTime/1000  + " seconds");
+		System.out.println("==================================================");
 						
 		return results;
 		

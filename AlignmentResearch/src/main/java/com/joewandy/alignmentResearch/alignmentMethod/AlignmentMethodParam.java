@@ -77,8 +77,11 @@ public class AlignmentMethodParam {
 	private String groupingMethod;
 	private double groupingRtTolerance;
 	private String scoringMethod;
-	private double alpha;
-	
+	private double alpha;	
+	private int groupingNSamples;
+	private int groupingBurnIn;
+	private double groupingDpAlpha;
+
 	// for ransac alignment
 	private double ransacRtToleranceBeforeMinute;
 	private double ransacRtToleranceAfterMinute;
@@ -107,6 +110,9 @@ public class AlignmentMethodParam {
 		private double groupingRtTolerance;
 		private String scoringMethod;
 		private double alpha;
+		private int groupingNSamples;
+		private int groupingBurnIn;
+		private double groupingDpAlpha;
 
 		// for ransac alignment
 		private double ransacRtToleranceBeforeMinute;
@@ -148,7 +154,12 @@ public class AlignmentMethodParam {
 			this.groupingMethod = MultiAlignConstants.GROUPING_METHOD_GREEDY;
 			this.scoringMethod = MultiAlignConstants.SCORING_METHOD_DIST;
 			this.alpha = AlignmentMethodParam.PARAM_ALPHA;
-			
+
+			this.groupingRtTolerance = MultiAlignConstants.GROUPING_METHOD_RT_TOLERANCE;
+			this.groupingDpAlpha = MultiAlignConstants.GROUPING_METHOD_ALPHA;
+			this.groupingNSamples = MultiAlignConstants.GROUPING_METHOD_NUM_SAMPLES;
+			this.groupingBurnIn = MultiAlignConstants.GROUPING_METHOD_BURN_IN;
+
 		}
 
 		public Builder usePpm(boolean usePpm) {
@@ -183,6 +194,21 @@ public class AlignmentMethodParam {
 
 		public Builder scoringMethod(String scoringMethod) {
 			this.scoringMethod = scoringMethod;
+			return this;
+		}				
+
+		public Builder groupingNSamples(int groupingNSamples) {
+			this.groupingNSamples = groupingNSamples;
+			return this;
+		}				
+
+		public Builder groupingBurnIn(int groupingBurnIn) {
+			this.groupingBurnIn = groupingBurnIn;
+			return this;
+		}				
+
+		public Builder groupingDpAlpha(double groupingDpAlpha) {
+			this.groupingDpAlpha = groupingDpAlpha;
 			return this;
 		}				
 		
@@ -248,6 +274,9 @@ public class AlignmentMethodParam {
 		this.scoringMethod = builder.scoringMethod;
 		this.groupingRtTolerance = builder.groupingRtTolerance;
 		this.alpha = builder.alpha;
+		this.groupingNSamples = builder.groupingNSamples;
+		this.groupingBurnIn = builder.groupingBurnIn;
+		this.groupingDpAlpha = builder.groupingDpAlpha;		
 		this.ransacRtToleranceBeforeMinute = builder.ransacRtToleranceBeforeMinute;
 		this.ransacRtToleranceAfterMinute = builder.ransacRtToleranceAfterMinute;
 		this.ransacIteration = builder.ransacIteration;
@@ -284,6 +313,18 @@ public class AlignmentMethodParam {
 	
 	public String getGroupingMethod() {
 		return groupingMethod;
+	}
+
+	public int getGroupingNSamples() {
+		return groupingNSamples;
+	}
+
+	public int getGroupingBurnIn() {
+		return groupingBurnIn;
+	}
+	
+	public double getGroupingDpAlpha() {
+		return groupingDpAlpha;
 	}
 	
 	public String getScoringMethod() {

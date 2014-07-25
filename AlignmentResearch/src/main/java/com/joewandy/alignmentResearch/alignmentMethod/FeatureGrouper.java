@@ -2,11 +2,13 @@ package com.joewandy.alignmentResearch.alignmentMethod;
 
 import java.util.List;
 
+import com.joewandy.alignmentResearch.main.MultiAlign;
 import com.joewandy.alignmentResearch.main.MultiAlignConstants;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.FeatureGroupingMethod;
 import com.joewandy.alignmentResearch.objectModel.GreedyFeatureGroupingMethod;
+import com.joewandy.alignmentResearch.objectModel.MatlabFeatureGroupingMethod;
 import com.joewandy.alignmentResearch.objectModel.MetAssignFeatureGroupingMethod;
 import com.joewandy.alignmentResearch.objectModel.SavedMatlabFeatureGroupingMethod;
 
@@ -56,10 +58,12 @@ public class FeatureGrouper  {
 		} else if (MultiAlignConstants.GROUPING_METHOD_METASSIGN_MIXTURE.equals(groupingMethod) || 
 				MultiAlignConstants.GROUPING_METHOD_METASSIGN_POSTERIOR.equals(groupingMethod)) {
 			grouping = new MetAssignFeatureGroupingMethod(groupingMethod, groupingRtWindow, usePeakShape);																			
-		} else {
-//				grouping = new MatlabFeatureGroupingMethod(groupingMethod, groupingRtWindow, 
-//						MultiAlign.GROUPING_METHOD_ALPHA, MultiAlign.GROUPING_METHOD_NUM_SAMPLES, MultiAlign.GROUPING_METHOD_BURN_IN);															
+		} else if (MultiAlignConstants.GROUPING_METHOD_POSTERIOR.equals(groupingMethod)) {
 			grouping = new SavedMatlabFeatureGroupingMethod(groupingMethod, usePeakShape);															
+		} else if (MultiAlignConstants.GROUPING_METHOD_MATLAB_POSTERIOR.equals(groupingMethod)) {
+			grouping = new MatlabFeatureGroupingMethod(groupingMethod, groupingRtWindow, 
+					MultiAlignConstants.GROUPING_METHOD_ALPHA, MultiAlignConstants.GROUPING_METHOD_NUM_SAMPLES, 
+					MultiAlignConstants.GROUPING_METHOD_BURN_IN);															
 		}
 		return grouping;
 	}	

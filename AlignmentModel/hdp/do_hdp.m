@@ -20,10 +20,10 @@ function samples = do_hdp(hdp, cluster_rt, cluster_mass, debug)
             % print stuffs
             time_taken = toc;        
             if s > hdp.BURN_IN
-                fprintf('S#%d\tI=%d\t', s, hdp.I);
+                fprintf('time=%5.2fs S#%05d I=%d ', time_taken, s, hdp.I);
                 samples = [samples, hdp]; 
             else
-                fprintf('B#%d\tI=%d\t', s, hdp.I);        
+                fprintf('time=%5.2fs B#%05d I=%d ', time_taken, s, hdp.I);        
             end        
             all_A = [];
             for i = 1:hdp.I
@@ -42,10 +42,10 @@ function samples = do_hdp(hdp, cluster_rt, cluster_mass, debug)
             % print stuffs
             time_taken = toc;        
             if s > hdp.BURN_IN
-                fprintf('S#%d\tI=%d\n', s, hdp.I);
+                fprintf('time=%5.2fs S#%05d I=%d\n', time_taken, s, hdp.I);
                 samples = [samples, hdp]; 
             else
-                fprintf('B#%d\tI=%d\n', s, hdp.I);        
+                fprintf('time=%5.2fs B#%05d I=%d\n', time_taken, s, hdp.I);        
             end        
         
         elseif cluster_mass

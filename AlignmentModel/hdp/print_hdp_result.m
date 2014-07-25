@@ -150,12 +150,18 @@ function sorted_res = print_hdp_result(samples, cluster_rt, cluster_mass, debug,
     entries = peakvspeak_map.entrySet.toArray;
     peakvspeak = zeros(length(entries), 5);
     for counter = 1:length(entries)
+
         entry = entries(counter);
         keyStr = entry.getKey;
-        toks = strsplit(keyStr, '-');
+
+        % toks = strsplit(keyStr, '-');
+        toks = strread(keyStr, '%s', 'delimiter', '-')';
+
         keyArr = str2double(toks);
+
         value = entry.getValue;
         peakvspeak(counter, :) = [keyArr, value];
+
     end
 
     [res, pos] = sort(peakvspeak(:, 5), 'descend');
