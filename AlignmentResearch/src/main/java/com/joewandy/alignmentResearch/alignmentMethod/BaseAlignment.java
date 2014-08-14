@@ -61,29 +61,7 @@ public abstract class BaseAlignment implements AlignmentMethod {
 					+ alignmentResult.getRowsCount());
 						
 			filter.process(alignmentResult);	
-			List<AlignmentRow> accepted = filter.getAccepted();
-//			accepted.addAll(filter.getRejected());			
-
-			// realign the rejected
-//			Set<Feature> whiteList = new HashSet<Feature>();
-//			for (AlignmentRow row : filter.getRejected()) {
-//				whiteList.add(row.getFirstFeature());
-//			}
-//			List<AlignmentFile> newDataList = new ArrayList<AlignmentFile>();
-//			for (AlignmentFile oldFile : this.dataList) {
-//				AlignmentFile newFile = new AlignmentFile(oldFile.getId(), oldFile.getFilename(), oldFile.getDeletedFeatures());
-//				for (Feature f : newFile.getFeatures()) {
-//					f.setAligned(false);
-//				}
-//				newDataList.add(newFile);
-//			}
-//			Builder builder = new Builder(massTolerance, rtTolerance);
-//			AlignmentMethodParam param = builder.build();
-//			AlignmentMethod baseline = new BaselineAlignment(newDataList, param);
-//			AlignmentList list = baseline.align();
-//			List<AlignmentRow> deletedRows = list.getRows();
-//			accepted.addAll(deletedRows);				
-			
+			List<AlignmentRow> accepted = filter.getAccepted();			
 			List<AlignmentRow> combined = new ArrayList<AlignmentRow>();
 			combined.addAll(accepted);			
 			// find last row id

@@ -18,8 +18,10 @@ function hdp = assign_peaks_mass_rt(hdp, debug)
             end
 
             % find the RT cluster
-            k = find(hdp.file{j}.Z(n, :));
-            i = find(hdp.file{j}.top_Z(k, :)); % the RT cluster's parent metabolite
+            % k = find(hdp.file{j}.Z(n, :));
+            % i = find(hdp.file{j}.top_Z(k, :)); % the RT cluster's parent metabolite
+            k = hdp.file{j}.Z(n);
+            i = hdp.file{j}.top_Z(k);
 
             % find the mass cluster
             peak_n = find(hdp.metabolite(i).peak_n==n); % find all peaks at position n
@@ -33,8 +35,11 @@ function hdp = assign_peaks_mass_rt(hdp, debug)
 
             %%%%%%%%%% 1. remove peak from model %%%%%%%%%%
             
-            hdp.file{j}.Z(n, :) = 0;
-            hdp.file{j}.count_Z = sum(hdp.file{j}.Z, 1);
+            % hdp.file{j}.Z(n, :) = 0;
+            hdp.file{j}.Z(n) = 0;
+            % hdp.file{j}.count_Z = sum(hdp.file{j}.Z, 1);
+            hdp.file{j}.count_Z(k) = hdp.file{j}.count_Z(k) - 1;
+            hdp.file{j}.sum_Z(k) = hdp.file{j}.sum_Z(k) - this_peak.rt;
             hdp.metabolite(i).V(peak_pos) = [];
             hdp.metabolite(i).peak_n(peak_pos) = [];
             hdp.metabolite(i).peak_j(peak_pos) = [];      
@@ -64,25 +69,38 @@ function hdp = assign_peaks_mass_rt(hdp, debug)
             
                 % delete the RT cluster
                 hdp.file{j}.K = hdp.file{j}.K - 1; % decrease count of clusters in file j
-                hdp.file{j}.Z(:, k) = []; % delete the whole column from peaks-cluster assignment        
+                % hdp.file{j}.Z(:, k) = []; % delete the whole column from peaks-cluster assignment
+                % decrease all indices in Z that is > k by 1 since k is deleted
+                affected = find(hdp.file{j}.Z>k);
+                hdp.file{j}.Z(affected) = hdp.file{j}.Z(affected) - 1;
+                        
 
                 % update for bookkeeping
-                hdp.file{j}.count_Z = sum(hdp.file{j}.Z, 1);
+                % hdp.file{j}.count_Z = sum(hdp.file{j}.Z, 1);
+                hdp.file{j}.count_Z(k) = [];
+                hdp.file{j}.sum_Z(k) = [];
+                tij = hdp.file{j}.ti(k);
                 hdp.file{j}.ti(k) = [];
 
-                hdp.file{j}.top_Z(k, :) = []; % remove assignment of cluster to parent metabolite
+                % hdp.file{j}.top_Z(k, :) = []; % remove assignment of cluster to parent metabolite
+                hdp.file{j}.top_Z(k) = [];
                 hdp.fi(i) = hdp.fi(i) - 1; % decrease count of clusters under parent metabolite
+                hdp.si(i) = hdp.si(i) - tij;
 
                 % does this result in an empty metabolite ?
                 if (hdp.fi(i) == 0)
 
                     % delete the metabolite across all replicates
                     for rep = 1:hdp.J
-                        hdp.file{rep}.top_Z(:, i) = [];
+                        % hdp.file{rep}.top_Z(:, i) = [];
+                        % decrease all indices in top_Z that is > i by 1 since i is deleted
+                        affected = find(hdp.file{rep}.top_Z>i);
+                        hdp.file{rep}.top_Z(affected) = hdp.file{rep}.top_Z(affected) - 1;                        
                     end
                     
                     % delete top-level info too
                     hdp.fi(i) = [];
+                    hdp.si(i) = [];
                     hdp.ti(i) = [];
                     hdp.I = hdp.I - 1;
 
@@ -108,7 +126,8 @@ function hdp = assign_peaks_mass_rt(hdp, debug)
             for this_cluster = 1:hdp.file{j}.K
             
                 % the RT cluster's parent metabolite
-                this_metabolite = find(hdp.file{j}.top_Z(this_cluster, :)); 
+                % this_metabolite = find(hdp.file{j}.top_Z(this_cluster, :)); 
+                this_metabolite = hdp.file{j}.top_Z(this_cluster);
 
                 % first consider existing mass clusters
                 count_fa = length(hdp.metabolite(this_metabolite).fa); 
@@ -189,13 +208,16 @@ function hdp = assign_peaks_mass_rt(hdp, debug)
                 hdp.file{j}.K = hdp.file{j}.K + 1; % update counts of clusters
 
                 % resize peak-cluster assignment to include the new cluster
-                new_column = zeros(hdp.file{j}.N, 1); 
-                hdp.file{j}.Z = [hdp.file{j}.Z, new_column];
-                hdp.file{j}.Z(n, k) = 1; % put the peak into the cluster
+                % new_column = zeros(hdp.file{j}.N, 1); 
+                % hdp.file{j}.Z = [hdp.file{j}.Z, new_column];
+                % hdp.file{j}.Z(n, k) = 1; % put the peak into the cluster
+                hdp.file{j}.count_Z = [hdp.file{j}.count_Z, 0];
+                hdp.file{j}.sum_Z = [hdp.file{j}.sum_Z, 0];
 
                 % resize cluster-metabolite assignment to include the new cluster
-                new_row = zeros(1, hdp.I);
-                hdp.file{j}.top_Z = [hdp.file{j}.top_Z; new_row];
+                % new_row = zeros(1, hdp.I);
+                % hdp.file{j}.top_Z = [hdp.file{j}.top_Z; new_row];
+                hdp.file{j}.top_Z = [hdp.file{j}.top_Z, 0];
 
                 % decide which metabolite to assign the new cluster to
                 metabolite_post = metabolite_post./sum(metabolite_post); % remember to convert to probability distribution
@@ -204,7 +226,8 @@ function hdp = assign_peaks_mass_rt(hdp, debug)
                 if (i <= hdp.I)
 
                     % current metabolite
-                    hdp.file{j}.top_Z(k, i) = 1;
+                    % hdp.file{j}.top_Z(k, i) = 1;
+                    hdp.file{j}.top_Z(k) = i;
                     hdp.fi(i) = hdp.fi(i) + 1;
 
                 else
@@ -213,14 +236,16 @@ function hdp = assign_peaks_mass_rt(hdp, debug)
                     hdp.I = hdp.I + 1;
 
                     % resize cluster-metabolite assignment in all files to include the new metabolite
-                    for rep = 1:hdp.J
-                        new_column = zeros(hdp.file{rep}.K, 1);
-                        hdp.file{rep}.top_Z = [hdp.file{rep}.top_Z, new_column]; 
-                    end                                                           
+                    % for rep = 1:hdp.J
+                    %     new_column = zeros(hdp.file{rep}.K, 1);
+                    %     hdp.file{rep}.top_Z = [hdp.file{rep}.top_Z, new_column]; 
+                    % end                                                           
 
                     % assign the cluster under this new metabolite
-                    hdp.file{j}.top_Z(k, i) = 1;
+                    % hdp.file{j}.top_Z(k, i) = 1;
+                    hdp.file{j}.top_Z(k) = i;
                     hdp.fi = [hdp.fi, 1];
+                    hdp.si = [hdp.si, 0];
                     
                     % generate ti given data RT
                     temp = 1 / (1/hdp.gamma_prec + 1/hdp.delta_prec);
@@ -245,6 +270,8 @@ function hdp = assign_peaks_mass_rt(hdp, debug)
                 mu = 1/prec * (hdp.gamma_prec*this_peak.rt + hdp.delta_prec*hdp.ti(i));
                 new_tij = normrnd(mu, sqrt(1/prec));
                 hdp.file{j}.ti = [hdp.file{j}.ti, new_tij];
+                
+                hdp.si(i) = hdp.si(i) + new_tij;
 
             end
 
@@ -254,7 +281,8 @@ function hdp = assign_peaks_mass_rt(hdp, debug)
             % a = find(rand<=cumsum(mass_term_post), 1);            
 
             % now perform peak to mass cluster assignments
-            i = find(hdp.file{j}.top_Z(k, :)); % find the parent metabolite first            
+            % i = find(hdp.file{j}.top_Z(k, :)); % find the parent metabolite first            
+            i = hdp.file{j}.top_Z(k);
 
             % for existing mass cluster
             count_fa = length(hdp.metabolite(i).fa);             
@@ -312,9 +340,12 @@ function hdp = assign_peaks_mass_rt(hdp, debug)
             hdp.metabolite(i).peak_data = [hdp.metabolite(i).peak_data, this_peak];
                         
             % assign the peak under RT cluster k
-            hdp.file{j}.Z(n, :) = 0;
-            hdp.file{j}.Z(n, k) = 1;
-            hdp.file{j}.count_Z = sum(hdp.file{j}.Z, 1);            
+            % hdp.file{j}.Z(n, :) = 0;
+            % hdp.file{j}.Z(n, k) = 1;
+            hdp.file{j}.Z(n) = k;
+            % hdp.file{j}.count_Z = sum(hdp.file{j}.Z, 1);            
+            hdp.file{j}.count_Z(k) = hdp.file{j}.count_Z(k) + 1;
+            hdp.file{j}.sum_Z(k) = hdp.file{j}.sum_Z(k) + this_peak.rt;
 
 
 

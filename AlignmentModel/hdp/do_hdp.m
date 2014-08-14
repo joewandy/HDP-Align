@@ -16,7 +16,7 @@ function samples = do_hdp(hdp, cluster_rt, cluster_mass, debug)
 
             % update mixture component parameters
             hdp = update_parameters_mass_rt(hdp, debug);
-
+            
             % print stuffs
             time_taken = toc;        
             if s > hdp.BURN_IN

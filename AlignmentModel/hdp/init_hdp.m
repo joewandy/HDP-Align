@@ -25,7 +25,8 @@ function hdp = init_hdp(input_hdp, debug)
     
     % sample initial metabolite RT    
     hdp.I = 1;                                  % initial number of metabolites
-    hdp.fi = zeros(1, hdp.I);                   % 1 x I, number of clusters assigned to metabolite i    
+    hdp.fi = zeros(1, hdp.I);                   % 1 x I, number of clusters assigned to metabolite i  
+    hdp.si = zeros(1, hdp.I);                   % 1 x I, sum of clusters RT assigned to metabolite i  
     hdp.ti = normrnd(hdp.mu_0, sqrt(1/hdp.sigma_0_prec), 1, hdp.I); % 1 x I, the metabolite's RT
 
     % assign peaks across files into 1 RT cluster per file, 1 top-level metabolite
@@ -34,6 +35,7 @@ function hdp = init_hdp(input_hdp, debug)
     n_all = [];
     j_all = [];
     data_all = [];
+    i = 1;
     for j = 1:hdp.J
 
         hdp.file{j}.K = 1; % number of clusters in this file
@@ -64,33 +66,43 @@ function hdp = init_hdp(input_hdp, debug)
         end
         
         % K x I, clusters to metabolites assignment
-        top_Z = rand(hdp.file{j}.K, hdp.I);
-        top_Z = (top_Z==repmat(max(top_Z, [], 2), 1, hdp.I));
-        hdp.file{j}.top_Z = top_Z;
+        % top_Z = rand(hdp.file{j}.K, hdp.I);
+        % top_Z = (top_Z==repmat(max(top_Z, [], 2), 1, hdp.I));
+        % hdp.file{j}.top_Z = top_Z;
+        % 1 x K, clusters to metabolites assignment
+        hdp.file{j}.top_Z = ones(1, hdp.file{j}.K);
         
         % N x K, peaks to clusters assignment
-        Z = rand(hdp.file{j}.N, hdp.file{j}.K);             % just randomly assign to start with
-        Z = (Z==repmat(max(Z, [], 2), 1, hdp.file{j}.K));   % turn to binary values
-        hdp.file{j}.Z = Z;
+        % Z = rand(hdp.file{j}.N, hdp.file{j}.K);             % just randomly assign to start with
+        % Z = (Z==repmat(max(Z, [], 2), 1, hdp.file{j}.K));   % turn to binary values
+        % 1 x N, peaks to clusters assignment
+        hdp.file{j}.Z = ones(1, hdp.file{j}.N);
                                     
         % 1 x K, sample initial the clusters' RT
         for k=hdp.file{j}.K
-            parent_i = find(hdp.file{j}.top_Z(k, :)); % find cluster's parent metabolite
+            % parent_i = find(hdp.file{j}.top_Z(k, :)); % find cluster's parent metabolite
+            parent_i = hdp.file{j}.top_Z(k);
             ti = hdp.ti(parent_i);
             tij = normrnd(ti, sqrt(1/hdp.delta_prec)); % then sample cluster rt given ti
             hdp.file{j}.ti(k) = tij;
+            hdp.si(parent_i) = hdp.si(parent_i) + tij;
         end
 
         % 1 x I, no. of RT clusters under each metabolite
-        hdp.fi = hdp.fi + sum(hdp.file{j}.top_Z, 1);    
+        % hdp.fi = hdp.fi + sum(hdp.file{j}.top_Z, 1);    
+        hdp.fi(i) = hdp.fi(i) + hdp.file{j}.K;
 
         % 1 x K, no. of peaks under each RT cluster
-        hdp.file{j}.count_Z = sum(hdp.file{j}.Z, 1);
+        % hdp.file{j}.count_Z = sum(hdp.file{j}.Z, 1);
+        hdp.file{j}.count_Z = [hdp.file{j}.N];
+        
+        % 1 x K, sum of peak RT under each RT cluster
+        hdp.file{j}.sum_Z = [sum(hdp.file{j}.data_rt)];
                                                   
     end
     
     % assign all peaks under 1 mass cluster
-    for i = 1:hdp.I
+    for metabolite_i = 1:hdp.I
     
         hdp.metabolite(i).A = 1;        % number of mass cluster in this metabolite
         hdp.metabolite(i).thetas = [normrnd(hdp.psi_0, sqrt(1/hdp.rho_0_prec))]; % sample some initial value for mass cluster

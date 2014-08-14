@@ -55,9 +55,6 @@ public class SimaFormatToText {
 
 		@Option(name = "d", param = "filename", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "The directory of input files in the FeatureML file format.")
 		public String inputDirectory = null;
-
-		@Option(name = "gt", param = "filename", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "The ground truth file for these data.")
-		public String gt = null;
 		
 		@Option(name = "h", param = "", type = Option.Type.NO_ARGUMENT, level = Option.Level.SYSTEM, usage = "When this is set, the help is shown.")
 		public boolean help = false;
@@ -89,9 +86,6 @@ public class SimaFormatToText {
 				Tool.printHeader(System.out, application, version);
 				cmdline.printOptions();
 			}
-
-			AlignmentDataGenerator generator = new FeatureXMLDataGenerator(options.inputDirectory, options.gt);
-			AlignmentData data = generator.generate();
 			
 			// sort input file alphabetically to look nicer
 			File inputDirectory = new File(options.inputDirectory);

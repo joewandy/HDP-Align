@@ -169,7 +169,7 @@ public class FeatureXMLDataGenerator extends BaseDataGenerator implements Alignm
 								// make a new example Feature object
 								Feature example = new Feature(-1, mass, rt, intensity);
 								Feature featureFromData = data.getFeatureByExample(example);
-								assert(featureFromData != null);
+								assert featureFromData != null : "not found " + example + " in " + data.getFilename();
 								gtFeatures.addFeature(featureFromData);
 							}
 	

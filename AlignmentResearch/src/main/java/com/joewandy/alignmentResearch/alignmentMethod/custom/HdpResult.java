@@ -14,6 +14,14 @@ public class HdpResult {
 		this.feature2 = feature2;
 	}
 	
+	public Feature getFeature1() {
+		return feature1;
+	}
+
+	public Feature getFeature2() {
+		return feature2;
+	}
+
 	public double getSimilarity() {
 		return similarity;
 	}

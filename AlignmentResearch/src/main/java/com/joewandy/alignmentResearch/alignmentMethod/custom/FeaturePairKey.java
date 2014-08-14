@@ -3,11 +3,27 @@ package com.joewandy.alignmentResearch.alignmentMethod.custom;
 import com.joewandy.alignmentResearch.objectModel.Feature;
 
 public class FeaturePairKey {
+	
 	private Feature f1;
 	private Feature f2;
-	public FeaturePairKey(Feature f1, Feature f2) {
+	private double score;
+	
+	public FeaturePairKey(Feature f1, Feature f2, double score) {
 		this.f1 = f1;
 		this.f2 = f2;
+		this.score = score;
+	}
+
+	public Feature getF1() {
+		return f1;
+	}
+
+	public Feature getF2() {
+		return f2;
+	}
+	
+	public double getScore() {
+		return score;
 	}
 
 	@Override
@@ -45,4 +61,5 @@ public class FeaturePairKey {
 	public String toString() {
 		return "FeaturePairKey [f1=" + f1 + ", f2=" + f2 + "]";
 	}
+	
 }

@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,12 +36,9 @@ public class SimaAlignment extends BaseAlignment implements AlignmentMethod {
 	
 	// the executable name of SIMA
 	private static final String SIMA_EXEC = "/home/joewandy/Dropbox/Project/real_datasets/SIMA_full/SIMA";
-
-	// temporary directory to put our input files
-	private static final String TEMP_INPUT_DIR = "/home/joewandy/temp/SIMA";
 	
 	// the output to read after running SIMA_EXEC
-	private static final String SIMA_OUTPUT = "/home/joewandy/temp/SIMA/results/result.txt";
+	private static final String SIMA_OUTPUT = "/results/result.txt";
 	
 	// Enable MTS correction using PARAMETER linepoints. Recommendation: 50-100 linepoints.
 	private double mtsCorrection; // any other options to include here ?
@@ -62,11 +61,11 @@ public class SimaAlignment extends BaseAlignment implements AlignmentMethod {
 		try {
 
 			// create temporary input files, and execute SIMA on them
-			final String tempDirPath = writeTempFiles();			
-			runSima(tempDirPath);
+			Path tempDirPath = writeTempFiles();			
+			runSima(tempDirPath.toString());
 			
 			// read back the output from simaDir/results/result.txt
-			final String outputPath = SimaAlignment.SIMA_OUTPUT;
+			String outputPath = tempDirPath.toString() + SimaAlignment.SIMA_OUTPUT;
 			alignedList = new AlignmentList(outputPath, dataList, "");
 						
 		} catch (IOException e) {
@@ -77,30 +76,25 @@ public class SimaAlignment extends BaseAlignment implements AlignmentMethod {
 		return alignedList;
 				
 	}
-
-	private String writeTempFiles() throws IOException, FileNotFoundException {
 	
-		// create temporary directory to hold our intermediate input files
-		final String tempDirPath = SimaAlignment.TEMP_INPUT_DIR;
-		final File tempDir = new File(tempDirPath);
-		if (!tempDir.exists() && !tempDir.mkdirs()) {
-		    throw new IOException("Unable to create " + tempDir.getAbsolutePath());
-		}
+	private Path writeTempFiles() throws IOException, FileNotFoundException {
 		
-		// clean all files inside directory
-		FileUtils.cleanDirectory(tempDir);
-
-		// put all spectra files inside SIMA_INPUT_DIR
+		// create temporary directory to hold our intermediate input files
+        String default_tmp = System.getProperty("java.io.tmpdir");
+        System.out.println("default_tmp = " + default_tmp);		
+        Path tempPath = Files.createTempDirectory("SIMA_INPUT_");
+		
+		// put all spectra files inside TEMP_INPUT_DIR
 		for (AlignmentFile data : dataList) {
-			String out = SimaAlignment.TEMP_INPUT_DIR + "/" + 
+			String out = tempPath.toString() + "/" + 
 					data.getFilenameWithoutExtension() + ".csv";
 			data.saveSimaFeatures(out);
 			System.out.println("Written to " + out);
 		}
-		return tempDirPath;
+		return tempPath;
 	
 	}
-
+	
 	private void runSima(final String tempDirPath) throws ExecuteException,
 		IOException {
 

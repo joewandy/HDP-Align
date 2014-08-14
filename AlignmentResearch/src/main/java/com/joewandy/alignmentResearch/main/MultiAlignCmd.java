@@ -39,7 +39,7 @@ public class MultiAlignCmd {
 
 			// print out the results
 			List<MultiAlignExpResult> results = exp.performExperiment(options);									
-			exp.printResult(results);
+			exp.printTestingResult(results);
 			
 		} catch (Exception e) {
 			Tool.unexpectedError(e, MultiAlignCmdOptions.APPLICATION);

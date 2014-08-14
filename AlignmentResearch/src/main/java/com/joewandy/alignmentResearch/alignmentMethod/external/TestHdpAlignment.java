@@ -11,6 +11,7 @@ import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
 import com.joewandy.alignmentResearch.alignmentMethod.BaseAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.custom.FeatureMatching;
+import com.joewandy.alignmentResearch.alignmentMethod.custom.HdpProbabilityMatching;
 import com.joewandy.alignmentResearch.alignmentMethod.custom.HdpResult;
 import com.joewandy.alignmentResearch.alignmentMethod.custom.HdpSimpleMatching;
 import com.joewandy.alignmentResearch.main.MultiAlignConstants;
@@ -18,7 +19,7 @@ import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.Feature;
 import com.joewandy.alignmentResearch.objectModel.HDPClustering;
-import com.joewandy.alignmentResearch.objectModel.HDPRTClustering;
+import com.joewandy.alignmentResearch.objectModel.HDPMassRTClustering;
 
 public class TestHdpAlignment extends BaseAlignment implements AlignmentMethod {
 
@@ -79,7 +80,7 @@ public class TestHdpAlignment extends BaseAlignment implements AlignmentMethod {
 			if (MultiAlignConstants.SCORING_METHOD_HDP_MASS_RT_JAVA.equals(this.scoringMethod)) {
 
 				// use the java HDP RT+mass clustering 
-				HDPClustering clustering = new HDPRTClustering(dataList);
+				HDPClustering clustering = new HDPMassRTClustering(dataList, param.getGroupingNSamples(), param.getGroupingBurnIn());
 				clustering.run();
 				resultMap = clustering.getSimilarityResult();
 				
@@ -94,7 +95,12 @@ public class TestHdpAlignment extends BaseAlignment implements AlignmentMethod {
 	}
 	
 	public AlignmentList matchFeatures() {
-		
+//		AlignmentList masterList = greedyMatch();
+		AlignmentList masterList = probMatch();
+		return masterList;
+	}
+
+	private AlignmentList greedyMatch() {
 		AlignmentList masterList = new AlignmentList("");	
 		int counter = 0;
 		for (AlignmentFile data : dataList) {			
@@ -105,9 +111,14 @@ public class TestHdpAlignment extends BaseAlignment implements AlignmentMethod {
 			masterList = matcher.getMatchedList();			            
 			counter++;
 		}
-		
 		return masterList;
-		
 	}
-				
+
+	private AlignmentList probMatch() {
+		AlignmentList masterList = new AlignmentList("");	
+		FeatureMatching matcher = new HdpProbabilityMatching(resultMap, dataList);
+		masterList = matcher.getMatchedList();			            
+		return masterList;
+	}	
+	
 }

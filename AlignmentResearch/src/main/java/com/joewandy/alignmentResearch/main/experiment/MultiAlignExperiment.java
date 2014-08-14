@@ -18,6 +18,6 @@ public interface MultiAlignExperiment {
 	
 	public List<MultiAlignExpResult> performExperiment(MultiAlignCmdOptions options) throws Exception;
 
-	public void printResult(List<MultiAlignExpResult> results);
+	public void printTestingResult(List<MultiAlignExpResult> results);
 	
 }

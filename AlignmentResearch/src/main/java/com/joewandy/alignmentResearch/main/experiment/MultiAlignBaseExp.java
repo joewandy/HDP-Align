@@ -12,7 +12,34 @@ import com.joewandy.alignmentResearch.objectModel.EvaluationResult;
 
 public abstract class MultiAlignBaseExp implements MultiAlignExperiment {
 
-	public void printResult(List<MultiAlignExpResult> results) {
+	public void printTrainingResult(MultiAlignExpResult result) {
+		result.printResult();
+		System.out.println();			
+		for (EvaluationResult evalRes : result.getEvaluationResults()) {
+			if (evalRes == null) {
+				continue;
+			}
+			String precision = String.format("%.3f", evalRes.getPrecision());
+			String recall = String.format("%.3f", evalRes.getRecall());
+			String f1 = String.format("%.3f", evalRes.getF1());
+			String tp = String.format("%.1f", evalRes.getTotalTp());
+			String fp = String.format("%.1f", evalRes.getTotalFp());
+			String fn = String.format("%.1f", evalRes.getTotalFn());			
+			String note = evalRes.getNote();
+			System.out.println("!TRAINING, " + 
+					evalRes.getDmz() + ", " + 
+					evalRes.getDrt() + ", " + 
+					precision + ", " + 
+					recall + ", " + 
+					f1 + ", " + 
+					tp + ", " + 
+					fp + ", " + 
+					fn + ", " + 
+					note);
+		}			
+	}	
+	
+	public void printTestingResult(List<MultiAlignExpResult> results) {
 		for (MultiAlignExpResult result : results) {
 			result.printResult();
 			System.out.println();			

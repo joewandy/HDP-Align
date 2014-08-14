@@ -130,7 +130,7 @@ class AlignmentFile(object):
         self.rows = []
         
     def __repr__(self):
-        return "full_path " + full_path + " with " + len(self.rows) + " rows"
+        return "full_path " + self.full_path + " with " + len(self.rows) + " rows"
     
     def get_data(self):
         '''Reads features from input file pointed by full_path'''
@@ -191,7 +191,6 @@ class AlignmentFile(object):
                 continue
             else:
                 if candidate.is_within_tolerance(reference_row, -1, drt):
-                    candidate.grouped = True
                     candidates.append(candidate)
         return candidates
         

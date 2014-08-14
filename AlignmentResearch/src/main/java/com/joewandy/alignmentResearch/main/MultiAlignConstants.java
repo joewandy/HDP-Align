@@ -46,5 +46,6 @@ public class MultiAlignConstants {
 
 	// use my own performance measure
 	public static final String PERFORMANCE_MEASURE_JOE = "joe";
+	public static final String PERFORMANCE_MEASURE_JOE_PR = "joePR";
 	
 }

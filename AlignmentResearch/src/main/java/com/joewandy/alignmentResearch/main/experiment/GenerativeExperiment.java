@@ -133,7 +133,7 @@ public abstract class GenerativeExperiment extends MultiAlignBaseExp implements 
 	}
 
 	@Override
-	public void printResult(List<MultiAlignExpResult> results) {
+	public void printTestingResult(List<MultiAlignExpResult> results) {
 
 		StringBuilder f1Builder = new StringBuilder();
 //		f1Builder.append("join,openms,sima,mw,mwg\n");

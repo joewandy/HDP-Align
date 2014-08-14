@@ -30,7 +30,10 @@ public class AlignmentFile {
 	private List<Feature> features;
 	private List<Feature> sortedFeatures; // sorted by intensity descending
 	private Matrix ZZProb;
-		
+
+	// for HDP alignment
+	private int K;
+	
 	public AlignmentFile(int id, String filename, List<Feature> features) {
 		this.id = id;
 		this.filename = filename;		
@@ -108,6 +111,10 @@ public class AlignmentFile {
 	}
 		
 	public int getFeaturesCount() {
+		return features.size();
+	}
+
+	public int getN() {
 		return features.size();
 	}
 	

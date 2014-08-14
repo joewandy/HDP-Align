@@ -23,7 +23,10 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 import com.joewandy.alignmentResearch.alignmentExperiment.AlignmentData;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
@@ -32,7 +35,7 @@ import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
 import com.joewandy.alignmentResearch.alignmentMethod.FeatureGrouper;
 import com.joewandy.alignmentResearch.alignmentMethod.custom.ExtendedLibraryBuilder;
 import com.joewandy.alignmentResearch.filter.AlignmentResultFilter;
-import com.joewandy.alignmentResearch.filter.ScoreResultFilter;
+import com.joewandy.alignmentResearch.main.experiment.MultiAlignExpResult;
 import com.joewandy.alignmentResearch.objectModel.AlignmentLibrary;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
@@ -130,6 +133,29 @@ public class MultiAlign {
 		
 	}
 	
+	public MultiAlignExpResult runPRExperiment() throws FileNotFoundException {
+
+		MultiAlignExpResult expResult = new MultiAlignExpResult("");						
+		AlignmentList result = aligner.align();
+		if (result != null) {
+			System.out.println("Total " + result.getRowsCount() + " rows aligned");			
+		}
+		if (result != null) {
+			EvaluationResult evalRes = null;
+			double lastThreshold = 0;
+			do {
+				evalRes = evaluatePR(result, options.measureType, lastThreshold);
+				if (evalRes != null) {
+					expResult.addResult(evalRes);
+					lastThreshold = evalRes.getTh();					
+				}
+			} while (evalRes != null);
+			
+		}
+		return expResult;
+		
+	}
+	
 	public void addResultFilter(AlignmentResultFilter filter) {
 		aligner.addFilter(filter);							
 	}
@@ -165,6 +191,62 @@ public class MultiAlign {
 		return evalRes;
 		
 	}		
+
+	private EvaluationResult evaluatePR(AlignmentList result, String measureType, double threshold) {
+		
+		EvaluationResult evalRes = null;
+		if (data.getGroundTruth() != null) {			
+			
+			int noOfFiles = data.getNoOfFiles();
+			GroundTruth gt = data.getGroundTruth();
+
+			Queue<AlignmentRow> pq = new PriorityQueue<AlignmentRow>(10, new AlignmentScoreComparator());
+			for (AlignmentRow row : result.getRows()) {
+				pq.add(row);
+			}
+			double lastScore = 0;
+			// filter out stuff lower than or equal to threshold
+			while (!pq.isEmpty()) {
+				AlignmentRow row = pq.peek();
+				if (row.getScore() > threshold) {
+					lastScore = row.getScore();
+					break;
+				} else {
+					AlignmentRow removed = pq.remove();
+				}
+			}
+				
+			if (pq.isEmpty()) {
+				return null;
+			}
+			
+			List<AlignmentRow> filtered = new ArrayList<AlignmentRow>(pq);
+			if (measureType.equals(MultiAlignConstants.PERFORMANCE_MEASURE_LANGE)) {
+				evalRes = gt.evaluateOld(filtered, noOfFiles, massTolerance, rtTolerance);								
+			} else if (measureType.equals(MultiAlignConstants.PERFORMANCE_MEASURE_JOE)) {
+				evalRes = gt.evaluateNew(filtered, noOfFiles, massTolerance, rtTolerance);												
+			}
+			evalRes.setTh(lastScore);
+			String note = alpha + ", " + groupingRtWindow;
+			evalRes.setNote(note);
+			
+		}		
+		
+		String precStr = String.format("%.3f", evalRes.getPrecision());
+		String recStr = String.format("%.3f", evalRes.getRecall());
+		String f1Str = String.format("%.3f", evalRes.getF1());
+		
+		System.out.println("!PR, " + method + ", " + evalRes.getDmz() + ", " + evalRes.getDrt() + 
+				", " + precStr + ", " + recStr + ", " + f1Str + 
+				", " + evalRes.getTh());
+					
+		// RetentionTimePrinter rtp = new RetentionTimePrinter();
+		// rtp.printRt1(alignmentDataList.get(0), alignmentDataList.get(1));
+		// rtp.printRt2(alignmentDataList.get(0), alignmentDataList.get(1), result);
+				
+		return evalRes;
+		
+	}		
 	
 	private void writeAlignmentResult(AlignmentList result, 
 			String outputPath) throws FileNotFoundException {
@@ -189,6 +271,13 @@ public class MultiAlign {
 	
 	private String printFeature(Feature feature) {
 		return feature.getIntensity() + " " + feature.getRt() + " " + feature.getMass() + " ";
+	}
+	
+	class AlignmentScoreComparator implements Comparator<AlignmentRow> {
+	    @Override
+	    public int compare(AlignmentRow x, AlignmentRow y) {
+	        return Double.compare(x.getScore(), y.getScore());
+	    }
 	}
 	
 }

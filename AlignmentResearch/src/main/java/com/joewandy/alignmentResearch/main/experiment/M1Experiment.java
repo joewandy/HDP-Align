@@ -101,6 +101,8 @@ public class M1Experiment extends MultiAlignBaseExp implements MultiAlignExperim
 				}
 			}
 			
+			super.printTrainingResult(tempResult);
+			
 			// report the result on another set of random n files
 			System.out.println();
 			EvaluationResult bestResult = tempResult.getResultBestF1();	

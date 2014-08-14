@@ -12,6 +12,8 @@ from models import *
 
 class GreedyClustering:
 
+    MATRIX_SAVE_PATH = '/home/joewandy/mat'
+
     def __init__(self, alignment_file, options):
         
         self.alignment_file = alignment_file
@@ -23,23 +25,46 @@ class GreedyClustering:
         print " - Grouping " + self.alignment_file.filename
         sys.stdout.flush()
         
+        '''target = os.path.join(GreedyClustering.MATRIX_SAVE_PATH, self.alignment_file.filename + '.greedy.mat')
+        if os.path.isfile(target):
+            print "\tReading clustering from " + target
+            mdict = scipy.io.loadmat(target)
+            ZZ_all = mdict['ZZ_all']
+            return ZZ_all'''
+        
         rows = sorted(self.alignment_file.rows, key=lambda x: x.get_average_intensity(), reverse=True)
-        n = len(rows)
-        grouping_arr = lil_matrix((n, n))        
+        N = len(rows)
 
+        groups = []
         for reference_row in rows:
             if reference_row.grouped == True:
                 continue
-            i = reference_row.row_id
             candidates = self.alignment_file.get_ungrouped_rows(reference_row, self.grt)
-            for candidate_row in candidates:
-                j = candidate_row.row_id
-                grouping_arr[i, j] = 1
-                candidate_row.grouped = True
-            reference_row.grouped = True
-        
-        return grouping_arr
+            if len(candidates) > 0:
+                for candidate_row in candidates:
+                    candidate_row.grouped = True
+                group = candidates
+                groups.append(group)
 
+        K = len(groups)
+        Z = lil_matrix((N, K))        
+
+        k = 0
+        for group in groups:
+            for row in group:
+                n = row.row_id
+                Z[n, k] = 1
+            k = k + 1
+                
+        ZZ = Z.tocsr() * Z.tocsr().transpose()
+        return ZZ.tolil()
+            
+        '''print "Saving clustering result to " + target
+        mdict = {'ZZ_all' : ZZ}
+        scipy.io.savemat(target, mdict, do_compression=True)'''
+
+        return ZZ
+                
 class MixtureModelClustering:
     
     MATRIX_SAVE_PATH = '/home/joewandy/mat'
@@ -180,7 +205,7 @@ class MixtureModelClustering:
             
         # end sample loop
         
-        ZZ_all = ZZ_all / total_nsamps
+        ZZ_all = ZZ_all / self.nsamps
         
         print "Saving clustering result to " + target
         mdict = {'ZZ_all' : ZZ_all}
