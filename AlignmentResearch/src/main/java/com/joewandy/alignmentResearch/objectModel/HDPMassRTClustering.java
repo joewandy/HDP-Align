@@ -47,7 +47,7 @@ public class HDPMassRTClustering implements HDPClustering {
 		param.setTop_alpha(10);
 		param.setDelta_prec(1.0/(10*10));
 		param.setGamma_prec(1.0/(10*10));
-		param.setRho_prec(0.05);
+		param.setRho_prec(1.0/(0.0025*0.0025));
 		
 		this.randomData = new RandomDataImpl();
 		this.resultMap = new HashMap<HdpResult, HdpResult>();
@@ -104,7 +104,7 @@ public class HDPMassRTClustering implements HDPClustering {
 				hdpFile.appendSumZ(hdpFile.getRtSum());
 			}
 			
-			setFi(i, hdpFile.K());
+			addFi(i, hdpFile.K());
 			hdpFiles.add(hdpFile);
 			
 		}
@@ -112,7 +112,8 @@ public class HDPMassRTClustering implements HDPClustering {
 		// assign all peaks under 1 metabolite
 		for (i = 0; i < this.I; i++) {
 			
-			HDPMetabolite met = hdpMetabolites.get(i);
+			HDPMetabolite met = hdpMetabolites.get(hdpMetaboliteId);
+			hdpMetaboliteId++;			
 			met.setA(1);
 			double theta = randomData.nextGaussian(param.getPsi_0(), Math.sqrt(1/param.getRho_prec())); 
 			met.appendTheta(theta);
@@ -159,14 +160,16 @@ public class HDPMassRTClustering implements HDPClustering {
 			long startTime = System.currentTimeMillis();
 			assignPeakMassRt();
 			updateParametersMassRt();
-			updateResultMap();
 			long endTime = System.currentTimeMillis();
-			double timeTaken = (endTime - startTime) / 1000;
+			double timeTaken = (endTime - startTime) / 1000.0;
 			
 			StringBuilder sb = new StringBuilder();
 			if (s > param.getBurnIn()) {
+				// store the actual samples
 				sb.append(String.format("time=%5.2fs S#%05d I=%d ", timeTaken, s, this.I));
+				updateResultMap();
 			} else {
+				// discard the burn-in samples
 				sb.append(String.format("time=%5.2fs B#%05d I=%d ", timeTaken, s, this.I));			
 			}
 			sb.append("all_A = [");
@@ -177,6 +180,7 @@ public class HDPMassRTClustering implements HDPClustering {
 				sb.append(formatted);
 			}
 			sb.append(" ]");
+			System.out.println(sb.toString());
 			
 		}
 		
@@ -204,7 +208,7 @@ public class HDPMassRTClustering implements HDPClustering {
 			// loop across peaks randomly
 			assert(hdpFile.N() == hdpFile.Zsize());
 			for (int n = 0; n < hdpFile.N(); n++) {
-				
+								
 				Feature thisPeak = hdpFile.getFeatures().get(n);
 				
 				// find the RT cluster
@@ -214,15 +218,12 @@ public class HDPMassRTClustering implements HDPClustering {
 				// find the mass cluster
 				HDPMetabolite met = hdpMetabolites.get(i);
 				int peakPos = met.findPeakPos(thisPeak);
-				if (peakPos == -1) {
-					peakPos = met.findPeakPos(thisPeak);
-				}
-				assert (peakPos != -1);
+				assert (peakPos != -1) : "file is " + j;
 				assert (met.vSize() == met.peakDataSize());
 				
 				// %%%%%%%%%% 1. remove peak from model %%%%%%%%%%
 				
-				hdpFile.setZ(n, 0);
+				hdpFile.setZ(n, -1);
 				hdpFile.decreaseCountZ(k);
 				hdpFile.subsSumZ(k, thisPeak.getRt());
 				int a = met.V(peakPos);
@@ -355,7 +356,7 @@ public class HDPMassRTClustering implements HDPClustering {
 				
 				// now compute the likelihood for peak going into new cluster            
 	            // first, compute p( x_nj | existing metabolite )
-				double denum = sum(fiArray());
+				double denum = sum(fiArray()) + param.getTop_alpha();
 				double[] currentMetabolitePost = new double[I];
 				for (int idx = 0; idx < I; idx++) {
 					double prior = fi(idx) / denum;
@@ -433,8 +434,8 @@ public class HDPMassRTClustering implements HDPClustering {
 						appendTi(newTi);
 						
 						// create empty mass cluster data structures for use later
-						hdpMetaboliteId++;
 						hdpMetabolites.add(new HDPMetabolite(hdpMetaboliteId));
+						hdpMetaboliteId++;
 						
 					}
 					
@@ -455,9 +456,9 @@ public class HDPMassRTClustering implements HDPClustering {
 				HDPMetabolite metabolite_i = hdpMetabolites.get(i);
 				double[] logPrior = append(logArray(metabolite_i.faArray()), Math.log(param.getAlpha_mass()));
 				double[] mu2 = append(metabolite_i.thetasArray(), param.getPsi_0());
-				double[] temp = new double[mu2.length];
+				double[] temp = new double[metabolite_i.thetasSize()];
 				fill(temp, param.getRho_prec());
-				double temp2 = 1/(1/(param.getRho_prec() + param.getRho_0_prec()));
+				double temp2 = 1/( 1/param.getRho_prec() + 1/param.getRho_0_prec() );
 				double[] prec2 = append(temp, temp2);
 				
 				// compute likelihood and posterior 
@@ -504,6 +505,7 @@ public class HDPMassRTClustering implements HDPClustering {
 				
 				// %%%%%%%%%% 4. maintain model state consistency %%%%%%%%%%
 
+				assert(this.hdpMetabolites.size() == this.I);
 				assert(metabolite_i.thetasSize()==metabolite_i.A());
 				assert(metabolite_i.faSize()==metabolite_i.A());
 				assert(metabolite_i.saSize()==metabolite_i.A());
@@ -600,6 +602,12 @@ public class HDPMassRTClustering implements HDPClustering {
 	
 	private void setFi(int i, int newFi) {
 		this.fi.set(i, newFi);
+	}
+	
+	private void addFi(int i, int amount) {
+		int fi = this.fi.get(i);
+		fi += amount;
+		setFi(i, fi);
 	}
 	
 	private void increaseFi(int i) {

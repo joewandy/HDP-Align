@@ -227,5 +227,11 @@ public class HDPFile {
 			return false;
 		return true;
 	}
+
+	@Override
+	public String toString() {
+		return "HDPFile [id=" + id + ", countZ="
+				+ countZ + "]";
+	}
 	
 }

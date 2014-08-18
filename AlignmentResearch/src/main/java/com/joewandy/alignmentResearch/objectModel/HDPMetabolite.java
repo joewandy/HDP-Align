@@ -207,5 +207,10 @@ public class HDPMetabolite {
 	public void removePeakData(int peakPos) {
 		this.peakData.remove(peakPos);
 	}
+
+	@Override
+	public String toString() {
+		return "HDPMetabolite [id=" + id + ", peakData.size()=" + peakData.size() + ", peakData=" + peakData + "]";
+	}
 	
 }

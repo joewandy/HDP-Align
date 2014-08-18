@@ -1,9 +1,10 @@
 function hdp = assign_peaks_mass_rt(hdp, debug)
 
-    for j = randperm(hdp.J)
+    % for j = randperm(hdp.J)
+      for j = 1:hdp.J
                             
-        for n = randperm(hdp.file{j}.N)
-
+        % for n = randperm(hdp.file{j}.N)
+        for n = 1:hdp.file{j}.N
 
             
             %%%%%%%%%% 0. find all the indices %%%%%%%%%%
