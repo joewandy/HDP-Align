@@ -36,18 +36,41 @@ public class HDPMassRTClustering implements HDPClustering {
 	public HDPMassRTClustering(List<AlignmentFile> dataList, int nSamps, int burnIn) {
 		
 		this.param = new HDPClusteringParam();
-		param.setNsamps(20);
-		param.setBurnIn(10);
+		double alphaRt, alphaMass, topAlpha, deltaPrec, gammaPrec, rhoPrec;
+
 		param.setMu_0(getRTMean(dataList));
-		param.setSigma_0_prec(1.0/5E6);
 		param.setPsi_0(getMassMean(dataList));
+		param.setSigma_0_prec(1.0/5E6);
 		param.setRho_0_prec(1.0/5E6);
-		param.setAlpha_rt(10);
-		param.setAlpha_mass(10);
-		param.setTop_alpha(10);
-		param.setDelta_prec(1.0/(10*10));
-		param.setGamma_prec(1.0/(10*10));
-		param.setRho_prec(1.0/(0.0025*0.0025));
+				
+		// for synthetic data
+		nSamps = 200;			// total number of samples
+		burnIn = 100;			// burn-in samples
+		alphaRt = 10; 			// DP concentration param for local RT clusters
+		alphaMass = 10;			// DP concentration param for mass clusters
+		topAlpha = 10;			// DP concentration param for global RT clusters
+		deltaPrec = 10;			// global RT cluster standard deviation
+		gammaPrec = 10;			// local RT cluster standard deviation
+		rhoPrec = 0.015;		// mass cluster standard deviation
+
+		// for P1 - 080
+		nSamps = 2000;			// total number of samples
+		burnIn = 1000;			// burn-in samples
+		topAlpha = 10;			// DP concentration param for global RT clusters
+		alphaRt = 10; 			// DP concentration param for local RT clusters
+		alphaMass = 10;			// DP concentration param for mass clusters
+		deltaPrec = 10;			// global RT cluster standard deviation
+		gammaPrec = 10;			// local RT cluster standard deviation
+		rhoPrec = 0.25;			// mass cluster standard deviation
+		
+		param.setNsamps(nSamps);
+		param.setBurnIn(burnIn);
+		param.setAlpha_rt(alphaRt);
+		param.setAlpha_mass(alphaMass);
+		param.setTop_alpha(topAlpha);
+		param.setDelta_prec(1.0/(deltaPrec*deltaPrec));
+		param.setGamma_prec(1.0/(gammaPrec*gammaPrec));
+		param.setRho_prec(1.0/(rhoPrec*rhoPrec));
 		
 		this.randomData = new RandomDataImpl();
 		this.resultMap = new HashMap<HdpResult, HdpResult>();

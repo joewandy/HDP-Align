@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.joewandy.alignmentResearch.filter.AlignmentResultFilter;
+import com.joewandy.alignmentResearch.main.MultiAlignConstants;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
@@ -31,7 +32,6 @@ public abstract class BaseAlignment implements AlignmentMethod {
 		this.dataList = dataList;		
 		
 		this.massTolerance = param.getMassTolerance();
-		 // we use absolute mass tolerance for now to be the same as Lange, et al. (2008)
 		this.usePpm = param.isUsePpm();
 		this.rtTolerance = param.getRtTolerance();
 		

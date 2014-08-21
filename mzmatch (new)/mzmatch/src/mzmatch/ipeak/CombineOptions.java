@@ -2,10 +2,11 @@ package mzmatch.ipeak;
 
 import java.util.Vector;
 
-import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
-
 import cmdline.Option;
 import cmdline.OptionsClass;
+
+import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
+import com.joewandy.alignmentResearch.main.MultiAlignConstants;
 
 @OptionsClass(name = CombineOptions.APPLICATION, version = CombineOptions.VERSION, author = "RA Scheltema (r.a.scheltema@rug.nl)", 
 		description = "Combines the contents of a set of PeakML files, containing either mass chromatograms "
@@ -112,27 +113,27 @@ public class CombineOptions {
 	
 	@Option(name = "ransacRtToleranceBeforeCorrection", param = "float", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, 
 			usage = "Ransac parameter.")
-	public double ransacRtToleranceBeforeCorrection = AlignmentMethodParam.PARAM_RT_TOLERANCE_BEFORE_CORRECTION;
+	public double ransacRtToleranceBeforeCorrection = MultiAlignConstants.PARAM_RT_TOLERANCE_BEFORE_CORRECTION;
 
 	@Option(name = "ransacIteration", param = "int", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, 
 			usage = "Ransac parameter.")
-	public int ransacIteration = AlignmentMethodParam.PARAM_RANSAC_ITERATION;
+	public int ransacIteration = MultiAlignConstants.PARAM_RANSAC_ITERATION;
 	
 	@Option(name = "ransacNMinPoints", param = "float", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, 
 			usage = "Ransac parameter.")
-	public double ransacNMinPoints = AlignmentMethodParam.PARAM_MINIMUM_NO_OF_POINTS;
+	public double ransacNMinPoints = MultiAlignConstants.PARAM_MINIMUM_NO_OF_POINTS;
 
 	@Option(name = "ransacThreshold", param = "float", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, 
 			usage = "Ransac parameter.")
-	public double ransacThreshold = AlignmentMethodParam.PARAM_THRESHOLD_VALUE;
+	public double ransacThreshold = MultiAlignConstants.PARAM_THRESHOLD_VALUE;
 	
 	@Option(name="ransacLinearModel", param="boolean", type=Option.Type.REQUIRED_ARGUMENT, 
 			usage="Ransac parameter")
-	public boolean ransacLinearModel = AlignmentMethodParam.PARAM_LINEAR_MODEL;
+	public boolean ransacLinearModel = MultiAlignConstants.PARAM_LINEAR_MODEL;
 
 	@Option(name="ransacSameChargeRequired", param="boolean", type=Option.Type.REQUIRED_ARGUMENT, 
 			usage="Ransac parameter")
-	public boolean ransacSameChargeRequired = AlignmentMethodParam.PARAM_REQUIRE_SAME_CHARGE_STATE;
+	public boolean ransacSameChargeRequired = MultiAlignConstants.PARAM_REQUIRE_SAME_CHARGE_STATE;
 	
 	/*
 	 * OPTIONS FOR PEAK GROUPING

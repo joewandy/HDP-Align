@@ -43,6 +43,7 @@ import net.sf.mzmine.util.Range;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
 import com.joewandy.alignmentResearch.alignmentMethod.BaseAlignment;
+import com.joewandy.alignmentResearch.main.MultiAlignConstants;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
@@ -122,7 +123,7 @@ public abstract class MzMineAlignment extends BaseAlignment implements
 		MZmineProcessingModule module = this.getAlignerModule();
 		System.out.println("Setting parameters for module " + module.getName());
 		ExitCode exitCode = ExitCode.OK;
-		if (AlignmentMethodParam.SHOW_PARAM_SETUP_DIALOG) {
+		if (MultiAlignConstants.SHOW_PARAM_SETUP_DIALOG) {
 			exitCode = params.showSetupDialog();			
 		}
 		

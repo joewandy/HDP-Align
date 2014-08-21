@@ -28,10 +28,10 @@ public class CombineCustomJoinMethod extends CombineBaseMethod implements Combin
 		assert(dataList.size() == peaksets.size());		
 		
 		// pass this to the alignment method
-		AlignmentMethodParam.Builder paramBuilder = new AlignmentMethodParam.Builder(
-				options.ppm, options.rtwindow);
-		paramBuilder.usePpm(true);
-		AlignmentMethodParam param = paramBuilder.build();
+		AlignmentMethodParam param = new AlignmentMethodParam();
+		param.setMassTolerance(options.ppm);
+		param.setRtTolerance(options.rtwindow);
+		param.setUsePpm(true);
 		AlignmentMethod aligner = AlignmentMethodFactory.getAlignmentMethod(
 				AlignmentMethodFactory.ALIGNMENT_METHOD_MY_JOIN, 
 				param, data, null);

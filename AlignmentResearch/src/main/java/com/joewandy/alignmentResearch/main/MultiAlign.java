@@ -69,30 +69,8 @@ public class MultiAlign {
 		this.massTolerance = options.alignmentPpm;
 		this.rtTolerance = options.alignmentRtWindow;
 		this.groupingRtWindow = options.groupingRtWindow;
-		this.alpha = options.alpha;
-		
-		AlignmentMethodParam.Builder paramBuilder = new AlignmentMethodParam.Builder(
-				options.alignmentPpm, options.alignmentRtWindow);
-		paramBuilder.usePpm(MultiAlignConstants.ALIGN_BY_RELATIVE_MASS_TOLERANCE);
-		paramBuilder.ransacRtToleranceBefore(options.ransacRtToleranceBeforeCorrection);
-		paramBuilder.ransacRtToleranceAfter(options.alignmentRtWindow);
-		paramBuilder.ransacIteration(options.ransacIteration);
-		paramBuilder.ransacNMinPoints(options.ransacNMinPoints);
-		paramBuilder.ransacThreshold(options.ransacThreshold);
-		paramBuilder.ransacLinearModel(options.ransacLinearModel);
-		paramBuilder.ransacSameChargeRequired(options.ransacSameChargeRequired);
-		paramBuilder.openMsMzPairMaxDistance(options.openMsMzPairMaxDistance);
-		paramBuilder.useGroup(options.useGroup);
-		paramBuilder.exactMatch(options.exactMatch);		
-		paramBuilder.usePeakShape(options.usePeakShape);
-		paramBuilder.groupingMethod(options.groupingMethod);
-		paramBuilder.groupingRtTolerance(options.groupingRtWindow);
-		paramBuilder.scoringMethod(options.scoringMethod);		
-		paramBuilder.alpha(options.alpha);
-		paramBuilder.groupingNSamples(options.groupingNSamples);
-		paramBuilder.groupingBurnIn(options.groupingBurnIn);
-		paramBuilder.groupingDpAlpha(options.groupingDpAlpha);		
-		this.param = paramBuilder.build();
+		this.alpha = options.alpha;		
+		this.param = new AlignmentMethodParam(options);
 				
 		if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_MAXIMUM_WEIGHT_MATCHING_HIERARCHICAL.equals(method)) {
 

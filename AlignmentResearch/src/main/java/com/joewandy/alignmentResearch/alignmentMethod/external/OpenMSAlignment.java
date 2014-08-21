@@ -32,6 +32,7 @@ import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
 import com.joewandy.alignmentResearch.alignmentMethod.BaseAlignment;
+import com.joewandy.alignmentResearch.main.MultiAlignConstants;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
@@ -64,7 +65,7 @@ public class OpenMSAlignment extends BaseAlignment implements AlignmentMethod {
 		for (int i = 0; i < dataList.size(); i++) {
 			dataMap.put(i, dataList.get(i));
 		}
-		mzPairMaxDistance = AlignmentMethodParam.PARAM_MZ_PAIR_MAX_DISTANCE;
+		mzPairMaxDistance = MultiAlignConstants.PARAM_MZ_PAIR_MAX_DISTANCE;
 	}
 	
 	@Override

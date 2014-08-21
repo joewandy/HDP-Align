@@ -28,18 +28,17 @@ public class CombineMzMineRANSACMethod extends CombineBaseMethod implements Comb
 		assert(dataList.size() == peaksets.size());		
 		
 		// pass this to the alignment method
-		AlignmentMethodParam.Builder paramBuilder = new AlignmentMethodParam.Builder(
-				options.ppm, options.rtwindow);
-		
-		paramBuilder.usePpm(true);
-		paramBuilder.ransacRtToleranceBefore(options.ransacRtToleranceBeforeCorrection);
-		paramBuilder.ransacRtToleranceAfter(options.rtwindow);
-		paramBuilder.ransacIteration(options.ransacIteration);
-		paramBuilder.ransacNMinPoints(options.ransacNMinPoints);
-		paramBuilder.ransacThreshold(options.ransacThreshold);
-		paramBuilder.ransacLinearModel(options.ransacLinearModel);
-		paramBuilder.ransacSameChargeRequired(options.ransacSameChargeRequired);
-		AlignmentMethodParam param = paramBuilder.build();
+		AlignmentMethodParam param = new AlignmentMethodParam();
+		param.setMassTolerance(options.ppm);
+		param.setRtTolerance(options.rtwindow);
+		param.setUsePpm(true);
+		param.setRansacRtToleranceBeforeMinute(options.ransacRtToleranceBeforeCorrection);
+		param.setRansacRtToleranceAfterMinute(options.rtwindow);
+		param.setRansacIteration(options.ransacIteration);
+		param.setRansacNMinPoints(options.ransacNMinPoints);
+		param.setRansacThreshold(options.ransacThreshold);
+		param.setRansacLinearModel(options.ransacLinearModel);
+		param.setRansacSameChargeRequired(options.ransacSameChargeRequired);
 
 		AlignmentMethod aligner = AlignmentMethodFactory.getAlignmentMethod(
 				AlignmentMethodFactory.ALIGNMENT_METHOD_MZMINE_RANSAC, 

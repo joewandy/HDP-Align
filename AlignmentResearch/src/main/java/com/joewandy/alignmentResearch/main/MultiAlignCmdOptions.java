@@ -17,7 +17,7 @@ public class MultiAlignCmdOptions {
 
 	public static final String VERSION = "1.0";
 
-	public static final String APPLICATION = "FeatureXMLAlignment";
+	public static final String APPLICATION = "MultiAlignCmd";
 
 	/*
 	 * Basic options
@@ -42,21 +42,20 @@ public class MultiAlignCmdOptions {
 	@Option(name = "dataType", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Read from file or generate data.")
 	public String dataType = AlignmentDataGeneratorFactory.FEATURE_XML_DATA;
 
-	// for FeatureXML data, if ground truth is available
-	@Option(name = "gt", param = "filename", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "The ground truth file for these data.")
+	@Option(name = "gt", param = "filename", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "The ground truth file for these data, if any.")
 	public String gt = null;
 	
-	@Option(name = "measureType", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Which way to compute performance measures.")
+	@Option(name = "measureType", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Which way to compute performance measures: lange or joe")
 	public String measureType = MultiAlignConstants.PERFORMANCE_MEASURE_LANGE;	
 		
 	/*
-	 * Experiment options
+	 * Grouping experiment options
 	 */
 	
 	@Option(name = "experimentType", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "greedy or mzMine join aligner.")
 	public String experimentType = null;	
 
-	@Option(name = "experimentIter", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "No. of iterations")
+	@Option(name = "experimentIter", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "No. of iterations or experiment index")
 	public int experimentIter = 1;
 			
 	@Option(name = "autoAlpha", param = "", type = Option.Type.NO_ARGUMENT, level = Option.Level.SYSTEM, usage = "When this is set, automatically adjust alpha from 0 to 1.")
@@ -87,27 +86,27 @@ public class MultiAlignCmdOptions {
 	
 	@Option(name = "ransacRtToleranceBeforeCorrection", param = "float", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, 
 			usage = "Ransac parameter.")
-	public double ransacRtToleranceBeforeCorrection = AlignmentMethodParam.PARAM_RT_TOLERANCE_BEFORE_CORRECTION;
+	public double ransacRtToleranceBeforeCorrection = MultiAlignConstants.PARAM_RT_TOLERANCE_BEFORE_CORRECTION;
 
 	@Option(name = "ransacIteration", param = "int", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, 
 			usage = "Ransac parameter.")
-	public int ransacIteration = AlignmentMethodParam.PARAM_RANSAC_ITERATION;
+	public int ransacIteration = MultiAlignConstants.PARAM_RANSAC_ITERATION;
 	
 	@Option(name = "ransacNMinPoints", param = "float", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, 
 			usage = "Ransac parameter.")
-	public double ransacNMinPoints = AlignmentMethodParam.PARAM_MINIMUM_NO_OF_POINTS;
+	public double ransacNMinPoints = MultiAlignConstants.PARAM_MINIMUM_NO_OF_POINTS;
 
 	@Option(name = "ransacThreshold", param = "float", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, 
 			usage = "Ransac parameter.")
-	public double ransacThreshold = AlignmentMethodParam.PARAM_THRESHOLD_VALUE;
+	public double ransacThreshold = MultiAlignConstants.PARAM_THRESHOLD_VALUE;
 	
 	@Option(name="ransacLinearModel", param="boolean", type=Option.Type.REQUIRED_ARGUMENT, 
 			usage="Ransac parameter")
-	public boolean ransacLinearModel = AlignmentMethodParam.PARAM_LINEAR_MODEL;
+	public boolean ransacLinearModel = MultiAlignConstants.PARAM_LINEAR_MODEL;
 
 	@Option(name="ransacSameChargeRequired", param="boolean", type=Option.Type.REQUIRED_ARGUMENT, 
 			usage="Ransac parameter")
-	public boolean ransacSameChargeRequired = AlignmentMethodParam.PARAM_REQUIRE_SAME_CHARGE_STATE;
+	public boolean ransacSameChargeRequired = MultiAlignConstants.PARAM_REQUIRE_SAME_CHARGE_STATE;
 
 	/*
 	 * OpenMS options
@@ -115,7 +114,7 @@ public class MultiAlignCmdOptions {
 	
 	@Option(name = "mzPairMaxDistance", param = "float", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, 
 			usage = "OpenMS parameter.")
-	public double openMsMzPairMaxDistance = AlignmentMethodParam.PARAM_MZ_PAIR_MAX_DISTANCE;
+	public double openMsMzPairMaxDistance = MultiAlignConstants.PARAM_MZ_PAIR_MAX_DISTANCE;
 
 	/*
 	 * Max-weight matching options
@@ -123,42 +122,63 @@ public class MultiAlignCmdOptions {
 	
 	@Option(name="useGroup", param="boolean", type=Option.Type.REQUIRED_ARGUMENT, 
 			usage="Whether to use grouping")
-	public boolean useGroup = AlignmentMethodParam.USE_GROUP;
+	public boolean useGroup = MultiAlignConstants.USE_GROUP;
 
 	@Option(name="exactMatch", param="boolean", type=Option.Type.NO_ARGUMENT, 
 			usage="Exact or approximate matching ?")
-	public boolean exactMatch = AlignmentMethodParam.EXACT_MATCH;
+	public boolean exactMatch = MultiAlignConstants.EXACT_MATCH;
 	
 	@Option(name="usePeakShape", param="boolean", type=Option.Type.REQUIRED_ARGUMENT, 
 			usage="Whether to use peak shape correlation when grouping")
-	public boolean usePeakShape = AlignmentMethodParam.USE_PEAK_SHAPE;
+	public boolean usePeakShape = MultiAlignConstants.USE_PEAK_SHAPE;
 	
 	@Option(name = "alpha", param = "float", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, 
 			usage = "Controls the ratio of weights used in similarity calculation during matching.")
-	public double alpha = AlignmentMethodParam.PARAM_ALPHA;
+	public double alpha = MultiAlignConstants.PARAM_ALPHA;
 	
 	/*
 	 * Grouping options
 	 */
 	
-	// TODO: change to enum
+	// greedy grouping or DP model-based grouping
+
 	@Option(name = "groupingMethod", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Grouping method")
 	public String groupingMethod = MultiAlignConstants.GROUPING_METHOD_GREEDY;
-	
-	// for greedy grouping
-	@Option(name = "groupingRtWindow", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Grouping RT window for greedy grouping")
-	public double groupingRtWindow = MultiAlignConstants.GROUPING_METHOD_RT_TOLERANCE;
-
-	// for model-based grouping
-
-	@Option(name = "groupingDpAlpha", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "DP concentration param")
-	public double groupingDpAlpha = MultiAlignConstants.GROUPING_METHOD_ALPHA;
 	
 	@Option(name = "groupingNSamples", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "No. of samples")
 	public int groupingNSamples = MultiAlignConstants.GROUPING_METHOD_NUM_SAMPLES;
 
 	@Option(name = "groupingBurnIn", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "No. of burn-in samples")
 	public int groupingBurnIn = MultiAlignConstants.GROUPING_METHOD_BURN_IN;
+	
+	// for greedy grouping
+	
+	@Option(name = "groupingRtWindow", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Grouping RT window for greedy grouping")
+	public double groupingRtWindow = MultiAlignConstants.GROUPING_METHOD_RT_TOLERANCE;
+
+	// for model-based grouping using DP
+
+	@Option(name = "groupingDpAlpha", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "DP concentration param")
+	public double groupingDpAlpha = MultiAlignConstants.GROUPING_METHOD_ALPHA;
+		
+	// for model-based grouping using HDP
+	@Option(name = "hdpAlphaRt", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "HDP DP concentraton parameter for local RT cluster")
+	public double hdpAlphaRt = MultiAlignConstants.HDP_ALPHA_RT;
+
+	@Option(name = "hdpTopAlpha", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "HDP DP concentraton parameter for global RT cluster")
+	public double hdpTopAlpha = MultiAlignConstants.HDP_TOP_ALPHA;
+	
+	@Option(name = "hdpAlphaMass", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "HDP DP concentraton parameter for mass cluster")
+	public double hdpAlphaMass = MultiAlignConstants.HDP_ALPHA_MASS;
+
+	@Option(name = "hdpGlobalRtClusterStdev", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "HDP global RT cluster standard deviation")
+	public double hdpGlobalRtClusterStdev = MultiAlignConstants.HDP_GLOBAL_RT_CLUSTER_STDEV;
+
+	@Option(name = "hdpLocalRtClusterStdev", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "HDP local RT cluster standard deviation")
+	public double hdpLocalRtClusterStdev = MultiAlignConstants.HDP_LOCAL_RT_CLUSTER_STDEV;
+	
+	@Option(name = "hdpMassClusterStdev", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "HDP mass cluster standard deviation")
+	public double hdpMassClusterStdev = MultiAlignConstants.HDP_MASS_CLUSTER_STDEV;
 	
 	/*
 	 * Scoring options
@@ -169,7 +189,6 @@ public class MultiAlignCmdOptions {
 	/*
 	 * Generative model parameters
 	 */
-
 	public GenerativeModelParameter generativeParams = new GenerativeModelParameter();
 	
 }

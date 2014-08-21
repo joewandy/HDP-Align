@@ -28,10 +28,9 @@ public class CombineSIMAMethod extends CombineBaseMethod implements CombineMetho
 		assert(dataList.size() == peaksets.size());		
 		
 		// pass this to the alignment method
-		AlignmentMethodParam.Builder paramBuilder = new AlignmentMethodParam.Builder(
-				options.ppm, options.rtwindow);
-		paramBuilder.usePpm(false);
-		AlignmentMethodParam param = paramBuilder.build();		
+		AlignmentMethodParam param = new AlignmentMethodParam();
+		param.setMassTolerance(options.ppm);
+		param.setRtTolerance(options.rtwindow);
 		AlignmentMethod aligner = AlignmentMethodFactory.getAlignmentMethod(
 				AlignmentMethodFactory.ALIGNMENT_METHOD_SIMA, 
 				param, data, null);
