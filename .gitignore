@@ -1,3 +1,4 @@
+*.pyc
 error.txt
 *.mat
 *.zip
