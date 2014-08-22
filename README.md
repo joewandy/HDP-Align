@@ -9,7 +9,8 @@ Research Codes for Peak Alignment Methods
 - MZmine_2_clone: fork of MZMine2 for evaluation purpose
 - mzmatch_clone: fork of mzMatch for evaluation and integration purpose
 
-Quick Note: project set-up for Eclipse
+Setting Up
+======================================
 
 0. Install eGit and maven plugins in eclipse
 1. Clone the repository. git clone https://github.com/joewandy/phd-research.git
