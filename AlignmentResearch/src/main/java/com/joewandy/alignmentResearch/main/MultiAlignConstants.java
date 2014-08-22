@@ -30,8 +30,8 @@ public class MultiAlignConstants {
 	public static final String GROUPING_METHOD_METASSIGN_MIXTURE = "metAssignMixture";
 	public static final String GROUPING_METHOD_METASSIGN_POSTERIOR = "metAssignPosterior";
 
-	public static final int GROUPING_METHOD_NUM_SAMPLES = 200;
-	public static final int GROUPING_METHOD_BURN_IN = 100;
+	public static final int GROUPING_METHOD_NUM_SAMPLES = 20;
+	public static final int GROUPING_METHOD_BURN_IN = 10;
 	public static final double GROUPING_METHOD_RT_TOLERANCE = 5;
 	public static final double GROUPING_METHOD_ALPHA = 1;
 	public static final double HDP_ALPHA_RT = 10;

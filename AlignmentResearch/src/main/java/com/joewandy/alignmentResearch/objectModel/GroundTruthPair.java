@@ -17,6 +17,14 @@ public class GroundTruthPair {
 	public Feature getF2() {
 		return f2;
 	}
+	
+	public double getAbsRtDiff() {
+		return Math.abs(f1.getRt() - f2.getRt());
+	}
+	
+	public double getAbsMassDiff() {
+		return Math.abs(f1.getMass() - f2.getMass());		
+	}
 
 	@Override
 	public int hashCode() {

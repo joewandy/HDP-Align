@@ -73,6 +73,18 @@ public class GroundTruth {
 		System.out.println();
 		System.out.println("Total pairwise ground truth combinations = " + pairwiseGroundTruth.size());
 		System.out.println(sizeMap);
+		
+		double avgRt = 0;
+		double avgMass = 0;
+		for (GroundTruthPair pairwise : pairwiseGroundTruth) {
+			avgRt += pairwise.getAbsRtDiff();
+			avgMass += pairwise.getAbsMassDiff();
+		}
+		avgRt = avgRt / pairwiseGroundTruth.size();
+		avgMass = avgMass / pairwiseGroundTruth.size();		
+		System.out.println("Average abs RT diff = " + avgRt);
+		System.out.println("Average abs mass diff = " + avgMass);
+		
 	}
 
 	private GroundTruthPair getGroundTruthPair(Feature f1, Feature f2) {

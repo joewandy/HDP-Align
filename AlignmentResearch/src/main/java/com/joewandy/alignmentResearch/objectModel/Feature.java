@@ -19,6 +19,7 @@ public class Feature {
 
 	private int peakID;
 	private double mass;
+	private double massLog;
 	private double rt;
 	private double intensity;
 	private AlignmentFile data;
@@ -40,6 +41,7 @@ public class Feature {
 	public Feature(int peakID, double mass, double rt, double intensity) {
 		this.peakID = peakID;
 		this.mass = mass;
+		this.massLog = Math.log(mass);
 		this.rt = rt;
 		this.intensity = intensity;
 		this.groups = new ArrayList<FeatureGroup>();
@@ -56,6 +58,10 @@ public class Feature {
 	public double getMass() {
 		return mass;
 	}
+
+	public double getMassLog() {
+		return massLog;
+	}
 	
 	public double getRt() {
 		return rt;
@@ -67,6 +73,7 @@ public class Feature {
 	
 	public void setMass(double mass) {
 		this.mass = mass;
+		this.massLog = Math.log(mass);
 	}
 
 	public void setRt(double rt) {

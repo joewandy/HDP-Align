@@ -80,7 +80,7 @@ public class TestHdpAlignment extends BaseAlignment implements AlignmentMethod {
 			if (MultiAlignConstants.SCORING_METHOD_HDP_MASS_RT_JAVA.equals(this.scoringMethod)) {
 
 				// use the java HDP RT+mass clustering 
-				HDPClustering clustering = new HDPMassRTClustering(dataList, param.getGroupingNSamples(), param.getGroupingBurnIn());
+				HDPClustering clustering = new HDPMassRTClustering(dataList, param);
 				clustering.run();
 				resultMap = clustering.getSimilarityResult();
 				
