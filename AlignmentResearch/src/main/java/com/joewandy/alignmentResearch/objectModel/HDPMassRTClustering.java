@@ -175,7 +175,6 @@ public class HDPMassRTClustering implements HDPClustering {
 		return sum / count;
 	}
 	
-	@Override
 	public void run() {
 
 		for (int s = 0; s < hdpParam.getNsamps(); s++) {
@@ -209,7 +208,6 @@ public class HDPMassRTClustering implements HDPClustering {
 		
 	}
 	
-	@Override
 	public Map<HdpResult, HdpResult> getSimilarityResult() {
 		
 		int samplesTaken = hdpParam.getNsamps() - hdpParam.getBurnIn();

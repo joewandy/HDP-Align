@@ -38,7 +38,7 @@ public class TestHdpAlignment extends BaseAlignment implements AlignmentMethod {
 		// load from matlab
 		AlignmentFile firstFile = dataList.get(0);
 		String parentPath = firstFile.getParentPath();
-		resultMap = new HashMap<>();
+		resultMap = new HashMap<HdpResult, HdpResult>();
 		MatFileReader mfr = null;
 		try {
 			if (MultiAlignConstants.SCORING_METHOD_HDP_MASS_RT.equals(this.scoringMethod)) {

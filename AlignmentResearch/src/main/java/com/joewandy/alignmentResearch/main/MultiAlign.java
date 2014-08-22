@@ -252,7 +252,6 @@ public class MultiAlign {
 	}
 	
 	class AlignmentScoreComparator implements Comparator<AlignmentRow> {
-	    @Override
 	    public int compare(AlignmentRow x, AlignmentRow y) {
 	        return Double.compare(x.getScore(), y.getScore());
 	    }

@@ -76,7 +76,6 @@ public class ScoreResultFilter implements AlignmentResultFilter {
 	}
 	
 	class AlignmentScoreComparator implements Comparator<AlignmentRow> {
-	    @Override
 	    public int compare(AlignmentRow x, AlignmentRow y) {
 	        return -Double.compare(x.getScore(), y.getScore());
 	    }
