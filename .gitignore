@@ -1,8 +1,6 @@
 *.mat
 *.zip
 .svn*
-*.pydevproject
-.project
 .metadata
 bin/**
 tmp/**
@@ -12,7 +10,6 @@ tmp/**/*
 *.swp
 *~.nib
 local.properties
-.classpath
 *.class
 .settings/
 */.settings/
