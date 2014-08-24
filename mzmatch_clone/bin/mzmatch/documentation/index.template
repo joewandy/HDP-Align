@@ -1,0 +1,26 @@
+<!doctype html public "-//W3C//DTD HTML 4.01 Frameset//EN" "http://www.w3.org/TR/html4/frameset.dtd">
+
+
+<html>
+<head>
+<title>Generated Documentation</title>
+</head>
+
+<frameset cols="20%,80%" title="">
+	<frameset rows="30%,70%" title="">
+		<frame src="overview-frame.html" name="packageListFrame" title="All Packages">
+		<frame src="alltools-frame.html" name="packageFrame" title="All classes and interfaces (except non-static nested types)">
+	</frameset>
+
+	<frame src="overview-summary.html" name="toolFrame" title="Package, class and interface descriptions" scrolling="yes">
+
+	<noframes>
+		<h2>Frame Alert</h2>
+		<p />
+		This document is designed to be viewed using the frames feature. If you see this message,
+		you are using a non-frame-capable web client.
+		<br>
+	</noframes>
+</frameset>
+
+</html>
