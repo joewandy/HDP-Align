@@ -49,15 +49,15 @@ input_hdp.top_alpha = 10;              % top-level DP concentration
 
 % synth data
 
-input_hdp.delta_prec = 1/(10*10);          % precision for top components
-input_hdp.gamma_prec = 1/(10*10);          % precision for RT cluster mixture components
-input_hdp.rho_prec = 1/(0.0025*0.0025);      % precision for mass cluster mixture components
+% input_hdp.delta_prec = 1/(10*10);          % precision for top components
+% input_hdp.gamma_prec = 1/(10*10);          % precision for RT cluster mixture components
+% input_hdp.rho_prec = 1/(0.0025*0.0025);      % precision for mass cluster mixture components
 
 % lange data P1
 
-% input_hdp.delta_prec = 1/100;          % precision for top components
-% input_hdp.gamma_prec = 1/100;          % precision for RT cluster mixture components
-% input_hdp.rho_prec = 1/(0.05);      % precision for mass cluster mixture components
+input_hdp.delta_prec = 1/100;          % precision for top components
+input_hdp.gamma_prec = 1/100;          % precision for RT cluster mixture components
+input_hdp.rho_prec = 1/(0.05);      % precision for mass cluster mixture components
 
 % glyco data -- shit result
 
