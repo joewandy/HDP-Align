@@ -47,9 +47,13 @@ public class HDPMassRTClustering implements HDPClustering {
 		hdpParam.setAlpha_rt(methodParam.getHdpAlphaRt());
 		hdpParam.setAlpha_mass(methodParam.getHdpAlphaMass());
 		hdpParam.setTop_alpha(methodParam.getHdpTopAlpha());
-		hdpParam.setDelta_prec(1.0/(methodParam.getHdpGlobalRtClusterStdev()*methodParam.getHdpGlobalRtClusterStdev()));
-		hdpParam.setGamma_prec(1.0/(methodParam.getHdpLocalRtClusterStdev()*methodParam.getHdpLocalRtClusterStdev()));
-		hdpParam.setRho_prec(1.0/(methodParam.getHdpMassClusterStdev()*methodParam.getHdpMassClusterStdev()));
+		
+		double globalRtClusterStdev = methodParam.getHdpGlobalRtClusterStdev();
+		double localRtClusterStdev = methodParam.getHdpLocalRtClusterStdev();
+		double massClusterStdev = methodParam.getHdpMassClusterStdev();
+		hdpParam.setDelta_prec(1.0/(globalRtClusterStdev*globalRtClusterStdev));
+		hdpParam.setGamma_prec(1.0/(localRtClusterStdev*localRtClusterStdev));
+		hdpParam.setRho_prec(1.0/(massClusterStdev*massClusterStdev));
 		
 //		// for synthetic data
 //		double alphaRt, alphaMass, topAlpha, deltaPrec, gammaPrec, rhoPrec;
@@ -572,7 +576,17 @@ public class HDPMassRTClustering implements HDPClustering {
 	        double mu = (1/prec) * ( hdpParam.getMu_0()*hdpParam.getSigma_0_prec() + hdpParam.getDelta_prec()*sum_clusters );
 	        double new_ti = randomData.nextGaussian(mu, Math.sqrt(1/prec));
 	        setTi(i, new_ti);
-			
+	        
+	        // also update all the mass clusters linked to this metabolite
+			HDPMetabolite met = hdpMetabolites.get(i);
+			for (int a = 0; a < met.A(); a++) {
+				prec = hdpParam.getRho_0_prec() + (hdpParam.getRho_prec() + met.fa(a));
+				mu = (1/prec) * (hdpParam.getRho_0_prec() + hdpParam.getPsi_0()) + (hdpParam.getRho_prec() * met.sa(a));
+				double newTheta = randomData.nextGaussian(mu, Math.sqrt(1/prec)); 
+				met.setTheta(a, newTheta);
+			}
+	        
+	        
 		}
 				
 	}
