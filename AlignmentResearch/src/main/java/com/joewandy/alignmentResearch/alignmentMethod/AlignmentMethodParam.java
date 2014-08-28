@@ -41,14 +41,14 @@ public class AlignmentMethodParam {
 	private double hdpTopAlpha;
 	private double hdpGlobalRtClusterStdev;
 	private double hdpLocalRtClusterStdev;
-	private double hdpMassClusterStdev;
+	private double hdpMassTol;
 
 	public AlignmentMethodParam() {
 	
 	}
 	
 	public AlignmentMethodParam(MultiAlignCmdOptions options) {
-		this.usePpm = MultiAlignConstants.ALIGN_BY_RELATIVE_MASS_TOLERANCE;
+		this.usePpm = options.usePpm;
 		this.massTolerance = options.alignmentPpm;
 		this.rtTolerance = options.alignmentRtWindow;
 		this.useGroup = options.useGroup;
@@ -73,7 +73,7 @@ public class AlignmentMethodParam {
 		this.hdpTopAlpha = options.hdpTopAlpha;
 		this.hdpGlobalRtClusterStdev = options.hdpGlobalRtClusterStdev;
 		this.hdpLocalRtClusterStdev = options.hdpLocalRtClusterStdev;
-		this.hdpMassClusterStdev = options.hdpMassClusterStdev;
+		this.hdpMassTol = options.hdpMassTol;
 		this.scoringMethod = options.scoringMethod;		
 	}
 
@@ -286,12 +286,12 @@ public class AlignmentMethodParam {
 		this.hdpLocalRtClusterStdev = hdpLocalRtClusterStdev;
 	}
 
-	public double getHdpMassClusterStdev() {
-		return hdpMassClusterStdev;
+	public double getHdpMassTol() {
+		return hdpMassTol;
 	}
 
-	public void setHdpMassClusterStdev(double hdpMassClusterStdev) {
-		this.hdpMassClusterStdev = hdpMassClusterStdev;
+	public void setHdpMassTol(double hdpMassTol) {
+		this.hdpMassTol = hdpMassTol;
 	}	
 
 }

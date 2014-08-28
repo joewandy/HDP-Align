@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import mzmatch.ipeak.util.Common;
+
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.math3.random.RandomData;
 import org.apache.commons.math3.random.RandomDataImpl;
@@ -33,10 +35,14 @@ public class HDPMassRTClustering implements HDPClustering {
 	private double sa;
 	
 	private Map<HdpResult, HdpResult> resultMap;
+	private int samplesTaken;
 	
 	public HDPMassRTClustering(List<AlignmentFile> dataList, AlignmentMethodParam methodParam) {
 		
 		this.hdpParam = new HDPClusteringParam();
+		
+		hdpParam.setUsePpm(methodParam.isUsePpm());
+		
 		hdpParam.setMu_0(getRTMean(dataList));
 		hdpParam.setPsi_0(getMassMean(dataList));
 		hdpParam.setSigma_0_prec(1.0/5E6);
@@ -49,33 +55,17 @@ public class HDPMassRTClustering implements HDPClustering {
 		hdpParam.setTop_alpha(methodParam.getHdpTopAlpha());
 		
 		double globalRtClusterStdev = methodParam.getHdpGlobalRtClusterStdev();
-		double localRtClusterStdev = methodParam.getHdpLocalRtClusterStdev();
-		double massClusterStdev = methodParam.getHdpMassClusterStdev();
-		hdpParam.setDelta_prec(1.0/(globalRtClusterStdev*globalRtClusterStdev));
-		hdpParam.setGamma_prec(1.0/(localRtClusterStdev*localRtClusterStdev));
-		hdpParam.setRho_prec(1.0/(massClusterStdev*massClusterStdev));
+		double globalRtClusterPrec = 1.0 / (globalRtClusterStdev*globalRtClusterStdev);
+		hdpParam.setDelta_prec(globalRtClusterPrec);
 		
-//		// for synthetic data
-//		double alphaRt, alphaMass, topAlpha, deltaPrec, gammaPrec, rhoPrec;
-//		nSamps = 200;			// total number of samples
-//		burnIn = 100;			// burn-in samples
-//		alphaRt = 10; 			// DP concentration param for local RT clusters
-//		alphaMass = 10;			// DP concentration param for mass clusters
-//		topAlpha = 10;			// DP concentration param for global RT clusters
-//		deltaPrec = 10;			// global RT cluster standard deviation
-//		gammaPrec = 10;			// local RT cluster standard deviation
-//		rhoPrec = 0.015;		// mass cluster standard deviation
-//
-//		// for P1 - 080
-//		nSamps = 2000;			// total number of samples
-//		burnIn = 1000;			// burn-in samples
-//		topAlpha = 10;			// DP concentration param for global RT clusters
-//		alphaRt = 10; 			// DP concentration param for local RT clusters
-//		alphaMass = 10;			// DP concentration param for mass clusters
-//		deltaPrec = 10;			// global RT cluster standard deviation
-//		gammaPrec = 10;			// local RT cluster standard deviation
-//		rhoPrec = 0.25;			// mass cluster standard deviation
+		double localRtClusterStdev = methodParam.getHdpLocalRtClusterStdev();
+		double localRtClusterPrec = 1.0 / (localRtClusterStdev*localRtClusterStdev);
+		hdpParam.setGamma_prec(localRtClusterPrec);
 				
+		double massTol = methodParam.getHdpMassTol();
+		double massPrec = getMassPrec(massTol);
+		hdpParam.setRho_prec(massPrec);
+						
 		this.randomData = new RandomDataImpl();
 		this.resultMap = new HashMap<HdpResult, HdpResult>();
 		
@@ -109,7 +99,7 @@ public class HDPMassRTClustering implements HDPClustering {
 			hdpFile.setK(1);
 			
 			fa += hdpFile.N();
-			sa += hdpFile.getMassSum();
+			sa += hdpFile.getMassSum(this.hdpParam.isUsePpm());
 			
 			dataAll.addAll(hdpFile.getFeatures());
 
@@ -154,13 +144,37 @@ public class HDPMassRTClustering implements HDPClustering {
 		}
 		
 	}
+	
+	private double getMassPrec(double massTol) {
+		double prec = 0;
+		if (this.hdpParam.isUsePpm()) {
+			double logOnePpm = Math.log(1000001) - Math.log(1000000);
+			double logDiff = logOnePpm * massTol; 
+			double stdev = logDiff/2; // assume 2 stdev = logDiff
+			prec = 1.0 / (stdev*stdev);
+		} else {
+			// in case of absolute mass tolerance, not using log scale 
+			// to make it easier to specify the value
+			prec = 1.0 / (massTol*massTol);
+		}
+		System.out.println("usePpm = " + this.hdpParam.isUsePpm() + ", massPrec = " + prec);
+		return prec;			
+	}
+	
+	private double getFeatureMass(Feature f) {
+		if (this.hdpParam.isUsePpm()) {
+			return f.getMassLog();
+		} else {
+			return f.getMass();
+		}
+	}
 
 	private double getRTMean(List<AlignmentFile> dataList) {
 		double sum = 0;
 		int count = 0;
 		for (AlignmentFile file : dataList) {
 			for (Feature f : file.getFeatures()) {
-				sum += f.getRt();
+				sum += getFeatureMass(f);
 				count++;
 			}
 		}
@@ -172,7 +186,7 @@ public class HDPMassRTClustering implements HDPClustering {
 		int count = 0;
 		for (AlignmentFile file : dataList) {
 			for (Feature f : file.getFeatures()) {
-				sum += f.getMass();
+				sum += getFeatureMass(f);
 				count++;
 			}
 		}
@@ -190,10 +204,11 @@ public class HDPMassRTClustering implements HDPClustering {
 			double timeTaken = (endTime - startTime) / 1000.0;
 			
 			StringBuilder sb = new StringBuilder();
-			if (s > hdpParam.getBurnIn()) {
+			if ((s+1) > hdpParam.getBurnIn()) {
 				// store the actual samples
 				sb.append(String.format("time=%5.2fs S#%05d I=%d ", timeTaken, s, this.I));
 				updateResultMap();
+				samplesTaken++;
 			} else {
 				// discard the burn-in samples
 				sb.append(String.format("time=%5.2fs B#%05d I=%d ", timeTaken, s, this.I));			
@@ -214,7 +229,7 @@ public class HDPMassRTClustering implements HDPClustering {
 	
 	public Map<HdpResult, HdpResult> getSimilarityResult() {
 		
-		int samplesTaken = hdpParam.getNsamps() - hdpParam.getBurnIn();
+		System.out.println("Samples taken = " + samplesTaken);
 		for (Entry<HdpResult, HdpResult> e : resultMap.entrySet()) {
 			HdpResult value = e.getValue();
 			value.setSimilarity(value.getSimilarity() / samplesTaken);
@@ -255,7 +270,7 @@ public class HDPMassRTClustering implements HDPClustering {
 				met.removeV(peakPos);
 				met.removePeakData(peakPos);
 				met.decreaseFa(a);
-				met.subsSa(a, thisPeak.getMass());
+				met.subsSa(a, getFeatureMass(thisPeak));
 				
 				// does this result in an empty mass cluster ?
 				if (met.fa(a) == 0) {
@@ -365,7 +380,7 @@ public class HDPMassRTClustering implements HDPClustering {
 					double[] massTermLikelihood = new double[prec2.length];
 					double[] massTermPost = new double[prec2.length];					
 					for (int idx = 0; idx < prec2.length; idx++) {
-						double likelihood = computeLikelihood(thisPeak.getMass(), mu[idx], prec2[idx]);
+						double likelihood = computeLikelihood(getFeatureMass(thisPeak), mu[idx], prec2[idx]);
 						massTermLikelihood[idx] = likelihood;
 						massTermPost[idx] = massTermPrior[idx] * massTermLikelihood[idx];
 					}
@@ -489,7 +504,7 @@ public class HDPMassRTClustering implements HDPClustering {
 				// compute likelihood and posterior 
 				double[] logLikelihood = new double[mu2.length];
 				for (int idx = 0; idx < logLikelihood.length; idx++) {
-					double entry = computeLogLikelihood(thisPeak.getMass(), mu2[idx], prec2[idx]);
+					double entry = computeLogLikelihood(getFeatureMass(thisPeak), mu2[idx], prec2[idx]);
 					logLikelihood[idx] = entry;
 				}
 				double[] logPost = addArray(logPrior, logLikelihood);
@@ -508,7 +523,7 @@ public class HDPMassRTClustering implements HDPClustering {
 					
 					// sample new mass cluster value
 					double sigma_a = hdpParam.getRho_prec() + hdpParam.getRho_0_prec();
-					double mu_a = 1/sigma_a * (hdpParam.getRho_prec()*thisPeak.getMass() + hdpParam.getRho_0_prec()*hdpParam.getPsi_0());
+					double mu_a = 1/sigma_a * (hdpParam.getRho_prec()*getFeatureMass(thisPeak) + hdpParam.getRho_0_prec()*hdpParam.getPsi_0());
 					double theta_ia = randomData.nextGaussian(mu_a, Math.sqrt(1/sigma_a));
 					metabolite_i.appendTheta(theta_ia);
 					assert(metabolite_i.thetasSize()==metabolite_i.A());
@@ -519,7 +534,7 @@ public class HDPMassRTClustering implements HDPClustering {
 				
 				// assign the peak under mass cluster a
 				metabolite_i.increaseFa(a);
-				metabolite_i.addSa(a, thisPeak.getMass());
+				metabolite_i.addSa(a, getFeatureMass(thisPeak));
 				metabolite_i.appendV(a);
 				metabolite_i.addPeakData(thisPeak);
 				

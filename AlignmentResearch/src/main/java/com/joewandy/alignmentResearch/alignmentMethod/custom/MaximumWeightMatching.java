@@ -257,7 +257,7 @@ public class MaximumWeightMatching implements FeatureMatching {
 				AlignmentRow row1 = men.get(i);
 				AlignmentRow row2 = women.get(matchIndex);
 				// and they are within tolerance to each other
-				if (row1.rowInRange(row2, massTol, rtTol, MultiAlignConstants.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
+				if (row1.rowInRange(row2, massTol, rtTol, MultiAlignConstants.USE_PPM)) {
 					MatchResult matchRes = new MatchResult(row1, row2, scoreArr.get(i, matchIndex));
 					matches.add(matchRes);
 				}
@@ -302,7 +302,7 @@ public class MaximumWeightMatching implements FeatureMatching {
 			for (int j = 0; j < n; j++) {
 				AlignmentRow man = men.get(i);
 				AlignmentRow woman = women.get(j);
-				if (man.rowInRange(woman, massTol, rtTol, MultiAlignConstants.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
+				if (man.rowInRange(woman, massTol, rtTol, MultiAlignConstants.USE_PPM)) {
 					double dist = scorer.computeDist(man, woman);
 					if (dist > maxDist) {
 						maxDist = dist;

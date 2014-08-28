@@ -358,7 +358,7 @@ public class StableMatching implements FeatureMatching {
 		List<PreferenceItem> prefs = new ArrayList<PreferenceItem>();
 		for (int j = 0; j < scoreMatrix.numColumns(); j++) {
 			AlignmentRow woman = women.get(j);
-			if (man.rowInRange(woman, massTol, rtTol, MultiAlignConstants.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
+			if (man.rowInRange(woman, massTol, rtTol, MultiAlignConstants.USE_PPM)) {
 				double score = scoreMatrix.get(i, j);
 				PreferenceItem pref = new PreferenceItem(j, score);
 				prefs.add(pref);				
@@ -384,7 +384,7 @@ public class StableMatching implements FeatureMatching {
 			for (int j = 0; j < n; j++) {
 				AlignmentRow man = men.get(i);
 				AlignmentRow woman = women.get(j);
-				if (man.rowInRange(woman, massTol, -1, MultiAlignConstants.ALIGN_BY_RELATIVE_MASS_TOLERANCE)) {
+				if (man.rowInRange(woman, massTol, -1, MultiAlignConstants.USE_PPM)) {
 					double dist = scorer.computeDist(man, woman);
 					if (dist > maxDist) {
 						maxDist = dist;

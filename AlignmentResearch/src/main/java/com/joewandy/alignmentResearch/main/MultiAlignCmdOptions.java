@@ -80,6 +80,10 @@ public class MultiAlignCmdOptions {
 	@Option(name = "alignmentRtWindow", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "The retention time window in seconds, defining the range where to look for matches.")
 	public double alignmentRtWindow = -1;
 	
+	@Option(name="usePpm", param="boolean", type=Option.Type.NO_ARGUMENT, 
+			usage="Whether to use calculate mass difference in parts-per-million (ppm) or absolute value")
+	public boolean usePpm = MultiAlignConstants.USE_PPM;
+	
 	/*
 	 * RANSAC options
 	 */
@@ -177,8 +181,8 @@ public class MultiAlignCmdOptions {
 	@Option(name = "hdpLocalRtClusterStdev", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "HDP local RT cluster standard deviation")
 	public double hdpLocalRtClusterStdev = MultiAlignConstants.HDP_LOCAL_RT_CLUSTER_STDEV;
 	
-	@Option(name = "hdpMassClusterStdev", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "HDP mass cluster standard deviation")
-	public double hdpMassClusterStdev = MultiAlignConstants.HDP_MASS_CLUSTER_STDEV;
+	@Option(name = "hdpMassTol", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "HDP mass cluster tolerance (in ppm)")
+	public double hdpMassTol = MultiAlignConstants.HDP_MASS_TOLERANCE;
 	
 	/*
 	 * Scoring options

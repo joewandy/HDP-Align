@@ -18,6 +18,8 @@ public class HDPClusteringParam {
 	private double delta_prec;
 	private double gamma_prec;
 	private double rho_prec;
+	
+	private boolean usePpm;
 		
 	public int getNsamps() {
 		return nsamps;
@@ -113,6 +115,14 @@ public class HDPClusteringParam {
 
 	public void setRho_prec(double rho_prec) {
 		this.rho_prec = rho_prec;
+	}
+
+	public boolean isUsePpm() {
+		return usePpm;
+	}
+
+	public void setUsePpm(boolean usePpm) {
+		this.usePpm = usePpm;
 	}
 	
 }

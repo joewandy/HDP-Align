@@ -20,8 +20,8 @@ package com.joewandy.alignmentResearch.main;
 
 public class MultiAlignConstants {
 		
-	// supposed to be used to determine whether the mass tolerance is absolute or relative value
-	public static final boolean ALIGN_BY_RELATIVE_MASS_TOLERANCE = false;
+	// false if the mass tolerance is absolute, true if it's relative value (in parts-per-million)
+	public static final boolean USE_PPM = false;
 	
 	public static final String GROUPING_METHOD_GREEDY = "greedy";
 	public static final String GROUPING_METHOD_MIXTURE = "mixture";
@@ -34,12 +34,13 @@ public class MultiAlignConstants {
 	public static final int GROUPING_METHOD_BURN_IN = 10;
 	public static final double GROUPING_METHOD_RT_TOLERANCE = 5;
 	public static final double GROUPING_METHOD_ALPHA = 1;
+	
 	public static final double HDP_ALPHA_RT = 10;
 	public static final double HDP_ALPHA_MASS = 10;
 	public static final double HDP_TOP_ALPHA = 10;
-	public static final double HDP_GLOBAL_RT_CLUSTER_STDEV = 10;
-	public static final double HDP_LOCAL_RT_CLUSTER_STDEV = 10;
-	public static final double HDP_MASS_CLUSTER_STDEV = 0.03;
+	public static final double HDP_GLOBAL_RT_CLUSTER_STDEV = 20;
+	public static final double HDP_LOCAL_RT_CLUSTER_STDEV = 2;
+	public static final double HDP_MASS_TOLERANCE = 3;
 	
 	public static final String SCORING_METHOD_HDP_MASS_RT_JAVA = "hdpmassrtjava";
 	public static final String SCORING_METHOD_HDP_RT_JAVA = "hdprtjava";
