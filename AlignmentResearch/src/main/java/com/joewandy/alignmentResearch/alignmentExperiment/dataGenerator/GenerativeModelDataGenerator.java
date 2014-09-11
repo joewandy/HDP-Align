@@ -321,13 +321,13 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 										
 			// get the observed mass, intensity and RT
 			int id = theoFeature.getPeakID();
-			double mass = theoFeature.getMass();
-			double intensity = theoFeature.getIntensity();
+			double logMass = Math.log(theoFeature.getMass());
+			double logIntensity = Math.log(theoFeature.getIntensity());
 
-			NormalDistribution massDist = new NormalDistribution(mass, params.getSigma_m());
-			NormalDistribution intensityDist = new NormalDistribution(intensity, params.getSigma_q());
-			double observedMass = massDist.sample();
-			double observedIntensity = intensityDist.sample();
+			NormalDistribution massDist = new NormalDistribution(logMass, params.getSigma_m());
+			NormalDistribution intensityDist = new NormalDistribution(logIntensity, params.getSigma_q());
+			double observedMass = Math.exp(massDist.sample());
+			double observedIntensity = Math.exp(intensityDist.sample());
 			double observedRT = predictor.predict(theoFeature);
 						
 			// skip if feature has intensity below threshold 

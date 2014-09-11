@@ -12,10 +12,12 @@ public class RetentionTimeWarping {
 	}
 		
 	public double getWarpedRT(double originalRT, int replicate) {
-		double gs = g[replicate];
-		double hs = h[replicate];
-		double warpedRT = (gs * originalRT) + hs;
-		return warpedRT;
+		// not used for now
+//		double gs = g[replicate];
+//		double hs = h[replicate];
+//		double warpedRT = (gs * originalRT) + hs;
+//		return warpedRT;
+		return originalRT;
 	}
 
 }

@@ -10,22 +10,22 @@ public class GenerativeModelParameter {
 	private ExperimentType expType = ExperimentType.TECHNICAL;	
 	private int S = 2;					// how many replicates to produce
 	
-	private double threshold_q = 5000;	// threshold for filtering low intensity peaks
+	private double threshold_q = 3000;		// threshold for filtering low intensity peaks
 	private double [] g = {1, 1, 1};	// warping scaling coeff in each replicate
 	private double[] h = {0, 0, 0};		// warping translation coeff in each replicate
 
 	private double[] as = null;			// proportion of the metabolites that are not identical across runs
 	private double a = 0.5;
 	
-	private double b = 11;				// mean of metabolite's concentration (log-Normal)
-	private double c = 1;				// standard deviation of metabolite concentration (log-Normal)
-	private double alpha = 10;			// DP concentration parameter for clustering
-	private double d = 1000; 				// mean of predicted retention time of metabolite (Normal)
-	private double e = 250;				// standard deviation of predicted retention time of metabolite (Normal)
-	private double sigma_c = 100;  	  	// standard deviation of cluster's RT (Normal)
-	private double sigma_t = 5;			// standard deviation of observed peak's RT (Normal)
-	private double sigma_q = 1000;		// standard deviation of observed peak's intensity (Normal)
-	private double sigma_m = 0.015;		// standard deviation of observed peak's mass (Normal)
+	private double b = 12;				// mean of metabolite's concentration (log-Normal dist)
+	private double c = 1;				// standard deviation of metabolite concentration (log-Normal dist)
+	private double alpha = 10;			// DP concentration parameter for local RT clusters
+	private double d = 1000; 			// mean of predicted retention time of metabolite (Normal dist)
+	private double e = 250;				// standard deviation of predicted retention time of metabolite (Normal dist)
+	private double sigma_c = 30;  	  	// standard deviation of cluster's RT (Normal dist)
+	private double sigma_t = 2;			// standard deviation of observed peak's RT (Normal dist)
+	private double sigma_q = 0.1;		// standard deviation of observed peak's log intensity (Normal dist)
+	private double sigma_m = getMassStdev(10);	// standard deviation of observed peak's log mass in ppm (Normal dist)
 
 	// The minimum probability mass that a mass needs to be kept in the distribution of the spectrum
 	private double minDistributionValue = 10e-6;
@@ -34,12 +34,19 @@ public class GenerativeModelParameter {
 	private int maxValues = 10;
 
 	// Option to specify which adducts to search for."
+//	private String adducts = "M+2H,M+H+NH4,M+ACN+2H,M+2ACN+2H,M+H,M+NH4,M+Na,M+CH3OH+H,M+ACN+H,M+ACN+Na,M+2ACN+H,2M+H,2M+Na,2M+ACN+H";
 	private String adducts = "M+2H,M+H+NH4,M+ACN+2H,M+2ACN+2H,M+H,M+NH4,M+Na,M+CH3OH+H,M+ACN+H,M+ACN+Na,M+2ACN+H,2M+H,2M+Na,2M+ACN+H";
-//	private String adducts = "M+2H,M+H+NH4,M+ACN+2H,M+H,M+Na";
 //	private String adducts = "M+H,M+2H,M+Na";
 
 	private String replacementMolsPath = "/home/joewandy/Dropbox/Project/mzMatch/scripts/standards/kegg.xml";
 
+	private double getMassStdev(double massTol) {
+		double logOnePpm = Math.log(1000001) - Math.log(1000000);
+		double logDiff = logOnePpm * massTol; 
+		double stdev = logDiff/2; // assume 2 stdev = logDiff
+		return stdev;
+	}
+	
 	/* LOTS OF GETTERS AND SETTERS **/
 	
 	public ExperimentType getExpType() {

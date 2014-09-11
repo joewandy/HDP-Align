@@ -1,8 +1,9 @@
-java.lang.IndexOutOfBoundsException: Index: 0, Size: 0
-	at java.util.ArrayList.rangeCheck(ArrayList.java:638)
-	at java.util.ArrayList.get(ArrayList.java:414)
-	at com.joewandy.alignmentResearch.alignmentMethod.external.TestHdpAlignment.<init>(TestHdpAlignment.java:39)
-	at com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodFactory.getAlignmentMethod(AlignmentMethodFactory.java:72)
-	at com.joewandy.alignmentResearch.main.MultiAlign.<init>(MultiAlign.java:91)
-	at com.joewandy.alignmentResearch.main.experiment.HdpExperiment.performExperiment(HdpExperiment.java:24)
+java.lang.ArrayIndexOutOfBoundsException: 3
+	at com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.RetentionTimeWarping.getWarpedRT(RetentionTimeWarping.java:15)
+	at com.joewandy.alignmentResearch.rtPrediction.RTPredictor.predict(RTPredictor.java:62)
+	at com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.GenerativeModelDataGenerator.initialiseClusters(GenerativeModelDataGenerator.java:304)
+	at com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.GenerativeModelDataGenerator.getAlignmentFiles(GenerativeModelDataGenerator.java:103)
+	at com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.BaseDataGenerator.generateByIteration(BaseDataGenerator.java:45)
+	at com.joewandy.alignmentResearch.main.experiment.GenerativeExperiment.getData(GenerativeExperiment.java:80)
+	at com.joewandy.alignmentResearch.main.experiment.GenerativeExperiment.performExperiment(GenerativeExperiment.java:33)
 	at com.joewandy.alignmentResearch.main.MultiAlignCmd.main(MultiAlignCmd.java:41)

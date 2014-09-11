@@ -197,22 +197,29 @@ public class HDPMassRTClustering implements HDPClustering {
 
 		for (int s = 0; s < hdpParam.getNsamps(); s++) {
 
+			if ((s+1) > hdpParam.getBurnIn()) {
+				System.out.println(String.format("Sample S#%05d", s));
+			} else {
+				System.out.println(String.format("Sample B#%05d", s));
+			}
+			
 			long startTime = System.currentTimeMillis();
 			assignPeakMassRt();
 			updateParametersMassRt();
 			long endTime = System.currentTimeMillis();
 			double timeTaken = (endTime - startTime) / 1000.0;
-			
+
 			StringBuilder sb = new StringBuilder();
 			if ((s+1) > hdpParam.getBurnIn()) {
 				// store the actual samples
-				sb.append(String.format("time=%5.2fs S#%05d I=%d ", timeTaken, s, this.I));
+				sb.append(String.format("\ttime=%5.2fs I=%d ", timeTaken, this.I));
 				updateResultMap();
 				samplesTaken++;
 			} else {
 				// discard the burn-in samples
-				sb.append(String.format("time=%5.2fs B#%05d I=%d ", timeTaken, s, this.I));			
+				sb.append(String.format("\ttime=%5.2fs I=%d ", timeTaken, this.I));			
 			}
+			
 			sb.append("all_A = [");
 			for (int i = 0; i < this.I; i++) {
 				HDPMetabolite met = hdpMetabolites.get(i);
@@ -221,6 +228,7 @@ public class HDPMassRTClustering implements HDPClustering {
 				sb.append(formatted);
 			}
 			sb.append(" ]");
+
 			System.out.println(sb.toString());
 			
 		}
@@ -240,15 +248,21 @@ public class HDPMassRTClustering implements HDPClustering {
 
 	private void assignPeakMassRt() {
 		
-		// loop across all files randomly
+		// TODO: loop across all files randomly
 		for (HDPFile hdpFile : hdpFiles) {
 
+			System.out.print("\t- File" + hdpFile.getId() + " ");
+			
 			int j = hdpFile.getId();
 			
-			// loop across peaks randomly
+			// TODO: loop across peaks randomly
 			assert(hdpFile.N() == hdpFile.Zsize());
 			for (int n = 0; n < hdpFile.N(); n++) {
-								
+							
+				if (n%100==0) {
+					System.out.print('.');
+				}
+				
 				Feature thisPeak = hdpFile.getFeatures().get(n);
 				
 				// find the RT cluster
@@ -552,7 +566,9 @@ public class HDPMassRTClustering implements HDPClustering {
 				
 			} // end loop across peaks randomly
 		
-		} // end loop across peaks randomly
+			System.out.println();
+			
+		} // end loop across files randomly
 		
 	}
 	

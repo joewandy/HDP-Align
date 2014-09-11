@@ -31,7 +31,6 @@ public class PeakClusteringSamplerHandler implements SampleHandler<Data, SimpleC
 		this.ZZall = new DenseMatrix(numPeaks, numPeaks); 
 	}
 	
-	@Override
 	public void handleSample(SimpleClustering clustering) {
 
 		numSamples++;
