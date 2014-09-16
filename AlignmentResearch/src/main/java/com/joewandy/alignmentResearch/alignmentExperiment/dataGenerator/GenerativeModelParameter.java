@@ -8,9 +8,9 @@ public class GenerativeModelParameter {
 	
 	// generate biological or technical replicates ??	
 	private ExperimentType expType = ExperimentType.TECHNICAL;	
-	private int S = 100;				// how many replicates to produce
+	private int S = 2;				// how many replicates to produce
 	
-	private double threshold_q = 2000;	// threshold for filtering low intensity peaks
+	private double threshold_q = 0000;	// threshold for filtering low intensity peaks
 	private double [] g = {1, 1, 1};	// warping scaling coeff in each replicate
 	private double[] h = {0, 0, 0};		// warping translation coeff in each replicate
 
@@ -31,7 +31,7 @@ public class GenerativeModelParameter {
 	private double minDistributionValue = 10e-6;
 		
 	// The maximum number of entries in a compound's spectrum
-	private int maxValues = 10;
+	private int maxValues = 5;
 
 	// Option to specify which adducts to search for."
 //	private String adducts = "M+2H,M+H+NH4,M+ACN+2H,M+2ACN+2H,M+H,M+NH4,M+Na,M+CH3OH+H,M+ACN+H,M+ACN+Na,M+2ACN+H,2M+H,2M+Na,2M+ACN+H";
