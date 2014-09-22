@@ -16,7 +16,14 @@ function hdp = init_hdp(input_hdp, debug)
     hdp.top_alpha = input_hdp.top_alpha;        % metabolite DP concentration param    
 
     hdp.gamma_prec = input_hdp.gamma_prec;      % precision for RT cluster mixture components
-    hdp.rho_prec = input_hdp.rho_prec;          % precision for mass cluster mixture components
+
+    massTol = input_hdp.rho;
+    logOnePpm = log(1000001) - log(1000000);
+	logDiff = logOnePpm * massTol; 
+	stdev = logDiff/2;
+    massPrec = 1/(stdev*stdev);
+    hdp.rho_prec = massPrec;                    % precision for mass cluster mixture components
+
     hdp.delta_prec = input_hdp.delta_prec;      % precision for top component Gaussians    
         
     if debug
@@ -42,7 +49,7 @@ function hdp = init_hdp(input_hdp, debug)
         hdp.file{j}.peakID = input_hdp.file{j}.peakID;
         hdp.file{j}.N = length(hdp.file{j}.peakID);
         hdp.file{j}.data_rt = input_hdp.file{j}.data_rt;
-        hdp.file{j}.data_mass = input_hdp.file{j}.data_mass;
+        hdp.file{j}.data_mass = log(input_hdp.file{j}.data_mass);
         hdp.file{j}.data_intensity = input_hdp.file{j}.data_intensity;
         hdp.file{j}.peakID = input_hdp.file{j}.peakID;
         

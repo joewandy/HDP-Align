@@ -50,6 +50,21 @@ function samples = do_hdp(hdp, cluster_rt, cluster_mass, debug)
         
         elseif cluster_mass
         
+              % update peak to cluster assignment
+            hdp = assign_peaks_mass(hdp, debug);                
+
+            % update mixture component parameters
+            hdp = update_parameters_mass(hdp, debug);
+
+            % print stuffs
+            time_taken = toc;        
+            if s > hdp.BURN_IN
+                fprintf('time=%5.2fs S#%05d I=%d\n', time_taken, s, hdp.I);
+                samples = [samples, hdp]; 
+            else
+                fprintf('time=%5.2fs B#%05d I=%d\n', time_taken, s, hdp.I);        
+            end             
+            
         end                                                       
                                        
         % show message in octave before program ends

@@ -59,7 +59,8 @@ public class FeaturePairKey {
 
 	@Override
 	public String toString() {
-		return "FeaturePairKey [f1=" + f1 + ", f2=" + f2 + "]";
+		return "FeaturePairKey [f1=" + f1 + ", f2=" + f2 + ", score=" + score
+				+ "]";
 	}
 	
 }

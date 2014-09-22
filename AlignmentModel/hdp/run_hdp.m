@@ -52,6 +52,7 @@ input_hdp.top_alpha = 10;              % top-level DP concentration
 input_hdp.delta_prec = 1/(30*30);          % precision for top components
 input_hdp.gamma_prec = 1/(2*2);          % precision for RT cluster mixture components
 input_hdp.rho_prec = 1/(0.0025*0.0025);      % precision for mass cluster mixture components
+input_hdp.rho = 10;
 
 % lange data P1
 

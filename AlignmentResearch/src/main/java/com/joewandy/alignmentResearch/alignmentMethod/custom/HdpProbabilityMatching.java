@@ -1,5 +1,7 @@
 package com.joewandy.alignmentResearch.alignmentMethod.custom;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -35,18 +37,51 @@ public class HdpProbabilityMatching implements FeatureMatching {
 					continue;
 				}
 				FeaturePairKey uniquePair = this.getFeaturePair(f1, f2, score);
+				System.out.println(uniquePair);
 				unique.add(uniquePair);				
 //			}
 		}
+		System.out.println("unique.size() = " + unique.size());
 		
 		// construct a new list and merge the matched entries together
+		Map<Feature, List<Feature>> pairing = new HashMap<Feature, List<Feature>>();
+		for (FeaturePairKey uniquePair : unique) {
+			Feature f1 = uniquePair.getF1();
+			Feature f2 = uniquePair.getF2();
+			if (pairing.containsKey(f1)) {
+				pairing.get(f1).add(f2);
+			} else {
+				List partners = new ArrayList();
+				f2.setScore(uniquePair.getScore());
+				partners.add(f2);
+				pairing.put(f1, partners);				
+			}
+		}
 		AlignmentList matchedList = new AlignmentList("matched_list");
 		int rowId = 0;		
-		for (FeaturePairKey uniquePair : unique) {
+		for (Entry<Feature, List<Feature>> match : pairing.entrySet()) {
+			Feature f1 = match.getKey();
+			List<Feature> candidates = match.getValue();
+			System.out.println("Feature " + match.getKey() + " has " + candidates.size() + " candidates, pairings = " + candidates);
+			Feature f2 = null;
+			if (candidates.size() > 1) {
+				// choose the highest score
+				double massDiff = Double.MAX_VALUE;
+				for (Feature can : candidates) {
+					System.out.println("\t" + can.getScore() + " " + can);
+					double diff = Math.abs(f1.getMass() - can.getMass());
+					if (diff < massDiff) {
+						massDiff = diff;
+						f2 = can;
+					}
+				}
+			} else {
+				f2 = candidates.get(0);
+			}			
 			AlignmentRow merged = new AlignmentRow(matchedList, rowId++);
-			merged.addAlignedFeature(uniquePair.getF1());
-			merged.addAlignedFeature(uniquePair.getF2());
-			merged.setScore(uniquePair.getScore());			
+			merged.addAlignedFeature(f1);
+			merged.addAlignedFeature(f2);
+			merged.setScore(f2.getScore());			
 			matchedList.addRow(merged);
 		}
 		

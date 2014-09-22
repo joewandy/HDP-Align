@@ -31,6 +31,7 @@ public class Feature {
 	private boolean delete;
 	private Element xmlElem;
 	private int theoPeakID;
+	private double score;
 	
 	public Feature(int peakID) {
 		// the peakID is also the position index, so it should start from 0
@@ -235,6 +236,14 @@ public class Feature {
 		return this.totalIntensityError / this.noPairs;
 	}
 	
+	public double getScore() {
+		return score;
+	}
+
+	public void setScore(double score) {
+		this.score = score;
+	}
+
 	/**
 	 * TODO: This is a hack !
 	 * @return
