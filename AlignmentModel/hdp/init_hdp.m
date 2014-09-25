@@ -49,7 +49,7 @@ function hdp = init_hdp(input_hdp, debug)
         hdp.file{j}.peakID = input_hdp.file{j}.peakID;
         hdp.file{j}.N = length(hdp.file{j}.peakID);
         hdp.file{j}.data_rt = input_hdp.file{j}.data_rt;
-        hdp.file{j}.data_mass = log(input_hdp.file{j}.data_mass);
+        hdp.file{j}.data_mass = input_hdp.file{j}.data_mass;
         hdp.file{j}.data_intensity = input_hdp.file{j}.data_intensity;
         hdp.file{j}.peakID = input_hdp.file{j}.peakID;
         

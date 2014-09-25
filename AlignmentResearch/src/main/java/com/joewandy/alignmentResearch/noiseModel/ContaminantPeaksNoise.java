@@ -23,9 +23,9 @@ public class ContaminantPeaksNoise implements AlignmentNoise {
 	private static final double NOISE_MEAN = 0.0f;
 	public enum MassIntensityNoiseLevel {
 
-		LOW 		(0.10),
-		MEDIUM		(0.20),
-		HIGH		(0.50);
+		LOW 		(0.005),
+		MEDIUM		(0.010),
+		HIGH		(0.050);
 		
 		private final double massStdev;
 		private final double intensityStdev;
@@ -61,9 +61,9 @@ public class ContaminantPeaksNoise implements AlignmentNoise {
 	
 	public enum RtNoiseLevel {
 
-		LOW 		(1),
-		MEDIUM		(2),
-		HIGH		(5);
+		LOW 		(30),
+		MEDIUM		(60),
+		HIGH		(90);
 		
 		private final double rtStdev;
 		

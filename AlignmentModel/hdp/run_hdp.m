@@ -25,7 +25,8 @@ for j=1:length(fls)
     
     % store mass
     data_mass = X.data(:, 2);
-    input_hdp.file{j}.data_mass = data_mass;
+    data_mass = log(data_mass); % work in log-space
+    input_hdp.file{j}.data_mass = data_mass; 
     data_mass_all = [data_mass_all; data_mass];
     
     % store intensity
@@ -49,10 +50,10 @@ input_hdp.top_alpha = 10;              % top-level DP concentration
 
 % synth data
 
-input_hdp.delta_prec = 1/(30*30);          % precision for top components
+input_hdp.delta_prec = 1/(20*20);          % precision for top components
 input_hdp.gamma_prec = 1/(2*2);          % precision for RT cluster mixture components
 input_hdp.rho_prec = 1/(0.0025*0.0025);      % precision for mass cluster mixture components
-input_hdp.rho = 10;
+input_hdp.rho = 2;
 
 % lange data P1
 

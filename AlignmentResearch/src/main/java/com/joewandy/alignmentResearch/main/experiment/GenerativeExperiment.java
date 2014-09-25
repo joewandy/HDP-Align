@@ -3,7 +3,6 @@ package com.joewandy.alignmentResearch.main.experiment;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -77,6 +76,8 @@ public abstract class GenerativeExperiment extends MultiAlignBaseExp implements 
 
 		AlignmentDataGenerator dataGenerator = AlignmentDataGeneratorFactory
 				.getAlignmentDataGenerator(options);
+//		dataGenerator.addNoise(new ContaminantPeaksNoise(0));
+//		dataGenerator.addNoise(new RandomPeakNoise(1.0));
 		AlignmentData data = dataGenerator.generateByIteration(currentIter);
 		for (AlignmentFile file : data.getAlignmentDataList()) {
 			System.out.println("test on " + file.getFilename());

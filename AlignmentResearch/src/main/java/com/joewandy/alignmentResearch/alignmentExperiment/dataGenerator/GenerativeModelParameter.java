@@ -8,35 +8,35 @@ public class GenerativeModelParameter {
 	
 	// generate biological or technical replicates ??	
 	private ExperimentType expType = ExperimentType.TECHNICAL;	
-	private int S = 2;				// how many replicates to produce
+	private int S = 20;				// how many replicates to produce
 	
 	private double threshold_q = 0000;	// threshold for filtering low intensity peaks
 	private double [] g = {1, 1, 1};	// warping scaling coeff in each replicate
 	private double[] h = {0, 0, 0};		// warping translation coeff in each replicate
 
-	private double[] as = null;			// proportion of the metabolites that are not identical across runs
-	private double a = 0.5;
+	private double[] as = {0.3, 0.5};			// proportion of the metabolites that are not identical across runs
+	private double a = 0.3;
 	
 	private double b = 12;				// mean of metabolite's concentration (log-Normal dist)
 	private double c = 1;				// standard deviation of metabolite concentration (log-Normal dist)
 	private double alpha = 10;			// DP concentration parameter for local RT clusters
 	private double d = 1000; 			// mean of predicted retention time of metabolite (Normal dist)
 	private double e = 250;				// standard deviation of predicted retention time of metabolite (Normal dist)
-	private double sigma_c = 30;  	  	// standard deviation of cluster's RT (Normal dist)
+	private double sigma_c = 20;  	  	// standard deviation of cluster's RT (Normal dist)
 	private double sigma_t = 2;			// standard deviation of observed peak's RT (Normal dist)
 	private double sigma_q = 0.1;		// standard deviation of observed peak's log intensity (Normal dist)
-	private double sigma_m = getMassStdev(10);	// standard deviation of observed peak's log mass in ppm (Normal dist)
+	private double sigma_m = getMassStdev(2);	// standard deviation of observed peak's log mass in ppm (Normal dist)
 
 	// The minimum probability mass that a mass needs to be kept in the distribution of the spectrum
 	private double minDistributionValue = 10e-6;
 		
 	// The maximum number of entries in a compound's spectrum
-	private int maxValues = 5;
+	private int maxValues = 10;
 
 	// Option to specify which adducts to search for."
-//	private String adducts = "M+2H,M+H+NH4,M+ACN+2H,M+2ACN+2H,M+H,M+NH4,M+Na,M+CH3OH+H,M+ACN+H,M+ACN+Na,M+2ACN+H,2M+H,2M+Na,2M+ACN+H";
+	//	private String adducts = "M+2H,M+H+NH4,M+ACN+2H,M+2ACN+2H,M+H,M+NH4,M+Na,M+CH3OH+H,M+ACN+H,M+ACN+Na,M+2ACN+H,2M+H,2M+Na,2M+ACN+H";
 	private String adducts = "M+2H,M+H+NH4,M+ACN+2H,M+2ACN+2H,M+H,M+NH4,M+Na,M+CH3OH+H,M+ACN+H,M+ACN+Na,M+2ACN+H,2M+H,2M+Na,2M+ACN+H";
-//	private String adducts = "M+H,M+2H,M+Na";
+	//	private String adducts = "M+H,M+2H,M+Na";
 
 	private String replacementMolsPath = "/home/joewandy/Dropbox/Project/mzMatch/scripts/standards/kegg.xml";
 
@@ -93,20 +93,20 @@ public class GenerativeModelParameter {
 		return as;
 	}
 	
-	public double getA(int i) {
-		if (as == null) {
-			return a;
-		} else {
-			return as[i];			
-		}
+	public double getAs(int i) {
+		return as[i];			
+	}	
+	
+	public void setAs(double[] as) {
+		this.as = as;
 	}
 	
 	public void setA(double a) {
 		this.a = a;
 	}
 
-	public void setAs(double[] as) {
-		this.as = as;
+	public double getA() {
+		return this.a;
 	}
 
 	public double getB() {

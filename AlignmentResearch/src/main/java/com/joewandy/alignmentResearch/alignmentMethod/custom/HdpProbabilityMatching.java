@@ -66,23 +66,31 @@ public class HdpProbabilityMatching implements FeatureMatching {
 			Feature f2 = null;
 			if (candidates.size() > 1) {
 				// choose the highest score
-				double massDiff = Double.MAX_VALUE;
+//				double massDiff = Double.MAX_VALUE;
+//				for (Feature can : candidates) {
+//					System.out.println("\t" + can.getScore() + " " + can);
+//					double diff = Math.abs(f1.getMass() - can.getMass());
+//					if (diff < massDiff) {
+//						massDiff = diff;
+//						f2 = can;
+//					}
+//				}
 				for (Feature can : candidates) {
-					System.out.println("\t" + can.getScore() + " " + can);
-					double diff = Math.abs(f1.getMass() - can.getMass());
-					if (diff < massDiff) {
-						massDiff = diff;
-						f2 = can;
-					}
+					f2 = can;
+					AlignmentRow merged = new AlignmentRow(matchedList, rowId++);
+					merged.addAlignedFeature(f1);
+					merged.addAlignedFeature(f2);
+					merged.setScore(f2.getScore());			
+					matchedList.addRow(merged);					
 				}
 			} else {
 				f2 = candidates.get(0);
+				AlignmentRow merged = new AlignmentRow(matchedList, rowId++);
+				merged.addAlignedFeature(f1);
+				merged.addAlignedFeature(f2);
+				merged.setScore(f2.getScore());			
+				matchedList.addRow(merged);
 			}			
-			AlignmentRow merged = new AlignmentRow(matchedList, rowId++);
-			merged.addAlignedFeature(f1);
-			merged.addAlignedFeature(f2);
-			merged.setScore(f2.getScore());			
-			matchedList.addRow(merged);
 		}
 		
 		// add everything else that's unmatched

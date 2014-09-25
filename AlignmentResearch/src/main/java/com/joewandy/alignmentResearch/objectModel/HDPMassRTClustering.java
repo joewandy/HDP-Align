@@ -174,11 +174,12 @@ public class HDPMassRTClustering implements HDPClustering {
 		int count = 0;
 		for (AlignmentFile file : dataList) {
 			for (Feature f : file.getFeatures()) {
-				sum += getFeatureMass(f);
+				sum += f.getRt();
 				count++;
 			}
 		}
-		return sum / count;
+		double mean = sum / count;
+		return mean;
 	}
 
 	private double getMassMean(List<AlignmentFile> dataList) {
@@ -190,7 +191,8 @@ public class HDPMassRTClustering implements HDPClustering {
 				count++;
 			}
 		}
-		return sum / count;
+		double mean = sum / count;
+		return mean;
 	}
 	
 	public void run() {

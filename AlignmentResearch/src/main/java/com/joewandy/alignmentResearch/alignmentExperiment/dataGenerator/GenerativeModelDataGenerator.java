@@ -77,7 +77,7 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 	protected List<AlignmentFile> getAlignmentFiles(int currentIter) {
 		
 		int numFiles = params.getS();
-		double a = params.getA(currentIter);
+		double a = params.getAs(currentIter);
 		GenerativeMoleculeDB database = createDatabase(molecules, replacement,
 				numFiles, a);
 						
@@ -317,6 +317,8 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 		List<Feature> observedFeatures = new ArrayList<Feature>();
 		int observedPeakID = 0;
 //		Map<GenerativeMolecule, List<Feature>> molFeatures = new HashMap<GenerativeMolecule, List<Feature>>();
+		
+		Map<GenerativeMolecule, Integer> molToId = getMolToId(theoFeatures);
 		for (Feature theoFeature : theoFeatures) {
 										
 			// get the observed mass, intensity and RT
@@ -340,13 +342,15 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 				continue;
 			}
 			
+			if (Math.random() < params.getA()) {
+				continue;
+			}
+			
 			Feature observedFeature = new Feature(observedPeakID);
 			observedFeature.setMass(observedMass);
 			observedFeature.setIntensity(observedIntensity);
 			observedFeature.setRt(observedRT);
 			observedFeature.setTheoPeakID(id);
-			observedFeatures.add(observedFeature);
-			observedPeakID++;
 			
 			GenerativeFeatureGroup group = (GenerativeFeatureGroup) theoFeature.getFirstGroup();
 			GenerativeMolecule mol = group.getParent();
@@ -357,7 +361,13 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 //				newList.add(observedFeature);
 //				molFeatures.put(mol, newList);
 //			}
-				
+
+			observedFeature.setMetaboliteID(molToId.get(mol));
+			observedFeature.setSynthetic(true);
+			
+			observedFeatures.add(observedFeature);
+			observedPeakID++;
+			
 		}
 		
 //		for (Entry<GenerativeMolecule, List<Feature>> e : molFeatures.entrySet()) {
@@ -369,6 +379,21 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 		
 		return observedFeatures;
 
+	}
+
+	private Map<GenerativeMolecule, Integer> getMolToId(
+			List<Feature> theoFeatures) {
+		Map<GenerativeMolecule, Integer> molToId = new HashMap<GenerativeMolecule, Integer>();
+		int molId = 0;
+		for (Feature theoFeature : theoFeatures) {
+			GenerativeFeatureGroup group = (GenerativeFeatureGroup) theoFeature.getFirstGroup();
+			GenerativeMolecule mol = group.getParent();
+			if (!molToId.containsKey(mol)) {
+				molToId.put(mol, molId);
+				molId++;
+			}
+		}
+		return molToId;
 	}
 	
 }

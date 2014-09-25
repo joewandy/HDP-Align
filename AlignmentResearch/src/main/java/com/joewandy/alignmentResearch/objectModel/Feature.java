@@ -31,7 +31,9 @@ public class Feature {
 	private boolean delete;
 	private Element xmlElem;
 	private int theoPeakID;
+	private int metaboliteID;
 	private double score;
+	private boolean synthetic;
 	
 	public Feature(int peakID) {
 		// the peakID is also the position index, so it should start from 0
@@ -140,6 +142,22 @@ public class Feature {
 		this.theoPeakID = theoPeakID;
 	}
 
+	public int getMetaboliteID() {
+		return metaboliteID;
+	}
+
+	public void setMetaboliteID(int metaboliteID) {
+		this.metaboliteID = metaboliteID;
+	}
+
+	public boolean isSynthetic() {
+		return synthetic;
+	}
+
+	public void setSynthetic(boolean synthetic) {
+		this.synthetic = synthetic;
+	}
+
 	public boolean isAligned() {
 		return aligned;
 	}
@@ -208,13 +226,19 @@ public class Feature {
 	}	
 	
 	public String csvForm() {
-		// TODO: turn this into decorator
 		return peakID + ", " + mass + ", " + rt + ", " + intensity;
 	}
 
+	public String csvFormSynthetic() {
+		return peakID + ", " + mass + ", " + rt + ", " + intensity + ", " + theoPeakID + ", " + metaboliteID;
+	}
+	
 	public String csvFormForSima() {
-		// TODO: turn this into decorator
 		return mass + "\t" + 1 + "\t" + intensity + "\t" + rt;
+	}
+
+	public String csvFormForSimaSynthetic() {
+		return mass + "\t" + 1 + "\t" + intensity + "\t" + rt + "\t" + theoPeakID + "\t" + metaboliteID;
 	}
 	
 	public void graphScore(AlignmentPair pair) {
@@ -286,6 +310,7 @@ public class Feature {
 			return "Feature [peakID=" + peakID + ", mass=" + mass + ", rt=" + rt
 					+ ", intensity=" + intensity + ", data=" + data.getFilenameWithoutExtension()
 					+ ", theoPeakID=" + theoPeakID
+					+ ", metaboliteID=" + metaboliteID
 					+ "]";			
 		} else {
 			return "Feature [peakID=" + peakID + ", mass=" + mass + ", rt=" + rt

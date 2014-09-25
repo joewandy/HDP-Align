@@ -369,9 +369,18 @@ public class AlignmentFile {
 	public void saveCsvFeatures(String path) throws IOException {
 		
 		PrintWriter pw = new PrintWriter(new FileOutputStream(path));
-		pw.println("peakID, mass, rt, intensity");
+		Feature f = this.features.get(0);
+		if (f.isSynthetic()) {
+			pw.println("peak_ID, mass, rt, intensity, theo_peak_ID, metabolite_ID");			
+		} else {
+			pw.println("peak_ID, mass, rt, intensity");			
+		}
 		for (Feature feature : this.features) {
-			pw.println(feature.csvForm());						
+			if (feature.isSynthetic()) {
+				pw.println(feature.csvFormSynthetic());						
+			} else {
+				pw.println(feature.csvForm());										
+			}
 		}
 		pw.close();
 		
@@ -381,7 +390,11 @@ public class AlignmentFile {
 		
 		PrintWriter pw = new PrintWriter(new FileOutputStream(path));
 		for (Feature feature : this.features) {
-			pw.println(feature.csvFormForSima());						
+			if (feature.isSynthetic()) {
+				pw.println(feature.csvFormForSimaSynthetic());										
+			} else {
+				pw.println(feature.csvFormForSima());														
+			}
 		}
 		pw.close();
 		
@@ -446,6 +459,46 @@ public class AlignmentFile {
 	public static String removeExtension(String filename) {
 		String fileNameWithOutExt = filename.replaceFirst("[.][^.]+$", "");	
 		return fileNameWithOutExt;
+	}
+	
+	public double getMinMass() {
+		double minMass = Double.MAX_VALUE;
+		for (Feature f : this.features) {
+			if (f.getMass() < minMass) {
+				minMass = f.getMass();
+			}
+		}
+		return minMass;
+	}
+	
+	public double getMinRt() {
+		double minRt = Double.MAX_VALUE;
+		for (Feature f : this.features) {
+			if (f.getRt() < minRt) {
+				minRt = f.getRt();
+			}
+		}
+		return minRt;
+	}
+	
+	public double getMaxMass() {
+		double maxMass = Double.MIN_VALUE;
+		for (Feature f : this.features) {
+			if (f.getMass() > maxMass) {
+				maxMass = f.getMass();
+			}
+		}
+		return maxMass;
+	}
+	
+	public double getMaxRt() {
+		double maxRt = Double.MIN_VALUE;
+		for (Feature f : this.features) {
+			if (f.getRt() > maxRt) {
+				maxRt = f.getRt();
+			}
+		}
+		return maxRt;
 	}
 	
 }
