@@ -54,7 +54,7 @@ function hdp = assign_peaks_rt(hdp, debug)
             cluster_prior = [hdp.file{j}.count_Z hdp.alpha_rt];
             cluster_prior = cluster_prior./sum(cluster_prior);
             
-            % for current cluster
+            % for current local RT cluster
             ti = hdp.file{j}.ti;
             prec = hdp.gamma_prec;
             current_cluster_log_like = -0.5*log(2*pi) + 0.5*log(prec) - 0.5*prec.*(this_peak.rt - ti).^2;
