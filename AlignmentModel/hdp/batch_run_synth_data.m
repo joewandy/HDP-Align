@@ -1,7 +1,7 @@
 clear all; close all; clc;
 
-NSAMPS = 200;
-BURN_IN = 100;
+NSAMPS = 20;
+BURN_IN = 10;
 
 fprintf('\n=================================\n');
 fprintf('REPLICATE 0\n');

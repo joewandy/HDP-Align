@@ -199,10 +199,20 @@ public class HDPMassRTClustering implements HDPClustering {
 
 		for (int s = 0; s < hdpParam.getNsamps(); s++) {
 
+//			boolean printMsg = false;
+//			if ((s+1) % 10 == 0) {
+//				printMsg = true;
+//			}			
+			boolean printMsg = true;
+			
 			if ((s+1) > hdpParam.getBurnIn()) {
-				System.out.println(String.format("Sample S#%05d", s));
+				if (printMsg) {
+					System.out.print(String.format("Sample S#%05d", (s+1)));					
+				}
 			} else {
-				System.out.println(String.format("Sample B#%05d", s));
+				if (printMsg) {
+					System.out.print(String.format("Sample B#%05d", (s+1)));					
+				}
 			}
 			
 			long startTime = System.currentTimeMillis();
@@ -231,7 +241,9 @@ public class HDPMassRTClustering implements HDPClustering {
 			}
 			sb.append(" ]");
 
-			System.out.println(sb.toString());
+			if (printMsg) {
+				System.out.println(sb.toString());				
+			}
 			
 		}
 		
@@ -416,43 +428,45 @@ public class HDPMassRTClustering implements HDPClustering {
 				// finally, the likelihood of peak going into a current cluster is the RT * mass terms
 				double[] currentClusterLogLike = addArray(rtTermLogLike, massTermLogLike);
 				
-				// now compute the likelihood for peak going into new cluster            
-	            // first, compute p( x_nj | existing metabolite )
+				// now compute the likelihood for peak going into new cluster, eq #19.            
+	            // first, compute p( x_nj | existing metabolite ), eq #20
 				double denum = sum(fiArray()) + hdpParam.getTop_alpha();
 				double[] currentMetabolitePost = new double[I];
 				for (int idx = 0; idx < I; idx++) {
 					double prior = fi(idx) / denum;
+					// first compute the RT term
 					double mu = ti(idx);
 					prec = 1/(1/hdpParam.getGamma_prec() + 1/hdpParam.getDelta_prec());
-					double likelihood = computeLikelihood(thisPeak.getRt(), mu, prec);
+					double rtLikelihood = computeLikelihood(thisPeak.getRt(), mu, prec);
+					// then compute the mass term
+					double massLikelihood = metaboliteMassLike[idx];
+					// multiply likelihood with prior to get the posterior p( % d_jn | existing metabolite )
+					double likelihood = rtLikelihood * massLikelihood;
 					double posterior = prior * likelihood;
 					currentMetabolitePost[idx] = posterior;
 				}
 				
-				// then compute p( x_nj | new metabolite )
+				// then compute p( d_jn | new metabolite ), eq #21
 				double prior = hdpParam.getTop_alpha()/denum;
 				double mu = hdpParam.getMu_0();
 				prec = 1/(1/hdpParam.getGamma_prec() + 1/hdpParam.getDelta_prec() + 1/hdpParam.getSigma_0_prec()); 
-				double likelihood = computeLikelihood(thisPeak.getRt(), mu, prec);
-				double newMetabolitePost = prior * likelihood;
-				double[] metabolitePost = append(currentMetabolitePost, newMetabolitePost);
-				double metabolitePostSum = sum(metabolitePost);
-				
-				// then compute p( y_nj | new mass cluster )
-				prior = hdpParam.getAlpha_mass() / hdpParam.getAlpha_mass();
+				double rtLikelihood = computeLikelihood(thisPeak.getRt(), mu, prec);
 				mu = hdpParam.getPsi_0();
-				prec = 1/(1/hdpParam.getRho_prec() + 1/hdpParam.getRho_0_prec());
-				likelihood = computeLikelihood(thisPeak.getRt(), mu, prec);
-				double massClusterPost = prior * likelihood;
+				prec = 1/(1/hdpParam.getRho_prec() + 1/hdpParam.getRho_0_prec()); 
+				double massLikelihood = computeLikelihood(thisPeak.getMass(), mu, prec);
+				double likelihood = rtLikelihood * massLikelihood;
+				double newMetabolitePost = prior * likelihood;
 				
+				// sum over for eq #19
+				double[] metabolitePost = append(currentMetabolitePost, newMetabolitePost);
+				double newClusterLogLike = Math.log(sum(metabolitePost));
+							
 				// pick either existing or new RT cluster
 				// set the prior
 				int[] countZArr = hdpFile.countZArray();
 				double[] clusterPrior = append(toDouble(countZArr), hdpParam.getAlpha_rt());
 				clusterPrior = normalise(clusterPrior, sum(clusterPrior));
-				// set the likelihood = p(x_nj|new metabolite) * p(y_jn|new mass cluster)
-				double newClusterLike = metabolitePostSum * massClusterPost;
-				double[] clusterLogLike = append(currentClusterLogLike, Math.log(newClusterLike));
+				double[] clusterLogLike = append(currentClusterLogLike, newClusterLogLike);
 				double[] clusterLogPost = addArray(logArray(clusterPrior), clusterLogLike);
 				// compute and sample from posterior
 				double[] clusterPost = expArray(subsArray(clusterLogPost, max(clusterLogPost)));
@@ -752,7 +766,7 @@ public class HDPMassRTClustering implements HDPClustering {
 	private void removeSi(int i) {
 		this.si.remove(i);
 	}
-	
+		
 	private double sum(double[] arr) {
 		double sum = 0;
 		for (double elem : arr) {

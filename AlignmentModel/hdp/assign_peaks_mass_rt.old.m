@@ -2,9 +2,10 @@ function hdp = assign_peaks_mass_rt(hdp, debug)
 
     % for j = randperm(hdp.J)
       for j = 1:hdp.J
-                                     
+                            
         % for n = randperm(hdp.file{j}.N)
-        for n = 1:hdp.file{j}.N          
+        for n = 1:hdp.file{j}.N
+
             
             %%%%%%%%%% 0. find all the indices %%%%%%%%%%
             
@@ -19,7 +20,7 @@ function hdp = assign_peaks_mass_rt(hdp, debug)
 
             % find the RT cluster
             % k = find(hdp.file{j}.Z(n, :));
-            % i = find(hdp.file{j}.top_Z(k, :)); % the RT cluster's parent metabolite 
+            % i = find(hdp.file{j}.top_Z(k, :)); % the RT cluster's parent metabolite
             k = hdp.file{j}.Z(n);
             i = hdp.file{j}.top_Z(k);
 
@@ -116,17 +117,15 @@ function hdp = assign_peaks_mass_rt(hdp, debug)
             
             %%%%%%%%%% 2. perform peak assignments %%%%%%%%%%
             
-            % for current RT cluster, first compute the RT term, eq. #15
+            % for current RT cluster, first compute the RT term
             ti = hdp.file{j}.ti;
             prec = hdp.gamma_prec;
             rt_term_log_like = -0.5*log(2*pi) + 0.5*log(prec) - 0.5*prec.*(this_peak.rt - ti).^2;
             
-            % then for every RT cluster, compute the likelihood of this peak to be in the mass clusters linked to it, eq #16
-            % first, we compute this over all existing metabolites
+            % then for every RT cluster, compute the likelihood of this peak to be in the mass clusters linked to it
             metabolite_mass_like = zeros(1, hdp.I);
-            metabolite_log_mass_post_dist = {};
             for this_metabolite = 1:hdp.I
-                                
+
                 % first consider existing mass clusters
                 count_fa = length(hdp.metabolite(this_metabolite).fa); 
                 mass_term_prior = zeros(1, count_fa+1); % extra 1 for new cluster
@@ -146,73 +145,62 @@ function hdp = assign_peaks_mass_rt(hdp, debug)
                 prec(end) = temp;
 
                 % compute posterior probability            
-                % mass_term_likelihood = sqrt(prec/(2*pi)) .* exp((-prec.*(this_peak.mass-mu).^2)/2);
-                % mass_term_post = mass_term_prior .* mass_term_likelihood;                        
-                mass_term_log_likelihood = -0.5*log(2*pi) + 0.5*log(prec) - 0.5*prec.*(this_peak.mass - mu).^2;
-                mass_term_log_post = log(mass_term_prior) + mass_term_log_likelihood;
-                mass_term_post = exp(mass_term_log_post);
+                mass_term_likelihood = sqrt(prec/(2*pi)) .* exp((-prec.*(this_peak.mass-mu).^2)/2);
+                mass_term_post = mass_term_prior .* mass_term_likelihood;                        
                 assert(length(mass_term_post)==hdp.metabolite(this_metabolite).A+1, 'inconsistent state');
 
-                % marginalise over all the mass clusters by summing over them             
-                metabolite_mass_like(i) = sum(mass_term_post);
+                % marginalise over all the mass clusters by summing over them, then take the log for use later                
+                metabolite_mass_like(this_metabolite) = log(sum(mass_term_post));
 
             end
-            
-            % then loop over all clusters
             mass_term_log_like = zeros(1, hdp.file{j}.K); % 1 by K, stores the mass log likelihood linked to each RT cluster
             for this_cluster = 1:hdp.file{j}.K
-            
                 % the RT cluster's parent metabolite
+                % this_metabolite = find(hdp.file{j}.top_Z(this_cluster, :)); 
                 this_metabolite = hdp.file{j}.top_Z(this_cluster);
-                
-                % take the log of the marginal probability over the mass clusters
-                mass_term_log_like(this_cluster) = log(metabolite_mass_like(this_metabolite));
-                                
+                mass_term_log_like(this_cluster) = metabolite_mass_like(this_metabolite);
             end
             
-            % finally, the likelihood of peak going into a current cluster
-            % is the RT term * mass term, eq #14
+            % finally, the likelihood of peak going into a current cluster is the RT * mass terms
             current_cluster_log_like = rt_term_log_like + mass_term_log_like;
             
-            % now compute the likelihood for peak going into new cluster, eq #19.             
-            % first, compute p( d_jn | existing metabolite ), eq #20
+            % now compute the likelihood for peak going into new cluster            
+            % first, compute p( x_nj | existing metabolite )
             denum = sum(hdp.fi) + hdp.top_alpha;
             current_metabolite_post = zeros(1, hdp.I);
             for this_metabolite = 1:hdp.I
-                prior = hdp.fi(i)/denum;
-                % first compute the rt term
+                prior = hdp.fi(this_metabolite)/denum;
                 mu = hdp.ti(this_metabolite);
                 prec = 1/(1/hdp.gamma_prec + 1/hdp.delta_prec);
-                rt_likelihood = sqrt(prec/(2*pi)) * exp((-prec*(this_peak.rt-mu)^2)/2);
-                % then compute the mass term
-                mass_likelihood = metabolite_mass_like(this_metabolite);
-                % multiply likelihood with prior to get the posterior p( % d_jn | existing metabolite )
-                % likelihood = rt_likelihood * mass_likelihood;
-                likelihood = rt_likelihood * mass_likelihood;
+                likelihood = sqrt(prec/(2*pi)) * exp((-prec*(this_peak.rt-mu)^2)/2);
                 posterior = prior * likelihood;
-                current_metabolite_post(i) = posterior;
+                current_metabolite_post(this_metabolite) = posterior;
             end
 
-            % then compute p( d_jn | new metabolite ), eq #21
+            % then compute p( x_nj | new metabolite )
             prior = hdp.top_alpha/denum;
             mu = hdp.mu_0;
             prec = 1/(1/hdp.gamma_prec + 1/hdp.delta_prec + 1/hdp.sigma_0_prec);
-            rt_likelihood = sqrt(prec/(2*pi)) * exp((-prec*(this_peak.rt-mu)^2)/2);
+            likelihood = sqrt(prec/(2*pi)) * exp((-prec*(this_peak.rt-mu)^2)/2);
+            new_metabolite_post = prior * likelihood;
+            metabolite_post = [current_metabolite_post, new_metabolite_post];
+            metabolite_post_sum = sum(metabolite_post);
+            
+            % then compute p( y_nj | new mass cluster )
+            prior = hdp.alpha_mass / hdp.alpha_mass;
             mu = hdp.psi_0;
             prec = 1/(1/hdp.rho_prec + 1/hdp.rho_0_prec);
-            mass_likelihood = sqrt(prec/(2*pi)) * exp((-prec*(this_peak.mass-mu)^2)/2);            
-            likelihood = rt_likelihood * mass_likelihood;
-            new_metabolite_post = prior * likelihood;
-            
-            % sum over for eq #19
-            metabolite_post = [current_metabolite_post, new_metabolite_post];
-            new_cluster_log_like = log(sum(metabolite_post));
-            
+            likelihood = sqrt(prec/(2*pi)) * exp((-prec*(this_peak.rt-mu)^2)/2);
+            mass_cluster_post = prior * likelihood;     
+
             % pick either existing or new RT cluster
             % set the prior
             cluster_prior = [hdp.file{j}.count_Z hdp.alpha_rt];
             cluster_prior = cluster_prior./sum(cluster_prior);                        
-            cluster_log_like = [current_cluster_log_like, new_cluster_log_like];
+            % set the likelihood = p(x_nj|new metabolite) * p(y_jn|new mass cluster)
+            % new_cluster_like = metabolite_post_sum * mass_cluster_post;
+            new_cluster_like = metabolite_post_sum; % changed!
+            cluster_log_like = [current_cluster_log_like, log(new_cluster_like)];
             cluster_log_post = log(cluster_prior) + cluster_log_like;            
             % compute and sample from posterior
             cluster_post = exp(cluster_log_post - max(cluster_log_post));

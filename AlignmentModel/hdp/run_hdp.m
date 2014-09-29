@@ -41,7 +41,7 @@ input_hdp.BURN_IN = BURN_IN;              % burn-in samples
 
 input_hdp.mu_0 = mean(data_rt_all);   % base distribution mean for RT
 input_hdp.sigma_0_prec = 1/5e6;      % base distribution prec for RT
-input_hdp.psi_0 = mean(data_mass_all);% base distribution mean for mass
+input_hdp.psi_0 = log(mean(exp(data_mass_all)));% base distribution mean for mass
 input_hdp.rho_0_prec = 1/5e6;         % base distribution prec for mass
 
 input_hdp.alpha_rt = 10;               % RT cluster DP concentration param
