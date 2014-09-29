@@ -253,7 +253,7 @@ public class HDPMassRTClustering implements HDPClustering {
 		// TODO: loop across all files randomly
 		for (HDPFile hdpFile : hdpFiles) {
 
-			System.out.print("\t- File" + hdpFile.getId() + " ");
+//			System.out.print("\t- File" + hdpFile.getId() + " ");
 			
 			int j = hdpFile.getId();
 			
@@ -261,9 +261,9 @@ public class HDPMassRTClustering implements HDPClustering {
 			assert(hdpFile.N() == hdpFile.Zsize());
 			for (int n = 0; n < hdpFile.N(); n++) {
 							
-				if (n%100==0) {
-					System.out.print('.');
-				}
+//				if (n%100==0) {
+//					System.out.print('.');
+//				}
 				
 				Feature thisPeak = hdpFile.getFeatures().get(n);
 				
@@ -361,11 +361,9 @@ public class HDPMassRTClustering implements HDPClustering {
  				}
 				
 				// then for every RT cluster, compute the likelihood of this peak to be in the mass clusters linked to it
-				double[] massTermLogLike = new double[hdpFile.K()]; // % 1 by K, stores the mass log likelihood linked to each RT cluster
-				for (int thisCluster = 0; thisCluster < hdpFile.K(); thisCluster++) {
-					
-					// the RT cluster's parent metabolite
-					int metIndex = hdpFile.topZ(thisCluster);
+				double[] metaboliteMassLike = new double[I];
+				for (int metIndex = 0; metIndex < I; metIndex++) {
+
 					HDPMetabolite thisMetabolite = hdpMetabolites.get(metIndex);
 					
 					// first consider existing mass clusters
@@ -403,7 +401,15 @@ public class HDPMassRTClustering implements HDPClustering {
 					assert(massTermPost.length==thisMetabolite.A()+1);
 
 					// marginalise over all the mass clusters by summing over them, then take the log for use later
-					massTermLogLike[thisCluster] = Math.log(sum(massTermPost));					
+					metaboliteMassLike[metIndex] = Math.log(sum(massTermPost));					
+				
+				}								
+				double[] massTermLogLike = new double[hdpFile.K()]; // % 1 by K, stores the mass log likelihood linked to each RT cluster
+				for (int thisCluster = 0; thisCluster < hdpFile.K(); thisCluster++) {
+					
+					// the RT cluster's parent metabolite
+					int metIndex = hdpFile.topZ(thisCluster);
+					massTermLogLike[thisCluster] = metaboliteMassLike[metIndex];
 					
 				}
 				
@@ -568,7 +574,7 @@ public class HDPMassRTClustering implements HDPClustering {
 				
 			} // end loop across peaks randomly
 		
-			System.out.println();
+//			System.out.println();
 			
 		} // end loop across files randomly
 		
