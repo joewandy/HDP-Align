@@ -187,12 +187,12 @@ public class HDPMassRTClustering implements HDPClustering {
 		int count = 0;
 		for (AlignmentFile file : dataList) {
 			for (Feature f : file.getFeatures()) {
-				sum += getFeatureMass(f);
+				sum += Math.exp(getFeatureMass(f));
 				count++;
 			}
 		}
 		double mean = sum / count;
-		return mean;
+		return Math.log(mean);
 	}
 	
 	public void run() {
@@ -413,7 +413,7 @@ public class HDPMassRTClustering implements HDPClustering {
 					assert(massTermPost.length==thisMetabolite.A()+1);
 
 					// marginalise over all the mass clusters by summing over them, then take the log for use later
-					metaboliteMassLike[metIndex] = Math.log(sum(massTermPost));					
+					metaboliteMassLike[metIndex] = sum(massTermPost);					
 				
 				}								
 				double[] massTermLogLike = new double[hdpFile.K()]; // % 1 by K, stores the mass log likelihood linked to each RT cluster
@@ -421,15 +421,15 @@ public class HDPMassRTClustering implements HDPClustering {
 					
 					// the RT cluster's parent metabolite
 					int metIndex = hdpFile.topZ(thisCluster);
-					massTermLogLike[thisCluster] = metaboliteMassLike[metIndex];
+					massTermLogLike[thisCluster] = Math.log(metaboliteMassLike[metIndex]);
 					
 				}
 				
-				// finally, the likelihood of peak going into a current cluster is the RT * mass terms
+				// finally, the likelihood of peak going into a current cluster eq #15 is the RT * mass terms
 				double[] currentClusterLogLike = addArray(rtTermLogLike, massTermLogLike);
 				
-				// now compute the likelihood for peak going into new cluster, eq #19.            
-	            // first, compute p( x_nj | existing metabolite ), eq #20
+				// now compute the likelihood for peak going into new cluster, eq #20      
+	            // first, compute p( x_nj | existing metabolite ), eq #21
 				double denum = sum(fiArray()) + hdpParam.getTop_alpha();
 				double[] currentMetabolitePost = new double[I];
 				for (int idx = 0; idx < I; idx++) {
@@ -446,18 +446,18 @@ public class HDPMassRTClustering implements HDPClustering {
 					currentMetabolitePost[idx] = posterior;
 				}
 				
-				// then compute p( d_jn | new metabolite ), eq #21
+				// then compute p( d_jn | new metabolite ), eq #22
 				double prior = hdpParam.getTop_alpha()/denum;
 				double mu = hdpParam.getMu_0();
 				prec = 1/(1/hdpParam.getGamma_prec() + 1/hdpParam.getDelta_prec() + 1/hdpParam.getSigma_0_prec()); 
 				double rtLikelihood = computeLikelihood(thisPeak.getRt(), mu, prec);
 				mu = hdpParam.getPsi_0();
 				prec = 1/(1/hdpParam.getRho_prec() + 1/hdpParam.getRho_0_prec()); 
-				double massLikelihood = computeLikelihood(thisPeak.getMass(), mu, prec);
+				double massLikelihood = computeLikelihood(thisPeak.getMass(), mu, prec); // TODO: use log-likelihood!
 				double likelihood = rtLikelihood * massLikelihood;
 				double newMetabolitePost = prior * likelihood;
 				
-				// sum over for eq #19
+				// sum over for eq #17
 				double[] metabolitePost = append(currentMetabolitePost, newMetabolitePost);
 				double newClusterLogLike = Math.log(sum(metabolitePost));
 							
@@ -879,6 +879,13 @@ public class HDPMassRTClustering implements HDPClustering {
 	}
 	
 	private double computeLogLikelihood(double x, double mu, double prec) {
+		/*
+		 * f(x) 	= sqrt(prec/2pi)*e^((-prec(x-mu)^2)/2)
+		 * log f(x) = log (sqrt(prec/2pi)*e^((-prec(x-mu)^2)/2))
+		 * 			= log(sqrt(prec/2pi)) + log(e^((-prec(x-mu)^2)/2))
+		 * 			= 0.5 log(prec) - 0.5 log(2pi) + ((-prec(x-mu)^2)/2)
+		 * 			= 0.5 log(prec) - 0.5 log(2pi) - 0.5 * prec * (x-mu)^2
+		 */
 		double logLikelihood = -0.5 * Math.log(2*Math.PI);
 		logLikelihood += 0.5 * Math.log(prec);
 		logLikelihood -= 0.5 * prec * Math.pow(x - mu, 2);

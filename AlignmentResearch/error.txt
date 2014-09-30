@@ -1,11 +1,7 @@
-java.lang.IndexOutOfBoundsException: Index: 3, Size: 3
-	at java.util.ArrayList.rangeCheck(ArrayList.java:635)
-	at java.util.ArrayList.set(ArrayList.java:426)
-	at com.joewandy.alignmentResearch.objectModel.HDPFile.setTopZ(HDPFile.java:111)
-	at com.joewandy.alignmentResearch.objectModel.HDPMassRTClustering.assignPeakMassRt(HDPMassRTClustering.java:492)
-	at com.joewandy.alignmentResearch.objectModel.HDPMassRTClustering.run(HDPMassRTClustering.java:219)
-	at com.joewandy.alignmentResearch.alignmentMethod.external.TestHdpAlignment.<init>(TestHdpAlignment.java:84)
-	at com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodFactory.getAlignmentMethod(AlignmentMethodFactory.java:72)
-	at com.joewandy.alignmentResearch.main.MultiAlign.<init>(MultiAlign.java:91)
-	at com.joewandy.alignmentResearch.main.experiment.HdpExperiment.performExperiment(HdpExperiment.java:24)
+java.lang.NullPointerException
+	at java.util.Arrays.sort(Arrays.java:1435)
+	at com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.SimaFormatDataGenerator.getAlignmentFiles(SimaFormatDataGenerator.java:48)
+	at com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.BaseDataGenerator.generate(BaseDataGenerator.java:29)
+	at com.joewandy.alignmentResearch.main.experiment.MultiAlignBaseExp.getData(MultiAlignBaseExp.java:84)
+	at com.joewandy.alignmentResearch.main.experiment.HdpExperiment.performExperiment(HdpExperiment.java:21)
 	at com.joewandy.alignmentResearch.main.MultiAlignCmd.main(MultiAlignCmd.java:41)
