@@ -36,7 +36,7 @@ public class MultiAlignConstants {
 	public static final double GROUPING_METHOD_ALPHA = 1;
 	
 	public static final double HDP_ALPHA_RT = 10;
-	public static final double HDP_ALPHA_MASS = 10;
+	public static final double HDP_ALPHA_MASS = 1000;
 	public static final double HDP_TOP_ALPHA = 10;
 	public static final double HDP_GLOBAL_RT_CLUSTER_STDEV = 20;
 	public static final double HDP_LOCAL_RT_CLUSTER_STDEV = 2;
