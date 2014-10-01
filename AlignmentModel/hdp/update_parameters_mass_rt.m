@@ -43,11 +43,11 @@ function hdp = update_parameters_mass_rt(hdp, debug)
         hdp.ti(i) = normrnd(mu, sqrt(1/prec));
 
         % also update all the mass clusters linked to this metabolite
-        for a = 1:hdp.metabolite(i).A
-            prec = hdp.rho_0_prec + (hdp.rho_prec*hdp.metabolite(i).fa(a));
-            mu = (1./prec).*((hdp.rho_0_prec*hdp.psi_0) + (hdp.rho_prec*hdp.metabolite(i).sa(a)));
-            hdp.metabolite(i).thetas(a) = normrnd(mu, sqrt(1/prec));            
-        end
+        % for a = 1:hdp.metabolite(i).A
+        %     prec = hdp.rho_0_prec + (hdp.rho_prec*hdp.metabolite(i).fa(a));
+        %     mu = (1./prec).*((hdp.rho_0_prec*hdp.psi_0) + (hdp.rho_prec*hdp.metabolite(i).sa(a)));
+        %     hdp.metabolite(i).thetas(a) = normrnd(mu, sqrt(1/prec));            
+        % end
         
     end                    
 

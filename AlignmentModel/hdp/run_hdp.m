@@ -45,14 +45,14 @@ input_hdp.psi_0 = log(mean(exp(data_mass_all)));% base distribution mean for mas
 input_hdp.rho_0_prec = 1/5e6;         % base distribution prec for mass
 
 input_hdp.alpha_rt = 10;               % RT cluster DP concentration param
-input_hdp.alpha_mass = 10;             % mass cluster DP concentration param
+input_hdp.alpha_mass = 100;             % mass cluster DP concentration param
 input_hdp.top_alpha = 10;              % top-level DP concentration
 
 % synth data
 
 input_hdp.delta_prec = 1/(20*20);          % precision for top components
 input_hdp.gamma_prec = 1/(2*2);          % precision for RT cluster mixture components
-input_hdp.rho_prec = 1/(0.0025*0.0025);      % precision for mass cluster mixture components
+% input_hdp.rho_prec = 1/(0.0025*0.0025);      % precision for mass cluster mixture components
 input_hdp.rho = 2;
 
 % lange data P1

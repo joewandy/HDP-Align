@@ -2,9 +2,7 @@ function hdp = assign_peaks_mass_rt(hdp, debug)
 
     % for j = randperm(hdp.J)
       for j = 1:hdp.J
-                           
-        j
-          
+                                     
         % for n = randperm(hdp.file{j}.N)
         for n = 1:hdp.file{j}.N          
             
@@ -126,6 +124,7 @@ function hdp = assign_peaks_mass_rt(hdp, debug)
             % then for every RT cluster, compute the likelihood of this peak to be in the mass clusters linked to it, eq #16
             % first, we compute this over all existing metabolites
             metabolite_mass_like = zeros(1, hdp.I);
+            metabolite_log_mass_post_dist = {};
             for this_metabolite = 1:hdp.I
                                 
                 % first consider existing mass clusters
@@ -147,12 +146,15 @@ function hdp = assign_peaks_mass_rt(hdp, debug)
                 prec(end) = temp;
 
                 % compute posterior probability            
-                mass_term_likelihood = sqrt(prec/(2*pi)) .* exp((-prec.*(this_peak.mass-mu).^2)/2);
-                mass_term_post = mass_term_prior .* mass_term_likelihood;                        
+                % mass_term_likelihood = sqrt(prec/(2*pi)) .* exp((-prec.*(this_peak.mass-mu).^2)/2);
+                % mass_term_post = mass_term_prior .* mass_term_likelihood;                        
+                mass_term_log_likelihood = -0.5*log(2*pi) + 0.5*log(prec) - 0.5*prec.*(this_peak.mass - mu).^2;
+                mass_term_log_post = log(mass_term_prior) + mass_term_log_likelihood;
+                mass_term_post = exp(mass_term_log_post);
                 assert(length(mass_term_post)==hdp.metabolite(this_metabolite).A+1, 'inconsistent state');
 
                 % marginalise over all the mass clusters by summing over them             
-                metabolite_mass_like(i) = sum(mass_term_post);
+                metabolite_mass_like(this_metabolite) = sum(mass_term_post);
 
             end
             
@@ -177,7 +179,7 @@ function hdp = assign_peaks_mass_rt(hdp, debug)
             denum = sum(hdp.fi) + hdp.top_alpha;
             current_metabolite_post = zeros(1, hdp.I);
             for this_metabolite = 1:hdp.I
-                prior = hdp.fi(i)/denum;
+                prior = hdp.fi(this_metabolite)/denum;
                 % first compute the rt term
                 mu = hdp.ti(this_metabolite);
                 prec = 1/(1/hdp.gamma_prec + 1/hdp.delta_prec);
@@ -186,9 +188,9 @@ function hdp = assign_peaks_mass_rt(hdp, debug)
                 mass_likelihood = metabolite_mass_like(this_metabolite);
                 % multiply likelihood with prior to get the posterior p( % d_jn | existing metabolite )
                 % likelihood = rt_likelihood * mass_likelihood;
-                likelihood = rt_likelihood;
+                likelihood = rt_likelihood * mass_likelihood;
                 posterior = prior * likelihood;
-                current_metabolite_post(i) = posterior;
+                current_metabolite_post(this_metabolite) = posterior;
             end
 
             % then compute p( d_jn | new metabolite ), eq #21
@@ -199,8 +201,7 @@ function hdp = assign_peaks_mass_rt(hdp, debug)
             mu = hdp.psi_0;
             prec = 1/(1/hdp.rho_prec + 1/hdp.rho_0_prec);
             mass_likelihood = sqrt(prec/(2*pi)) * exp((-prec*(this_peak.mass-mu)^2)/2);            
-            % likelihood = rt_likelihood * mass_likelihood;
-            likelihood = rt_likelihood;
+            likelihood = rt_likelihood * mass_likelihood;
             new_metabolite_post = prior * likelihood;
             
             % sum over for eq #19
@@ -208,10 +209,9 @@ function hdp = assign_peaks_mass_rt(hdp, debug)
             new_cluster_log_like = log(sum(metabolite_post));
             
             % pick either existing or new RT cluster
-            % set the prior
+            % set the prior [0.0, 2.4763110957200977E-7, 2.4418810130461547E-8]
             cluster_prior = [hdp.file{j}.count_Z hdp.alpha_rt];
             cluster_prior = cluster_prior./sum(cluster_prior);                        
-            % set the likelihood = p(x_nj|new metabolite) * p(y_jn|new mass cluster)
             cluster_log_like = [current_cluster_log_like, new_cluster_log_like];
             cluster_log_post = log(cluster_prior) + cluster_log_like;            
             % compute and sample from posterior

@@ -62,10 +62,10 @@ public class HdpProbabilityMatching implements FeatureMatching {
 		for (Entry<Feature, List<Feature>> match : pairing.entrySet()) {
 			Feature f1 = match.getKey();
 			List<Feature> candidates = match.getValue();
-			System.out.println("Feature " + match.getKey() + " has " + candidates.size() + " candidates, pairings = " + candidates);
+			System.out.print("Feature " + match.getKey() + " has " + candidates.size() + " candidates, pairings = [");
 			Feature f2 = null;
 			if (candidates.size() > 1) {
-				// choose the highest score
+//				// choose the highest score
 //				double massDiff = Double.MAX_VALUE;
 //				for (Feature can : candidates) {
 //					System.out.println("\t" + can.getScore() + " " + can);
@@ -75,6 +75,12 @@ public class HdpProbabilityMatching implements FeatureMatching {
 //						f2 = can;
 //					}
 //				}
+//				AlignmentRow merged = new AlignmentRow(matchedList, rowId++);
+//				merged.addAlignedFeature(f1);
+//				merged.addAlignedFeature(f2);
+//				merged.setScore(f2.getScore());			
+//				matchedList.addRow(merged);					
+//				System.out.print(f2 + ", ");
 				for (Feature can : candidates) {
 					f2 = can;
 					AlignmentRow merged = new AlignmentRow(matchedList, rowId++);
@@ -82,6 +88,7 @@ public class HdpProbabilityMatching implements FeatureMatching {
 					merged.addAlignedFeature(f2);
 					merged.setScore(f2.getScore());			
 					matchedList.addRow(merged);					
+					System.out.print(f2 + ", ");
 				}
 			} else {
 				f2 = candidates.get(0);
@@ -90,7 +97,9 @@ public class HdpProbabilityMatching implements FeatureMatching {
 				merged.addAlignedFeature(f2);
 				merged.setScore(f2.getScore());			
 				matchedList.addRow(merged);
+				System.out.print(f2 + ", ");
 			}			
+			System.out.println();
 		}
 		
 		// add everything else that's unmatched

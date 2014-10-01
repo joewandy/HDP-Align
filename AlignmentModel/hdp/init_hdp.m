@@ -112,7 +112,7 @@ function hdp = init_hdp(input_hdp, debug)
     for metabolite_i = 1:hdp.I
     
         hdp.metabolite(i).A = 1;        % number of mass cluster in this metabolite
-        hdp.metabolite(i).thetas = [normrnd(hdp.psi_0, sqrt(1/hdp.rho_0_prec))]; % sample some initial value for mass cluster
+        % hdp.metabolite(i).thetas = [normrnd(hdp.psi_0, sqrt(1/hdp.rho_0_prec))]; % sample some initial value for mass cluster
         hdp.metabolite(i).fa = [fa];    % number of peaks under each mass cluster, size 1 by A
         hdp.metabolite(i).sa = [sa];    % sum of masses of peaks under each mass cluster, size 1 by A
         

@@ -52,7 +52,6 @@ function hdp = assign_peaks_mass_rt(hdp, debug)
             
                 % delete this mass cluster indexed by a
                 hdp.metabolite(i).A = hdp.metabolite(i).A - 1;
-                hdp.metabolite(i).thetas(a) = [];
                 hdp.metabolite(i).fa(a) = [];
                 hdp.metabolite(i).sa(a) = [];
 
@@ -60,7 +59,8 @@ function hdp = assign_peaks_mass_rt(hdp, debug)
                 affected = find(hdp.metabolite(i).V>a);
                 hdp.metabolite(i).V(affected) = hdp.metabolite(i).V(affected) - 1;
                 
-                assert(length(hdp.metabolite(i).thetas)==hdp.metabolite(i).A, 'invalid length');                                
+                assert(length(hdp.metabolite(i).fa)==hdp.metabolite(i).A, 'invalid length');                                
+                assert(length(hdp.metabolite(i).sa)==hdp.metabolite(i).A, 'invalid length');                                
 
             end
                         
@@ -127,29 +127,13 @@ function hdp = assign_peaks_mass_rt(hdp, debug)
             metabolite_log_mass_post_dist = {};
             for this_metabolite = 1:hdp.I
                                 
-                % first consider existing mass clusters
-                count_fa = length(hdp.metabolite(this_metabolite).fa); 
-                mass_term_prior = zeros(1, count_fa+1); % extra 1 for new cluster
-                mass_term_prior(1, 1:count_fa) = hdp.metabolite(this_metabolite).fa;
-                count_theta = length(hdp.metabolite(this_metabolite).thetas);
-                mu = zeros(1, count_theta+1); % extra 1 for new cluster
-                mu(1, 1:count_theta) = hdp.metabolite(this_metabolite).thetas;
-                prec = zeros(1, count_theta+1); % extra 1 for new cluster
-                temp = repmat([hdp.rho_prec], 1, hdp.metabolite(this_metabolite).A); % copy multiple times
-                prec(1, 1:count_theta) = temp;
-                
-                % then add the term for the new mass cluster
-                mass_term_prior(end) = hdp.alpha_mass;
-                mass_term_prior = mass_term_prior ./ sum(mass_term_prior); % normalise
-                mu(end) = hdp.psi_0;
-                temp = 1/(1/hdp.rho_prec + 1/hdp.rho_0_prec);
-                prec(end) = temp;
+                c_counts = hdp.metabolite(this_metabolite).fa;
+                c_sums = hdp.metabolite(this_metabolite).sa;
+                [mass_term_log_prior, mass_term_log_likelihood] = get_dp_log_prior_likelihood(this_peak.mass, ...
+                    hdp.rho_prec, hdp.psi_0, hdp.rho_0_prec, hdp.alpha_mass, c_counts, c_sums);
 
                 % compute posterior probability            
-                % mass_term_likelihood = sqrt(prec/(2*pi)) .* exp((-prec.*(this_peak.mass-mu).^2)/2);
-                % mass_term_post = mass_term_prior .* mass_term_likelihood;                        
-                mass_term_log_likelihood = -0.5*log(2*pi) + 0.5*log(prec) - 0.5*prec.*(this_peak.mass - mu).^2;
-                mass_term_log_post = log(mass_term_prior) + mass_term_log_likelihood;
+                mass_term_log_post = mass_term_log_prior + mass_term_log_likelihood;
                 mass_term_post = exp(mass_term_log_post);
                 assert(length(mass_term_post)==hdp.metabolite(this_metabolite).A+1, 'inconsistent state');
 
@@ -298,28 +282,11 @@ function hdp = assign_peaks_mass_rt(hdp, debug)
             % a = find(rand<=cumsum(mass_term_post), 1);            
 
             % now perform peak to mass cluster assignments
-            % i = find(hdp.file{j}.top_Z(k, :)); % find the parent metabolite first            
             i = hdp.file{j}.top_Z(k);
-
-            % for existing mass cluster
-            count_fa = length(hdp.metabolite(i).fa);             
-            log_prior = zeros(1, count_fa+1);
-            log_prior(1, 1:count_fa) = log(hdp.metabolite(i).fa);
-            count_theta = length(hdp.metabolite(i).thetas);            
-            mu = zeros(1, count_theta+1); % extra 1 for new cluster
-            mu(1, 1:count_theta) = hdp.metabolite(i).thetas;
-            prec = zeros(1, count_theta+1); % extra 1 for new cluster
-            temp = repmat([hdp.rho_prec], 1, hdp.metabolite(i).A); % copy multiple times
-            prec(1, 1:count_theta) = temp;
-            
-            % add the terms for the new mass cluster
-            log_prior(end) = log(hdp.alpha_mass);
-            mu(end) = hdp.psi_0;
-            temp = 1/(1/hdp.rho_prec + 1/hdp.rho_0_prec);
-            prec(end) = temp;
-
-            % compute likelihood and posterior            
-            log_likelihood = -0.5*log(2*pi) + 0.5*log(prec) - 0.5*prec.*(this_peak.mass - mu).^2;
+            c_counts = hdp.metabolite(i).fa;
+            c_sums = hdp.metabolite(i).sa;
+            [log_prior, log_likelihood] = get_dp_log_prior_likelihood(this_peak.mass, ...
+                hdp.rho_prec, hdp.psi_0, hdp.rho_0_prec, hdp.alpha_mass, c_counts, c_sums);
             log_post = log_prior + log_likelihood;                        
 
             % pick the mass cluster
@@ -333,13 +300,6 @@ function hdp = assign_peaks_mass_rt(hdp, debug)
                 hdp.metabolite(i).A = hdp.metabolite(i).A + 1;
                 hdp.metabolite(i).fa(a) = 0;
                 hdp.metabolite(i).sa(a) = 0;
-
-                % sample new mass cluster value
-                sigma_a = hdp.rho_prec + hdp.rho_0_prec;
-                mu_a = 1/sigma_a * (hdp.rho_prec*this_peak.mass + hdp.rho_0_prec*hdp.psi_0);
-                theta_ia = normrnd(mu_a, sqrt(1/sigma_a));
-                hdp.metabolite(i).thetas(a) = theta_ia;
-                assert(length(hdp.metabolite(i).thetas)==hdp.metabolite(i).A, 'invalid length');                
 
             end                   
 
@@ -383,7 +343,6 @@ function hdp = assign_peaks_mass_rt(hdp, debug)
             peak_pos = intersect(peak_n, peak_j);       % find peak at position n and from file j
             assert(~isempty(peak_pos), 'Invalid position index');            
             assert(length(hdp.metabolite(i).peak_n) == length(hdp.metabolite(i).peak_j), 'inconsistent state');
-            assert(length(hdp.metabolite(i).thetas)==hdp.metabolite(i).A, 'inconsistent state');
             assert(length(hdp.metabolite(i).fa)==hdp.metabolite(i).A, 'inconsistent state');
             assert(length(hdp.metabolite(i).sa)==hdp.metabolite(i).A, 'inconsistent state');
             

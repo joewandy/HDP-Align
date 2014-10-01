@@ -311,6 +311,7 @@ public class Feature {
 					+ ", intensity=" + intensity + ", data=" + data.getFilenameWithoutExtension()
 					+ ", theoPeakID=" + theoPeakID
 					+ ", metaboliteID=" + metaboliteID
+					+ ", score=" + score
 					+ "]";			
 		} else {
 			return "Feature [peakID=" + peakID + ", mass=" + mass + ", rt=" + rt

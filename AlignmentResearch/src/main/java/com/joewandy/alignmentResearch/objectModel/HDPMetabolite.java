@@ -9,7 +9,6 @@ public class HDPMetabolite {
 
 	private int id;
 	private int A;
-	private List<Double> thetas;
 	private List<Integer> fa;
 	private List<Double> sa;
 	
@@ -18,7 +17,6 @@ public class HDPMetabolite {
 	
 	public HDPMetabolite(int id) {
 		this.id = id;
-		this.thetas = new ArrayList<Double>();
 		this.fa = new ArrayList<Integer>();
 		this.sa = new ArrayList<Double>();
 		this.V = new ArrayList<Integer>();
@@ -57,40 +55,15 @@ public class HDPMetabolite {
 		}
 		return results;
 	}
-	
-	public double theta(int a) {
-		return thetas.get(a);
-	}
-
-	public double[] thetasArray() {
-		Double[] temp = thetas.toArray(new Double[thetas.size()]);
-		return ArrayUtils.toPrimitive(temp);
-	}
-	
-	public void setTheta(int a, double newTheta) {
-		thetas.set(a, newTheta);
-	}
-
-	public void appendTheta(double newTheta) {
-		thetas.add(newTheta);
-	}
-	
-	public void removeTheta(int a) {
-		thetas.remove(a);
-	}
-	
-	public int thetasSize() {
-		return thetas.size();
-	}
-	
+			
 	public int fa(int a) {
 		return fa.get(a);
 	}
 	
-	public double[] faArray() {
-		double[] temp = new double[fa.size()];
+	public int[] faArray() {
+		int[] temp = new int[fa.size()];
 		for (int i = 0; i < fa.size(); i++) {
-			temp[i] = fa.get(i).doubleValue();
+			temp[i] = fa.get(i);
 		}
 		return temp;
 	}
@@ -125,6 +98,14 @@ public class HDPMetabolite {
 	
 	public void setSa(int a, double newSa) {
 		sa.set(a, newSa);
+	}
+	
+	public double[] saArray() {
+		double[] temp = new double[sa.size()];
+		for (int i = 0; i < sa.size(); i++) {
+			temp[i] = sa.get(i);
+		}
+		return temp;
 	}
 	
 	public int saSize() {
