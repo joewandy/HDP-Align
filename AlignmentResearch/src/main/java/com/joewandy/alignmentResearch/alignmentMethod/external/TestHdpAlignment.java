@@ -2,8 +2,12 @@ package com.joewandy.alignmentResearch.alignmentMethod.external;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import no.uib.cipr.matrix.Matrix;
+import no.uib.cipr.matrix.MatrixEntry;
 
 import com.jmatio.io.MatFileReader;
 import com.jmatio.types.MLDouble;
@@ -19,6 +23,7 @@ import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.Feature;
 import com.joewandy.alignmentResearch.objectModel.HDPClustering;
+import com.joewandy.alignmentResearch.objectModel.HDPFile;
 import com.joewandy.alignmentResearch.objectModel.HDPMassRTClustering;
 
 public class TestHdpAlignment extends BaseAlignment implements AlignmentMethod {
@@ -79,10 +84,57 @@ public class TestHdpAlignment extends BaseAlignment implements AlignmentMethod {
 			
 			if (MultiAlignConstants.SCORING_METHOD_HDP_MASS_RT_JAVA.equals(this.scoringMethod)) {
 
-				// use the java HDP RT+mass clustering 
+				// assign a sequential ID to all peaks to store the result later
+				Map<Integer, Feature> sequenceMap = new HashMap<Integer, Feature>();
+				int sequenceID = 0;
+				for (int j=0; j < dataList.size(); j++) {
+								
+					HDPFile hdpFile = new HDPFile(j);
+					AlignmentFile alignmentFile = dataList.get(j);
+					for (Feature f : alignmentFile.getFeatures()) {
+						f.setSequenceID(sequenceID);
+						sequenceMap.put(sequenceID, f);
+						sequenceID++;
+					}
+					
+				}				
+				
+				// run the HDP RT+mass clustering 
 				HDPClustering clustering = new HDPMassRTClustering(dataList, param);
 				clustering.run();
-				resultMap = clustering.getSimilarityResult();
+
+				// process the result
+				int samplesTaken = clustering.getSamplesTaken();		
+				System.out.println("Samples taken = " + samplesTaken);
+				Matrix simMatrix = clustering.getSimilarityResult();
+				Iterator<MatrixEntry> it = simMatrix.iterator();
+				while (it.hasNext()) {
+					
+					MatrixEntry entry = it.next();
+					int m = entry.row();
+					int n = entry.column();
+					Feature feature1 = sequenceMap.get(m);
+					Feature feature2 = sequenceMap.get(n);
+					
+					// skip alignment from the same file
+					if (feature1.getData().getId() == feature2.getData().getId()) {
+						continue; 
+					}
+					
+					// HACK: ensure that f1 file id is always smaller than f2 file id
+					if (feature1.getData().getId() > feature2.getData().getId()) {
+						Feature temp = feature1;
+						feature1 = feature2;
+						feature2 = temp;
+					}
+					
+					double similarity = entry.get();
+					HdpResult hdpRes = new HdpResult(feature1, feature2);
+					hdpRes.setSimilarity(similarity/samplesTaken);
+					System.out.println(hdpRes);
+					resultMap.put(hdpRes, hdpRes);
+					
+				}
 				
 			} else if (MultiAlignConstants.SCORING_METHOD_HDP_RT_JAVA.equals(this.scoringMethod)) {
 			

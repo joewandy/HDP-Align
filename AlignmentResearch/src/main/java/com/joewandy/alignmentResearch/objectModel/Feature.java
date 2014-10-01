@@ -34,6 +34,7 @@ public class Feature {
 	private int metaboliteID;
 	private double score;
 	private boolean synthetic;
+	private int sequenceID;
 	
 	public Feature(int peakID) {
 		// the peakID is also the position index, so it should start from 0
@@ -266,6 +267,14 @@ public class Feature {
 
 	public void setScore(double score) {
 		this.score = score;
+	}
+
+	public int getSequenceID() {
+		return sequenceID;
+	}
+
+	public void setSequenceID(int sequenceID) {
+		this.sequenceID = sequenceID;
 	}
 
 	/**

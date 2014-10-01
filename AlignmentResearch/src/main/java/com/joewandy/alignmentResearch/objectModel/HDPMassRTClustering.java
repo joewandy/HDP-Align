@@ -1,17 +1,16 @@
 package com.joewandy.alignmentResearch.objectModel;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
+
+import no.uib.cipr.matrix.Matrix;
+import no.uib.cipr.matrix.sparse.FlexCompRowMatrix;
 
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.math3.random.RandomData;
 import org.apache.commons.math3.random.RandomDataImpl;
 
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
-import com.joewandy.alignmentResearch.alignmentMethod.custom.HdpResult;
 
 public class HDPMassRTClustering implements HDPClustering {
 
@@ -32,7 +31,7 @@ public class HDPMassRTClustering implements HDPClustering {
 	private int fa;
 	private double sa;
 	
-	private Map<HdpResult, HdpResult> resultMap;
+	private Matrix resultMap;
 	private int samplesTaken;
 	
 	public HDPMassRTClustering(List<AlignmentFile> dataList, AlignmentMethodParam methodParam) {
@@ -65,7 +64,6 @@ public class HDPMassRTClustering implements HDPClustering {
 		hdpParam.setRho_prec(massPrec);
 						
 		this.randomData = new RandomDataImpl();
-		this.resultMap = new HashMap<HdpResult, HdpResult>();
 		
 		// sample initial metabolite RT
 		setI(1);
@@ -81,6 +79,22 @@ public class HDPMassRTClustering implements HDPClustering {
 			hdpMetaboliteId = i;
 			this.hdpMetabolites.add(new HDPMetabolite(hdpMetaboliteId));
 		}
+		
+		// assign a sequential ID to all peaks to store the result later
+		int sequenceID = 0;
+		int totalPeaks = 0;
+		for (int j=0; j < dataList.size(); j++) {
+						
+			HDPFile hdpFile = new HDPFile(j);
+			AlignmentFile alignmentFile = dataList.get(j);
+			totalPeaks += alignmentFile.getFeaturesCount();
+			for (Feature f : alignmentFile.getFeatures()) {
+				f.setSequenceID(sequenceID);
+				sequenceID++;
+			}
+			
+		}
+		this.resultMap = new FlexCompRowMatrix(totalPeaks, totalPeaks);
 		
 	    // assign peaks across files into 1 RT cluster per file, 1 top-level metabolite
 		fa = 0;
@@ -249,15 +263,12 @@ public class HDPMassRTClustering implements HDPClustering {
 		
 	}
 	
-	public Map<HdpResult, HdpResult> getSimilarityResult() {
-		
-		System.out.println("Samples taken = " + samplesTaken);
-		for (Entry<HdpResult, HdpResult> e : resultMap.entrySet()) {
-			HdpResult value = e.getValue();
-			value.setSimilarity(value.getSimilarity() / samplesTaken);
-		}
-		
+	public Matrix getSimilarityResult() {		
 		return this.resultMap;
+	}
+	
+	public int getSamplesTaken() {
+		return this.samplesTaken;
 	}
 
 	private void assignPeakMassRt() {
@@ -660,21 +671,11 @@ public class HDPMassRTClustering implements HDPClustering {
 				List<Feature> peaksInside = met.getPeaksInMassCluster(a);
 				for (Feature f1 : peaksInside) {
 					for (Feature f2 : peaksInside) {
-						// skip same feature
-						if (f1.equals(f2)) {
-							continue;
-						}
-						// impose an ordering on the features
-						
-						
-						HdpResult hdpRes = new HdpResult(f1, f2);
-						if (resultMap.containsKey(hdpRes)) {
-							HdpResult current = resultMap.get(hdpRes);
-							current.setSimilarity(current.getSimilarity()+1);
-						} else {
-							hdpRes.setSimilarity(1);
-							resultMap.put(hdpRes, hdpRes);
-						}
+						int m = f1.getSequenceID();
+						int n = f2.getSequenceID();
+						double currentValue = resultMap.get(m, n);
+						double newValue = currentValue+1;
+						resultMap.set(m, n, newValue);
 					}
 				}
 			}

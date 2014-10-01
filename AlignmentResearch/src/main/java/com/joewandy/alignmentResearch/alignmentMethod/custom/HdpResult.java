@@ -65,6 +65,12 @@ public class HdpResult {
 		} else if (!feature2.equals(other.feature2))
 			return false;
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "HdpResult [feature1=" + feature1 + ", feature2=" + feature2
+				+ ", similarity=" + similarity + "]";
 	}	
 	
 }

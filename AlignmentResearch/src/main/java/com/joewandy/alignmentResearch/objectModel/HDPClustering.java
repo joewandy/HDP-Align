@@ -1,12 +1,12 @@
 package com.joewandy.alignmentResearch.objectModel;
 
-import java.util.Map;
-
-import com.joewandy.alignmentResearch.alignmentMethod.custom.HdpResult;
+import no.uib.cipr.matrix.Matrix;
 
 public interface HDPClustering {
 
-	Map<HdpResult, HdpResult> getSimilarityResult();
+	Matrix getSimilarityResult();
+	
+	int getSamplesTaken();
 
 	void run();
 
