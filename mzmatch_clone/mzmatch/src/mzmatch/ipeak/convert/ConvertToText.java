@@ -57,7 +57,7 @@ public class ConvertToText
 	// implementation
 	public static void process(Header header, IPeakSet<IPeakSet<IPeak>> peaksets, Options options, HashMap<String,Molecule> molecules, OutputStream output) throws XmlParserException,IOException
 	{
-		final CsvWriter writer = new CsvWriter(output, ',', Charset.forName("UTF-8"));
+		final CsvWriter writer = new CsvWriter(output, ':', Charset.forName("UTF-8"));
 		writer.write("id");
 		writer.write("mass");
 		writer.write("RT");

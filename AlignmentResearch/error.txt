@@ -1,5 +1,6 @@
 java.lang.NullPointerException
-	at java.util.Arrays.sort(Arrays.java:1435)
+	at java.util.TimSort.sort(TimSort.java:173)
+	at java.util.Arrays.sort(Arrays.java:659)
 	at com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.SimaFormatDataGenerator.getAlignmentFiles(SimaFormatDataGenerator.java:48)
 	at com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.BaseDataGenerator.generate(BaseDataGenerator.java:29)
 	at com.joewandy.alignmentResearch.main.experiment.MultiAlignBaseExp.getData(MultiAlignBaseExp.java:84)

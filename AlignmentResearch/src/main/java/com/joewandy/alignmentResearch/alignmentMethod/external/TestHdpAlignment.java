@@ -1,10 +1,12 @@
 package com.joewandy.alignmentResearch.alignmentMethod.external;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import no.uib.cipr.matrix.Matrix;
 import no.uib.cipr.matrix.MatrixEntry;
@@ -104,6 +106,7 @@ public class TestHdpAlignment extends BaseAlignment implements AlignmentMethod {
 				clustering.run();
 
 				// process the result
+				Map<Feature, List<Feature>> pairings = new HashMap<Feature, List<Feature>>();
 				int samplesTaken = clustering.getSamplesTaken();		
 				System.out.println("Samples taken = " + samplesTaken);
 				Matrix simMatrix = clustering.getSimilarityResult();
@@ -113,6 +116,7 @@ public class TestHdpAlignment extends BaseAlignment implements AlignmentMethod {
 					MatrixEntry entry = it.next();
 					int m = entry.row();
 					int n = entry.column();
+					double similarity = entry.get()/samplesTaken;
 					Feature feature1 = sequenceMap.get(m);
 					Feature feature2 = sequenceMap.get(n);
 					
@@ -120,6 +124,17 @@ public class TestHdpAlignment extends BaseAlignment implements AlignmentMethod {
 					if (feature1.getData().getId() == feature2.getData().getId()) {
 						continue; 
 					}
+
+					// track the partner peaks for debugging
+					List<Feature> partners = null;
+					if (pairings.containsKey(feature1)) {
+						partners = pairings.get(feature1);
+					} else {
+						partners = new ArrayList<Feature>();
+						pairings.put(feature1, partners);
+					}
+					feature2.setScore(similarity);
+					partners.add(feature2);
 					
 					// HACK: ensure that f1 file id is always smaller than f2 file id
 					if (feature1.getData().getId() > feature2.getData().getId()) {
@@ -128,12 +143,21 @@ public class TestHdpAlignment extends BaseAlignment implements AlignmentMethod {
 						feature2 = temp;
 					}
 					
-					double similarity = entry.get();
 					HdpResult hdpRes = new HdpResult(feature1, feature2);
-					hdpRes.setSimilarity(similarity/samplesTaken);
+					hdpRes.setSimilarity(similarity);
 					System.out.println(hdpRes);
 					resultMap.put(hdpRes, hdpRes);
 					
+				}
+				
+				for (Entry<Feature, List<Feature>> entry : pairings.entrySet()) {
+					Feature f = entry.getKey();
+					List<Feature> partners = entry.getValue();
+					System.out.println("Feature " + f + " has " + 
+							partners.size() + " partners = ");
+					for (Feature partner : partners) {
+						System.out.println("\t" + partner);
+					}
 				}
 				
 			} else if (MultiAlignConstants.SCORING_METHOD_HDP_RT_JAVA.equals(this.scoringMethod)) {
