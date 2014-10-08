@@ -42,6 +42,7 @@ public class AlignmentMethodParam {
 	private double hdpGlobalRtClusterStdev;
 	private double hdpLocalRtClusterStdev;
 	private double hdpMassTol;
+	private boolean hdpPreventSameMassCluster;
 
 	public AlignmentMethodParam() {
 	
@@ -74,6 +75,7 @@ public class AlignmentMethodParam {
 		this.hdpGlobalRtClusterStdev = options.hdpGlobalRtClusterStdev;
 		this.hdpLocalRtClusterStdev = options.hdpLocalRtClusterStdev;
 		this.hdpMassTol = options.hdpMassTol;
+		this.hdpPreventSameMassCluster = options.hdpPreventSameMassCluster;
 		this.scoringMethod = options.scoringMethod;		
 	}
 
@@ -292,6 +294,14 @@ public class AlignmentMethodParam {
 
 	public void setHdpMassTol(double hdpMassTol) {
 		this.hdpMassTol = hdpMassTol;
+	}
+
+	public boolean isHdpPreventSameMassCluster() {
+		return hdpPreventSameMassCluster;
+	}
+
+	public void setHdpPreventSameMassCluster(boolean hdpPreventSameMassCluster) {
+		this.hdpPreventSameMassCluster = hdpPreventSameMassCluster;
 	}	
 
 }

@@ -193,5 +193,35 @@ public class HDPMetabolite {
 	public String toString() {
 		return "HDPMetabolite [id=" + id + ", peakData.size()=" + peakData.size() + ", peakData=" + peakData + "]";
 	}
+
+	public int[] getMassClusterIndicator(Feature thisPeak) {
+
+		int[] results = new int[A+1];
+		for (int a = 0; a < A; a++) {
+			List<Feature> peaksInside = getPeaksInMassCluster(a);
+			if (containsSameOrigin(peaksInside, thisPeak)) {
+				results[a] = 0; // do not allow peaks from the same file to be put together in the same mass cluster
+			} else {
+				results[a] = 1;
+			}
+		}		
+		
+		results[A] = 1; // the last infinite part is always 1
+		
+		return results;
+
+	}
+	
+	private boolean containsSameOrigin(List<Feature> features, Feature toFind) {
+		for (Feature inside : features) {
+			if (inside.equals(toFind)) {
+				continue; // skip ourself
+			}
+			if (inside.getData().equals(toFind.getData())) {
+				return true;
+			}
+		}
+		return false;
+	}
 	
 }

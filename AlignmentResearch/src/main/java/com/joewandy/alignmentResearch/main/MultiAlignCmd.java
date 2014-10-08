@@ -1,5 +1,6 @@
 package com.joewandy.alignmentResearch.main;
 
+import java.io.PrintStream;
 import java.util.List;
 
 import mzmatch.util.Tool;
@@ -101,17 +102,25 @@ public class MultiAlignCmd {
 		cmdline.parse(args);
 		if (options.help) {
 			// show help ?
-			Tool.printHeader(System.out, MultiAlignCmdOptions.APPLICATION, MultiAlignCmdOptions.VERSION);
+			printHeader(System.out, MultiAlignCmdOptions.APPLICATION, MultiAlignCmdOptions.VERSION);
 			cmdline.printUsage(System.out, "");
 			System.exit(0);
 		}
 		if (options.verbose) {
 			// be verbose ?
-			Tool.printHeader(System.out, MultiAlignCmdOptions.APPLICATION, MultiAlignCmdOptions.VERSION);
+			printHeader(System.out, MultiAlignCmdOptions.APPLICATION, MultiAlignCmdOptions.VERSION);
 			cmdline.printOptions();
 		}
 		return options;
 
 	}
-			
+
+	public static void printHeader(PrintStream output, String appname, String version) {		
+		output.println(" ------------------------------------------------------");
+		output.println("| Joe Wandy, University of Glasgow (j.wandy.1@research.gla.ac.uk)");
+		output.println("|");
+		output.println("| " + appname + " " + version + "");
+		output.println(" ------------------------------------------------------");
+	}
+	
 }

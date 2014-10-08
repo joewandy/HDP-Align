@@ -20,6 +20,7 @@ public class HDPClusteringParam {
 	private double rho_prec;
 	
 	private boolean usePpm;
+	private boolean preventSameMassCluster;
 		
 	public int getNsamps() {
 		return nsamps;
@@ -123,6 +124,14 @@ public class HDPClusteringParam {
 
 	public void setUsePpm(boolean usePpm) {
 		this.usePpm = usePpm;
+	}
+
+	public boolean isPreventSameMassCluster() {
+		return preventSameMassCluster;
+	}
+
+	public void setPreventSameMassCluster(boolean preventSameMassCluster) {
+		this.preventSameMassCluster = preventSameMassCluster;
 	}
 	
 }

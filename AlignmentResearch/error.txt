@@ -1,8 +1,8 @@
-java.lang.NullPointerException
-	at java.util.TimSort.sort(TimSort.java:173)
-	at java.util.Arrays.sort(Arrays.java:659)
-	at com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.SimaFormatDataGenerator.getAlignmentFiles(SimaFormatDataGenerator.java:48)
-	at com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.BaseDataGenerator.generate(BaseDataGenerator.java:29)
-	at com.joewandy.alignmentResearch.main.experiment.MultiAlignBaseExp.getData(MultiAlignBaseExp.java:84)
-	at com.joewandy.alignmentResearch.main.experiment.HdpExperiment.performExperiment(HdpExperiment.java:21)
+java.lang.IndexOutOfBoundsException: Index: 0, Size: 0
+	at java.util.ArrayList.rangeCheck(ArrayList.java:635)
+	at java.util.ArrayList.get(ArrayList.java:411)
+	at com.joewandy.alignmentResearch.alignmentMethod.external.SimaAlignment.<init>(SimaAlignment.java:54)
+	at com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodFactory.getAlignmentMethod(AlignmentMethodFactory.java:66)
+	at com.joewandy.alignmentResearch.main.MultiAlign.<init>(MultiAlign.java:91)
+	at com.joewandy.alignmentResearch.main.experiment.HdpExperiment.performExperiment(HdpExperiment.java:24)
 	at com.joewandy.alignmentResearch.main.MultiAlignCmd.main(MultiAlignCmd.java:41)
