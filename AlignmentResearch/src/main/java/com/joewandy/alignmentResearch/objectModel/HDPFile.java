@@ -38,14 +38,10 @@ public class HDPFile {
 		features.addAll(newFeatures);
 	}
 	
-	public double getMassSum(boolean usePpm) {
+	public double getMassSum() {
 		double mass = 0;
 		for (Feature f : features) {
-			if (usePpm) {
-				mass += f.getMassLog();				
-			} else {
-				mass += f.getMass();
-			}
+			mass += f.getMassLog();				
 		}
 		return mass;
 	}

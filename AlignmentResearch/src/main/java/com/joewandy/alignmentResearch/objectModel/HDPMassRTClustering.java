@@ -38,7 +38,6 @@ public class HDPMassRTClustering implements HDPClustering {
 		
 		this.hdpParam = new HDPClusteringParam();
 		
-		hdpParam.setUsePpm(methodParam.isUsePpm());
 		hdpParam.setPreventSameMassCluster(methodParam.isHdpPreventSameMassCluster());
 		
 		hdpParam.setMu_0(getRTMean(dataList));
@@ -112,7 +111,7 @@ public class HDPMassRTClustering implements HDPClustering {
 			hdpFile.setK(1);
 			
 			fa += hdpFile.N();
-			sa += hdpFile.getMassSum(this.hdpParam.isUsePpm());
+			sa += hdpFile.getMassSum();
 			
 			dataAll.addAll(hdpFile.getFeatures());
 
@@ -157,29 +156,14 @@ public class HDPMassRTClustering implements HDPClustering {
 	}
 	
 	private double getMassPrec(double massTol) {
-		double prec = 0;
-		if (this.hdpParam.isUsePpm()) {
-			double logOnePpm = Math.log(1000001) - Math.log(1000000);
-			double logDiff = logOnePpm * massTol; 
-			double stdev = logDiff/2; // assume 2 stdev = logDiff
-			prec = 1.0 / (stdev*stdev);
-		} else {
-			// in case of absolute mass tolerance, not using log scale 
-			// to make it easier to specify the value
-			prec = 1.0 / (massTol*massTol);
-		}
-		System.out.println("usePpm = " + this.hdpParam.isUsePpm() + ", massPrec = " + prec);
+		double logOnePpm = Math.log(1000001) - Math.log(1000000);
+		double logDiff = logOnePpm * massTol; 
+		double stdev = logDiff/2; // assume 2 stdev = logDiff
+		double prec = 1.0 / (stdev*stdev);
+		System.out.println("massPrec = " + prec);
 		return prec;			
 	}
 	
-	private double getFeatureMass(Feature f) {
-		if (this.hdpParam.isUsePpm()) {
-			return f.getMassLog();
-		} else {
-			return f.getMass();
-		}
-	}
-
 	private double getRTMean(List<AlignmentFile> dataList) {
 		double sum = 0;
 		int count = 0;
@@ -198,11 +182,7 @@ public class HDPMassRTClustering implements HDPClustering {
 		int count = 0;
 		for (AlignmentFile file : dataList) {
 			for (Feature f : file.getFeatures()) {
-				if (this.hdpParam.isUsePpm()) {
-					sum += Math.exp(getFeatureMass(f));
-				} else {
-					sum += getFeatureMass(f);
-				}
+				sum += Math.exp(f.getMassLog());
 				count++;
 			}
 		}
@@ -304,7 +284,7 @@ public class HDPMassRTClustering implements HDPClustering {
 				met.removeV(peakPos);
 				met.removePeakData(peakPos);
 				met.decreaseFa(a);
-				met.subsSa(a, getFeatureMass(thisPeak));
+				met.subsSa(a, thisPeak.getMassLog());
 				
 				// does this result in an empty mass cluster ?
 				if (met.fa(a) == 0) {
@@ -384,7 +364,7 @@ public class HDPMassRTClustering implements HDPClustering {
 
 					HDPMetabolite thisMetabolite = hdpMetabolites.get(metIndex);
 					
-					double x = getFeatureMass(thisPeak);
+					double x = thisPeak.getMassLog();
 					double componentPrec = hdpParam.getRho_prec();
 					double hyperparamMean = hdpParam.getPsi_0();
 					double hyperparamPrec = hdpParam.getRho_0_prec();
@@ -396,15 +376,14 @@ public class HDPMassRTClustering implements HDPClustering {
 					
 					// compute posterior probability
 					double[] massTermLogPrior = dpResult.getLogPrior();
-					double[] massTermLogLikelihood = dpResult.getLogLikelihood();
-					double[] massTermLogPost = addArray(massTermLogPrior, massTermLogLikelihood);
-					
 					// hack to prevent peaks going into the same mass cluster if another peak from the same file is already there
 					if (hdpParam.isPreventSameMassCluster()) {
-						massTermLogPost = modifyTerms(thisPeak, thisMetabolite,
-								massTermLogPost);						
+						massTermLogPrior = modifyTerms(thisPeak, thisMetabolite,
+								massTermLogPrior);						
 					}
-					
+					double[] massTermLogLikelihood = dpResult.getLogLikelihood();
+					double[] massTermLogPost = addArray(massTermLogPrior, massTermLogLikelihood);
+										
 					// marginalise over all the mass clusters by summing over them, then take the log for use later
 					metaboliteMassLike[metIndex] = sum(expArray(massTermLogPost));					
 				
@@ -526,7 +505,7 @@ public class HDPMassRTClustering implements HDPClustering {
 				// for existing and new mass cluster
 				HDPMetabolite metabolite_i = hdpMetabolites.get(i);
 				
-				double x = getFeatureMass(thisPeak);
+				double x = thisPeak.getMassLog();
 				double componentPrec = hdpParam.getRho_prec();
 				double hyperparamMean = hdpParam.getPsi_0();
 				double hyperparamPrec = hdpParam.getRho_0_prec();
@@ -538,14 +517,13 @@ public class HDPMassRTClustering implements HDPClustering {
 				
 				// compute posterior probability
 				double[] massTermLogPrior = dpResult.getLogPrior();
-				double[] massTermLogLikelihood = dpResult.getLogLikelihood();
-				double[] massTermLogPost = addArray(massTermLogPrior, massTermLogLikelihood);
-
 				// hack to prevent peaks going into the same mass cluster if another peak from the same file is already there
 				if (hdpParam.isPreventSameMassCluster()) {
-					massTermLogPost = modifyTerms(thisPeak, metabolite_i,
-							massTermLogPost);	
+					massTermLogPrior = modifyTerms(thisPeak, metabolite_i,
+							massTermLogPrior);	
 				}
+				double[] massTermLogLikelihood = dpResult.getLogLikelihood();
+				double[] massTermLogPost = addArray(massTermLogPrior, massTermLogLikelihood);
 				
 				// pick the mass cluster
 				double[] post = expArray(subsArray(massTermLogPost, max(massTermLogPost)));
@@ -565,7 +543,7 @@ public class HDPMassRTClustering implements HDPClustering {
 				
 				// assign the peak under mass cluster a
 				metabolite_i.increaseFa(a);
-				metabolite_i.addSa(a, getFeatureMass(thisPeak));
+				metabolite_i.addSa(a, thisPeak.getMassLog());
 				metabolite_i.appendV(a);
 				metabolite_i.addPeakData(thisPeak);
 				
@@ -645,7 +623,7 @@ public class HDPMassRTClustering implements HDPClustering {
 		// normalise and take the log again
 		dist = normalise(dist, sum(dist));
 		logDistribution = logArray(dist);
-
+		
 		return logDistribution;
 	
 	}
