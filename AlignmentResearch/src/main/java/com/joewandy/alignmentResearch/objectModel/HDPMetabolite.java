@@ -6,18 +6,16 @@ import java.util.Set;
 
 public class HDPMetabolite {
 
-	private int id;
-	private int A;
-	private List<Integer> fa;
-	private List<Double> sa;
-	
-	private List<Integer> V;
-	private List<Feature> peakData;
+	private int id;									// id of this metabolite
+	private List<Feature> peakData;					// all the peaks under this metabolite
+
+	private int massClusterSeqId;
+	private int A;									// count of mass clusters in this metabolite
+	private List<HDPMassCluster> massClusters;		// list of mass clusters objects
+	private List<Integer> V;						// membership of which peak in peakData to the mass clusters in the list above
 	
 	public HDPMetabolite(int id) {
 		this.id = id;
-		this.fa = new ArrayList<Integer>();
-		this.sa = new ArrayList<Double>();
 		this.V = new ArrayList<Integer>();
 		this.peakData = new ArrayList<Feature>();
 	}
@@ -42,91 +40,65 @@ public class HDPMetabolite {
 		A--;
 	}
 	
-	public List<Feature> getPeaksInMassCluster(int toFind) {
-		assert(V.size() == peakData.size());
-		List<Feature> results = new ArrayList<Feature>();
-		for (int n = 0; n < peakData.size(); n++) {
-			int a = V.get(n);
-			if (a == toFind) {
-				Feature f = peakData.get(n);
-				results.add(f);
-			}
-		}
-		return results;
+	public void addMassCluster() {
+		HDPMassCluster newCluster = new HDPMassCluster(massClusterSeqId);
+		massClusterSeqId++;
+		massClusters.add(newCluster);
+	}
+	
+	public void deleteMassCluster(int a) {
+		massClusters.remove(a);
+	}
+	
+	public void addPeak(Feature f, int a) {
+		HDPMassCluster massCluster = massClusters.get(a);
+		massCluster.addFeature(f);
+		V.add(a);
+		peakData.add(f);
+	}
+
+	public void removePeak(Feature f) {
+		int peakPos = findPeakPos(f);
+		int a = V(peakPos);
+		V.remove(peakPos);
+		peakData.remove(peakPos);
+		HDPMassCluster massCluster = massClusters.get(a);
+		massCluster.removeFeature(f);;
+	}
+	
+	public List<Feature> getPeaksInMassCluster(int a) {
+		Set<Feature> massClusterData = massClusters.get(a).getPeakData();
+		return new ArrayList<Feature>(massClusterData);
 	}
 			
 	public int fa(int a) {
-		return fa.get(a);
+		HDPMassCluster massCluster = massClusters.get(a);
+		return massCluster.getCountPeaks();
 	}
 	
 	public int[] faArray() {
-		int[] temp = new int[fa.size()];
-		for (int i = 0; i < fa.size(); i++) {
-			temp[i] = fa.get(i);
+		int[] temp = new int[massClusters.size()];
+		for (int a = 0; a < massClusters.size(); a++) {
+			temp[a] = fa(a);
 		}
 		return temp;
 	}
 	
-	public void setFa(int a, int newFa) {
-		fa.set(a, newFa);
-	}
-	
-	public int faSize() {
-		return fa.size();
-	}
-	
-	public void increaseFa(int a) {
-		fa.set(a, fa(a) + 1);
-	}
-
-	public void decreaseFa(int a) {
-		fa.set(a, fa(a) - 1);
-	}
-
-	public void appendFa(int newFa) {
-		fa.add(newFa);
-	}
-	
-	public void removeFa(int a) {
-		fa.remove(a);
+	public int getMassClustersSize() {
+		return massClusters.size();
 	}
 	
 	public double sa(int a) {
-		return sa.get(a);
-	}
-	
-	public void setSa(int a, double newSa) {
-		sa.set(a, newSa);
+		HDPMassCluster massCluster = massClusters.get(a);
+		return massCluster.getSumPeaks();
 	}
 	
 	public double[] saArray() {
-		double[] temp = new double[sa.size()];
-		for (int i = 0; i < sa.size(); i++) {
-			temp[i] = sa.get(i);
+		double[] temp = new double[massClusters.size()];
+		for (int a = 0; a < massClusters.size(); a++) {
+			temp[a] = sa(a);
 		}
 		return temp;
-	}
-	
-	public int saSize() {
-		return sa.size();
-	}
-	
-	public void addSa(int a, double amount) {
-		double currentSa = sa(a);
-		setSa(a, currentSa + amount);
-	}
-
-	public void subsSa(int a, double amount) {
-		double currentSa = sa(a);
-		setSa(a, currentSa - amount);
-	}
-
-	public void appendSa(double newSa) {
-		sa.add(newSa);
-	}
-	
-	public void removeSa(int a) {
-		sa.remove(a);
 	}
 	
 	public int V(int peakPos) {

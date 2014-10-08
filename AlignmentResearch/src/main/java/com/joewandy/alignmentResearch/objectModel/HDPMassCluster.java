@@ -33,7 +33,18 @@ public class HDPMassCluster {
 	
 	public void addFeature(Feature f) {
 		countPeaks++;
-		sumPeaks = f.getMassLog();					
+		sumPeaks += f.getMassLog();
+		peakData.add(f);
 	}	
+	
+	public void removeFeature(Feature f) {
+		countPeaks--;
+		sumPeaks -= f.getMassLog();
+		peakData.remove(f);
+	}
+	
+	public boolean contains(Feature f) {
+		return peakData.contains(f);
+	}
 	
 }

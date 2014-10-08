@@ -297,8 +297,7 @@ public class HDPMassRTClustering implements HDPClustering {
 					// decrease all indices in V that is > a by 1 since a is deleted
 					met.reindexV(a);
 					
-					assert(met.faSize() == met.A());					
-					assert(met.saSize() == met.A());					
+					assert(met.getMassClustersSize() == met.A());					
 					
 				}
 				
@@ -555,8 +554,7 @@ public class HDPMassRTClustering implements HDPClustering {
 				// %%%%%%%%%% 4. maintain model state consistency %%%%%%%%%%
 
 				assert(this.hdpMetabolites.size() == this.I);
-				assert(metabolite_i.faSize()==metabolite_i.A());
-				assert(metabolite_i.saSize()==metabolite_i.A());
+				assert(met.getMassClustersSize() == met.A());	
 				
 			} // end loop across peaks randomly
 					
