@@ -145,7 +145,6 @@ public class TestHdpAlignment extends BaseAlignment implements AlignmentMethod {
 					
 					HdpResult hdpRes = new HdpResult(feature1, feature2);
 					hdpRes.setSimilarity(similarity);
-					System.out.println(hdpRes);
 					resultMap.put(hdpRes, hdpRes);
 					
 				}
@@ -153,7 +152,7 @@ public class TestHdpAlignment extends BaseAlignment implements AlignmentMethod {
 				for (Entry<Feature, List<Feature>> entry : pairings.entrySet()) {
 					Feature f = entry.getKey();
 					List<Feature> partners = entry.getValue();
-					System.out.println("Feature " + f + " has " + 
+					System.out.println(f + " has " + 
 							partners.size() + " partners = ");
 					for (Feature partner : partners) {
 						System.out.println("\t" + partner);

@@ -459,14 +459,13 @@ public class HDPMassRTClustering implements HDPClustering {
 		
 		// compute posterior probability
 		double[] massTermLogPrior = dpResult.getLogPrior();
+		double[] massTermLogLikelihood = dpResult.getLogLikelihood();
 		
 		// hack to prevent peaks going into the same mass cluster if another peak from the same file is already there
 		if (hdpParam.isPreventSameMassCluster()) {
-			massTermLogPrior = modifyTerms(thisPeak, thisMetabolite,
-					massTermLogPrior);						
+			massTermLogLikelihood = modifyTerms(thisPeak, thisMetabolite, massTermLogLikelihood);						
 		}
 
-		double[] massTermLogLikelihood = dpResult.getLogLikelihood();
 		double[] massTermLogPost = addArray(massTermLogPrior, massTermLogLikelihood);
 		return massTermLogPost;
 
@@ -661,29 +660,27 @@ public class HDPMassRTClustering implements HDPClustering {
 	}
 	
 	/**
-	 * Experimental hack to modify the prior distribution to prevent a peak from
+	 * Experimental hack to modify the likelihood to prevent a peak from
 	 * entering a mass cluster if another peak from the same file is already there first.
 	 * This is used to improve alignment performance, since we don't want to align peaks
 	 * from the same file together, so we don't want them to be in the same mass cluster.
 	 * @param thisPeak The peak
 	 * @param thisMetabolite The metabolite
-	 * @param logDistribution 
-	 * @return The distribution
+	 * @param logDistribution The original likelihood
+	 * @return The distribution The modified likelihood
 	 */
 	private double[] modifyTerms(Feature thisPeak,
 			HDPMetabolite thisMetabolite, double[] logDistribution) {
 
 		// get the indicator array, entries are either 0 or 1
 		int[] indicator = thisMetabolite.getMassClusterIndicator(thisPeak);					
-
-		// unlog this, then multiply by the indicator
-		double[] dist = expArray(subsArray(logDistribution, max(logDistribution)));
-		dist = multArray(dist, indicator);
-		
-		// normalise and take the log again
-		dist = normalise(dist, sum(dist));
-		logDistribution = logArray(dist);
-		
+		assert(indicator.length == logDistribution.length);
+		for (int a = 0; a < indicator.length; a++) {
+			if (indicator[a] == 0) {
+				// we set the likelihood = 0, and log(0) = -infinity
+				logDistribution[a] = Double.NEGATIVE_INFINITY;
+			}
+		}		
 		return logDistribution;
 	
 	}
