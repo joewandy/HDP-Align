@@ -27,9 +27,6 @@ public class HDPMassRTClustering implements HDPClustering {
 	private List<Integer> fi;
 	private List<Double> ti;
 	private List<Double> si;
-		
-	private int fa;
-	private double sa;
 	
 	private Matrix resultMap;
 	private int samplesTaken;
@@ -85,7 +82,6 @@ public class HDPMassRTClustering implements HDPClustering {
 		int totalPeaks = 0;
 		for (int j=0; j < dataList.size(); j++) {
 						
-			HDPFile hdpFile = new HDPFile(j);
 			AlignmentFile alignmentFile = dataList.get(j);
 			totalPeaks += alignmentFile.getFeaturesCount();
 			for (Feature f : alignmentFile.getFeatures()) {
@@ -97,8 +93,6 @@ public class HDPMassRTClustering implements HDPClustering {
 		this.resultMap = new FlexCompRowMatrix(totalPeaks, totalPeaks);
 		
 	    // assign peaks across files into 1 RT cluster per file, 1 top-level metabolite
-		fa = 0;
-		sa = 0;
 		J = dataList.size();
 		hdpFiles = new ArrayList<HDPFile>();
 		List<Feature> dataAll = new ArrayList<Feature>();
@@ -109,10 +103,7 @@ public class HDPMassRTClustering implements HDPClustering {
 			AlignmentFile alignmentFile = dataList.get(j);
 			hdpFile.addFeatures(alignmentFile.getFeatures());
 			hdpFile.setK(1);
-			
-			fa += hdpFile.N();
-			sa += hdpFile.getMassSum();
-			
+						
 			dataAll.addAll(hdpFile.getFeatures());
 
 			// 1 x N, peaks to clusters assignment
@@ -142,14 +133,12 @@ public class HDPMassRTClustering implements HDPClustering {
 		for (i = 0; i < this.I; i++) {
 			
 			HDPMetabolite met = hdpMetabolites.get(hdpMetaboliteId);
-			hdpMetaboliteId++;			
-			met.setA(1);
-			met.appendFa(fa);
-			met.appendSa(sa);
+			hdpMetaboliteId++;
+			int a = met.addMassCluster();
 			for (int n = 0; n < dataAll.size(); n++) {
-				met.appendV(0);
+				Feature f = dataAll.get(n);
+				met.addPeak(f, a);
 			}
-			met.addPeakData(dataAll);
 			
 		}
 		
@@ -230,7 +219,7 @@ public class HDPMassRTClustering implements HDPClustering {
 			sb.append("all_A = [");
 			for (int i = 0; i < this.I; i++) {
 				HDPMetabolite met = hdpMetabolites.get(i);
-				int A = met.A();
+				int A = met.getA();
 				String formatted = String.format(" %3d", A);
 				sb.append(formatted);
 			}
@@ -256,9 +245,7 @@ public class HDPMassRTClustering implements HDPClustering {
 		
 		// TODO: loop across all files randomly
 		for (HDPFile hdpFile : hdpFiles) {
-		
-			int j = hdpFile.getId();
-			
+					
 			// TODO: loop across peaks randomly
 			assert(hdpFile.N() == hdpFile.Zsize());
 			for (int n = 0; n < hdpFile.N(); n++) {
@@ -271,34 +258,21 @@ public class HDPMassRTClustering implements HDPClustering {
 				
 				// find the mass cluster
 				HDPMetabolite met = hdpMetabolites.get(i);
-				int peakPos = met.findPeakPos(thisPeak);
-				assert (peakPos != -1) : "file is " + j;
-				assert (met.vSize() == met.peakDataSize());
+				assert met.vSize() == met.peakDataSize() : " met.vSize() " + met.vSize() + " met.peakDataSize() " + met.peakDataSize();
 				
 				// %%%%%%%%%% 1. remove peak from model %%%%%%%%%%
 				
 				hdpFile.setZ(n, -1);
 				hdpFile.decreaseCountZ(k);
 				hdpFile.subsSumZ(k, thisPeak.getRt());
-				int a = met.V(peakPos);
-				met.removeV(peakPos);
-				met.removePeakData(peakPos);
-				met.decreaseFa(a);
-				met.subsSa(a, thisPeak.getMassLog());
+				HDPMassCluster massCluster = met.removePeak(thisPeak);
 				
 				// does this result in an empty mass cluster ?
-				if (met.fa(a) == 0) {
+				if (massCluster.getCountPeaks() == 0) {
 					
 					// delete this mass cluster indexed by a
-					met.decreaseA();
-					met.removeFa(a);
-					met.removeSa(a);
-					
-					// decrease all indices in V that is > a by 1 since a is deleted
-					met.reindexV(a);
-					
-					assert(met.getMassClustersSize() == met.A());					
-					
+					met.removeMassCluster(massCluster);
+															
 				}
 				
 				// does this result in an empty RT cluster ?
@@ -527,24 +501,19 @@ public class HDPMassRTClustering implements HDPClustering {
 				// pick the mass cluster
 				double[] post = expArray(subsArray(massTermLogPost, max(massTermLogPost)));
 				post = normalise(post, sum(post));
-				a = sample(post);
+				int a = sample(post);
 				
-				if ((a+1) > metabolite_i.A()) {
+				if ((a+1) > metabolite_i.getA()) {
 					
 					// make a new mass cluster
-					metabolite_i.increaseA();
-					metabolite_i.appendFa(0);
-					metabolite_i.appendSa(0.0);
+					metabolite_i.addMassCluster();
 										
 				}
 				
 				// %%%%%%%%%% 3. add peak back into model %%%%%%%%%%
 				
 				// assign the peak under mass cluster a
-				metabolite_i.increaseFa(a);
-				metabolite_i.addSa(a, thisPeak.getMassLog());
-				metabolite_i.appendV(a);
-				metabolite_i.addPeakData(thisPeak);
+				metabolite_i.addPeak(thisPeak, a);
 				
 				// assign the peak under RT cluster k
 				hdpFile.setZ(n, k);
@@ -554,7 +523,6 @@ public class HDPMassRTClustering implements HDPClustering {
 				// %%%%%%%%%% 4. maintain model state consistency %%%%%%%%%%
 
 				assert(this.hdpMetabolites.size() == this.I);
-				assert(met.getMassClustersSize() == met.A());	
 				
 			} // end loop across peaks randomly
 					
@@ -674,7 +642,7 @@ public class HDPMassRTClustering implements HDPClustering {
 			HDPMetabolite met = hdpMetabolites.get(i);
 
 			// for all mass clusters
-			for (int a = 0; a < met.A(); a++) {
+			for (int a = 0; a < met.getA(); a++) {
 				List<Feature> peaksInside = met.getPeaksInMassCluster(a);
 				for (Feature f1 : peaksInside) {
 					for (Feature f2 : peaksInside) {

@@ -28,6 +28,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -292,6 +293,16 @@ public class Identify
 			// process the data
 			if (options.verbose)
 				System.out.println("Identifying peaks");
+			
+			List<String> keys = new ArrayList<String>(molecules.keySet());
+			Collections.sort(keys);
+			for (String key : keys) {
+				Molecule molecule = molecules.get(key);
+				final double moleculeMass = molecule.getFormula().getMass(Mass.MONOISOTOPIC);
+				System.out.println(molecule.getDatabaseID() + ", " + molecule.getName() + ", " + 
+						molecule.getPlainFormula() + ", " + moleculeMass);
+			}
+			
 			for (Molecule molecule : molecules.values())
 			{
 				final Polarity p = molecule.getPolarity();

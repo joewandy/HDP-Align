@@ -1,7 +1,9 @@
 package com.joewandy.alignmentResearch.objectModel;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class HDPMetabolite {
@@ -10,60 +12,48 @@ public class HDPMetabolite {
 	private List<Feature> peakData;					// all the peaks under this metabolite
 
 	private int massClusterSeqId;
-	private int A;									// count of mass clusters in this metabolite
 	private List<HDPMassCluster> massClusters;		// list of mass clusters objects
-	private List<Integer> V;						// membership of which peak in peakData to the mass clusters in the list above
+	private Map<Feature, HDPMassCluster> V;			// which peak assigned to which mass clusters
 	
 	public HDPMetabolite(int id) {
 		this.id = id;
-		this.V = new ArrayList<Integer>();
+		this.V = new HashMap<Feature, HDPMassCluster>();
 		this.peakData = new ArrayList<Feature>();
+		this.massClusters = new ArrayList<HDPMassCluster>();
 	}
 
 	public int getId() {
 		return id;
 	}
 	
-	public int A() {
-		return A;
+	public int getA() {
+		return massClusters.size();
 	}
-	
-	public void setA(int a) {
-		A = a;
-	}
-
-	public void increaseA() {
-		A++;
-	}
-	
-	public void decreaseA() {
-		A--;
-	}
-	
-	public void addMassCluster() {
+		
+	public int addMassCluster() {
 		HDPMassCluster newCluster = new HDPMassCluster(massClusterSeqId);
 		massClusterSeqId++;
 		massClusters.add(newCluster);
+		int a = massClusters.size()-1;
+		return a;
 	}
-	
-	public void deleteMassCluster(int a) {
-		massClusters.remove(a);
+		
+	public void removeMassCluster(HDPMassCluster mc) {
+		massClusters.remove(mc);
 	}
 	
 	public void addPeak(Feature f, int a) {
 		HDPMassCluster massCluster = massClusters.get(a);
 		massCluster.addFeature(f);
-		V.add(a);
+		V.put(f, massCluster);
 		peakData.add(f);
 	}
-
-	public void removePeak(Feature f) {
-		int peakPos = findPeakPos(f);
-		int a = V(peakPos);
-		V.remove(peakPos);
-		peakData.remove(peakPos);
-		HDPMassCluster massCluster = massClusters.get(a);
-		massCluster.removeFeature(f);;
+	
+	public HDPMassCluster removePeak(Feature f) {
+		HDPMassCluster massCluster = V.remove(f);
+		peakData.remove(f);
+		massCluster.removeFeature(f);
+		return massCluster;
 	}
 	
 	public List<Feature> getPeaksInMassCluster(int a) {
@@ -83,11 +73,7 @@ public class HDPMetabolite {
 		}
 		return temp;
 	}
-	
-	public int getMassClustersSize() {
-		return massClusters.size();
-	}
-	
+		
 	public double sa(int a) {
 		HDPMassCluster massCluster = massClusters.get(a);
 		return massCluster.getSumPeaks();
@@ -100,36 +86,11 @@ public class HDPMetabolite {
 		}
 		return temp;
 	}
-	
-	public int V(int peakPos) {
-		return V.get(peakPos);
-	}
-	
-	public void setV(int peakPos, int a) {
-		V.set(peakPos, a);
-	}
-	
-	public void appendV(int a) {
-		V.add(a);
-	}
-	
-	public void removeV(int peakPos) {
-		V.remove(peakPos);
-	}
-	
+			
 	public int vSize() {
 		return V.size();
 	}
-	
-	public void reindexV(int a) {
-		for (int n = 0; n < V.size(); n++) {
-			int currentVal = V(n);
-			if (currentVal > a) {
-				V.set(n, currentVal-1);
-			}
-		}
-	}
-	
+		
 	public int findPeakPos(Feature toFind) {
 		for (int peakPos = 0; peakPos < peakData.size(); peakPos++) {
 			Feature f = peakData.get(peakPos);
@@ -167,8 +128,8 @@ public class HDPMetabolite {
 
 	public int[] getMassClusterIndicator(Feature thisPeak) {
 
-		int[] results = new int[A+1];
-		for (int a = 0; a < A; a++) {
+		int[] results = new int[getA()+1];
+		for (int a = 0; a < getA(); a++) {
 			List<Feature> peaksInside = getPeaksInMassCluster(a);
 			if (containsSameOrigin(peaksInside, thisPeak)) {
 				results[a] = 0; // do not allow peaks from the same file to be put together in the same mass cluster
@@ -177,7 +138,7 @@ public class HDPMetabolite {
 			}
 		}		
 		
-		results[A] = 1; // the last infinite part is always 1
+		results[getA()] = 1; // the last infinite part is always 1
 		
 		return results;
 
@@ -185,9 +146,6 @@ public class HDPMetabolite {
 	
 	private boolean containsSameOrigin(List<Feature> features, Feature toFind) {
 		for (Feature inside : features) {
-			if (inside.equals(toFind)) {
-				continue; // skip ourself
-			}
 			if (inside.getData().equals(toFind.getData())) {
 				return true;
 			}
