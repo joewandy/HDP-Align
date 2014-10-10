@@ -31,12 +31,13 @@ public class HDPMassRTClustering implements HDPClustering {
 	private List<HDPMetabolite> hdpMetabolites;		// inferred metabolites
 	private int hdpMetaboliteId;					// sequence ID for metabolites
 	private final RandomData randomData;			// random data generator	
-	private HDPSamplerHandler sampleHandler;		// process gibbs samples
+	private HDPSamplerHandler sampleHandler;		// handles the samples obtained from Gibbs sampling
 		
-	private int I;
-	private List<Integer> fi;
-	private List<Double> ti;
-	private List<Double> si;
+	// TODO: move all these into HDPMetabolite
+	private int I;									// how many metabolites are there?
+	private List<Integer> fi;						// no. of RT clusters in each metabolite
+	private List<Double> ti;						// RT value of each metabolite
+	private List<Double> si;						// sum of RT clusters' time in each metabolite
 		
 	/**
 	 * Constructs an instance of HDP clustering by mass and RT
@@ -302,6 +303,7 @@ public class HDPMassRTClustering implements HDPClustering {
 			
 			// remove assignment of cluster to parent metabolite
 			hdpFile.removeTopZ(k);
+			
 			// decrease count of clusters under parent metabolite
 			decreaseFi(i);
 			subsSi(i, tij);
@@ -367,6 +369,7 @@ public class HDPMassRTClustering implements HDPClustering {
 		// first, compute p( x_nj | existing metabolite ), eq #21
 		double denum = sum(fiArray()) + hdpParam.getTop_alpha();
 		double[] currentMetabolitePost = new double[I];
+		
 		for (int idx = 0; idx < I; idx++) {
 			double logPrior = Math.log(fi(idx) / denum);
 			// first compute the RT term
@@ -388,7 +391,7 @@ public class HDPMassRTClustering implements HDPClustering {
 		double rtLogLikelihood = computeLogLikelihood(thisPeak.getRt(), mu, prec);
 		mu = hdpParam.getPsi_0();
 		prec = 1/(1/hdpParam.getRho_prec() + 1/hdpParam.getRho_0_prec()); 
-		double massLogLikelihood = computeLogLikelihood(thisPeak.getMass(), mu, prec); // TODO: use log-likelihood!
+		double massLogLikelihood = computeLogLikelihood(thisPeak.getMass(), mu, prec);
 		double logLikelihood = rtLogLikelihood + massLogLikelihood;
 		double logNewMetabolitePost = logPrior + logLikelihood;
 		double newMetabolitePost = Math.exp(logNewMetabolitePost);
@@ -690,7 +693,7 @@ public class HDPMassRTClustering implements HDPClustering {
 	 */
 	private void updateParametersMassRt() {
 		
-		// %%%%% update RT clusters %%%%%        
+		// update local RT clusters        
 		for (int j = 0; j < hdpFiles.size(); j++) {
 
 			HDPFile hdpFile = hdpFiles.get(j);
@@ -712,7 +715,7 @@ public class HDPMassRTClustering implements HDPClustering {
 			
 		}
 		
-		// %%%%% update metabolite RT %%%%%
+		// update metabolite RT
 		for (int i = 0; i < hdpMetabolites.size(); i++) {
 		
 			double sum_clusters = si(i);

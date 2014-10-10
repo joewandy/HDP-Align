@@ -9,6 +9,7 @@ error.txt
 bin/**
 tmp/**
 tmp/**/*
+error.txt
 *.tmp
 *.bak
 *.swp
