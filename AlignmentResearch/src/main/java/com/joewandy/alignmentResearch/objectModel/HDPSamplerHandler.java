@@ -1,6 +1,7 @@
 package com.joewandy.alignmentResearch.objectModel;
 
 import java.util.List;
+import java.util.Set;
 
 import no.uib.cipr.matrix.Matrix;
 import no.uib.cipr.matrix.sparse.FlexCompRowMatrix;
@@ -74,7 +75,7 @@ public class HDPSamplerHandler {
 
 			// for all mass clusters
 			for (int a = 0; a < met.getA(); a++) {
-				List<Feature> peaksInside = met.getPeaksInMassCluster(a);
+				List <Feature> peaksInside = met.getPeaksInMassCluster(a);
 				for (Feature f1 : peaksInside) {
 					for (Feature f2 : peaksInside) {
 						int m = f1.getSequenceID();
