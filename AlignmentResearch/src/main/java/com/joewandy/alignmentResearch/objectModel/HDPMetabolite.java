@@ -42,6 +42,16 @@ public class HDPMetabolite {
 		massClusters.remove(mc);
 	}
 	
+	public List<HDPMassCluster> getEmptyMassClusters() {
+		List<HDPMassCluster> emptyList = new ArrayList<HDPMassCluster>();
+		for (HDPMassCluster mc : massClusters) {
+			if (mc.getCountPeaks() == 0) {
+				emptyList.add(mc);
+			}
+		}
+		return emptyList;
+	}
+	
 	public void addPeak(Feature f, int a) {
 		HDPMassCluster massCluster = massClusters.get(a);
 		massCluster.addFeature(f);
@@ -53,6 +63,11 @@ public class HDPMetabolite {
 		HDPMassCluster massCluster = V.remove(f);
 		peakData.remove(f);
 		massCluster.removeFeature(f);
+		return massCluster;
+	}
+	
+	public HDPMassCluster getMassClusterOfPeak(Feature f) {
+		HDPMassCluster massCluster = V.get(f);
 		return massCluster;
 	}
 	

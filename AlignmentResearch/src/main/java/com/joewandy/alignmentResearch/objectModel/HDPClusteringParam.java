@@ -19,7 +19,7 @@ public class HDPClusteringParam {
 	private double gamma_prec;
 	private double rho_prec;
 	
-	private boolean preventSameMassCluster;
+	private boolean speedUpHacks;
 		
 	public int getNsamps() {
 		return nsamps;
@@ -117,12 +117,12 @@ public class HDPClusteringParam {
 		this.rho_prec = rho_prec;
 	}
 
-	public boolean isPreventSameMassCluster() {
-		return preventSameMassCluster;
+	public boolean isSpeedUpHacks() {
+		return speedUpHacks;
 	}
 
-	public void setPreventSameMassCluster(boolean preventSameMassCluster) {
-		this.preventSameMassCluster = preventSameMassCluster;
+	public void setSpeedUpHacks(boolean speedUpHacks) {
+		this.speedUpHacks = speedUpHacks;
 	}
 	
 }

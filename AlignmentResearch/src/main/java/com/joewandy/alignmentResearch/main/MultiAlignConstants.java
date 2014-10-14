@@ -41,8 +41,8 @@ public class MultiAlignConstants {
 	public static final double HDP_GLOBAL_RT_CLUSTER_STDEV = 20;
 	public static final double HDP_LOCAL_RT_CLUSTER_STDEV = 2;
 	public static final double HDP_MASS_TOLERANCE = 2;
-	public static final boolean HDP_PREVENT_SAME_MASS_CLUSTER = false;
-	
+	public static final boolean HDP_SPEED_UP = false;
+
 	public static final String SCORING_METHOD_HDP_MASS_RT_JAVA = "hdpmassrtjava";
 	public static final String SCORING_METHOD_HDP_RT_JAVA = "hdprtjava";
 	public static final String SCORING_METHOD_HDP_MASS_RT = "hdpmassrt";

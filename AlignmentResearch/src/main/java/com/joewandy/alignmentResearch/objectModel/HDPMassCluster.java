@@ -46,5 +46,10 @@ public class HDPMassCluster {
 	public boolean contains(Feature f) {
 		return peakData.contains(f);
 	}
+
+	@Override
+	public String toString() {
+		return "HDPMassCluster [id=" + id + ", countPeaks=" + countPeaks + "]";
+	}
 	
 }

@@ -11,36 +11,38 @@ public class HDPSamplerHandler {
 	private List<HDPMetabolite> hdpMetabolites;
 	private Matrix resultMap;
 	private int samplesTaken;
+	private int totalPeaks;
 	
 	public HDPSamplerHandler(List<HDPMetabolite> hdpMetabolites, int totalPeaks) {
 		this.hdpMetabolites = hdpMetabolites;
+		this.totalPeaks = totalPeaks;
 		this.resultMap = new FlexCompRowMatrix(totalPeaks, totalPeaks);
 	}
 
-	public void handleSample(int s, double timeTaken, HDPClusteringParam hdpParam) {
+	public void handleSample(int s, int peaksProcessed, double timeTaken, HDPClusteringParam hdpParam) {
 
 		int I = hdpMetabolites.size();
 		
 		boolean printMsg = true;	
 		if ((s+1) > hdpParam.getBurnIn()) {
 			if (printMsg) {
-				System.out.print(String.format("Sample S#%05d", (s+1)));					
+				System.out.print(String.format("Sample S#%05d ", (s+1)));					
 			}
 		} else {
 			if (printMsg) {
-				System.out.print(String.format("Sample B#%05d", (s+1)));					
+				System.out.print(String.format("Sample B#%05d ", (s+1)));					
 			}
 		}
 		
 		StringBuilder sb = new StringBuilder();
 		if ((s+1) > hdpParam.getBurnIn()) {
 			// store the actual samples
-			sb.append(String.format("\ttime=%5.2fs I=%d ", timeTaken, I));
+			sb.append(String.format("(%5.2fs) peaks=%d/%d I=%d ", timeTaken, peaksProcessed, totalPeaks, I));
 			updateResultMap();
 			samplesTaken++;
 		} else {
 			// discard the burn-in samples
-			sb.append(String.format("\ttime=%5.2fs I=%d ", timeTaken, I));			
+			sb.append(String.format("(%5.2fs) peaks=%d/%d I=%d ", timeTaken, peaksProcessed, totalPeaks, I));			
 		}
 		
 		sb.append("all_A = [");

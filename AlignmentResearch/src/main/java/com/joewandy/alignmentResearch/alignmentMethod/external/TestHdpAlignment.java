@@ -91,7 +91,6 @@ public class TestHdpAlignment extends BaseAlignment implements AlignmentMethod {
 				int sequenceID = 0;
 				for (int j=0; j < dataList.size(); j++) {
 								
-					HDPFile hdpFile = new HDPFile(j);
 					AlignmentFile alignmentFile = dataList.get(j);
 					for (Feature f : alignmentFile.getFeatures()) {
 						f.setSequenceID(sequenceID);
@@ -120,7 +119,12 @@ public class TestHdpAlignment extends BaseAlignment implements AlignmentMethod {
 					Feature feature1 = sequenceMap.get(m);
 					Feature feature2 = sequenceMap.get(n);
 					
-					// skip alignment from the same file
+					// skip alignment of a feature to itself					
+					if (feature1.equals(feature2)) {
+						continue; 
+					}
+					
+					// skip alignment of features in the same file
 					if (feature1.getData().getId() == feature2.getData().getId()) {
 						continue; 
 					}

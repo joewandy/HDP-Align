@@ -183,10 +183,10 @@ public class MultiAlignCmdOptions {
 	
 	@Option(name = "hdpMassTol", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "HDP mass cluster tolerance (in ppm)")
 	public double hdpMassTol = MultiAlignConstants.HDP_MASS_TOLERANCE;
-	
-	@Option(name="hdpPreventSameMassCluster", param="boolean", type=Option.Type.NO_ARGUMENT, 
-			usage="Whether to prevent peak going into a mass cluster where another peak from the same file is already present")
-	public boolean hdpPreventSameMassCluster = MultiAlignConstants.HDP_PREVENT_SAME_MASS_CLUSTER;
+		
+	@Option(name="hdpSpeedUp", param="boolean", type=Option.Type.NO_ARGUMENT, 
+			usage="Enable various experimental speed-up hacks")
+	public boolean hdpSpeedUp = MultiAlignConstants.HDP_SPEED_UP;
 	
 	/*
 	 * Scoring options
