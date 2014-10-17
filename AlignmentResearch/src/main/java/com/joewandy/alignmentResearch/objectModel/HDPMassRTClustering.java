@@ -256,35 +256,42 @@ public class HDPMassRTClustering implements HDPClustering {
 			// TODO: loop across peaks randomly
 			assert(hdpFile.N() == hdpFile.Zsize());
 			for (int n = 0; n < hdpFile.N(); n++) {
-											
-				Feature thisPeak = hdpFile.getFeatures().get(n);
 				
-				// find the RT cluster
-				int k = hdpFile.Z(n);
-				int i = hdpFile.topZ(k);
-				
-				// find the mass cluster
-				HDPMetabolite met = hdpMetabolites.get(i);
-				assert(met.vSize() == met.peakDataSize());
-
 				// enable experimental hack to speed up gibbs update
 				if (hdpParam.isSpeedUpHacks()) {
 
-					if (!ignoreSet.contains(thisPeak)) {
-						
-						// perform gibbs assignment only for peaks in non-singleton clusters
+					Feature thisPeak = hdpFile.getFeatures().get(n);
+
+					// we will not process anything in the ignore set
+					if (ignoreSet.contains(thisPeak)) {
+						continue;
+					}
+
+					int k = hdpFile.Z(n); 
+					int i = hdpFile.topZ(k);
+					HDPMetabolite met = hdpMetabolites.get(i);
+					assert(met.vSize() == met.peakDataSize());
+					
+					// track how many times this peak is assigned to a singleton cluster
+					boolean ignored = trackSingletonCount(thisPeak, met);
+					if (ignored) {
+						// if ignore, then remove peak from model, and he remains a bachelor forever
+						removePeakFromModel(hdpFile, thisPeak, met, n, k, i);
+					} else {							
+						// otherwise perform the gibbs update as usual
 						removePeakFromModel(hdpFile, thisPeak, met, n, k, i);
 						HDPMetabolite parentMet = reassignPeak(hdpFile, thisPeak, n);					
 						peaksProcessed++;
-						
-						// track how many times this peak is assigned to a singleton cluster
-						trackSingletonCount(thisPeak, parentMet);
-						
 					}
-					
+																	
 				} else {
 					
 					// do old-fashioned update
+					Feature thisPeak = hdpFile.getFeatures().get(n);
+					int k = hdpFile.Z(n); 
+					int i = hdpFile.topZ(k);
+					HDPMetabolite met = hdpMetabolites.get(i);
+					assert(met.vSize() == met.peakDataSize());					
 					removePeakFromModel(hdpFile, thisPeak, met, n, k, i);
 					reassignPeak(hdpFile, thisPeak, n);					
 					peaksProcessed++;
@@ -487,7 +494,7 @@ public class HDPMassRTClustering implements HDPClustering {
 	 * @param thisPeak The peak to track
 	 * @param parentMet The parent metabolite
 	 */
-	private void trackSingletonCount(Feature thisPeak, HDPMetabolite parentMet) {
+	private boolean trackSingletonCount(Feature thisPeak, HDPMetabolite parentMet) {
 
 		HDPMassCluster mc = parentMet.getMassClusterOfPeak(thisPeak);				
 		assert(mc.getCountPeaks() != 0);
@@ -501,16 +508,18 @@ public class HDPMassRTClustering implements HDPClustering {
 			if (mc.getCountPeaks() == 1) {
 				// increment count if this peak is in a singleton cluster
 				singletonCount.put(thisPeak, counter+1);
-				// if the peak stays single long enough, he remains a bachelor forever
-				if (counter >= 10) {
-					ignoreSet.add(thisPeak); // move this peak to ignore set
+				// if the peak stays single long enough, add him to ignore set
+				if (counter >= MultiAlignConstants.HDP_SPEED_UP_NUM_SAMPLE) {
+					ignoreSet.add(thisPeak);
+					return true;
 				}
 			} else {
 				// reset counter if this peak joins a non-singleton cluster
 				singletonCount.put(thisPeak, 0);
 			}
 			
-		}
+		}		
+		return false;
 
 	}
 

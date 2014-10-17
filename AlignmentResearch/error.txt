@@ -1,8 +1,10 @@
-java.lang.NullPointerException
-	at com.joewandy.alignmentResearch.objectModel.HDPMassRTClustering.trackSingletonCount(HDPMassRTClustering.java:475)
-	at com.joewandy.alignmentResearch.objectModel.HDPMassRTClustering.assignPeakMassRt(HDPMassRTClustering.java:275)
-	at com.joewandy.alignmentResearch.objectModel.HDPMassRTClustering.run(HDPMassRTClustering.java:82)
-	at com.joewandy.alignmentResearch.alignmentMethod.external.TestHdpAlignment.<init>(TestHdpAlignment.java:106)
+java.lang.ArrayIndexOutOfBoundsException: -1
+	at java.util.ArrayList.elementData(ArrayList.java:400)
+	at java.util.ArrayList.get(ArrayList.java:413)
+	at com.joewandy.alignmentResearch.objectModel.HDPFile.topZ(HDPFile.java:103)
+	at com.joewandy.alignmentResearch.objectModel.HDPMassRTClustering.assignPeakMassRt(HDPMassRTClustering.java:264)
+	at com.joewandy.alignmentResearch.objectModel.HDPMassRTClustering.run(HDPMassRTClustering.java:84)
+	at com.joewandy.alignmentResearch.alignmentMethod.external.TestHdpAlignment.<init>(TestHdpAlignment.java:105)
 	at com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodFactory.getAlignmentMethod(AlignmentMethodFactory.java:72)
 	at com.joewandy.alignmentResearch.main.MultiAlign.<init>(MultiAlign.java:91)
 	at com.joewandy.alignmentResearch.main.experiment.HdpExperiment.performExperiment(HdpExperiment.java:24)

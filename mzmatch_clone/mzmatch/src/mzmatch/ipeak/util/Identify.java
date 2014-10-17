@@ -379,6 +379,7 @@ public class Identify
 				addAnnotation(peak, molecule, adducts[adductIndex], mass);
 			}
 		}
+		System.out.println();
 	}
 	
 	private static void annotatePeaks(final Molecule molecule, List<Map<String,Double>> masses, final IPeakSet<IPeak> peakset,
