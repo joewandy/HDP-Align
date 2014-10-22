@@ -188,8 +188,11 @@ public class MultiAlignCmdOptions {
 			usage="Enable various experimental speed-up hacks")
 	public boolean hdpSpeedUp = MultiAlignConstants.HDP_SPEED_UP;
 
-	@Option(name = "hdpSpeedUpNumSample", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "No. of samples a peak can stay in a singleton cluster before removed from the model")
+	@Option(name = "hdpSpeedUpNumSample", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Optional. No. of samples a peak can stay in a singleton cluster before removed from the model")
 	public int hdpSpeedUpNumSample = MultiAlignConstants.HDP_SPEED_UP_NUM_SAMPLE;
+
+	@Option(name = "hdpRefFileIdx", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Optional. Reference file index.")
+	public int hdpRefFileIdx = MultiAlignConstants.HDP_REF_FILE_IDX;
 	
 	/*
 	 * Scoring options

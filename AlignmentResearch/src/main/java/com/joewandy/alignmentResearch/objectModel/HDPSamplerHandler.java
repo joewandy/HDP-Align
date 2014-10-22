@@ -8,18 +8,20 @@ import no.uib.cipr.matrix.sparse.FlexCompRowMatrix;
 
 public class HDPSamplerHandler {
 
+	private List<HDPFile> hdpFiles;
 	private List<HDPMetabolite> hdpMetabolites;
 	private Matrix resultMap;
 	private int samplesTaken;
 	private int totalPeaks;
 	
-	public HDPSamplerHandler(List<HDPMetabolite> hdpMetabolites, int totalPeaks) {
+	public HDPSamplerHandler(List<HDPFile> hdpFiles, List<HDPMetabolite> hdpMetabolites, int totalPeaks) {
+		this.hdpFiles = hdpFiles;
 		this.hdpMetabolites = hdpMetabolites;
 		this.totalPeaks = totalPeaks;
 		this.resultMap = new FlexCompRowMatrix(totalPeaks, totalPeaks);
 	}
 
-	public void handleSample(int s, int peaksProcessed, double timeTaken, HDPClusteringParam hdpParam) {
+	public void handleSample(int s, int peaksProcessed, double timeTaken, HDPClusteringParam hdpParam, boolean lastSample) {
 
 		int I = hdpMetabolites.size();
 		
@@ -56,6 +58,24 @@ public class HDPSamplerHandler {
 
 		if (printMsg) {
 			System.out.println(sb.toString());				
+		}
+		
+		// print whole bunch of extra stuff in the last sample
+		if (lastSample) {
+			// print peak RT vs. local cluster RT if reference file is enabled
+			if (hdpParam.getRefFileIdx() != -1) {
+				System.out.println("peakrt, tjk");
+				for (HDPFile hdpFile : hdpFiles) {					
+					for (int n = 0; n < hdpFile.N(); n++) {
+						Feature f = hdpFile.getFeature(n);
+						int k = hdpFile.Z(n);
+						if (k != -1) {
+							double tjk = hdpFile.tjk(k);
+							System.out.println(f.getRt() + ", " + tjk);							
+						}
+					}
+				}
+			}
 		}
 		
 	}

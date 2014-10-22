@@ -65,11 +65,13 @@ public class HDPMassRTClustering implements HDPClustering {
 		// assign a sequential ID to all peaks to store the result later
 		int totalPeaks = initialiseSequenceID(dataList);
 		this.hdpMetabolites = new ArrayList<HDPMetabolite>();
-		this.sampleHandler = new HDPSamplerHandler(hdpMetabolites, totalPeaks);
 		
 		// put all peaks into 1 RT cluster, 1 metabolite, 1 mass cluster
 		initialiseGibbsSampling(dataList);
-		
+
+		// setup sample handler, do this after gibbs sampling has been initialised
+		this.sampleHandler = new HDPSamplerHandler(hdpFiles, hdpMetabolites, totalPeaks);
+
 	}
 
 	/**
@@ -88,7 +90,11 @@ public class HDPMassRTClustering implements HDPClustering {
 			totalTime += timeTaken;
 			
 			// process the sample
-			sampleHandler.handleSample(s, peaksProcessed, timeTaken, hdpParam);
+			boolean last = false;
+			if (s == hdpParam.getNsamps()-1) {
+				last = true;
+			}
+			sampleHandler.handleSample(s, peaksProcessed, timeTaken, hdpParam, last);
 			
 		}
 		System.out.println(String.format("TOTAL TIME = %5.2fs", totalTime));
@@ -116,9 +122,7 @@ public class HDPMassRTClustering implements HDPClustering {
 	 */
 	private void setHdpParam(List<AlignmentFile> dataList,
 			AlignmentMethodParam methodParam) {
-		
-		hdpParam.setSpeedUpHacks(methodParam.isHdpSpeedUp());
-		
+				
 		hdpParam.setMu_0(getRTMean(dataList));
 		hdpParam.setPsi_0(getMassMean(dataList));
 		hdpParam.setSigma_0_prec(1.0/5E6);
@@ -142,6 +146,10 @@ public class HDPMassRTClustering implements HDPClustering {
 		double massPrec = getMassPrec(massTol);
 		hdpParam.setRho_prec(massPrec);
 
+		hdpParam.setSpeedUpHacks(methodParam.isHdpSpeedUp());
+		hdpParam.setSpeedUpNumSample(methodParam.getHdpSpeedUpNumSample());
+		hdpParam.setRefFileIdx(methodParam.getHdpRefFileIdx());
+		
 	}
 	
 	/**
@@ -213,10 +221,11 @@ public class HDPMassRTClustering implements HDPClustering {
 				hdpFile.appendTopZ(0); // assign all RT clusters under 1 metabolite 
 				// 1 x K, sample initial the clusters' RT
 				int parentI = hdpFile.topZ(k);
-				double ti = this.ti.get(parentI);
-				double tij = randomData.nextGaussian(ti, Math.sqrt(1/hdpParam.getDelta_prec()));
-				hdpFile.appendTij(tij);
-				addSi(parentI, tij);
+				double mu = this.ti.get(parentI);
+				double prec = hdpParam.getDelta_prec();
+				double tjk = sampleNewClusterRt(mu, prec, j);
+				hdpFile.appendTjk(tjk);
+				addSi(parentI, tjk);
 				hdpFile.appendCountZ(hdpFile.N());
 				hdpFile.appendSumZ(hdpFile.getRtSum());
 			}
@@ -239,6 +248,26 @@ public class HDPMassRTClustering implements HDPClustering {
 			
 		}
 		
+	}
+
+	/**
+	 * Samples a new cluster RT given the parent metabolite
+	 * @param mu parent metabolite RT
+	 * @param prec precision
+	 * @param j input file, used if we're setting a fixed reference file
+	 * @return new cluster RT value
+	 */
+	private double sampleNewClusterRt(double mu, double prec, int j) {
+		double stdev = Math.sqrt(1/prec);
+		double tjk = randomData.nextGaussian(mu, stdev);
+		// use reference file if file index != -1
+		if (hdpParam.getRefFileIdx() != -1) {
+			// set tjk | ti to have 0 standard deviation for the reference file
+			if (j == hdpParam.getRefFileIdx()) {
+				tjk = mu;
+			}
+		}
+		return tjk;
 	}
 		
 	/**
@@ -280,7 +309,7 @@ public class HDPMassRTClustering implements HDPClustering {
 					} else {							
 						// otherwise perform the gibbs update as usual
 						removePeakFromModel(hdpFile, thisPeak, met, n, k, i);
-						HDPMetabolite parentMet = reassignPeak(hdpFile, thisPeak, n);					
+						reassignPeak(hdpFile, thisPeak, n);					
 						peaksProcessed++;
 					}
 																	
@@ -342,8 +371,8 @@ public class HDPMassRTClustering implements HDPClustering {
 			// update for bookkeeping
 			hdpFile.removeCountZ(k);
 			hdpFile.removeSumZ(k);
-			double tij = hdpFile.tij(k);
-			hdpFile.removeTij(k);
+			double tij = hdpFile.tjk(k);
+			hdpFile.removeTjk(k);
 			
 			// remove assignment of cluster to parent metabolite
 			hdpFile.removeTopZ(k);
@@ -509,7 +538,7 @@ public class HDPMassRTClustering implements HDPClustering {
 				// increment count if this peak is in a singleton cluster
 				singletonCount.put(thisPeak, counter+1);
 				// if the peak stays single long enough, add him to ignore set
-				if (counter >= MultiAlignConstants.HDP_SPEED_UP_NUM_SAMPLE) {
+				if (counter >= this.hdpParam.getSpeedUpNumSample()) {
 					ignoreSet.add(thisPeak);
 					return true;
 				}
@@ -564,7 +593,7 @@ public class HDPMassRTClustering implements HDPClustering {
 	private double[] computeCurrentClusterRTLikelihood(HDPFile hdpFile,
 			Feature thisPeak) {
 		
-		double[] tijArr = hdpFile.tijArray();
+		double[] tijArr = hdpFile.tjkArray();
 		double prec = hdpParam.getGamma_prec();
 		double[] rtTermLogLike = new double[tijArr.length];
 		assert(hdpFile.K()==rtTermLogLike.length);
@@ -614,7 +643,7 @@ public class HDPMassRTClustering implements HDPClustering {
 		double prec = hdpParam.getGamma_prec() + hdpParam.getDelta_prec();
 		double mu = 1/prec * (hdpParam.getGamma_prec()*thisPeak.getRt() + hdpParam.getDelta_prec()*ti(i));
 		double newTij = randomData.nextGaussian(mu, Math.sqrt(1/prec));
-		hdpFile.appendTij(newTij);
+		hdpFile.appendTjk(newTij);
 		addSi(i, newTij);
 		
 	}
@@ -666,23 +695,23 @@ public class HDPMassRTClustering implements HDPClustering {
 	 * RT cluster k
 	 * @param hdpFile The file 
 	 * @param thisPeak The peak
-	 * @param metabolite_i The metabolite (whether existing or new)
+	 * @param met The metabolite (whether existing or new)
 	 * @param n The peak position index
 	 * @param k The RT cluster position index
 	 * @param a The mass cluster position index
 	 */
 	private void addPeakToModel(HDPFile hdpFile, Feature thisPeak,
-			HDPMetabolite metabolite_i, int n, int k, int a) {
+			HDPMetabolite met, int n, int k, int a) {
 
 		// assign the peak under mass cluster a
-		metabolite_i.addPeak(thisPeak, a);
+		met.addPeak(thisPeak, a);
 		
 		// assign the peak under RT cluster k
 		hdpFile.setZ(n, k);
 		hdpFile.increaseCountZ(k);
 		hdpFile.addSumZ(k, thisPeak.getRt());
 		
-		HDPMassCluster mc = metabolite_i.getMassClusterOfPeak(thisPeak);
+		HDPMassCluster mc = met.getMassClusterOfPeak(thisPeak);
 		assert(mc.getCountPeaks() != 0);
 
 	}
@@ -785,14 +814,14 @@ public class HDPMassRTClustering implements HDPClustering {
 				// find parent metabolite of this cluster
 				int i = hdpFile.topZ(k);
 				double ti = ti(i);
-				double sum_xn = hdpFile.sumZ(k);
-				int count_peaks = hdpFile.countZ(k);
+				double sumXn = hdpFile.sumZ(k);
+				int countPeaks = hdpFile.countZ(k);
 				
-				// draw new tij
-	            double prec = hdpParam.getDelta_prec() + count_peaks*hdpParam.getGamma_prec();
-	            double mu = (1/prec) * ( ti*hdpParam.getDelta_prec() + hdpParam.getGamma_prec()*sum_xn );
-				double new_tij = randomData.nextGaussian(mu, Math.sqrt(1/prec));
-				hdpFile.setTij(k, new_tij);
+				// draw new tjk
+	            double prec = hdpParam.getDelta_prec() + countPeaks*hdpParam.getGamma_prec();
+	            double mu = (1/prec) * ( ti*hdpParam.getDelta_prec() + hdpParam.getGamma_prec()*sumXn );
+	            double tjk = sampleNewClusterRt(mu, prec, j);
+				hdpFile.setTjk(k, tjk);
 				
 			}
 			

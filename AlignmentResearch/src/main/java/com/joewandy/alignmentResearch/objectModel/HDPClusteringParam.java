@@ -20,6 +20,8 @@ public class HDPClusteringParam {
 	private double rho_prec;
 	
 	private boolean speedUpHacks;
+	private int speedUpNumSample;
+	private int refFileIdx;
 		
 	public int getNsamps() {
 		return nsamps;
@@ -123,6 +125,22 @@ public class HDPClusteringParam {
 
 	public void setSpeedUpHacks(boolean speedUpHacks) {
 		this.speedUpHacks = speedUpHacks;
+	}
+
+	public int getSpeedUpNumSample() {
+		return speedUpNumSample;
+	}
+
+	public void setSpeedUpNumSample(int speedUpNumSample) {
+		this.speedUpNumSample = speedUpNumSample;
+	}
+
+	public int getRefFileIdx() {
+		return refFileIdx;
+	}
+
+	public void setRefFileIdx(int refFileIdx) {
+		this.refFileIdx = refFileIdx;
 	}
 	
 }

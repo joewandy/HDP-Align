@@ -43,6 +43,8 @@ public class AlignmentMethodParam {
 	private double hdpLocalRtClusterStdev;
 	private double hdpMassTol;
 	private boolean hdpSpeedUp;
+	private int hdpSpeedUpNumSample;
+	private int hdpRefFileIdx;
 
 	public AlignmentMethodParam() {
 	
@@ -76,6 +78,8 @@ public class AlignmentMethodParam {
 		this.hdpLocalRtClusterStdev = options.hdpLocalRtClusterStdev;
 		this.hdpMassTol = options.hdpMassTol;
 		this.hdpSpeedUp = options.hdpSpeedUp;
+		this.hdpSpeedUpNumSample = options.hdpSpeedUpNumSample;
+		this.hdpRefFileIdx = options.hdpRefFileIdx;
 		this.scoringMethod = options.scoringMethod;		
 	}
 
@@ -302,6 +306,22 @@ public class AlignmentMethodParam {
 
 	public void setHdpSpeedUp(boolean hdpSpeedUp) {
 		this.hdpSpeedUp = hdpSpeedUp;
+	}
+
+	public int getHdpSpeedUpNumSample() {
+		return hdpSpeedUpNumSample;
+	}
+
+	public void setHdpSpeedUpNumSample(int hdpSpeedUpNumSample) {
+		this.hdpSpeedUpNumSample = hdpSpeedUpNumSample;
+	}
+
+	public int getHdpRefFileIdx() {
+		return hdpRefFileIdx;
+	}
+
+	public void setHdpRefFileIdx(int hdpRefFileIdx) {
+		this.hdpRefFileIdx = hdpRefFileIdx;
 	}
 
 }

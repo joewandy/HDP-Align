@@ -12,7 +12,7 @@ public class HDPFile {
 	private int K;
 	private List<Integer> Z;		// peak to RT clusters assignment
 	private List<Integer> topZ; 	// RT clusters to metabolite assignment
-	private List<Double> tij;		// RT clusters' time
+	private List<Double> tjk;		// RT clusters' time
 	private List<Integer> countZ;	// no. of peaks under each RT cluster
 	private List<Double> sumZ;		// sum of peak RT under each RT cluster
 	
@@ -21,13 +21,17 @@ public class HDPFile {
 		this.features = new ArrayList<Feature>();
 		this.Z = new ArrayList<Integer>();
 		this.topZ = new ArrayList<Integer>();
-		this.tij = new ArrayList<Double>();
+		this.tjk = new ArrayList<Double>();
 		this.countZ = new ArrayList<Integer>();
 		this.sumZ = new ArrayList<Double>();
 	}
 
 	public int getId() {
 		return id;
+	}
+	
+	public Feature getFeature(int n) {
+		return features.get(n);
 	}
 
 	public List<Feature> getFeatures() {
@@ -124,25 +128,25 @@ public class HDPFile {
 		}
 	}		
 	
-	public double tij(int k) {
-		return tij.get(k);
+	public double tjk(int k) {
+		return tjk.get(k);
 	}
 	
-	public double[] tijArray() {
-		Double[] temp = tij.toArray(new Double[tij.size()]);
+	public double[] tjkArray() {
+		Double[] temp = tjk.toArray(new Double[tjk.size()]);
 		return ArrayUtils.toPrimitive(temp);
 	}
 	
-	public void setTij(int k, double ti) {
-		this.tij.set(k, ti);
+	public void setTjk(int k, double ti) {
+		this.tjk.set(k, ti);
 	}
 
-	public void appendTij(double ti) {
-		this.tij.add(ti);
+	public void appendTjk(double ti) {
+		this.tjk.add(ti);
 	}
 	
-	public void removeTij(int k) {
-		this.tij.remove(k);
+	public void removeTjk(int k) {
+		this.tjk.remove(k);
 	}
 		
 	public int countZ(int k) {
