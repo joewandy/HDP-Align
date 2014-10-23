@@ -1,6 +1,5 @@
-package com.joewandy.alignmentResearch.alignmentMethod.custom;
+package com.joewandy.alignmentResearch.objectModel;
 
-import com.joewandy.alignmentResearch.objectModel.Feature;
 
 public class FeaturePairKey {
 	

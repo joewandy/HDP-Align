@@ -3,10 +3,10 @@ package com.joewandy.alignmentResearch.alignmentMethod;
 import java.util.List;
 
 import com.joewandy.alignmentResearch.alignmentExperiment.AlignmentData;
-import com.joewandy.alignmentResearch.alignmentMethod.custom.BaselineAlignment;
-import com.joewandy.alignmentResearch.alignmentMethod.custom.HierarchicalAlignment;
-import com.joewandy.alignmentResearch.alignmentMethod.custom.MyJoinAlignment;
-import com.joewandy.alignmentResearch.alignmentMethod.custom.MyMaximumMatchingAlignment;
+import com.joewandy.alignmentResearch.alignmentMethod.custom.baseline.BaselineAlignment;
+import com.joewandy.alignmentResearch.alignmentMethod.custom.join.MyJoinAlignment;
+import com.joewandy.alignmentResearch.alignmentMethod.custom.maxWeight.HierarchicalAlignment;
+import com.joewandy.alignmentResearch.alignmentMethod.custom.maxWeight.MyMaximumMatchingAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.external.MzMineJoinAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.external.MzMineRansacAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.external.OpenMSAlignment;

@@ -1,4 +1,4 @@
-package com.joewandy.alignmentResearch.alignmentMethod.custom;
+package com.joewandy.alignmentResearch.alignmentMethod.custom.maxWeight;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,11 +14,13 @@ import no.uib.cipr.matrix.MatrixEntry;
 import com.jmatio.io.MatFileWriter;
 import com.jmatio.types.MLArray;
 import com.jmatio.types.MLDouble;
+import com.joewandy.alignmentResearch.alignmentMethod.FeatureMatching;
 import com.joewandy.alignmentResearch.main.MultiAlignConstants;
 import com.joewandy.alignmentResearch.matrix.LinkedSparseMatrix;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
+import com.joewandy.alignmentResearch.objectModel.MatchResult;
 import com.joewandy.alignmentResearch.objectModel.MatchingScorer;
 
 public class MaximumWeightMatching implements FeatureMatching {

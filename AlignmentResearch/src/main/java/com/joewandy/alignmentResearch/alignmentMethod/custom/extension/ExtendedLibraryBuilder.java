@@ -1,4 +1,4 @@
-package com.joewandy.alignmentResearch.alignmentMethod.custom;
+package com.joewandy.alignmentResearch.alignmentMethod.custom.extension;
 
 import java.util.ArrayList;
 import java.util.Collections;

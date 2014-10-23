@@ -1,4 +1,4 @@
-package com.joewandy.alignmentResearch.alignmentMethod.custom;
+package com.joewandy.alignmentResearch.alignmentMethod.custom.baseline;
 
 import java.util.HashSet;
 import java.util.List;

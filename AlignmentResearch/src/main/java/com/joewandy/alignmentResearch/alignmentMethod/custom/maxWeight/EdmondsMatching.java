@@ -1,4 +1,4 @@
-package com.joewandy.alignmentResearch.alignmentMethod.custom;
+package com.joewandy.alignmentResearch.alignmentMethod.custom.maxWeight;
 
 // see http://www.keithschwarz.com/interesting/code/edmonds-matching/
 
@@ -114,6 +114,8 @@ package com.joewandy.alignmentResearch.alignmentMethod.custom;
 * gives the algorithm a runtime of O(n^2 m).
 */
 import java.util.*; // For ArrayDeque, HashMap, HashSet, LinkedList
+
+import com.joewandy.alignmentResearch.objectModel.UndirectedGraph;
 
 public final class EdmondsMatching {
    /**

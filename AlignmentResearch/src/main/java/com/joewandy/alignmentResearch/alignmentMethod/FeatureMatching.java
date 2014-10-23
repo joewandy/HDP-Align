@@ -1,4 +1,4 @@
-package com.joewandy.alignmentResearch.alignmentMethod.custom;
+package com.joewandy.alignmentResearch.alignmentMethod;
 
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 

@@ -1,6 +1,5 @@
-package com.joewandy.alignmentResearch.alignmentMethod.custom;
+package com.joewandy.alignmentResearch.objectModel;
 
-import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
 
 public class MatchResult {
 

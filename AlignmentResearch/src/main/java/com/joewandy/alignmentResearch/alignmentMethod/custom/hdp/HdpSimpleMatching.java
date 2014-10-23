@@ -1,4 +1,4 @@
-package com.joewandy.alignmentResearch.alignmentMethod.custom;
+package com.joewandy.alignmentResearch.alignmentMethod.custom.hdp;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,10 +8,14 @@ import no.uib.cipr.matrix.DenseMatrix;
 import no.uib.cipr.matrix.Matrix;
 import no.uib.cipr.matrix.MatrixEntry;
 
+import com.joewandy.alignmentResearch.alignmentMethod.FeatureMatching;
+import com.joewandy.alignmentResearch.alignmentMethod.custom.maxWeight.HungarianAlgorithm;
+import com.joewandy.alignmentResearch.alignmentMethod.custom.maxWeight.PathGrowing;
 import com.joewandy.alignmentResearch.main.MultiAlignConstants;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
 import com.joewandy.alignmentResearch.objectModel.Feature;
+import com.joewandy.alignmentResearch.objectModel.MatchResult;
 
 public class HdpSimpleMatching implements FeatureMatching {
 

@@ -1,10 +1,11 @@
-package com.joewandy.alignmentResearch.alignmentMethod.custom;
+package com.joewandy.alignmentResearch.alignmentMethod.custom.maxWeight;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import com.apporiented.algorithm.clustering.Cluster;
+import com.joewandy.alignmentResearch.alignmentMethod.FeatureMatching;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.ExtendedLibrary;

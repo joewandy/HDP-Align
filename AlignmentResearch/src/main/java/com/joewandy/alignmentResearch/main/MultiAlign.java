@@ -33,7 +33,7 @@ import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodFactory;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
 import com.joewandy.alignmentResearch.alignmentMethod.FeatureGrouper;
-import com.joewandy.alignmentResearch.alignmentMethod.custom.ExtendedLibraryBuilder;
+import com.joewandy.alignmentResearch.alignmentMethod.custom.extension.ExtendedLibraryBuilder;
 import com.joewandy.alignmentResearch.filter.AlignmentResultFilter;
 import com.joewandy.alignmentResearch.main.experiment.MultiAlignExpResult;
 import com.joewandy.alignmentResearch.objectModel.AlignmentLibrary;

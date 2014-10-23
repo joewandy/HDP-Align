@@ -1,4 +1,4 @@
-package com.joewandy.alignmentResearch.alignmentMethod.custom;
+package com.joewandy.alignmentResearch.alignmentMethod.custom.stableMatching;
 
 /*
  *  See https://github.com/psigen/robotutils/blob/master/src/main/java/robotutils/planning/GaleShapley.java
