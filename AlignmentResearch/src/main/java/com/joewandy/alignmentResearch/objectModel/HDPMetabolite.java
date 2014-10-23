@@ -102,6 +102,11 @@ public class HDPMetabolite {
 		return temp;
 	}
 			
+	public void setTheta(int a, double theta) {
+		HDPMassCluster massCluster = massClusters.get(a);
+		massCluster.setTheta(theta);
+	}
+	
 	public int vSize() {
 		return V.size();
 	}

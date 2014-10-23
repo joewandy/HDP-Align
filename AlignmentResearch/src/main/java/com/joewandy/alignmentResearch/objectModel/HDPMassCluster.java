@@ -6,6 +6,7 @@ import java.util.Set;
 public class HDPMassCluster {
 
 	private int id;
+	private double theta;
 	private int countPeaks;
 	private double sumPeaks;
 	private Set<Feature> peakData;
@@ -17,6 +18,14 @@ public class HDPMassCluster {
 
 	public int getId() {
 		return id;
+	}
+
+	public double getTheta() {
+		return theta;
+	}
+
+	public void setTheta(double theta) {
+		this.theta = theta;
 	}
 
 	public int getCountPeaks() {

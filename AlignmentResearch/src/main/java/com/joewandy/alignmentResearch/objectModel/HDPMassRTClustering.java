@@ -839,6 +839,15 @@ public class HDPMassRTClustering implements HDPClustering {
 	        double new_ti = randomData.nextGaussian(mu, Math.sqrt(1/prec));
 	        setTi(i, new_ti);	        
 	        
+	        // also update all the mass clusters linked to this metabolite		
+	        HDPMetabolite met = hdpMetabolites.get(i);		
+	        for (int a = 0; a < met.getA(); a++) {		
+	        	prec = hdpParam.getRho_0_prec() + (hdpParam.getRho_prec() + met.fa(a));		
+	        	mu = (1/prec) * (hdpParam.getRho_0_prec() + hdpParam.getPsi_0()) + (hdpParam.getRho_prec() * met.sa(a));		
+	        	double newTheta = randomData.nextGaussian(mu, Math.sqrt(1/prec)); 		
+	        	met.setTheta(a, newTheta);
+	        }		
+	        
 		}
 				
 	}
