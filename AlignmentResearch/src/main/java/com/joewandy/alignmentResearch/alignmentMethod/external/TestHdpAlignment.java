@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.commons.collections.MapUtils;
+
 import no.uib.cipr.matrix.Matrix;
 import no.uib.cipr.matrix.MatrixEntry;
 
@@ -163,6 +165,11 @@ public class TestHdpAlignment extends BaseAlignment implements AlignmentMethod {
 					}
 				}
 				
+				// print IP map
+				Map<Feature, Map<String, Integer>> ipMap = clustering.getIpMap();
+				System.out.println("IPMAP SIZE = " + ipMap.size());
+				MapUtils.debugPrint(System.out, "IP Map", ipMap);
+								
 			} else if (MultiAlignConstants.SCORING_METHOD_HDP_RT_JAVA.equals(this.scoringMethod)) {
 			
 				// use the java HDP RT clustering

@@ -58,7 +58,8 @@ public class HDPMassCluster {
 
 	@Override
 	public String toString() {
-		return "HDPMassCluster [id=" + id + ", countPeaks=" + countPeaks + "]";
+		return "HDPMassCluster [id=" + id + ", mass=" + Math.exp(theta)
+				+ ", countPeaks=" + countPeaks + "]";
 	}
 	
 }

@@ -30,6 +30,10 @@ public class HDPMetabolite {
 		return massClusters.size();
 	}
 		
+	public List<HDPMassCluster> getMassClusters() {
+		return massClusters;
+	}
+
 	public int addMassCluster() {
 		HDPMassCluster newCluster = new HDPMassCluster(massClusterSeqId);
 		massClusterSeqId++;
@@ -143,7 +147,7 @@ public class HDPMetabolite {
 
 	@Override
 	public String toString() {
-		return "HDPMetabolite [id=" + id + ", peakData.size()=" + peakData.size() + ", peakData=" + peakData + "]";
+		return "HDPMetabolite [id=" + id + ", massClusters.size()=" + massClusters.size() + ", peakData.size()=" + peakData.size() + "]";
 	}
 
 	public int[] getMassClusterIndicator(Feature thisPeak) {

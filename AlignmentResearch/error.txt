@@ -1,8 +1,8 @@
-java.lang.ArrayIndexOutOfBoundsException: -1
-	at java.util.ArrayList.elementData(ArrayList.java:403)
-	at java.util.ArrayList.get(ArrayList.java:416)
-	at com.joewandy.alignmentResearch.objectModel.HDPFile.tjk(HDPFile.java:132)
-	at com.joewandy.alignmentResearch.objectModel.HDPSamplerHandler.handleSample(HDPSamplerHandler.java:72)
+java.lang.NullPointerException
+	at com.joewandy.alignmentResearch.objectModel.HDPSamplerHandler.annotate(HDPSamplerHandler.java:237)
+	at com.joewandy.alignmentResearch.objectModel.HDPSamplerHandler.annotateIP(HDPSamplerHandler.java:214)
+	at com.joewandy.alignmentResearch.objectModel.HDPSamplerHandler.doProcess(HDPSamplerHandler.java:151)
+	at com.joewandy.alignmentResearch.objectModel.HDPSamplerHandler.handleSample(HDPSamplerHandler.java:93)
 	at com.joewandy.alignmentResearch.objectModel.HDPMassRTClustering.run(HDPMassRTClustering.java:97)
 	at com.joewandy.alignmentResearch.alignmentMethod.external.TestHdpAlignment.<init>(TestHdpAlignment.java:105)
 	at com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodFactory.getAlignmentMethod(AlignmentMethodFactory.java:72)

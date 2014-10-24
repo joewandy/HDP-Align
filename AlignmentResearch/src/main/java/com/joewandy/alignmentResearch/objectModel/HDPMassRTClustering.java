@@ -114,6 +114,10 @@ public class HDPMassRTClustering implements HDPClustering {
 	public int getSamplesTaken() {
 		return sampleHandler.getSamplesTaken();
 	}
+	
+	public Map<Feature, Map<String, Integer>> getIpMap() {
+		return sampleHandler.getIpMap();
+	}
 		
 	/**
 	 * Initialises HDP parameters
@@ -842,10 +846,20 @@ public class HDPMassRTClustering implements HDPClustering {
 	        // also update all the mass clusters linked to this metabolite		
 	        HDPMetabolite met = hdpMetabolites.get(i);		
 	        for (int a = 0; a < met.getA(); a++) {		
-	        	prec = hdpParam.getRho_0_prec() + (hdpParam.getRho_prec() + met.fa(a));		
-	        	mu = (1/prec) * (hdpParam.getRho_0_prec() + hdpParam.getPsi_0()) + (hdpParam.getRho_prec() * met.sa(a));		
-	        	double newTheta = randomData.nextGaussian(mu, Math.sqrt(1/prec)); 		
-	        	met.setTheta(a, newTheta);
+	        	
+//	        	prec = hdpParam.getRho_0_prec() + (hdpParam.getRho_prec() + met.fa(a));		
+//	        	mu = (1/prec) * ( (hdpParam.getPsi_0()*hdpParam.getRho_0_prec()) + (hdpParam.getRho_prec() * met.sa(a)) );		
+//	        	double newTheta = randomData.nextGaussian(mu, Math.sqrt(1/prec)); 	
+
+	        	double sumMasses = 0;
+	        	int count = 0;
+	        	for (Feature f : met.getPeaksInMassCluster(a)) {
+	        		sumMasses += f.getMass();
+	        		count++;
+	        	}
+	        	double newTheta = sumMasses / count;
+	        	met.setTheta(a, Math.log(newTheta));
+	        	
 	        }		
 	        
 		}

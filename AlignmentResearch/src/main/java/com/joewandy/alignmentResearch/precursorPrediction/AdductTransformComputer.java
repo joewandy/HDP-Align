@@ -61,6 +61,7 @@ public class AdductTransformComputer {
 	}
 
 	public void displayAdducts() {
+		System.out.println("AdductTransformComputer -- displayAdducts()");
 		for (int i = 0; i < adductList.size(); i++) {
 			System.out.println(adductList.get(i));
 		}
@@ -85,8 +86,7 @@ public class AdductTransformComputer {
 
 	private void compute(String adduct, int index) {
 
-		System.out.println("\n\n\n");
-		System.out.println("ADDUCT: " + adduct);
+//		System.out.println("ADDUCT: " + adduct);
 		List<String> components = new ArrayList<String>();
 		List<Integer> polarity = new ArrayList<Integer>();
 
@@ -102,7 +102,7 @@ public class AdductTransformComputer {
 
 		String massTerm = adduct.substring(0, pos - 1);
 		String addTerm = adduct.substring(pos - 1);
-		System.out.println("Mass term: " + massTerm + " addTerm " + addTerm);
+//		System.out.println("Mass term: " + massTerm + " addTerm " + addTerm);
 		// ArrayList<String> components = adduct.split("\\+");
 		// Integer[] polarity = new Integer(components.length() - 1);
 
@@ -134,15 +134,15 @@ public class AdductTransformComputer {
 				prev = i;
 			}
 		}
-		System.out.print("All components: ");
-		for (int i = 0; i < components.size(); i++) {
-			System.out.print("  " + components.get(i) + " (" + polarity.get(i)
-					+ "),");
-		}
-		System.out.println();
+//		System.out.print("All components: ");
+//		for (int i = 0; i < components.size(); i++) {
+//			System.out.print("  " + components.get(i) + " (" + polarity.get(i)
+//					+ "),");
+//		}
+//		System.out.println();
 
 		for (int i = 0; i < components.size(); i++) {
-			System.out.print("Component: " + components.get(i));
+//			System.out.print("Component: " + components.get(i));
 			// First check for substitutions
 			// is the first character an integer?
 			Integer fac = 1;
@@ -156,18 +156,18 @@ public class AdductTransformComputer {
 			String match = formulas.get(temp);
 			if (match != null) {
 				temp = match;
-				System.out.print(" (" + temp + ") ");
+//				System.out.print(" (" + temp + ") ");
 			}
-			System.out.print(" Fac: " + fac);
+//			System.out.print(" Fac: " + fac);
 			Boolean finished = false;
 			Double totMass = 0.0;
 			String atom;
 			Integer tempCharge = chargeThings.get(temp);
 			if (tempCharge != null) {
 				charge[index] += fac * tempCharge * polarity.get(i);
-				System.out.println("\tCharge = " + fac * tempCharge);
+//				System.out.println("\tCharge = " + fac * tempCharge);
 			} else {
-				System.out.println("\tCharge = 0");
+//				System.out.println("\tCharge = 0");
 			}
 			while (!finished) {
 				// Get two characters
@@ -193,25 +193,25 @@ public class AdductTransformComputer {
 					temp = temp.substring(1);
 				}
 				if (atomMatch == null) {
-					System.out.println("FATAL ERROR QUITTING");
+//					System.out.println("FATAL ERROR QUITTING");
 					System.exit(-1);
 				} else {
-					System.out.print("Found " + atom + " times ");
+//					System.out.print("Found " + atom + " times ");
 					if (temp.length() > 0) {
 						String check = temp.substring(0, 1);
 						if (Character.isDigit(check.charAt(0))) {
-							System.out.println(Character.getNumericValue(check
-									.charAt(0)));
+//							System.out.println(Character.getNumericValue(check
+//									.charAt(0)));
 							totMass += Character.getNumericValue(check
 									.charAt(0)) * massThings.get(atom);
 							temp = temp.substring(1);
 						} else {
 							totMass += massThings.get(atom);
-							System.out.println("1");
+//							System.out.println("1");
 						}
 
 					} else {
-						System.out.println("1");
+//						System.out.println("1");
 						totMass += massThings.get(atom);
 					}
 
@@ -225,16 +225,16 @@ public class AdductTransformComputer {
 
 		}
 		electronMass[index] = charge[index] * ELECTRON_MASS;
-		System.out.print("multiplicity: " + multiplicity[index]
-				+ " Adduct Mass: " + adductMass[index]);
-		System.out.println(" charge: " + charge[index] + " electronMass: "
-				+ electronMass[index]);
+//		System.out.print("multiplicity: " + multiplicity[index]
+//				+ " Adduct Mass: " + adductMass[index]);
+//		System.out.println(" charge: " + charge[index] + " electronMass: "
+//				+ electronMass[index]);
 
 		// Old values for testing
 		mul[index] = 1.0 * multiplicity[index] / Math.abs(charge[index]);
 		sub[index] = (adductMass[index] - electronMass[index])
 				/ Math.abs(charge[index]);
-		System.out.println("Mul: " + mul[index] + " Sub: " + sub[index]);
+//		System.out.println("Mul: " + mul[index] + " Sub: " + sub[index]);
 
 	}
 
@@ -250,6 +250,29 @@ public class AdductTransformComputer {
 		} catch (IOException e) {
 			System.out.println("IO Error");
 		}
+	}
+	
+	public List<String> getAdductList() {
+		return adductList;
+	}
+
+	public List<Double> getPrecursorMass(double ionMass) {
+		
+		List<Double> results = new ArrayList<Double>();
+		for (int i = 0; i < adductList.size(); i++) {
+
+			// (ionMass|c| + ce - sum of adduct masses) / multiplicity
+			double c = charge[i];
+			double ce = electronMass[i];
+			double soam = adductMass[i];
+			double mult = multiplicity[i];
+			double precursorMass = ((ionMass*c) + ce - soam) / mult;
+			results.add(precursorMass);
+			
+		}
+		
+		return results;
+				
 	}
 
 	public static void main(String[] args) {
