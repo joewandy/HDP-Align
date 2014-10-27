@@ -323,6 +323,7 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 										
 			// get the observed mass, intensity and RT
 			int id = theoFeature.getPeakID();
+			String adduct = theoFeature.getTheoAdductType();
 			double logMass = Math.log(theoFeature.getMass());
 			double logIntensity = Math.log(theoFeature.getIntensity());
 
@@ -351,6 +352,7 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 			observedFeature.setIntensity(observedIntensity);
 			observedFeature.setRt(observedRT);
 			observedFeature.setTheoPeakID(id);
+			observedFeature.setTheoAdductType(adduct);
 			
 			GenerativeFeatureGroup group = (GenerativeFeatureGroup) theoFeature.getFirstGroup();
 			GenerativeMolecule mol = group.getParent();

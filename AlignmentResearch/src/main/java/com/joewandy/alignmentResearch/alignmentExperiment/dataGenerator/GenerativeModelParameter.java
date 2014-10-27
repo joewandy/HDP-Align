@@ -8,7 +8,7 @@ public class GenerativeModelParameter {
 	
 	// generate biological or technical replicates ??	
 	private ExperimentType expType = ExperimentType.TECHNICAL;	
-	private int S = 2;				// how many replicates to produce
+	private int S = 20;				// how many replicates to produce
 	
 	private double threshold_q = 0000;	// threshold for filtering low intensity peaks
 	private double [] g = {1, 1, 1};	// warping scaling coeff in each replicate

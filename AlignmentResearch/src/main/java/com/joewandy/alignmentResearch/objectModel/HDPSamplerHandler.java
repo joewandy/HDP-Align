@@ -11,8 +11,6 @@ import no.uib.cipr.matrix.sparse.FlexCompRowMatrix;
 import com.joewandy.alignmentResearch.precursorPrediction.AdductTransformComputer;
 
 public class HDPSamplerHandler {
-
-	private static final double MASS_EPSILON = 0.005;
 	
 	private List<HDPFile> hdpFiles;
 	private List<HDPMetabolite> hdpMetabolites;
@@ -23,14 +21,16 @@ public class HDPSamplerHandler {
 	private AdductTransformComputer adductCalc;
 	private List<String> adductList;
 	private Map<Feature, Map<String, Integer>> ipMap;
+	private double ppm;
 	
-	public HDPSamplerHandler(List<HDPFile> hdpFiles, List<HDPMetabolite> hdpMetabolites, int totalPeaks) {
+	public HDPSamplerHandler(List<HDPFile> hdpFiles, List<HDPMetabolite> hdpMetabolites, int totalPeaks, double ppm) {
 	
 		this.hdpFiles = hdpFiles;
 		this.hdpMetabolites = hdpMetabolites;
 		this.totalPeaks = totalPeaks;
 		this.resultMap = new FlexCompRowMatrix(totalPeaks, totalPeaks);
 		this.ipMap = new HashMap<Feature, Map<String, Integer>>();
+		this.ppm = ppm;
 				
 		adductList = new ArrayList<String>();
 		adductList.add("M+3H");
@@ -177,51 +177,73 @@ public class HDPSamplerHandler {
 	}
 	
 	private void annotateIP() {
-	
+
+		// precompute precursor masses for each mass cluster
+		Map<HDPMassCluster, List<Double>> precursorMap = new HashMap<HDPMassCluster, List<Double>>();
+		for (int i = 0; i < hdpMetabolites.size(); i++) {
+			HDPMetabolite met = hdpMetabolites.get(i);
+			for (int j = 0; j < met.getMassClusters().size(); j++) {				
+				HDPMassCluster mc = met.getMassClusters().get(j);				
+				double ionMass = Math.exp(mc.getTheta());
+				List<Double> precursorMasses = adductCalc.getPrecursorMass(ionMass);
+				assert(adductList.size() == precursorMasses.size());
+				precursorMap.put(mc, precursorMasses);
+			}			
+		}
+		
 		// for all metabolite
 		for (int i = 0; i < hdpMetabolites.size(); i++) {
 
 			// for all mass clusters inside
 			HDPMetabolite met = hdpMetabolites.get(i);
-			for (HDPMassCluster mc1 : met.getMassClusters()) {
+			for (int j = 0; j < met.getMassClusters().size(); j++) {
 				
-//				if (mc1.getCountPeaks() == 2) {
-//					System.out.println(mc1.getCountPeaks());
-//				}
+				// first determine all the possible precursor masses for thie mass cluster
+				HDPMassCluster mc1 = met.getMassClusters().get(j);				
+				List<Double> precursorMasses1 = precursorMap.get(mc1);
+				
+				// then check if there's any other mass cluster sharing the same precursor mass
+				boolean found = false;
+				for (int k = j+1; k < met.getMassClusters().size(); k++) {
+					
+					HDPMassCluster mc2 = met.getMassClusters().get(k);				
+					List<Double> precursorMasses2 = precursorMap.get(mc2);
 
-				/* 
-				 * a mass cluster should correspond to an ion mass, so if this
-				 * comes from an adduct, we work out the expected precursor mass
-				 */
-				double ionMass = Math.exp(mc1.getTheta());
-				List<Double> predictedMasses = adductCalc.getPrecursorMass(ionMass);
-				assert(adductList.size() == predictedMasses.size());
-				for (HDPMassCluster mc2 : met.getMassClusters()) {
-					if (mc1.equals(mc2)) {
-						continue;
-					} else {
-						// check the mass of mc2 to see if it matches our list
-						double toCheck = Math.exp(mc2.getTheta());
-						for (int c = 0; c < adductList.size(); c++) {
-							double predictedMass = predictedMasses.get(c);
-							if (massWithinTolerance(toCheck, predictedMass)) {
-//								System.out.println("\t" + mc1 + " " + adductList.get(c) + " matches " + mc2 + " due to " + predictedMass);	
-								for (Feature f1 : mc1.getPeakData()) {
-									annotate(adductList.get(c), f1);
-									for (Feature f2 : mc2.getPeakData()) {
-										annotate("PRECURSOR", f2);
-									}
-								}
-							}
+					// if yes, then annotate both mass clusters
+					for (int c1 = 0; c1 < precursorMasses1.size(); c1++) {
+						double precursorMass1 = precursorMasses1.get(c1);
+						found = findAndAnnotate(precursorMass1, precursorMasses2, mc1,
+								mc2, c1);
+						if (found) {
+							break;
 						}
-						
 					}
+
 				}
 				
 			}
 			
 		}
 				
+	}
+
+	private boolean findAndAnnotate(double precursorMass1,
+			List<Double> precursorMasses2, HDPMassCluster mc1,
+			HDPMassCluster mc2, int c1) {
+		for (int c2 = 0; c2 < precursorMasses2.size(); c2++) {
+			double precursorMass2 = precursorMasses2.get(c2);
+			if (massWithinTolerance(precursorMass1, precursorMass2)) {
+				// if yes, then annotate peaks in both mass clusters with the adduct types
+				for (Feature f1 : mc1.getPeakData()) {
+					annotate(adductList.get(c1), f1);
+				}
+				for (Feature f2 : mc2.getPeakData()) {
+					annotate(adductList.get(c2), f2);
+				}
+				return true;
+			}
+		}
+		return false;
 	}
 
 	private void annotate(String msg, Feature f) {
@@ -242,13 +264,20 @@ public class HDPSamplerHandler {
 	}
 	
 	private boolean massWithinTolerance(double mass1, double mass2) {
-		double upper = mass1 + HDPSamplerHandler.MASS_EPSILON;
-		double lower = mass1 - HDPSamplerHandler.MASS_EPSILON;
+		double delta = PPM(mass1, this.ppm);
+		// 3 times the window to match the gaussian distribution used in the model
+		double upper = mass1 + (delta*3); 
+		double lower = mass1 - (delta*3);
 		if (lower < mass2 && mass2 < upper) {
 			return true;
 		} else {
 			return false;
 		}		
 	}
+	
+	private double PPM(double mass, double q) {
+		return q * (0.000001*mass);
+	}
+
 	
 }

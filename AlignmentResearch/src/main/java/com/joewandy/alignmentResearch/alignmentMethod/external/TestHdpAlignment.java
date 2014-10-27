@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.commons.collections.MapUtils;
-
 import no.uib.cipr.matrix.Matrix;
 import no.uib.cipr.matrix.MatrixEntry;
 
@@ -27,7 +25,6 @@ import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.Feature;
 import com.joewandy.alignmentResearch.objectModel.HDPClustering;
-import com.joewandy.alignmentResearch.objectModel.HDPFile;
 import com.joewandy.alignmentResearch.objectModel.HDPMassRTClustering;
 
 public class TestHdpAlignment extends BaseAlignment implements AlignmentMethod {
@@ -36,6 +33,7 @@ public class TestHdpAlignment extends BaseAlignment implements AlignmentMethod {
 	private Map<HdpResult, HdpResult> resultMap;
 	private String scoringMethod;
 	private boolean exactMatch;
+	private int totalPeaks;
 	
 	public TestHdpAlignment(List<AlignmentFile> dataList, AlignmentMethodParam param) {
 
@@ -44,6 +42,10 @@ public class TestHdpAlignment extends BaseAlignment implements AlignmentMethod {
 		this.scoringMethod = param.getScoringMethod();
 		this.exactMatch = param.isExactMatch();
 
+		for (AlignmentFile file : dataList) {
+			totalPeaks += file.getFeaturesCount();
+		}
+		
 		// load from matlab
 		AlignmentFile firstFile = dataList.get(0);
 		String parentPath = firstFile.getParentPath();
@@ -168,7 +170,45 @@ public class TestHdpAlignment extends BaseAlignment implements AlignmentMethod {
 				// print IP map
 				Map<Feature, Map<String, Integer>> ipMap = clustering.getIpMap();
 				System.out.println("IPMAP SIZE = " + ipMap.size());
-				MapUtils.debugPrint(System.out, "IP Map", ipMap);
+				int correctCount = 0;
+				int nonAmbiguousCount = 0;
+				int ambiguousCount = 0;
+				for (Entry<Feature, Map<String, Integer>> e : ipMap.entrySet()) {
+					Feature f = e.getKey();
+					System.out.println(f.getPeakID() + " " + f.getMass() + " " + f.getRt() + " " + f.getIntensity() + " " + f.getTheoAdductType());
+					Map<String, Integer> vals = e.getValue();
+					if (vals != null) {
+						double sum = 0;
+						for (Entry<String, Integer> e2 : vals.entrySet()) {
+							sum += e2.getValue();
+						}						
+						double maxProb = 0;
+						String annot = null;
+						for (Entry<String, Integer> e2 : vals.entrySet()) {
+							int count = e2.getValue();
+							double prob = ((double) count) / sum;
+							System.out.println("\t" + e2.getKey() + "=" + String.format("%.2f", prob));
+							if (prob > maxProb) {
+								maxProb = prob;
+								annot = e2.getKey();
+							}
+						}						
+						if (annot != null && annot.equals(f.getTheoAdductType())) {
+							System.out.println("\tCORRECT");
+							correctCount++;
+							if (vals.entrySet().size() == 1) {
+								nonAmbiguousCount++;
+							} else {
+								ambiguousCount++;
+							}
+						}
+					}
+				}
+				System.out.println("Total peaks annotated = " + ipMap.size() + "/" + totalPeaks);
+				System.out.println("Total correct peaks annotated = " + correctCount + "/" + ipMap.size());
+				System.out.println("Total nonambiguous correct annotated = " + nonAmbiguousCount + "/" + correctCount);
+				System.out.println("Total ambiguous correct annotated = " + ambiguousCount + "/" + correctCount);
+				//				MapUtils.debugPrint(System.out, "IP Map", ipMap);
 								
 			} else if (MultiAlignConstants.SCORING_METHOD_HDP_RT_JAVA.equals(this.scoringMethod)) {
 			

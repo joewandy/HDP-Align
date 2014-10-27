@@ -14,12 +14,14 @@ public class HDPMetabolite {
 	private int massClusterSeqId;
 	private List<HDPMassCluster> massClusters;		// list of mass clusters objects
 	private Map<Feature, HDPMassCluster> V;			// which peak assigned to which mass clusters
+	private List<Double> metaboliteMasses;
 	
 	public HDPMetabolite(int id) {
 		this.id = id;
 		this.V = new HashMap<Feature, HDPMassCluster>();
 		this.peakData = new ArrayList<Feature>();
 		this.massClusters = new ArrayList<HDPMassCluster>();
+		this.metaboliteMasses = new ArrayList<Double>();
 	}
 
 	public int getId() {
@@ -143,6 +145,14 @@ public class HDPMetabolite {
 	
 	public void removePeakData(int peakPos) {
 		this.peakData.remove(peakPos);
+	}
+	
+	public List<Double> getMetaboliteMasses() {
+		return this.metaboliteMasses;
+	}
+	
+	public void addMetaboliteMass(double mass) {
+		this.metaboliteMasses.add(mass);
 	}
 
 	@Override

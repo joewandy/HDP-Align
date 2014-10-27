@@ -42,11 +42,13 @@ public class GenerativeMolecule {
 			double theoreticalMass = getMass(j);
 			double intensityRatio = getDistribution(j);
 			double theoreticalIntensity = getIntensity() * intensityRatio;
+			String adductName = getAdductName(j);
 			
 			Feature theoFeature = new Feature(idStart);
 			theoFeature.setMass(theoreticalMass);
 			theoFeature.setIntensity(theoreticalIntensity);
 			theoFeature.setTheoPeakID(idStart);
+			theoFeature.setTheoAdductType(adductName);
 			idStart++;
 			molTheoFeatures.add(theoFeature);
 			
@@ -92,6 +94,11 @@ public class GenerativeMolecule {
 	
 	public int getAdduct(int index) {
 		return ms.getAdduct(index);
+	}
+
+	public String getAdductName(int index) {
+		int a = ms.getAdduct(index);
+		return adducts[a];
 	}
 	
 	public List<String> getAdductNames() {

@@ -31,6 +31,7 @@ public class Feature {
 	private boolean delete;
 	private Element xmlElem;
 	private int theoPeakID;
+	private String theoAdductType;
 	private int metaboliteID;
 	private double score;
 	private boolean synthetic;
@@ -143,6 +144,14 @@ public class Feature {
 		this.theoPeakID = theoPeakID;
 	}
 
+	public String getTheoAdductType() {
+		return theoAdductType;
+	}
+
+	public void setTheoAdductType(String theoAdductType) {
+		this.theoAdductType = theoAdductType;
+	}
+
 	public int getMetaboliteID() {
 		return metaboliteID;
 	}
@@ -239,7 +248,7 @@ public class Feature {
 	}
 
 	public String csvFormForSimaSynthetic() {
-		return mass + "\t" + 1 + "\t" + intensity + "\t" + rt + "\t" + theoPeakID + "\t" + metaboliteID;
+		return mass + "\t" + 1 + "\t" + intensity + "\t" + rt + "\t" + theoPeakID + "\t" + metaboliteID + "\t" + theoAdductType;
 	}
 	
 	public void graphScore(AlignmentPair pair) {
@@ -318,13 +327,17 @@ public class Feature {
 		if (data != null) {
 			return "Feature [peakID=" + peakID + ", mass=" + mass + ", rt=" + rt
 					+ ", intensity=" + intensity + ", data=" + data.getFilenameWithoutExtension()
-					+ ", theoPeakID=" + theoPeakID
+					+ ", theoPeakID=" + theoPeakID 
+					+ ", theoAdductType=" + theoAdductType 
 					+ ", metaboliteID=" + metaboliteID
 					+ ", score=" + score
 					+ "]";			
 		} else {
-			return "Feature [peakID=" + peakID + ", mass=" + mass + ", rt=" + rt
-					+ ", intensity=" + intensity + "]";			
+			return "Feature [peakID=" + peakID 
+					+ ", mass=" + mass 
+					+ ", rt=" + rt
+					+ ", intensity=" + intensity 
+					+ "]";			
 		}
 	}
 	

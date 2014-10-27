@@ -203,16 +203,18 @@ public class SimaFormatDataGenerator extends BaseDataGenerator implements Alignm
 		        	features.add(feature);
 		        	line = br.readLine();
 		        	peakId++;	        		
-	        	} else if (tokens.length == 6){
+	        	} else if (tokens.length == 7){
 		        	double mass = Double.valueOf(tokens[0]);
 		        	double charge = Double.valueOf(tokens[1]);
 		        	double intensity = Double.valueOf(tokens[2]);
 		        	double rt = Double.valueOf(tokens[3]);
 		        	int theoPeakId = Integer.valueOf(tokens[4]);
 		        	int metId = Integer.valueOf(tokens[5]);
+		        	String adduct = tokens[6];
 		        	Feature feature = new Feature(peakId, mass/charge, rt, intensity);
 		        	feature.setTheoPeakID(theoPeakId);
 		        	feature.setMetaboliteID(metId);
+		        	feature.setTheoAdductType(adduct);
 		        	features.add(feature);
 		        	line = br.readLine();
 		        	peakId++;

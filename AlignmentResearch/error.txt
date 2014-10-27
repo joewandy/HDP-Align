@@ -1,10 +1,10 @@
-java.lang.NullPointerException
-	at com.joewandy.alignmentResearch.objectModel.HDPSamplerHandler.annotate(HDPSamplerHandler.java:237)
-	at com.joewandy.alignmentResearch.objectModel.HDPSamplerHandler.annotateIP(HDPSamplerHandler.java:214)
-	at com.joewandy.alignmentResearch.objectModel.HDPSamplerHandler.doProcess(HDPSamplerHandler.java:151)
-	at com.joewandy.alignmentResearch.objectModel.HDPSamplerHandler.handleSample(HDPSamplerHandler.java:93)
-	at com.joewandy.alignmentResearch.objectModel.HDPMassRTClustering.run(HDPMassRTClustering.java:97)
-	at com.joewandy.alignmentResearch.alignmentMethod.external.TestHdpAlignment.<init>(TestHdpAlignment.java:105)
+java.util.UnknownFormatConversionException: Conversion = '%'
+	at java.util.Formatter.checkText(Formatter.java:2579)
+	at java.util.Formatter.parse(Formatter.java:2565)
+	at java.util.Formatter.format(Formatter.java:2501)
+	at java.util.Formatter.format(Formatter.java:2455)
+	at java.lang.String.format(String.java:2925)
+	at com.joewandy.alignmentResearch.alignmentMethod.external.TestHdpAlignment.<init>(TestHdpAlignment.java:190)
 	at com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodFactory.getAlignmentMethod(AlignmentMethodFactory.java:72)
 	at com.joewandy.alignmentResearch.main.MultiAlign.<init>(MultiAlign.java:91)
 	at com.joewandy.alignmentResearch.main.experiment.HdpExperiment.performExperiment(HdpExperiment.java:24)
