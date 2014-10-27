@@ -118,6 +118,10 @@ public class HDPMassRTClustering implements HDPClustering {
 	public Map<Feature, Map<String, Integer>> getIpMap() {
 		return sampleHandler.getIpMap();
 	}
+	
+	public Map<HDPMetabolite, List<HDPPrecursorMass>> getMetabolitePrecursors() {
+		return sampleHandler.getMetabolitePrecursors();
+	}
 		
 	/**
 	 * Initialises HDP parameters

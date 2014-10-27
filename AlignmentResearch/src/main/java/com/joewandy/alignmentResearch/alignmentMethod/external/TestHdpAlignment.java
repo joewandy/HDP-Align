@@ -2,6 +2,7 @@ package com.joewandy.alignmentResearch.alignmentMethod.external;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -26,6 +27,8 @@ import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.Feature;
 import com.joewandy.alignmentResearch.objectModel.HDPClustering;
 import com.joewandy.alignmentResearch.objectModel.HDPMassRTClustering;
+import com.joewandy.alignmentResearch.objectModel.HDPMetabolite;
+import com.joewandy.alignmentResearch.objectModel.HDPPrecursorMass;
 
 public class TestHdpAlignment extends BaseAlignment implements AlignmentMethod {
 
@@ -209,6 +212,19 @@ public class TestHdpAlignment extends BaseAlignment implements AlignmentMethod {
 				System.out.println("Total nonambiguous correct annotated = " + nonAmbiguousCount + "/" + correctCount);
 				System.out.println("Total ambiguous correct annotated = " + ambiguousCount + "/" + correctCount);
 				//				MapUtils.debugPrint(System.out, "IP Map", ipMap);
+				
+				// print metabolite precursor
+				System.out.println();
+				Map<HDPMetabolite, List<HDPPrecursorMass>> metabolitePrecursors = clustering.getMetabolitePrecursors();
+				for (Entry<HDPMetabolite, List<HDPPrecursorMass>> e : metabolitePrecursors.entrySet()) {
+					HDPMetabolite met = e.getKey();
+					List<HDPPrecursorMass> common = e.getValue();
+					System.out.println("Metabolite " + met + " has " + common.size() + " precursor masses ");
+					Collections.sort(common);
+					for (HDPPrecursorMass pc : common) {
+						System.out.println("\t" + pc);
+					}					
+				}
 								
 			} else if (MultiAlignConstants.SCORING_METHOD_HDP_RT_JAVA.equals(this.scoringMethod)) {
 			

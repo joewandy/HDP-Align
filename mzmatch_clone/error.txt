@@ -1,4 +1,3 @@
-java.lang.NullPointerException
-	at java.io.File.<init>(File.java:277)
-	at mzmatch.util.Tool.createFilePath(Tool.java:132)
-	at mzmatch.ipeak.util.ExtractIsotopePatterns.main(ExtractIsotopePatterns.java:178)
+java.lang.ClassCastException: peakml.MassChromatogram cannot be cast to peakml.IPeakSet
+	at mzmatch.ipeak.util.Identify.annotatePeaks(Identify.java:367)
+	at mzmatch.ipeak.util.Identify.main(Identify.java:316)

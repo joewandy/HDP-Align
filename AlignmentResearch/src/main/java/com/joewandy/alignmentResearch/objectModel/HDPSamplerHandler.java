@@ -1,6 +1,7 @@
 package com.joewandy.alignmentResearch.objectModel;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +23,7 @@ public class HDPSamplerHandler {
 	private List<String> adductList;
 	private Map<Feature, Map<String, Integer>> ipMap;
 	private double ppm;
+	Map<HDPMetabolite, List<HDPPrecursorMass>> metabolitePrecursors;
 	
 	public HDPSamplerHandler(List<HDPFile> hdpFiles, List<HDPMetabolite> hdpMetabolites, int totalPeaks, double ppm) {
 	
@@ -30,8 +32,9 @@ public class HDPSamplerHandler {
 		this.totalPeaks = totalPeaks;
 		this.resultMap = new FlexCompRowMatrix(totalPeaks, totalPeaks);
 		this.ipMap = new HashMap<Feature, Map<String, Integer>>();
+		this.metabolitePrecursors = new HashMap<HDPMetabolite, List<HDPPrecursorMass>>(); 
 		this.ppm = ppm;
-				
+		
 		adductList = new ArrayList<String>();
 		adductList.add("M+3H");
 		adductList.add("M+2H+Na");
@@ -141,6 +144,10 @@ public class HDPSamplerHandler {
 		return samplesTaken;
 	}
 
+	public Map<HDPMetabolite, List<HDPPrecursorMass>> getMetabolitePrecursors() {
+		return metabolitePrecursors;
+	}
+
 	private void doProcess() {
 		
 		// track alignment probabilities
@@ -193,9 +200,15 @@ public class HDPSamplerHandler {
 		
 		// for all metabolite
 		for (int i = 0; i < hdpMetabolites.size(); i++) {
+			
+			HDPMetabolite met = hdpMetabolites.get(i);
+			List<HDPPrecursorMass> common = metabolitePrecursors.get(met);
+			if (common == null) {
+				common = new ArrayList<HDPPrecursorMass>();
+				metabolitePrecursors.put(met, common);
+			}
 
 			// for all mass clusters inside
-			HDPMetabolite met = hdpMetabolites.get(i);
 			for (int j = 0; j < met.getMassClusters().size(); j++) {
 				
 				// first determine all the possible precursor masses for thie mass cluster
@@ -211,10 +224,31 @@ public class HDPSamplerHandler {
 
 					// if yes, then annotate both mass clusters
 					for (int c1 = 0; c1 < precursorMasses1.size(); c1++) {
+						// get the precomputed value
 						double precursorMass1 = precursorMasses1.get(c1);
-						found = findAndAnnotate(precursorMass1, precursorMasses2, mc1,
+						// find the precursor mass object first
+						HDPPrecursorMass precursor = null;
+						for (HDPPrecursorMass pc : common) {
+							if (pc.withinTolerance(precursorMass1)) {
+								precursor = pc;
+								break;
+							}
+						}
+						// make a new precursor mass if necessary
+						boolean newPc = false;
+						if (precursor == null) {
+							precursor = new HDPPrecursorMass(precursorMass1, this.ppm);
+							newPc = true;
+						}
+						// search for matching results in precursorMasses2 and annotate features if found
+						found = findAndAnnotate(precursor, precursorMasses2, mc1,
 								mc2, c1);
 						if (found) {
+							if (newPc) {
+								common.add(precursor);								
+							} else {
+								precursor.incrementCount();
+							}
 							break;
 						}
 					}
@@ -222,17 +256,17 @@ public class HDPSamplerHandler {
 				}
 				
 			}
-			
+						
 		}
 				
 	}
 
-	private boolean findAndAnnotate(double precursorMass1,
+	private boolean findAndAnnotate(HDPPrecursorMass precursorMass1,
 			List<Double> precursorMasses2, HDPMassCluster mc1,
 			HDPMassCluster mc2, int c1) {
 		for (int c2 = 0; c2 < precursorMasses2.size(); c2++) {
 			double precursorMass2 = precursorMasses2.get(c2);
-			if (massWithinTolerance(precursorMass1, precursorMass2)) {
+			if (precursorMass1.withinTolerance(precursorMass2)) {
 				// if yes, then annotate peaks in both mass clusters with the adduct types
 				for (Feature f1 : mc1.getPeakData()) {
 					annotate(adductList.get(c1), f1);
@@ -262,22 +296,5 @@ public class HDPSamplerHandler {
 		}
 		this.ipMap.put(f, annots);
 	}
-	
-	private boolean massWithinTolerance(double mass1, double mass2) {
-		double delta = PPM(mass1, this.ppm);
-		// 3 times the window to match the gaussian distribution used in the model
-		double upper = mass1 + (delta*3); 
-		double lower = mass1 - (delta*3);
-		if (lower < mass2 && mass2 < upper) {
-			return true;
-		} else {
-			return false;
-		}		
-	}
-	
-	private double PPM(double mass, double q) {
-		return q * (0.000001*mass);
-	}
-
-	
+		
 }
