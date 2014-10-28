@@ -122,6 +122,10 @@ public class HDPMassRTClustering implements HDPClustering {
 	public Map<HDPMetabolite, List<HDPPrecursorMass>> getMetabolitePrecursors() {
 		return sampleHandler.getMetabolitePrecursors();
 	}
+	
+	public List<HDPMetabolite> getMetabolitesInLastSample() {
+		return hdpMetabolites;
+	}
 		
 	/**
 	 * Initialises HDP parameters

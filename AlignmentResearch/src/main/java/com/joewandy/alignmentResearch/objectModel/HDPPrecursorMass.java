@@ -1,15 +1,25 @@
 package com.joewandy.alignmentResearch.objectModel;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import peakml.chemistry.Molecule;
+
+import com.joewandy.mzmatch.query.CompoundQuery;
+
 public class HDPPrecursorMass implements Comparable<HDPPrecursorMass> {
 
 	private double mass;
 	private double ppm;
 	private int count;
+	private Set<Molecule> molecules;
+	private CompoundQuery dbQuery;
 	
-	public HDPPrecursorMass(double mass, double ppm) {
+	public HDPPrecursorMass(double mass, double ppm, CompoundQuery dbQuery) {
 		this.mass = mass;
 		this.ppm = ppm;
 		this.count = 1;
+		this.dbQuery = dbQuery;
 	}
 
 	public double getMass() {
@@ -17,10 +27,10 @@ public class HDPPrecursorMass implements Comparable<HDPPrecursorMass> {
 	}
 	
 	public boolean withinTolerance(double toCheck) {
-		double delta = PPM(mass, ppm);
 		// 3 times the window to match the gaussian distribution used in the model
-		double upper = mass + (delta*3); 
-		double lower = mass - (delta*3);
+		double delta = PPM(mass, ppm*3);
+		double upper = mass + delta; 
+		double lower = mass - delta;
 		if (lower < toCheck && toCheck < upper) {
 			return true;
 		} else {
@@ -35,10 +45,23 @@ public class HDPPrecursorMass implements Comparable<HDPPrecursorMass> {
 	public void incrementCount() {
 		count++;
 	}
+	
+	public Set<Molecule> getMolecules() {
+		if (molecules == null) {
+			try {
+				molecules = dbQuery.findCompoundsByMass(mass, ppm*3, 0);
+			} catch (Exception e) {
+				e.printStackTrace();
+				molecules = new HashSet<Molecule>();
+			}
+		}
+		return molecules;
+	}
 		
 	@Override
 	public String toString() {
-		return "HDPPrecursorMass [mass=" + mass + ", count=" + count + "]";
+		String msg = "HDPPrecursorMass [mass=" + mass + ", count=" + count + "]";
+		return msg;
 	}
 
 	private double PPM(double mass, double q) {

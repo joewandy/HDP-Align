@@ -1,10 +1,5 @@
-java.util.UnknownFormatConversionException: Conversion = '%'
-	at java.util.Formatter.checkText(Formatter.java:2579)
-	at java.util.Formatter.parse(Formatter.java:2565)
-	at java.util.Formatter.format(Formatter.java:2501)
-	at java.util.Formatter.format(Formatter.java:2455)
-	at java.lang.String.format(String.java:2925)
-	at com.joewandy.alignmentResearch.alignmentMethod.external.TestHdpAlignment.<init>(TestHdpAlignment.java:190)
+java.lang.NullPointerException
+	at com.joewandy.alignmentResearch.alignmentMethod.external.TestHdpAlignment.<init>(TestHdpAlignment.java:245)
 	at com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodFactory.getAlignmentMethod(AlignmentMethodFactory.java:72)
 	at com.joewandy.alignmentResearch.main.MultiAlign.<init>(MultiAlign.java:91)
 	at com.joewandy.alignmentResearch.main.experiment.HdpExperiment.performExperiment(HdpExperiment.java:24)

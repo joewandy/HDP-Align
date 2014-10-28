@@ -1,16 +1,22 @@
 package com.joewandy.alignmentResearch.alignmentMethod.external;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import no.uib.cipr.matrix.Matrix;
 import no.uib.cipr.matrix.MatrixEntry;
+import peakml.chemistry.Molecule;
 
 import com.jmatio.io.MatFileReader;
 import com.jmatio.types.MLDouble;
@@ -32,11 +38,13 @@ import com.joewandy.alignmentResearch.objectModel.HDPPrecursorMass;
 
 public class TestHdpAlignment extends BaseAlignment implements AlignmentMethod {
 
+	private static final int LIMIT_CHECK_PRECURSORS = 10;
 	protected List<AlignmentFile> dataList;
 	private Map<HdpResult, HdpResult> resultMap;
 	private String scoringMethod;
 	private boolean exactMatch;
 	private int totalPeaks;
+	private Map<String, String> database;
 	
 	public TestHdpAlignment(List<AlignmentFile> dataList, AlignmentMethodParam param) {
 
@@ -48,6 +56,22 @@ public class TestHdpAlignment extends BaseAlignment implements AlignmentMethod {
 		for (AlignmentFile file : dataList) {
 			totalPeaks += file.getFeaturesCount();
 		}
+		
+		// init testing database for std1 synthetic data
+		database = new HashMap<String, String>();
+		String databaseFile = "/home/joewandy/Dropbox/Project/documents/new_measure_experiment/input_data/standard_hdp/std1.csv";
+        try {
+            List<String> lines = Files.readAllLines(Paths.get(databaseFile),
+                    Charset.defaultCharset());
+            for (String line : lines) {
+            	String[] tokens = line.split(",");
+            	String formula = tokens[2].trim();
+            	database.put(formula, line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("database=" + database);
 		
 		// load from matlab
 		AlignmentFile firstFile = dataList.get(0);
@@ -213,18 +237,37 @@ public class TestHdpAlignment extends BaseAlignment implements AlignmentMethod {
 				System.out.println("Total ambiguous correct annotated = " + ambiguousCount + "/" + correctCount);
 				//				MapUtils.debugPrint(System.out, "IP Map", ipMap);
 				
-				// print metabolite precursor
+				// print metabolite precursor and formulae retrieved from PubChem
 				System.out.println();
 				Map<HDPMetabolite, List<HDPPrecursorMass>> metabolitePrecursors = clustering.getMetabolitePrecursors();
-				for (Entry<HDPMetabolite, List<HDPPrecursorMass>> e : metabolitePrecursors.entrySet()) {
-					HDPMetabolite met = e.getKey();
-					List<HDPPrecursorMass> common = e.getValue();
-					System.out.println("Metabolite " + met + " has " + common.size() + " precursor masses ");
-					Collections.sort(common);
-					for (HDPPrecursorMass pc : common) {
+				List<HDPMetabolite> inferredMetabolites = clustering.getMetabolitesInLastSample();
+				System.out.println("Total metabolites in database = " + database.size());
+				System.out.println("Total metabolites inferred = " + inferredMetabolites.size());
+				Set<String> uniqueFound = new HashSet<String>();
+				for (HDPMetabolite met : inferredMetabolites) {
+					List<HDPPrecursorMass> precursors = metabolitePrecursors.get(met);
+					System.out.println("Metabolite " + met + " has " + precursors.size() + " precursor masses ");
+					Collections.sort(precursors);
+					for (int i = 0; i < precursors.size(); i++) {
+						if (i >= LIMIT_CHECK_PRECURSORS) {
+							break;
+						}
+						HDPPrecursorMass pc = precursors.get(i);
 						System.out.println("\t" + pc);
+						Set<Molecule> mols = pc.getMolecules();
+						for (Molecule mol : mols) {
+//							System.out.println("\t\t" + mol.toString());
+							String key = mol.getPlainFormula();
+							if (database.containsKey(key)) {
+								if (!uniqueFound.contains(key)) {
+									uniqueFound.add(key);
+									System.out.println("\t\tFOUND " + key + " in database");
+								}
+							}
+						}
 					}					
 				}
+				System.out.println("Metabolites found = " + uniqueFound.size() + "/" + database.size());
 								
 			} else if (MultiAlignConstants.SCORING_METHOD_HDP_RT_JAVA.equals(this.scoringMethod)) {
 			

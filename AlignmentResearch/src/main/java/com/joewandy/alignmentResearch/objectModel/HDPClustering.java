@@ -13,6 +13,8 @@ public interface HDPClustering {
 
 	public Map<HDPMetabolite, List<HDPPrecursorMass>> getMetabolitePrecursors();
 	
+	public List<HDPMetabolite> getMetabolitesInLastSample();
+	
 	int getSamplesTaken();
 
 	void run();

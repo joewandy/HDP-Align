@@ -1,4 +1,4 @@
-package com.joewandy.mzmatch.query;
+package com.joewandy.alignmentResearch.alignmentMethod.custom.hdp;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,15 +42,16 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.joewandy.mzmatch.model.PubChemMolecule;
 import com.joewandy.mzmatch.model.PugCidsToProperties;
+import com.joewandy.mzmatch.query.BaseQuery;
+import com.joewandy.mzmatch.query.CompoundQuery;
 
 /**
- * Queries PUG for other compounds having same formulae as our query formula.
- * This will retrieve the isomers of the query formula in remote PubChem database.
+ * Queries PUG for other compounds within mass tolerance
  * 
  * @author joewandy
  * 
  */
-public class PubChemQuery extends BaseQuery implements CompoundQuery {
+public class HDPPubChemQuery extends BaseQuery implements CompoundQuery {
 
 	// number of results per query
 	private static final int DEFAULT_NUM_RESULTS = 10;
@@ -66,22 +67,18 @@ public class PubChemQuery extends BaseQuery implements CompoundQuery {
 	private final int batchSize;
 	private final int numResults;
 
-	public PubChemQuery() {
+	public HDPPubChemQuery() {
+		super.result = new HashSet<Molecule>();
 		this.numResults = DEFAULT_NUM_RESULTS;		
 		this.batchSize = DEFAULT_BATCH_SIZE;
-		super.result = new HashSet<Molecule>();
 	}
 	
-	public PubChemQuery(Map<String, Molecule> molecules) {
-		this(molecules, PubChemQuery.DEFAULT_NUM_RESULTS, PubChemQuery.DEFAULT_BATCH_SIZE);
+	public HDPPubChemQuery(Map<String, Molecule> molecules) {
+		this(molecules, HDPPubChemQuery.DEFAULT_NUM_RESULTS, HDPPubChemQuery.DEFAULT_BATCH_SIZE);
 	}
 
-	public PubChemQuery(Map<String, Molecule> molecules, int numResults, int batchSize) {
+	public HDPPubChemQuery(Map<String, Molecule> molecules, int numResults, int batchSize) {
 		super.result = new HashSet<Molecule>();
-		super.lookup = new HashMap<String, Integer>();
-		for (Molecule mol : molecules.values()) {
-			super.lookup.put(mol.getPlainFormula(), 1);
-		}
 		this.numResults = numResults;
 		this.batchSize = batchSize;
 	}
@@ -89,10 +86,10 @@ public class PubChemQuery extends BaseQuery implements CompoundQuery {
 	public Set<Molecule> findCompoundsByMass(double mass, double ppm,
 			double delta) throws Exception {
 		
-		System.out.print("Querying remote PubChem");
-		System.out.print("\tmass=" + String.format("%.5f", mass));
-		System.out.print("\tdelta=" + String.format("%.5f", delta));
-		System.out.println("\tppm=" + String.format("%.1f", ppm));
+//		System.out.print("Querying remote PubChem");
+//		System.out.print("\tmass=" + String.format("%.5f", mass));
+//		System.out.print("\tdelta=" + String.format("%.5f", delta));
+//		System.out.println("\tppm=" + String.format("%.1f", ppm));
 
 		DBGateway gw = new PubChemGateway(); 
 		MZTolerance tolerance = new MZTolerance(delta, ppm);
@@ -123,11 +120,11 @@ public class PubChemQuery extends BaseQuery implements CompoundQuery {
 			high = low + batchSize;
 
 		}
-
-		// remove duplicates
+		
+		// remove duplicates --> isomers sharing the same formulae
 		Set<PubChemMolecule> rows = new HashSet<PubChemMolecule>(temp);
-		System.out.println("Found " + rows.size() + " other formulae");
-		System.out.println("Inserting: ");
+//		System.out.println("Found " + rows.size() + " other formulae");
+//		System.out.println("Inserting: ");
 		
 		// map pubchem result to peakml compounds
 		Set<Molecule> retrieved = new HashSet<Molecule>();
@@ -143,111 +140,35 @@ public class PubChemQuery extends BaseQuery implements CompoundQuery {
 				continue;
 			}
 			
-			// also skip those already in the existing standard database
-			if (lookup.get(pc.getMolecularFormula()) != null) {
-				continue;
-			}
-
 			Molecule mol = null;
 			try {
 				// will throw exception if anything wrong with the formula
 				mol = new Molecule(pc.getCid(), pc.getIupacName(), pc.getMolecularFormula());	
 			} catch (RuntimeException e) {
 				// ignore any exception handling for now
-				// System.out.println(e.getMessage());
+//				System.out.println("Error parsing formula " + e.getMessage());
 			}
 			if (mol != null) {
 				
 				mol.setInChi(pc.getInChi());
 				mol.setMass(Double.parseDouble(pc.getMonoisotopicMass()));
-				System.out.println("\t" + pc.getMolecularFormula() + " " + pc.getMonoisotopicMass());					
+//				System.out.println("\t" + pc.getIupacName() + " " + pc.getMolecularFormula() + " " + pc.getMonoisotopicMass());					
 				retrieved.add(mol);					
 				
-				// store the formula in lookup table, for checking in future queries
-				lookup.put(pc.getMolecularFormula(), 1);
-
 				counter++;
 				
 			}
 								
 		}
 		
-		System.out.println(counter + " inserted.");
+//		System.out.println(counter + " inserted.");
 		
 		result.addAll(retrieved);
 		return retrieved;
 
 	}
-	
-	public PubChemMolecule findCompoundsByNameFormula(Molecule original, boolean useFormula) throws Exception {
 
-		String name = original.getName();
-		String formula = original.getPlainFormula();
-		
-		if (useFormula) {
-			System.out.println("Querying PubChem by name=" + name + " formula=" + formula);			
-		} else {
-			System.out.println("\t--RETRY-- Querying PubChem by name=" + name + " only");
-		}
-
-		String[] cids = null;
-		if (useFormula) {
-			cids = findCompounds(name, formula);		
-		} else {
-			cids = findCompounds(name, null);		
-		}
-		PubChemMolecule[] retrieved = findMoleculesByCids(cids);
-		if (retrieved == null) {
-			return null;
-		}
-		PubChemMolecule singleRetrieved = retrieved[0];			
-		return singleRetrieved;
-
-	}
-	
-	private String[] findCompounds(String name, String formula) throws IOException {
-		
-		StringBuilder pubchemUrl = new StringBuilder();
-//		pubchemUrl
-//			.append("http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?usehistory=n&db=pccompound&sort=cida&retmax=");
-		pubchemUrl
-			.append("http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?usehistory=n&db=pccompound&retmax=");
-		pubchemUrl.append(1);
-		pubchemUrl.append("&term=");
-		pubchemUrl.append("\"" + name + "\"[Synonym]");			
-		if (formula != null) {
-			pubchemUrl.append("%20AND%20" + formula);			
-		}
-		System.out.println("\tQuery: " + pubchemUrl);
-
-		NodeList cidElements;
-
-		try {
-		    DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		    DocumentBuilder builder = dbf.newDocumentBuilder();
-		    Document parsedResult = builder.parse(pubchemUrl.toString());
-
-		    XPathFactory factory = XPathFactory.newInstance();
-		    XPath xpath = factory.newXPath();
-		    XPathExpression expr = xpath.compile("//eSearchResult/IdList/Id");
-		    cidElements = (NodeList) expr.evaluate(parsedResult,
-			    XPathConstants.NODESET);
-
-		} catch (Exception e) {
-		    throw (new IOException(e));
-		}
-
-		String cidArray[] = new String[cidElements.getLength()];
-		for (int i = 0; i < cidElements.getLength(); i++) {
-		    Element cidElement = (Element) cidElements.item(i);
-		    cidArray[i] = cidElement.getTextContent();
-		}
-
-		return cidArray;
-		
-	}
-
-	public PubChemMolecule[] findMoleculesByCids(String[] cids) throws URISyntaxException, ClientProtocolException, IOException {
+	private PubChemMolecule[] findMoleculesByCids(String[] cids) throws URISyntaxException, ClientProtocolException, IOException {
 
 		/*
 		 * Request: 
@@ -285,7 +206,7 @@ public class PubChemQuery extends BaseQuery implements CompoundQuery {
 		}
 
 		StringBuilder builder = new StringBuilder();
-		builder.append(PubChemQuery.QUERY_PROLOG);
+		builder.append(HDPPubChemQuery.QUERY_PROLOG);
 		final String input = "/compound/cid/";
 		builder.append(input);
 		for(String s : cids) {
@@ -293,13 +214,13 @@ public class PubChemQuery extends BaseQuery implements CompoundQuery {
 		}
 		final String operation = "/property/IUPACName,MolecularFormula,MolecularWeight,MonoisotopicMass,Charge,InChIKey,InChI";
 		builder.append(operation);
-		builder.append(PubChemQuery.QUERY_OUTPUT);
+		builder.append(HDPPubChemQuery.QUERY_OUTPUT);
 		URI uri = constructUri(builder);
 
 		HttpGet httpget = new HttpGet(uri);
 		// System.out.println("GET: " + httpget.getURI());
-		System.out.println("\tFetching " + cids.length + " compounds from PubChem");
-		System.out.println("\t\t" + httpget);
+//		System.out.println("\tFetching " + cids.length + " compounds from PubChem");
+//		System.out.println("\t\t" + httpget);
 		HttpClient httpclient = new DefaultHttpClient();
 		HttpResponse httpResponse = httpclient.execute(httpget);
 		
@@ -334,51 +255,9 @@ public class PubChemQuery extends BaseQuery implements CompoundQuery {
 	private URI constructUri(StringBuilder sb) throws URISyntaxException {
 		String path = sb.toString();
 		URIBuilder builder = new URIBuilder();
-		builder.setScheme("http").setHost(PubChemQuery.QUERY_HOST).setPath(path);
+		builder.setScheme("http").setHost(HDPPubChemQuery.QUERY_HOST).setPath(path);
 		URI uri = builder.build();
 		return uri;
 	}
 	
-	/**
-	 * Quick check to see if newFormula has been stored inside compounds before
-	 * 
-	 * @param compounds
-	 * @param newFormula
-	 * @return
-	 */
-	private boolean seenBefore(Set<PubChemMolecule> compounds, String newFormula) {
-		for (PubChemMolecule compound : compounds) {
-			if (compound.getMolecularFormula() == null) {
-				continue;
-			}
-			String[] tokens = compound.getMolecularFormula().split("(\\+|\\-)");
-			String toCheck = tokens[0];
-			if (toCheck.equals(newFormula)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Construct URI request to local PubChem snapshot (CouchDB)
-	 * 
-	 * @param path
-	 * @param fromMass
-	 * @param toMass
-	 * @return
-	 * @throws URISyntaxException
-	 */
-	private URI constructMassQueryUri(String path, double fromMass,
-			double toMass) throws URISyntaxException {
-		URIBuilder builder = new URIBuilder();
-		builder.setScheme("http").setHost(CompoundQuery.QUERY_HOST_LOCAL)
-				.setPath(path).setPort(CompoundQuery.QUERY_PORT_LOCAL);
-		builder.setParameter("startkey", String.format("\"%.5f\"", fromMass));
-		builder.setParameter("endkey", String.format("\"%.5f\"", toMass));
-		builder.setParameter("include_docs", "true");
-		URI uri = builder.build();
-		return uri;
-	}
-
 }

@@ -1,7 +1,6 @@
 package com.joewandy.alignmentResearch.objectModel;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +8,9 @@ import java.util.Map;
 import no.uib.cipr.matrix.Matrix;
 import no.uib.cipr.matrix.sparse.FlexCompRowMatrix;
 
+import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HDPPubChemQuery;
 import com.joewandy.alignmentResearch.precursorPrediction.AdductTransformComputer;
+import com.joewandy.mzmatch.query.CompoundQuery;
 
 public class HDPSamplerHandler {
 	
@@ -23,7 +24,8 @@ public class HDPSamplerHandler {
 	private List<String> adductList;
 	private Map<Feature, Map<String, Integer>> ipMap;
 	private double ppm;
-	Map<HDPMetabolite, List<HDPPrecursorMass>> metabolitePrecursors;
+	private Map<HDPMetabolite, List<HDPPrecursorMass>> metabolitePrecursors;
+	private CompoundQuery dbQuery;
 	
 	public HDPSamplerHandler(List<HDPFile> hdpFiles, List<HDPMetabolite> hdpMetabolites, int totalPeaks, double ppm) {
 	
@@ -34,6 +36,7 @@ public class HDPSamplerHandler {
 		this.ipMap = new HashMap<Feature, Map<String, Integer>>();
 		this.metabolitePrecursors = new HashMap<HDPMetabolite, List<HDPPrecursorMass>>(); 
 		this.ppm = ppm;
+		this.dbQuery = new HDPPubChemQuery();
 		
 		adductList = new ArrayList<String>();
 		adductList.add("M+3H");
@@ -70,7 +73,7 @@ public class HDPSamplerHandler {
 		adductList.add("2M+ACN+Na");
 		this.adductCalc = new AdductTransformComputer(adductList);
 		this.adductCalc.makeLists();
-
+		
 	}
 
 	public void handleSample(int s, int peaksProcessed, double timeTaken, HDPClusteringParam hdpParam, boolean lastSample) {
@@ -112,7 +115,7 @@ public class HDPSamplerHandler {
 			System.out.println(sb.toString());				
 		}
 		
-		// print whole bunch of extra stuff in the last sample
+		// extra stuff in the last sample
 		if (lastSample) {
 			// print peak RT vs. local cluster RT if reference file is enabled
 			if (hdpParam.getRefFileIdx() != -1) {
@@ -128,6 +131,7 @@ public class HDPSamplerHandler {
 					}
 				}
 			}
+			
 		}
 		
 	}
@@ -142,6 +146,10 @@ public class HDPSamplerHandler {
 
 	public int getSamplesTaken() {
 		return samplesTaken;
+	}
+
+	public List<HDPMetabolite> getHdpMetabolites() {
+		return hdpMetabolites;
 	}
 
 	public Map<HDPMetabolite, List<HDPPrecursorMass>> getMetabolitePrecursors() {
@@ -226,31 +234,36 @@ public class HDPSamplerHandler {
 					for (int c1 = 0; c1 < precursorMasses1.size(); c1++) {
 						// get the precomputed value
 						double precursorMass1 = precursorMasses1.get(c1);
-						// find the precursor mass object first
-						HDPPrecursorMass precursor = null;
-						for (HDPPrecursorMass pc : common) {
-							if (pc.withinTolerance(precursorMass1)) {
-								precursor = pc;
+						if (precursorMass1 > 0) {
+						
+							// find the precursor mass object first
+							HDPPrecursorMass precursor = null;
+							for (HDPPrecursorMass pc : common) {
+								if (pc.withinTolerance(precursorMass1)) {
+									precursor = pc;
+									break;
+								}
+							}
+							// make a new precursor mass if necessary
+							boolean newPc = false;
+							if (precursor == null) {
+								precursor = new HDPPrecursorMass(precursorMass1, this.ppm, this.dbQuery);
+								newPc = true;
+							}
+							// search for matching results in precursorMasses2 and annotate features if found
+							found = findAndAnnotate(precursor, precursorMasses2, mc1,
+									mc2, c1);
+							if (found) {
+								if (newPc) {
+									common.add(precursor);								
+								} else {
+									precursor.incrementCount();
+								}
 								break;
 							}
-						}
-						// make a new precursor mass if necessary
-						boolean newPc = false;
-						if (precursor == null) {
-							precursor = new HDPPrecursorMass(precursorMass1, this.ppm);
-							newPc = true;
-						}
-						// search for matching results in precursorMasses2 and annotate features if found
-						found = findAndAnnotate(precursor, precursorMasses2, mc1,
-								mc2, c1);
-						if (found) {
-							if (newPc) {
-								common.add(precursor);								
-							} else {
-								precursor.incrementCount();
-							}
-							break;
-						}
+
+							
+						}						
 					}
 
 				}
@@ -266,6 +279,9 @@ public class HDPSamplerHandler {
 			HDPMassCluster mc2, int c1) {
 		for (int c2 = 0; c2 < precursorMasses2.size(); c2++) {
 			double precursorMass2 = precursorMasses2.get(c2);
+			if (precursorMass2 < 0) {
+				continue;
+			}
 			if (precursorMass1.withinTolerance(precursorMass2)) {
 				// if yes, then annotate peaks in both mass clusters with the adduct types
 				for (Feature f1 : mc1.getPeakData()) {
