@@ -8,7 +8,7 @@ import java.util.Map;
 import no.uib.cipr.matrix.Matrix;
 import no.uib.cipr.matrix.sparse.FlexCompRowMatrix;
 
-import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HDPPubChemQuery;
+import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HDPKeggQuery;
 import com.joewandy.alignmentResearch.precursorPrediction.AdductTransformComputer;
 import com.joewandy.mzmatch.query.CompoundQuery;
 
@@ -36,8 +36,12 @@ public class HDPSamplerHandler {
 		this.ipMap = new HashMap<Feature, Map<String, Integer>>();
 		this.metabolitePrecursors = new HashMap<HDPMetabolite, List<HDPPrecursorMass>>(); 
 		this.ppm = ppm;
-		this.dbQuery = new HDPPubChemQuery();
 		
+		// can use either PubChem or KEGG
+//		this.dbQuery = new HDPPubChemQuery();
+		this.dbQuery = new HDPKeggQuery();
+
+		// list of common adducts should be passed as a command-line parameter
 		adductList = new ArrayList<String>();
 		adductList.add("M+3H");
 		adductList.add("M+2H+Na");

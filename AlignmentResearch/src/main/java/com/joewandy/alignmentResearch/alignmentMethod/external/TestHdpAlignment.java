@@ -38,7 +38,6 @@ import com.joewandy.alignmentResearch.objectModel.HDPPrecursorMass;
 
 public class TestHdpAlignment extends BaseAlignment implements AlignmentMethod {
 
-	private static final int LIMIT_CHECK_PRECURSORS = 10;
 	protected List<AlignmentFile> dataList;
 	private Map<HdpResult, HdpResult> resultMap;
 	private String scoringMethod;
@@ -249,21 +248,12 @@ public class TestHdpAlignment extends BaseAlignment implements AlignmentMethod {
 					System.out.println("Metabolite " + met + " has " + precursors.size() + " precursor masses ");
 					Collections.sort(precursors);
 					for (int i = 0; i < precursors.size(); i++) {
-						if (i >= LIMIT_CHECK_PRECURSORS) {
-							break;
-						}
 						HDPPrecursorMass pc = precursors.get(i);
-						System.out.println("\t" + pc);
 						Set<Molecule> mols = pc.getMolecules();
-						for (Molecule mol : mols) {
-//							System.out.println("\t\t" + mol.toString());
-							String key = mol.getPlainFormula();
-							if (database.containsKey(key)) {
-								if (!uniqueFound.contains(key)) {
-									uniqueFound.add(key);
-									System.out.println("\t\tFOUND " + key + " in database");
-								}
-							}
+						System.out.println("\t" + pc);
+						boolean found = checkInDatabase(uniqueFound, mols);
+						if (found) {
+							break;
 						}
 					}					
 				}
@@ -277,6 +267,20 @@ public class TestHdpAlignment extends BaseAlignment implements AlignmentMethod {
 			
 		}
 				
+	}
+
+	private boolean checkInDatabase(Set<String> uniqueFound, Set<Molecule> mols) {
+		for (Molecule mol : mols) {
+			String key = mol.getPlainFormula();
+			if (database.containsKey(key)) {
+				if (!uniqueFound.contains(key)) {
+					uniqueFound.add(key);
+					System.out.println("\t\tFOUND " + key + " in database");
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 	
 	public AlignmentList matchFeatures() {

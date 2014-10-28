@@ -51,7 +51,6 @@ public class HDPPrecursorMass implements Comparable<HDPPrecursorMass> {
 			try {
 				molecules = dbQuery.findCompoundsByMass(mass, ppm*3, 0);
 			} catch (Exception e) {
-				e.printStackTrace();
 				molecules = new HashSet<Molecule>();
 			}
 		}
@@ -60,7 +59,7 @@ public class HDPPrecursorMass implements Comparable<HDPPrecursorMass> {
 		
 	@Override
 	public String toString() {
-		String msg = "HDPPrecursorMass [mass=" + mass + ", count=" + count + "]";
+		String msg = "HDPPrecursorMass [mass=" + mass + ", freq=" + count + ", mols=" + molecules.size() + "]";
 		return msg;
 	}
 
