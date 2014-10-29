@@ -12,7 +12,7 @@ import com.joewandy.alignmentResearch.alignmentMethod.external.MzMineRansacAlign
 import com.joewandy.alignmentResearch.alignmentMethod.external.OpenMSAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.external.PythonMW;
 import com.joewandy.alignmentResearch.alignmentMethod.external.SimaAlignment;
-import com.joewandy.alignmentResearch.alignmentMethod.external.TestHdpAlignment;
+import com.joewandy.alignmentResearch.alignmentMethod.external.HdpAlignment;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.ExtendedLibrary;
 
@@ -69,7 +69,7 @@ public class AlignmentMethodFactory {
 		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_MAXIMUM_WEIGHT_MATCHING_HIERARCHICAL.equals(method)) {
 			aligner = new HierarchicalAlignment(alignmentDataList, param, library);
 		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_HDP_ALIGNMENT.equals(method)) {
-			aligner = new TestHdpAlignment(alignmentDataList, param);
+			aligner = new HdpAlignment(alignmentDataList, param);
 		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_PYTHON_MW.equals(method)) {
 			aligner = new PythonMW(alignmentDataList, param);
 		}		

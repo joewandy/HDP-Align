@@ -59,7 +59,11 @@ public class HDPPrecursorMass implements Comparable<HDPPrecursorMass> {
 		
 	@Override
 	public String toString() {
-		String msg = "HDPPrecursorMass [mass=" + mass + ", freq=" + count + ", mols=" + molecules.size() + "]";
+		String msg = "HDPPrecursorMass [mass=" + mass + ", freq=" + count + ", databaseMolecules=" + molecules.size() + " { ";
+		for (Molecule mol : molecules) {
+			msg += mol.getName() + ", ";
+		}
+		msg += " }";
 		return msg;
 	}
 

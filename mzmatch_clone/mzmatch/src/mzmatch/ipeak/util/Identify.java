@@ -299,7 +299,9 @@ public class Identify
 			for (String key : keys) {
 				Molecule molecule = molecules.get(key);
 				final double moleculeMass = molecule.getFormula().getMass(Mass.MONOISOTOPIC);
-				System.out.println(molecule.getDatabaseID() + ", " + molecule.getName() + ", " + 
+				String name = molecule.getName();
+				String newName = name.replaceAll(",", "-");
+				System.out.println(molecule.getDatabaseID() + ", " + newName + ", " + 
 						molecule.getPlainFormula() + ", " + moleculeMass);
 			}
 			

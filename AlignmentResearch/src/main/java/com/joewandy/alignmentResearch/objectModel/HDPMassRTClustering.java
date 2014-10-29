@@ -77,7 +77,7 @@ public class HDPMassRTClustering implements HDPClustering {
 	/**
 	 * Calls Gibbs sampling and collects all the resulting samples
 	 */
-	public void run() {
+	public void runClustering() {
 
 		double totalTime = 0;
 		for (int s = 0; s < hdpParam.getNsamps(); s++) {

@@ -34,6 +34,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import peakml.chemistry.Mass;
 import peakml.chemistry.Molecule;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -258,6 +259,29 @@ public class HDPPubChemQuery extends BaseQuery implements CompoundQuery {
 		builder.setScheme("http").setHost(HDPPubChemQuery.QUERY_HOST).setPath(path);
 		URI uri = builder.build();
 		return uri;
+	}
+	
+	public static void main(String [] args) throws Exception {
+		
+		HDPPubChemQuery query = new HDPPubChemQuery();
+		final double ppm = 10;				
+		double[] terms = { 217.095, 218.098, 478.154, 576.126, 318.106, 347.982, 577.13 };
+		for (double term : terms) {
+			queryAndPrint(query, ppm, term);
+			System.out.println();
+		}
+
+		
+	}
+
+	private static void queryAndPrint(HDPPubChemQuery query, final double ppm,
+			double term) throws Exception {
+		System.out.println("Query PubChem for monoisotopic mass " + term + " at " + ppm + " ppm");
+		Set<Molecule> results = query.findCompoundsByMass(term, ppm, 0);
+		System.out.println("Top-10 Results:");
+		for (Molecule mol : results) {
+			System.out.println("\tid=" + mol.getDatabaseID() + "\tname=" + mol.getName() + "(" + mol.getPlainFormula() + ")" + "\tmass=" + mol.getMass(Mass.MOLECULAR, true));
+		}
 	}
 	
 }

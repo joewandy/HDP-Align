@@ -7,6 +7,10 @@ import no.uib.cipr.matrix.Matrix;
 
 public interface HDPClustering {
 
+	void runClustering();
+
+	int getSamplesTaken();
+	
 	Matrix getSimilarityResult();
 	
 	public Map<Feature, Map<String, Integer>> getIpMap();
@@ -14,9 +18,5 @@ public interface HDPClustering {
 	public Map<HDPMetabolite, List<HDPPrecursorMass>> getMetabolitePrecursors();
 	
 	public List<HDPMetabolite> getMetabolitesInLastSample();
-	
-	int getSamplesTaken();
-
-	void run();
 
 }
