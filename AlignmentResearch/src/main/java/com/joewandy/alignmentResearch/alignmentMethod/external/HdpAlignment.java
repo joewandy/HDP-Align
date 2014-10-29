@@ -329,24 +329,29 @@ public class HdpAlignment extends BaseAlignment implements AlignmentMethod {
 		int nonAmbiguousCount = 0;
 		int ambiguousCount = 0;
 		
-		for (Entry<Feature, Map<String, Integer>> e : ipMap.entrySet()) {
+		// for every peaks
+		for (Entry<Feature, Map<String, Integer>> ipEntry : ipMap.entrySet()) {
 
-			Feature f = e.getKey();
-			System.out.println(f.getPeakID() + " " + f.getMass() + " "
-					+ f.getRt() + " " + f.getIntensity() + " "
-					+ f.getTheoAdductType());
+			// finds its adduct annotations across samples
+			Feature feature = ipEntry.getKey();			
+			Map<String, Integer> annotations = ipEntry.getValue();			
+			System.out.println(feature.getPeakID() + " " + feature.getMass() + " "
+					+ feature.getRt() + " " + feature.getIntensity() + " "
+					+ feature.getTheoAdductType());
+
+			// if there's annotations for this feature ..
+			if (annotations != null) {
 			
-			Map<String, Integer> vals = e.getValue();
-			if (vals != null) {
-			
+				// computes the total frequencies of all annotations
 				double sum = 0;
-				for (Entry<String, Integer> e2 : vals.entrySet()) {
+				for (Entry<String, Integer> e2 : annotations.entrySet()) {
 					sum += e2.getValue();
 				}
 				
+				// normalise frequency by sum
 				double maxProb = 0;
 				String annot = null;
-				for (Entry<String, Integer> e2 : vals.entrySet()) {
+				for (Entry<String, Integer> e2 : annotations.entrySet()) {
 					int count = e2.getValue();
 					double prob = (count) / sum;
 					System.out.println("\t" + e2.getKey() + "="
@@ -357,11 +362,12 @@ public class HdpAlignment extends BaseAlignment implements AlignmentMethod {
 					}
 				}
 				
+				// for debugging only, compare against ground truth
 				if (annot != null
-						&& annot.equals(f.getTheoAdductType())) {
+						&& annot.equals(feature.getTheoAdductType())) {
 					System.out.println("\tCORRECT");
 					correctCount++;
-					if (vals.entrySet().size() == 1) {
+					if (annotations.entrySet().size() == 1) {
 						nonAmbiguousCount++;
 					} else {
 						ambiguousCount++;
@@ -399,20 +405,15 @@ public class HdpAlignment extends BaseAlignment implements AlignmentMethod {
 		System.out.println("Total metabolites inferred = "
 				+ inferredMetabolites.size());
 		
-		Set<String> uniqueFound = new HashSet<String>();
+		Set<String> metaboliteNames = new HashSet<String>();
 		for (HDPMetabolite met : inferredMetabolites) {
 
 			List<HDPPrecursorMass> precursors = metabolitePrecursors
 					.get(met);
 			System.out.println("Metabolite " + met + " has "
 					+ precursors.size() + " precursor masses ");
-			if (precursors.isEmpty()) {
-				// if no precursor mass in this metabolite, then within
-				// each mass cluster, take the most intense peak and use
-				// M+H adduct
 
-			}
-
+			// link precursor masses with molecules
 			Collections.sort(precursors);
 			for (int i = 0; i < precursors.size(); i++) {
 				HDPPrecursorMass pc = precursors.get(i);
@@ -421,16 +422,22 @@ public class HdpAlignment extends BaseAlignment implements AlignmentMethod {
 					continue;
 				}
 				System.out.println("\t" + pc);
-				checkInDatabase(mols);
+				metaboliteNames.addAll(checkInDatabase(mols));
+				
 			}
 
 		}
 		
-		System.out.println("Metabolites found = " + uniqueFound.size()
+		System.out.println("Metabolites found = " + metaboliteNames.size()
 				+ "/" + database.size());
 
 	}
 
+	/**
+	 * Checks if molecules actually exist in database
+	 * @param mols The molecules to check
+	 * @return The set of formulae for molecules found in database
+	 */
 	private Set<String> checkInDatabase(Set<Molecule> mols) {
 		Set<String> metaboliteFound = new HashSet<String>(); 
 		for (Molecule mol : mols) {
