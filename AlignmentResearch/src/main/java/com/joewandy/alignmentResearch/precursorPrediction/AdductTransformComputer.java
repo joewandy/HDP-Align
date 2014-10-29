@@ -274,6 +274,22 @@ public class AdductTransformComputer {
 		return results;
 				
 	}
+	
+	public double getPrecursorMass(double ionMass, String adductType) {
+		
+		// TODO: we can actually compute just a single precursor mass for this adductType ..
+		List<Double> precursorMasses = this.getPrecursorMass(ionMass);
+		assert(precursorMasses.size() == adductList.size());
+		for (int i = 0; i < adductList.size(); i++) {
+			if (adductList.get(i).equals(adductType)) {
+				return precursorMasses.get(i);
+			}
+		}
+		
+		// this should never happen if you provide a valid adductType!
+		return 0;
+		
+	}
 
 	public static void main(String[] args) {
 

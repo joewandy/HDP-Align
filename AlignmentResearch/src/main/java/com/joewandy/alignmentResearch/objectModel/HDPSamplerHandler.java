@@ -121,6 +121,7 @@ public class HDPSamplerHandler {
 		
 		// extra stuff in the last sample
 		if (lastSample) {
+			
 			// print peak RT vs. local cluster RT if reference file is enabled
 			if (hdpParam.getRefFileIdx() != -1) {
 				System.out.println("peakrt, tjk");
@@ -200,30 +201,39 @@ public class HDPSamplerHandler {
 		// precompute precursor masses for each mass cluster
 		Map<HDPMassCluster, List<Double>> precursorMap = new HashMap<HDPMassCluster, List<Double>>();
 		for (int i = 0; i < hdpMetabolites.size(); i++) {
+			
+			// for every mass cluster
 			HDPMetabolite met = hdpMetabolites.get(i);
 			for (int j = 0; j < met.getMassClusters().size(); j++) {				
+
+				// use the calculator to compute precursor masses under possible adduct transformations
 				HDPMassCluster mc = met.getMassClusters().get(j);				
 				double ionMass = Math.exp(mc.getTheta());
 				List<Double> precursorMasses = adductCalc.getPrecursorMass(ionMass);
 				assert(adductList.size() == precursorMasses.size());
+				
+				// store this for later use
 				precursorMap.put(mc, precursorMasses);
-			}			
+
+			}
+			
 		}
 		
-		// for all metabolite
+		// then build the 'consensus' counts of precursor masses
 		for (int i = 0; i < hdpMetabolites.size(); i++) {
 			
+			// initialise the precursor map for each metablite
 			HDPMetabolite met = hdpMetabolites.get(i);
-			List<HDPPrecursorMass> common = metabolitePrecursors.get(met);
-			if (common == null) {
-				common = new ArrayList<HDPPrecursorMass>();
-				metabolitePrecursors.put(met, common);
+			List<HDPPrecursorMass> precursorList = metabolitePrecursors.get(met);
+			if (precursorList == null) {
+				precursorList = new ArrayList<HDPPrecursorMass>();
+				metabolitePrecursors.put(met, precursorList);
 			}
 
-			// for all mass clusters inside
+			// for all mass clusters inside this metabolite
 			for (int j = 0; j < met.getMassClusters().size(); j++) {
 				
-				// first determine all the possible precursor masses for thie mass cluster
+				// first determine all the possible precursor masses for this mass cluster
 				HDPMassCluster mc1 = met.getMassClusters().get(j);				
 				List<Double> precursorMasses1 = precursorMap.get(mc1);
 				
@@ -242,7 +252,7 @@ public class HDPSamplerHandler {
 						
 							// find the precursor mass object first
 							HDPPrecursorMass precursor = null;
-							for (HDPPrecursorMass pc : common) {
+							for (HDPPrecursorMass pc : precursorList) {
 								if (pc.withinTolerance(precursorMass1)) {
 									precursor = pc;
 									break;
@@ -259,7 +269,7 @@ public class HDPSamplerHandler {
 									mc2, c1);
 							if (found) {
 								if (newPc) {
-									common.add(precursor);								
+									precursorList.add(precursor);								
 								} else {
 									precursor.incrementCount();
 								}
@@ -275,17 +285,54 @@ public class HDPSamplerHandler {
 			}
 						
 		}
+		
+		/*
+		 * if there's any metabolite without any consensus precursor mass, then
+		 * take the highest intensity peak and use that to annotate with M+H / M-H
+		 */
+		for (int i = 0; i < hdpMetabolites.size(); i++) {
+
+			HDPMetabolite met = hdpMetabolites.get(i);
+			List<HDPPrecursorMass> precursorList = metabolitePrecursors.get(met);
+			assert(precursorList != null); // cannot be null
+			
+			// if no precursors
+			if (precursorList.isEmpty()) {
+				
+				// find the most intense peak and its parent mass cluster
+				double maxIntensity = 0;
+				Feature selectedPeak = null;
+				for (Feature f : met.getPeakData()) {
+					if (f.getIntensity() > maxIntensity) {
+						maxIntensity = f.getIntensity();
+						selectedPeak = f;
+					}
+				}
+				HDPMassCluster mc = met.getMassClusterOfPeak(selectedPeak);
+
+				// get the precursor mass under M+H / M-H, and use this
+				double precursorMass = adductCalc.getPrecursorMass(mc.getTheta(), "M+H");
+				HDPPrecursorMass precursor = new HDPPrecursorMass(precursorMass, this.ppm, this.dbQuery);
+				precursorList.add(precursor);
+				
+			}
+			
+		}
+		
 				
 	}
 
 	private boolean findAndAnnotate(HDPPrecursorMass precursorMass1,
 			List<Double> precursorMasses2, HDPMassCluster mc1,
 			HDPMassCluster mc2, int c1) {
+		
 		for (int c2 = 0; c2 < precursorMasses2.size(); c2++) {
+	
 			double precursorMass2 = precursorMasses2.get(c2);
 			if (precursorMass2 < 0) {
 				continue;
 			}
+			
 			if (precursorMass1.withinTolerance(precursorMass2)) {
 				// if yes, then annotate peaks in both mass clusters with the adduct types
 				for (Feature f1 : mc1.getPeakData()) {
@@ -296,16 +343,21 @@ public class HDPSamplerHandler {
 				}
 				return true;
 			}
+
 		}
 		return false;
+
 	}
 
 	private void annotate(String msg, Feature f) {
+		
 		Map<String, Integer> annots = this.ipMap.get(f);
+
 		if (annots == null) {
 			annots = new HashMap<String, Integer>();
 			annots.put(msg, 1);
 		} else {
+		
 			assert(annots != null);
 			Integer count = annots.get(msg);
 			if (count != null) {
@@ -313,8 +365,11 @@ public class HDPSamplerHandler {
 			} else {
 				annots.put(msg, 1);
 			}
+			
 		}
+
 		this.ipMap.put(f, annots);
+	
 	}
 		
 }

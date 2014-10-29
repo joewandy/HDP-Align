@@ -46,7 +46,7 @@ public class HDPPrecursorMass implements Comparable<HDPPrecursorMass> {
 		count++;
 	}
 	
-	public Set<Molecule> getMolecules() {
+	public Set<Molecule> loadMoleculesFromDB() {
 		if (molecules == null) {
 			try {
 				molecules = dbQuery.findCompoundsByMass(mass, ppm*3, 0);

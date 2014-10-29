@@ -38,6 +38,9 @@ import com.joewandy.alignmentResearch.objectModel.HDPPrecursorMass;
 /**
  * An alignment method using Hierarchical Dirichlet Process mixture model
  * @author joewandy
+ * 
+ * TODO: Need to remove hardcoded constants. 
+ * TODO: Need to make this able to deal with positive & negative mode
  *
  */
 public class HdpAlignment extends BaseAlignment implements AlignmentMethod {
@@ -378,6 +381,9 @@ public class HdpAlignment extends BaseAlignment implements AlignmentMethod {
 			
 		}
 		
+		// lastly, if there's any metabolite without any consensus precursor masses,
+		// then assign the features inside to M+H or M-H
+		
 		System.out.println("Total peaks annotated = " + ipMap.size()
 				+ "/" + totalPeaks);
 		System.out.println("Total correct peaks annotated = "
@@ -417,7 +423,7 @@ public class HdpAlignment extends BaseAlignment implements AlignmentMethod {
 			Collections.sort(precursors);
 			for (int i = 0; i < precursors.size(); i++) {
 				HDPPrecursorMass pc = precursors.get(i);
-				Set<Molecule> mols = pc.getMolecules();
+				Set<Molecule> mols = pc.loadMoleculesFromDB();
 				if (mols.isEmpty()) {
 					continue;
 				}
@@ -445,7 +451,7 @@ public class HdpAlignment extends BaseAlignment implements AlignmentMethod {
 			if (database.containsKey(key)) {
 				if (!metaboliteFound.contains(key)) {
 					metaboliteFound.add(key);
-					System.out.println("\t\tFOUND " + key + " in database");
+					System.out.println("\t\tFOUND " + key + " IN GROUND TRUTH");
 				}
 			}
 		}

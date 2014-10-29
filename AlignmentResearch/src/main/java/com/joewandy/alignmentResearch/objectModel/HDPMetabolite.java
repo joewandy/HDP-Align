@@ -131,6 +131,10 @@ public class HDPMetabolite {
 		return peakData.get(peakPos);
 	}
 	
+	public List<Feature> getPeakData() {
+		return peakData;
+	}
+	
 	public int peakDataSize() {
 		return peakData.size();
 	}
