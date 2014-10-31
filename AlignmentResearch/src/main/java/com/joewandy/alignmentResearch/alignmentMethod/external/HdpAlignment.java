@@ -5,7 +5,6 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -16,7 +15,6 @@ import java.util.Set;
 
 import no.uib.cipr.matrix.Matrix;
 import no.uib.cipr.matrix.MatrixEntry;
-import peakml.chemistry.Molecule;
 
 import com.jmatio.io.MatFileReader;
 import com.jmatio.types.MLDouble;
@@ -34,8 +32,6 @@ import com.joewandy.alignmentResearch.objectModel.HDPAnnotation;
 import com.joewandy.alignmentResearch.objectModel.HDPAnnotationItem;
 import com.joewandy.alignmentResearch.objectModel.HDPClustering;
 import com.joewandy.alignmentResearch.objectModel.HDPMassRTClustering;
-import com.joewandy.alignmentResearch.objectModel.HDPMetabolite;
-import com.joewandy.alignmentResearch.objectModel.HDPPrecursorMass;
 
 /**
  * An alignment method using Hierarchical Dirichlet Process mixture model
@@ -76,9 +72,8 @@ public class HdpAlignment extends BaseAlignment implements AlignmentMethod {
 		this.sequenceMap = new HashMap<Integer, Feature>();
 		this.resultMap = new HashMap<HdpResult, HdpResult>();
 
-		// TODO: this should be a configurable parameter
-		String databaseFile = "/home/joewandy/Dropbox/Project/documents/new_measure_experiment/input_data/standard_hdp/std1.csv";
-		this.compoundGroundTruthDatabase = loadIdentificationDB(databaseFile);
+		String databaseFile = param.getGroundTruthDatabase();
+		this.compoundGroundTruthDatabase = loadGroundTruthDB(databaseFile);
 
 	}
 
@@ -136,8 +131,12 @@ public class HdpAlignment extends BaseAlignment implements AlignmentMethod {
 	 * @param databaseFile the standards database file
 	 * @return Map of database formula to the line
 	 */
-	private Map<String, String> loadIdentificationDB(String databaseFile) {
+	private Map<String, String> loadGroundTruthDB(String databaseFile) {
 
+		if (databaseFile == null) {
+			return null;
+		}
+		
 		Map<String, String> database = new HashMap<String, String>();
 		try {
 			List<String> lines = Files.readAllLines(Paths.get(databaseFile),
@@ -151,7 +150,7 @@ public class HdpAlignment extends BaseAlignment implements AlignmentMethod {
 			e.printStackTrace();
 		}
 
-		System.out.println("database=" + database);
+		System.out.println("Ground truth database=" + database);
 		return database;
 	
 	}
@@ -330,9 +329,14 @@ public class HdpAlignment extends BaseAlignment implements AlignmentMethod {
 		HDPAnnotation metaboliteAnnotations = clustering
 				.getMetaboliteAnnotations();
 		
-		System.out.println("IP annotations size = " + ipAnnotations.size());
-		System.out.println("Metabolite annotations size = " + metaboliteAnnotations.size());
-
+		if (ipAnnotations != null) {
+			System.out.println("IP annotations size = " + ipAnnotations.size());			
+		}
+		
+		if (metaboliteAnnotations != null) {
+			System.out.println("Metabolite annotations size = " + metaboliteAnnotations.size());			
+		}
+		
 		int correctIPCount = 0;
 		int nonAmbiguousIPCount = 0;
 		int ambiguousIPCount = 0;
@@ -341,7 +345,7 @@ public class HdpAlignment extends BaseAlignment implements AlignmentMethod {
 		Set<String> mapMetaboliteNotFoundInDB = new HashSet<String>();
 		Set<String> metaboliteFoundInDB = new HashSet<String>();
 		Set<String> metaboliteNotFoundInDB = new HashSet<String>();
-		
+
 		// for all features in all data files
 		for (Feature feature : allFeatures) {
 
@@ -349,119 +353,141 @@ public class HdpAlignment extends BaseAlignment implements AlignmentMethod {
 					+ feature.getRt() + " " + feature.getIntensity() + " "
 					+ feature.getTheoAdductType());
 
-			// find its metabolite annotations
-			HDPAnnotationItem featureMets = metaboliteAnnotations.get(feature);
+			// do metabolite annotations
+			if (metaboliteAnnotations != null) {
 
-			// if there's metabolite annotations for this feature ..
-			if (featureMets != null) {
-				
-				// computes the total frequencies of all annotations
-				double sum = 0;
-				for (Entry<String, Integer> e2 : featureMets.entrySet()) {
-					sum += e2.getValue();
-				}
-				
-				// normalise frequency by sum
-				double maxProb = 0;
-				String msg = null;
-				for (Entry<String, Integer> e2 : featureMets.entrySet()) {
-					String key = e2.getKey();
-					int count = e2.getValue();
-					double prob = (count) / sum;
-					System.out.println("\tMETABOLITE " + e2.getKey() + "="
-							+ String.format("%.2f", prob));
-					if (prob > maxProb) {
-						maxProb = prob;
-						msg = key;
+				// first find the metabolite annotations for this feature
+				HDPAnnotationItem featureMets = metaboliteAnnotations.get(feature);
+
+				// if there's any ..
+				if (featureMets != null) {
+					
+					// computes the total frequencies of all annotations
+					double sum = 0;
+					for (Entry<String, Integer> e2 : featureMets.entrySet()) {
+						sum += e2.getValue();
 					}
-					if (compoundGroundTruthDatabase.containsKey(key)) {
-						metaboliteFoundInDB.add(key);
-					} else {
-						metaboliteNotFoundInDB.add(key);
+					
+					// normalise frequency by sum
+					double maxProb = 0;
+					String msg = null;
+					for (Entry<String, Integer> e2 : featureMets.entrySet()) {
+						String key = e2.getKey();
+						int count = e2.getValue();
+						double prob = (count) / sum;
+						System.out.println("\tMETABOLITE " + e2.getKey() + "="
+								+ String.format("%.2f", prob));
+						if (prob > maxProb) {
+							maxProb = prob;
+							msg = key;
+						}
+						if (compoundGroundTruthDatabase != null && 
+								compoundGroundTruthDatabase.containsKey(key)) {
+							metaboliteFoundInDB.add(key);
+						} else {
+							metaboliteNotFoundInDB.add(key);
+						}
 					}
+					
+					// for debugging only, compare against ground truth
+					if (msg != null) {
+						if (compoundGroundTruthDatabase != null && 
+								compoundGroundTruthDatabase.containsKey(msg)) {
+							mapMetaboliteFoundInDB.add(msg);
+						} else {
+							mapMetaboliteNotFoundInDB.add(msg);
+						}					
+					}
+					
 				}
-				
-				// for debugging only, compare against ground truth
-				if (msg != null) {
-					if (compoundGroundTruthDatabase.containsKey(msg)) {
-						mapMetaboliteFoundInDB.add(msg);
-					} else {
-						mapMetaboliteNotFoundInDB.add(msg);
-					}					
-				}
-				
+	
 			}
 			
-			// finds its adduct annotations 
-			HDPAnnotationItem featureIPs = ipAnnotations.get(feature);
+			// do ionisation product annotations
+			if (ipAnnotations != null) {
+				
+				// first find the adduct annotations for this peak ...
+				HDPAnnotationItem featureIPs = ipAnnotations.get(feature);
 
-			// if there's IP annotations for this feature ..
-			if (featureIPs != null) {
-			
-				// computes the total frequencies of all annotations
-				double sum = 0;
-				for (Entry<String, Integer> e2 : featureIPs.entrySet()) {
-					sum += e2.getValue();
-				}
+				// if there's any ..
+				if (featureIPs != null) {
 				
-				// normalise frequency by sum
-				double maxProb = 0;
-				String msg = null;
-				for (Entry<String, Integer> e2 : featureIPs.entrySet()) {
-					int count = e2.getValue();
-					double prob = (count) / sum;
-					System.out.println("\tADDUCT " + e2.getKey() + "="
-							+ String.format("%.2f", prob));
-					if (prob > maxProb) {
-						maxProb = prob;
-						msg = e2.getKey();
+					// computes the total frequencies of all annotations
+					double sum = 0;
+					for (Entry<String, Integer> e2 : featureIPs.entrySet()) {
+						sum += e2.getValue();
 					}
-				}
-				
-				// for debugging only, compare against ground truth
-				if (msg != null
-						&& msg.equals(feature.getTheoAdductType())) {
-					correctIPCount++;
-					if (featureIPs.entrySet().size() == 1) {
-						nonAmbiguousIPCount++;
-					} else {
-						ambiguousIPCount++;
+					
+					// normalise frequency by sum
+					double maxProb = 0;
+					String msg = null;
+					for (Entry<String, Integer> e2 : featureIPs.entrySet()) {
+						int count = e2.getValue();
+						double prob = (count) / sum;
+						System.out.println("\tADDUCT " + e2.getKey() + "="
+								+ String.format("%.2f", prob));
+						if (prob > maxProb) {
+							maxProb = prob;
+							msg = e2.getKey();
+						}
 					}
-				}
+					
+					// for debugging only, compare against ground truth
+					if (msg != null
+							&& msg.equals(feature.getTheoAdductType())) {
+						correctIPCount++;
+						
+						if (featureIPs.entrySet().size() == 1) {
+							nonAmbiguousIPCount++;
+						} else {
+							ambiguousIPCount++;
+						}
+					}
+					
+				}				
 				
 			}
+						
 			
 		}
 
 		// print some overall statistics
+
+		if (ipAnnotations != null) {
 		
-		System.out.println("Total IP annotations = " + ipAnnotations.size()
-				+ "/" + totalPeaks);
-		System.out.println("Total correct IP annotations = "
-				+ correctIPCount + "/" + ipAnnotations.size());
-		System.out.println("Total nonambiguous correct IP annotations = "
-				+ nonAmbiguousIPCount + "/" + correctIPCount);
-		System.out.println("Total ambiguous correct IP annotations = "
-				+ ambiguousIPCount + "/" + correctIPCount);
-
-		System.out.println("Metabolite DB size = " + compoundGroundTruthDatabase.size());
-
-		double ratio = ((double)metaboliteFoundInDB.size()) / metaboliteNotFoundInDB.size();
-		System.out.println("Metabolites matching vs. non-matching = " + metaboliteFoundInDB.size()
-				+ "/" + metaboliteNotFoundInDB.size() + " ratio = " + ratio);
-		System.out.println("Matching found = ");
-		for (String met : metaboliteFoundInDB) {
-			System.out.println("\t- " + met);
+			System.out.println("Total IP annotations = " + ipAnnotations.size()
+					+ "/" + totalPeaks);
+			System.out.println("Total correct IP annotations = "
+					+ correctIPCount + "/" + ipAnnotations.size());
+			System.out.println("Total nonambiguous correct IP annotations = "
+					+ nonAmbiguousIPCount + "/" + correctIPCount);
+			System.out.println("Total ambiguous correct IP annotations = "
+					+ ambiguousIPCount + "/" + correctIPCount);
+			
 		}
 		
-		ratio = ((double)mapMetaboliteFoundInDB.size()) / mapMetaboliteNotFoundInDB.size();
-		System.out.println("Metabolites MAP matching vs. non-matching = " + mapMetaboliteFoundInDB.size()
-				+ "/" + mapMetaboliteNotFoundInDB.size() + " ratio = " + ratio);
-		System.out.println("MAP matching found = ");
-		for (String met : mapMetaboliteFoundInDB) {
-			System.out.println("\t- " + met);
-		}
+		if (metaboliteAnnotations != null) {
 		
+			System.out.println("Metabolite DB size = " + compoundGroundTruthDatabase.size());			
+
+			double ratio = ((double)metaboliteFoundInDB.size()) / metaboliteNotFoundInDB.size();
+			System.out.println("Metabolites matching vs. non-matching = " + metaboliteFoundInDB.size()
+					+ "/" + metaboliteNotFoundInDB.size() + " ratio = " + ratio);
+			System.out.println("Matching found = ");
+			for (String met : metaboliteFoundInDB) {
+				System.out.println("\t- " + met);
+			}
+			
+			ratio = ((double)mapMetaboliteFoundInDB.size()) / mapMetaboliteNotFoundInDB.size();
+			System.out.println("Metabolites MAP matching vs. non-matching = " + mapMetaboliteFoundInDB.size()
+					+ "/" + mapMetaboliteNotFoundInDB.size() + " ratio = " + ratio);
+			System.out.println("MAP matching found = ");
+			for (String met : mapMetaboliteFoundInDB) {
+				System.out.println("\t- " + met);
+			}
+			
+		}
+				
 	}
 	
 }

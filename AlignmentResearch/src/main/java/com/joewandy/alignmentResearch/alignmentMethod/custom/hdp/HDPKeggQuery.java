@@ -20,14 +20,14 @@ import peakml.io.chemistry.MoleculeIO;
 
 public class HDPKeggQuery extends BaseQuery implements CompoundQuery {
 
-	private static final String KEGG_PATH = "/home/joewandy/Project/mzMatch/scripts/standards/kegg.xml";
 	private List<Molecule> localDb;
 	
-	public HDPKeggQuery() {
+	public HDPKeggQuery(String moleculeDatabase) {
 		
 		super.result = new HashSet<Molecule>();
 		try {
-			Map<String, Molecule> kegg = MoleculeIO.parseXml(new FileInputStream(HDPKeggQuery.KEGG_PATH));
+			String keggPath = moleculeDatabase;
+			Map<String, Molecule> kegg = MoleculeIO.parseXml(new FileInputStream(moleculeDatabase));
 			this.localDb = new ArrayList<Molecule>(kegg.values());
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();

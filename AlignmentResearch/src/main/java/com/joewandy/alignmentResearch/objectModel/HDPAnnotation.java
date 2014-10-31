@@ -5,21 +5,21 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-public class HDPAnnotation {
+public class HDPAnnotation<T> {
 
-	private Map<Feature, HDPAnnotationItem> annotations;
+	private Map<T, HDPAnnotationItem> annotations;
 	
 	public HDPAnnotation() {
-		this.annotations = new HashMap<Feature, HDPAnnotationItem>();
+		this.annotations = new HashMap<T, HDPAnnotationItem>();
 	}
 		
-	public HDPAnnotationItem get(Feature key) {
+	public HDPAnnotationItem get(T key) {
 		return annotations.get(key);
 	}
 
-	public void annotate(Feature f, String msg) {
+	public void annotate(T key, String msg) {
 		
-		HDPAnnotationItem annots = this.annotations.get(f);
+		HDPAnnotationItem annots = this.annotations.get(key);
 
 		if (annots == null) {
 			annots = new HDPAnnotationItem();
@@ -36,7 +36,7 @@ public class HDPAnnotation {
 			
 		}
 
-		this.annotations.put(f, annots);
+		this.annotations.put(key, annots);
 	
 	}
 	

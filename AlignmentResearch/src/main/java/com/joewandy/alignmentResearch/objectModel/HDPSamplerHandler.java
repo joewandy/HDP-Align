@@ -1,7 +1,6 @@
 package com.joewandy.alignmentResearch.objectModel;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +11,7 @@ import no.uib.cipr.matrix.sparse.FlexCompRowMatrix;
 import peakml.chemistry.Molecule;
 
 import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HDPKeggQuery;
+import com.joewandy.alignmentResearch.main.MultiAlignConstants;
 import com.joewandy.alignmentResearch.precursorPrediction.AdductTransformComputer;
 import com.joewandy.mzmatch.query.CompoundQuery;
 
@@ -24,14 +24,15 @@ public class HDPSamplerHandler {
 	private double ppm;
 	private int samplesTaken;
 	
+	private String mode;
 	private AdductTransformComputer adductCalc;
 	private List<String> adductList;
-	private CompoundQuery compoundLookUp;
+	private CompoundQuery idDatabase;
 	private Map<HDPMetabolite, List<HDPPrecursorMass>> metabolitePrecursors;
-	private HDPAnnotation ionisationProductAnnotations;
-	private HDPAnnotation metaboliteAnnotations;
+	private HDPAnnotation<Feature> ionisationProductAnnotations;
+	private HDPAnnotation<Feature> metaboliteAnnotations;
 	
-	public HDPSamplerHandler(List<HDPFile> hdpFiles, List<HDPMetabolite> hdpMetabolites, int totalPeaks, double ppm) {
+	public HDPSamplerHandler(List<HDPFile> hdpFiles, List<HDPMetabolite> hdpMetabolites, int totalPeaks, double ppm, String dbPath, String mode) {
 	
 		this.hdpFiles = hdpFiles;
 		this.hdpMetabolites = hdpMetabolites;
@@ -39,47 +40,24 @@ public class HDPSamplerHandler {
 		this.resultMap = new FlexCompRowMatrix(totalPeaks, totalPeaks); // TODO: don't use a matrix!
 		this.ppm = ppm;
 
-		this.compoundLookUp = new HDPKeggQuery(); // TODO: the kegg path is hardcoded here!
-		this.metabolitePrecursors = new HashMap<HDPMetabolite, List<HDPPrecursorMass>>(); 		
-		this.ionisationProductAnnotations = new HDPAnnotation();
-		this.metaboliteAnnotations = new HDPAnnotation();
+		if (dbPath != null) {
+			this.idDatabase = new HDPKeggQuery(dbPath);			
+			this.metaboliteAnnotations = new HDPAnnotation<Feature>();
+		}
+		
+		if (mode != null) {
+			this.mode = mode;
+			if (mode.equals(MultiAlignConstants.IONISATION_MODE_POSITIVE)) {
+				this.adductList = MultiAlignConstants.adductListPositive;				
+			} else if (mode.equals(MultiAlignConstants.IONISATION_MODE_NEGATIVE)) {
+				this.adductList = MultiAlignConstants.adductListNegative;								
+			}
+			this.adductCalc = new AdductTransformComputer(this.adductList);
+			this.adductCalc.makeLists();
+			this.metabolitePrecursors = new HashMap<HDPMetabolite, List<HDPPrecursorMass>>(); 		
+			this.ionisationProductAnnotations = new HDPAnnotation<Feature>();
+		}
 
-		// list of common adducts should be passed as a command-line parameter?
-		adductList = new ArrayList<String>();
-		adductList.add("M+3H");
-		adductList.add("M+2H+Na");
-		adductList.add("M+H+2Na");
-		adductList.add("M+3Na");
-		adductList.add("M+2H");
-		adductList.add("M+H+NH4");
-		adductList.add("M+H+Na");
-		adductList.add("M+H+K");
-		adductList.add("M+ACN+2H");
-		adductList.add("M+2Na");
-		adductList.add("M+2ACN+2H");
-		adductList.add("M+3ACN+2H");
-		adductList.add("M+H");
-		adductList.add("M+NH4");
-		adductList.add("M+Na");
-		adductList.add("M+CH3OH+H");
-		adductList.add("M+K");
-		adductList.add("M+ACN+H");
-		adductList.add("M+2Na-H");
-		adductList.add("M+IsoProp+H");
-		adductList.add("M+ACN+Na");
-		adductList.add("M+2K-H");
-		adductList.add("M+DMSO+H");
-		adductList.add("M+2ACN+H");
-		adductList.add("M+IsoProp+Na+H");
-		adductList.add("2M+H");
-		adductList.add("2M+NH4");
-		adductList.add("2M+Na");
-		adductList.add("2M+3H2O+2H");
-		adductList.add("2M+K");
-		adductList.add("2M+ACN+H");
-		adductList.add("2M+ACN+Na");
-		this.adductCalc = new AdductTransformComputer(adductList);
-		this.adductCalc.makeLists();
 				
 	}
 
@@ -148,11 +126,11 @@ public class HDPSamplerHandler {
 		return resultMap;
 	}
 	
-	public HDPAnnotation getIonisationProductAnnotations() {
+	public HDPAnnotation<Feature> getIonisationProductAnnotations() {
 		return ionisationProductAnnotations;
 	}
 
-	public HDPAnnotation getMetaboliteAnnotations() {
+	public HDPAnnotation<Feature> getMetaboliteAnnotations() {
 		return metaboliteAnnotations;
 	}
 	
@@ -170,10 +148,14 @@ public class HDPSamplerHandler {
 		updateResultMap();
 	
 		// annotate ionisation products
-		annotateIP();
+		if (mode != null) {
+			annotateIP();			
+		}
 		
 		// annotate metabolites
-		annotateMetabolites();
+		if (idDatabase != null) {
+			annotateMetabolites();			
+		}
 		
 	}
 	
@@ -267,7 +249,7 @@ public class HDPSamplerHandler {
 							// make a new precursor mass if necessary
 							boolean newPc = false;
 							if (precursor == null) {
-								precursor = new HDPPrecursorMass(precursorMass1, this.ppm, this.compoundLookUp);
+								precursor = new HDPPrecursorMass(precursorMass1, this.ppm, this.idDatabase);
 								newPc = true;
 							}
 							// search for matching results in precursorMasses2 and annotate features if found
@@ -320,7 +302,7 @@ public class HDPSamplerHandler {
 
 				// get the precursor mass under M+H / M-H, and use this
 				double precursorMass = adductCalc.getPrecursorMass(mc.getTheta(), "M+H");
-				HDPPrecursorMass precursor = new HDPPrecursorMass(precursorMass, this.ppm, this.compoundLookUp);
+				HDPPrecursorMass precursor = new HDPPrecursorMass(precursorMass, this.ppm, this.idDatabase);
 
 				mc.setPrecursorMass(precursor);
 				precursorList.add(precursor);

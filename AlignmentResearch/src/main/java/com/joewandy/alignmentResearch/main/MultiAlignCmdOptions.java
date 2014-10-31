@@ -194,11 +194,22 @@ public class MultiAlignCmdOptions {
 	@Option(name = "hdpRefFileIdx", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Optional. Reference file index.")
 	public int hdpRefFileIdx = MultiAlignConstants.HDP_REF_FILE_IDX;
 	
+	@Option(name = "mode", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Ionisation mode. If this is provided, then the model will also annotate peaks by possible adduct transformations.")
+	public String mode = MultiAlignConstants.IONISATION_MODE_POSITIVE;	
+	
+	// 	private static final String KEGG_PATH = "/home/joewandy/Project/mzMatch/scripts/standards/kegg.xml";
+	@Option(name = "idDatabase", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Identification database. If this is provided, then the model will also annotate peaks by putative identities of formulae")
+	public String idDatabase = null;	
+
+	// String databaseFile = "/home/joewandy/Dropbox/Project/documents/new_measure_experiment/input_data/standard_hdp/std1.csv";
+	@Option(name = "gtDatabase", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Ground truth database -- for debugging only")
+	public String gtDatabase = null;		
+	
 	/*
 	 * Scoring options
 	 */
 	@Option(name = "scoringMethod", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Scoring method")
-	public String scoringMethod = MultiAlignConstants.SCORING_METHOD_DIST;	
+	public String scoringMethod = MultiAlignConstants.SCORING_METHOD_HDP_MASS_RT_JAVA;
 	
 	/*
 	 * Generative model parameters

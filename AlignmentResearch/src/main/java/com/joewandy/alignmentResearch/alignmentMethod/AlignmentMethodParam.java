@@ -45,6 +45,10 @@ public class AlignmentMethodParam {
 	private boolean hdpSpeedUp;
 	private int hdpSpeedUpNumSample;
 	private int hdpRefFileIdx;
+	
+	private String identificationDatabase;
+	private String groundTruthDatabase;
+	private String mode;
 
 	public AlignmentMethodParam() {
 	
@@ -80,7 +84,10 @@ public class AlignmentMethodParam {
 		this.hdpSpeedUp = options.hdpSpeedUp;
 		this.hdpSpeedUpNumSample = options.hdpSpeedUpNumSample;
 		this.hdpRefFileIdx = options.hdpRefFileIdx;
-		this.scoringMethod = options.scoringMethod;		
+		this.scoringMethod = options.scoringMethod;
+		this.identificationDatabase = options.idDatabase;
+		this.groundTruthDatabase = options.gtDatabase;
+		this.mode = options.mode;
 	}
 
 	public boolean isUsePpm() {
@@ -322,6 +329,30 @@ public class AlignmentMethodParam {
 
 	public void setHdpRefFileIdx(int hdpRefFileIdx) {
 		this.hdpRefFileIdx = hdpRefFileIdx;
+	}
+	
+	public String getIdentificationDatabase() {
+		return identificationDatabase;
+	}
+
+	public void setIdentificationDatabase(String identificationDatabase) {
+		this.identificationDatabase = identificationDatabase;
+	}
+
+	public String getGroundTruthDatabase() {
+		return groundTruthDatabase;
+	}
+
+	public void setGroundTruthDatabase(String groundTruthDatabase) {
+		this.groundTruthDatabase = groundTruthDatabase;
+	}
+
+	public String getMode() {
+		return mode;
+	}
+
+	public void setMode(String mode) {
+		this.mode = mode;
 	}
 
 }
