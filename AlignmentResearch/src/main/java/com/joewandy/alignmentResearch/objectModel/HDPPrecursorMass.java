@@ -27,7 +27,6 @@ public class HDPPrecursorMass implements Comparable<HDPPrecursorMass> {
 	}
 	
 	public boolean withinTolerance(double toCheck) {
-		// 3 times the window to match the gaussian distribution used in the model
 		double delta = PPM(mass, ppm);
 		double upper = mass + delta; 
 		double lower = mass - delta;
