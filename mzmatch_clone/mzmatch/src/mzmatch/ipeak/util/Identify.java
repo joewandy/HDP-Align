@@ -25,17 +25,21 @@ package mzmatch.ipeak.util;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 import java.util.zip.GZIPOutputStream;
-
-import com.csvreader.CsvReader;
 
 import mzmatch.ipeak.sort.IdentifyPeaksets;
 import mzmatch.util.Tool;
@@ -43,7 +47,6 @@ import peakml.Annotation;
 import peakml.IPeak;
 import peakml.IPeakSet;
 import peakml.chemistry.Mass;
-import peakml.chemistry.MolecularFormula;
 import peakml.chemistry.Molecule;
 import peakml.chemistry.PeriodicTable;
 import peakml.chemistry.Polarity;
@@ -54,6 +57,8 @@ import peakml.io.peakml.PeakMLWriter;
 import cmdline.CmdLineParser;
 import cmdline.Option;
 import cmdline.OptionsClass;
+
+import com.csvreader.CsvReader;
 
 
 
@@ -304,7 +309,12 @@ public class Identify
 				System.out.println(molecule.getDatabaseID() + ", " + newName + ", " + 
 						molecule.getPlainFormula() + ", " + moleculeMass);
 			}
-			
+
+			String databaseFile = "/home/joewandy/Dropbox/Project/documents/new_measure_experiment/input_data/standard_hdp/std1.csv";
+			Map<String, String> compoundGroundTruthDatabase = loadIdentificationDB(databaseFile);
+
+			Set<String> correctFormulaeFound = new HashSet<String>();
+			Set<String> incorrectFormulaeFound = new HashSet<String>();
 			for (Molecule molecule : molecules.values())
 			{
 				final Polarity p = molecule.getPolarity();
@@ -315,8 +325,24 @@ public class Identify
 				if ( options.moleculeMasses != null ) {
 					annotatePeaks(molecule, masses, peakset, options);
 				} else {
-					annotatePeaks(molecule, adducts, options, peakset, result);
+					boolean found = annotatePeaks(molecule, adducts, options, peakset, result);
+					if (found) {
+						String key = molecule.getPlainFormula();
+						if (compoundGroundTruthDatabase.containsKey(key)) {
+							correctFormulaeFound.add(key);							
+						} else {
+							incorrectFormulaeFound.add(key);														
+						}
+					}
 				}
+			}
+			System.out.println("Metabolite DB size = " + compoundGroundTruthDatabase.size());
+			double ratio = ((double)correctFormulaeFound.size()) / incorrectFormulaeFound.size();
+			System.out.println("\tMetabolites matching vs. non-matching = " + correctFormulaeFound.size()
+					+ "/" + incorrectFormulaeFound.size() + " ratio = " + ratio);
+			System.out.println("Found = ");
+			for (String met : correctFormulaeFound) {
+				System.out.println("\t- " + met);
 			}
 			
 			for ( IPeak peak : peakset ) {
@@ -352,8 +378,34 @@ public class Identify
 		}
 	}
 	
-	private static void annotatePeaks(final Molecule molecule, final String[] adducts, final Options options,
+	/**
+	 * Load identification database for evaluation 
+	 * @param databaseFile the standards database file
+	 * @return Map of database formula to the line
+	 */
+	private static Map<String, String> loadIdentificationDB(String databaseFile) {
+
+		Map<String, String> database = new HashMap<String, String>();
+		try {
+			List<String> lines = Files.readAllLines(Paths.get(databaseFile),
+					Charset.defaultCharset());
+			for (String line : lines) {
+				String[] tokens = line.split(",");
+				String formula = tokens[2].trim();
+				database.put(formula, line);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		System.out.println("database=" + database);
+		return database;
+	
+	}
+	
+	private static boolean annotatePeaks(final Molecule molecule, final String[] adducts, final Options options,
 			final IPeakSet<IPeak> peakset, final ParseResult result) {
+		boolean found = false;
 		for ( int adductIndex = 0; adductIndex < adducts.length; ++adductIndex ) {
 			GeneralDerivative gd = new GeneralDerivative(molecule.getFormula(), adductIndex, options.massOverride, adducts);
 			if ( ! gd.isValid() ) {
@@ -379,9 +431,11 @@ public class Identify
 						continue;
 				
 				addAnnotation(peak, molecule, adducts[adductIndex], mass);
+				found = true;
+				
 			}
 		}
-		System.out.println();
+		return found;
 	}
 	
 	private static void annotatePeaks(final Molecule molecule, List<Map<String,Double>> masses, final IPeakSet<IPeak> peakset,

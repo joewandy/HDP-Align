@@ -28,7 +28,7 @@ public class HDPPrecursorMass implements Comparable<HDPPrecursorMass> {
 	
 	public boolean withinTolerance(double toCheck) {
 		// 3 times the window to match the gaussian distribution used in the model
-		double delta = PPM(mass, ppm*3);
+		double delta = PPM(mass, ppm);
 		double upper = mass + delta; 
 		double lower = mass - delta;
 		if (lower < toCheck && toCheck < upper) {
@@ -46,7 +46,12 @@ public class HDPPrecursorMass implements Comparable<HDPPrecursorMass> {
 		count++;
 	}
 	
-	public Set<Molecule> loadMoleculesFromDB() {
+	/**
+	 * Returns the molecules from database that matches this precursor's mass within tolerance
+	 * @return Molecules within tolerance from the DB
+	 */
+	public Set<Molecule> initMolecules() {
+		// if no molecules yet, then search DB for the first time
 		if (molecules == null) {
 			try {
 				molecules = dbQuery.findCompoundsByMass(mass, ppm*3, 0);

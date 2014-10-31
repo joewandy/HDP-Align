@@ -10,6 +10,7 @@ public class HDPMassCluster {
 	private int countPeaks;
 	private double sumPeaks;
 	private Set<Feature> peakData;
+	private HDPPrecursorMass precursorMass;
 	
 	public HDPMassCluster(int id) {
 		this.id = id;
@@ -26,6 +27,14 @@ public class HDPMassCluster {
 
 	public void setTheta(double theta) {
 		this.theta = theta;
+	}
+
+	public HDPPrecursorMass getPrecursorMass() {
+		return precursorMass;
+	}
+
+	public void setPrecursorMass(HDPPrecursorMass pc) {
+		this.precursorMass = pc;
 	}
 
 	public int getCountPeaks() {

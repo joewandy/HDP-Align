@@ -1,12 +1,15 @@
 package com.joewandy.alignmentResearch.objectModel;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import no.uib.cipr.matrix.Matrix;
 import no.uib.cipr.matrix.sparse.FlexCompRowMatrix;
+import peakml.chemistry.Molecule;
 
 import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HDPKeggQuery;
 import com.joewandy.alignmentResearch.precursorPrediction.AdductTransformComputer;
@@ -16,32 +19,32 @@ public class HDPSamplerHandler {
 	
 	private List<HDPFile> hdpFiles;
 	private List<HDPMetabolite> hdpMetabolites;
-	private Matrix resultMap;
-	private int samplesTaken;
 	private int totalPeaks;
+	private Matrix resultMap;
+	private double ppm;
+	private int samplesTaken;
 	
 	private AdductTransformComputer adductCalc;
 	private List<String> adductList;
-	private Map<Feature, Map<String, Integer>> ipMap;
-	private double ppm;
+	private CompoundQuery compoundLookUp;
 	private Map<HDPMetabolite, List<HDPPrecursorMass>> metabolitePrecursors;
-	private CompoundQuery dbQuery;
+	private HDPAnnotation ionisationProductAnnotations;
+	private HDPAnnotation metaboliteAnnotations;
 	
 	public HDPSamplerHandler(List<HDPFile> hdpFiles, List<HDPMetabolite> hdpMetabolites, int totalPeaks, double ppm) {
 	
 		this.hdpFiles = hdpFiles;
 		this.hdpMetabolites = hdpMetabolites;
 		this.totalPeaks = totalPeaks;
-		this.resultMap = new FlexCompRowMatrix(totalPeaks, totalPeaks);
-		this.ipMap = new HashMap<Feature, Map<String, Integer>>();
-		this.metabolitePrecursors = new HashMap<HDPMetabolite, List<HDPPrecursorMass>>(); 
+		this.resultMap = new FlexCompRowMatrix(totalPeaks, totalPeaks); // TODO: don't use a matrix!
 		this.ppm = ppm;
-		
-		// can use either PubChem or KEGG
-//		this.dbQuery = new HDPPubChemQuery();
-		this.dbQuery = new HDPKeggQuery();
 
-		// list of common adducts should be passed as a command-line parameter
+		this.compoundLookUp = new HDPKeggQuery(); // TODO: the kegg path is hardcoded here!
+		this.metabolitePrecursors = new HashMap<HDPMetabolite, List<HDPPrecursorMass>>(); 		
+		this.ionisationProductAnnotations = new HDPAnnotation();
+		this.metaboliteAnnotations = new HDPAnnotation();
+
+		// list of common adducts should be passed as a command-line parameter?
 		adductList = new ArrayList<String>();
 		adductList.add("M+3H");
 		adductList.add("M+2H+Na");
@@ -77,7 +80,7 @@ public class HDPSamplerHandler {
 		adductList.add("2M+ACN+Na");
 		this.adductCalc = new AdductTransformComputer(adductList);
 		this.adductCalc.makeLists();
-		
+				
 	}
 
 	public void handleSample(int s, int peaksProcessed, double timeTaken, HDPClusteringParam hdpParam, boolean lastSample) {
@@ -145,16 +148,16 @@ public class HDPSamplerHandler {
 		return resultMap;
 	}
 	
-	public Map<Feature, Map<String, Integer>> getIpMap() {
-		return ipMap;
+	public HDPAnnotation getIonisationProductAnnotations() {
+		return ionisationProductAnnotations;
 	}
 
+	public HDPAnnotation getMetaboliteAnnotations() {
+		return metaboliteAnnotations;
+	}
+	
 	public int getSamplesTaken() {
 		return samplesTaken;
-	}
-
-	public List<HDPMetabolite> getHdpMetabolites() {
-		return hdpMetabolites;
 	}
 
 	public Map<HDPMetabolite, List<HDPPrecursorMass>> getMetabolitePrecursors() {
@@ -168,6 +171,9 @@ public class HDPSamplerHandler {
 	
 		// annotate ionisation products
 		annotateIP();
+		
+		// annotate metabolites
+		annotateMetabolites();
 		
 	}
 	
@@ -261,14 +267,16 @@ public class HDPSamplerHandler {
 							// make a new precursor mass if necessary
 							boolean newPc = false;
 							if (precursor == null) {
-								precursor = new HDPPrecursorMass(precursorMass1, this.ppm, this.dbQuery);
+								precursor = new HDPPrecursorMass(precursorMass1, this.ppm, this.compoundLookUp);
 								newPc = true;
 							}
 							// search for matching results in precursorMasses2 and annotate features if found
-							found = findAndAnnotate(precursor, precursorMasses2, mc1,
+							found = findAndAnnotateIP(precursor, precursorMasses2, mc1,
 									mc2, c1);
 							if (found) {
 								if (newPc) {
+									mc1.setPrecursorMass(precursor);
+									mc2.setPrecursorMass(precursor);
 									precursorList.add(precursor);								
 								} else {
 									precursor.incrementCount();
@@ -312,7 +320,9 @@ public class HDPSamplerHandler {
 
 				// get the precursor mass under M+H / M-H, and use this
 				double precursorMass = adductCalc.getPrecursorMass(mc.getTheta(), "M+H");
-				HDPPrecursorMass precursor = new HDPPrecursorMass(precursorMass, this.ppm, this.dbQuery);
+				HDPPrecursorMass precursor = new HDPPrecursorMass(precursorMass, this.ppm, this.compoundLookUp);
+
+				mc.setPrecursorMass(precursor);
 				precursorList.add(precursor);
 				
 			}
@@ -322,7 +332,7 @@ public class HDPSamplerHandler {
 				
 	}
 
-	private boolean findAndAnnotate(HDPPrecursorMass precursorMass1,
+	private boolean findAndAnnotateIP(HDPPrecursorMass precursorMass1,
 			List<Double> precursorMasses2, HDPMassCluster mc1,
 			HDPMassCluster mc2, int c1) {
 		
@@ -336,10 +346,10 @@ public class HDPSamplerHandler {
 			if (precursorMass1.withinTolerance(precursorMass2)) {
 				// if yes, then annotate peaks in both mass clusters with the adduct types
 				for (Feature f1 : mc1.getPeakData()) {
-					annotate(adductList.get(c1), f1);
+					ionisationProductAnnotations.annotate(f1, adductList.get(c1));
 				}
 				for (Feature f2 : mc2.getPeakData()) {
-					annotate(adductList.get(c2), f2);
+					ionisationProductAnnotations.annotate(f2, adductList.get(c2));
 				}
 				return true;
 			}
@@ -348,28 +358,33 @@ public class HDPSamplerHandler {
 		return false;
 
 	}
-
-	private void annotate(String msg, Feature f) {
-		
-		Map<String, Integer> annots = this.ipMap.get(f);
-
-		if (annots == null) {
-			annots = new HashMap<String, Integer>();
-			annots.put(msg, 1);
-		} else {
-		
-			assert(annots != null);
-			Integer count = annots.get(msg);
-			if (count != null) {
-				annots.put(msg, count+1); 				
-			} else {
-				annots.put(msg, 1);
-			}
-			
-		}
-
-		this.ipMap.put(f, annots);
 	
-	}
+	private void annotateMetabolites() {
+
+		List<HDPMetabolite> inferredMetabolites = this.hdpMetabolites;
+		
+		for (HDPMetabolite met : inferredMetabolites) {
+			
+			// annotate all features inside with the mols
+			for (HDPMassCluster mc : met.getMassClusters()) {
+				HDPPrecursorMass pc = mc.getPrecursorMass();
+				if (pc == null) {
+					continue;
+				}
+				Set<Molecule> mols = pc.initMolecules();
+				if (mols.isEmpty()) {
+					continue;
+				}
+				for (Molecule mol : mols) {
+					String msg = mol.getPlainFormula();
+					for (Feature f : mc.getPeakData()) {
+						metaboliteAnnotations.annotate(f, msg);
+					}					
+				}
+			}
+
+		}
+				
+	}	
 		
 }

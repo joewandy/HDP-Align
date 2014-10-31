@@ -26,7 +26,6 @@ import org.apache.commons.math3.random.RandomData;
 import org.apache.commons.math3.random.RandomDataImpl;
 
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
-import com.joewandy.alignmentResearch.main.MultiAlignConstants;
 
 public class HDPMassRTClustering implements HDPClustering {
 
@@ -46,7 +45,7 @@ public class HDPMassRTClustering implements HDPClustering {
 	private List<Integer> fi;						// no. of RT clusters in each metabolite
 	private List<Double> ti;						// RT value of each metabolite
 	private List<Double> si;						// sum of RT clusters' time in each metabolite
-		
+			
 	/**
 	 * Constructs an instance of HDP clustering by mass and RT
 	 * @param dataList The list of files to be processed
@@ -115,18 +114,14 @@ public class HDPMassRTClustering implements HDPClustering {
 		return sampleHandler.getSamplesTaken();
 	}
 	
-	public Map<Feature, Map<String, Integer>> getIpMap() {
-		return sampleHandler.getIpMap();
+	public HDPAnnotation getIonisationProductAnnotations() {
+		return sampleHandler.getIonisationProductAnnotations();
 	}
-	
-	public Map<HDPMetabolite, List<HDPPrecursorMass>> getMetabolitePrecursors() {
-		return sampleHandler.getMetabolitePrecursors();
+
+	public HDPAnnotation getMetaboliteAnnotations() {
+		return sampleHandler.getMetaboliteAnnotations();
 	}
-	
-	public List<HDPMetabolite> getMetabolitesInLastSample() {
-		return hdpMetabolites;
-	}
-		
+			
 	/**
 	 * Initialises HDP parameters
 	 * @param dataList
