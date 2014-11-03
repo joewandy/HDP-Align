@@ -31,7 +31,6 @@ public class AlignmentMethodFactory {
 	public static final String ALIGNMENT_METHOD_MY_HDP_ALIGNMENT = "myHdp";
 
 	// same but implemented in python
-	public static final String ALIGNMENT_METHOD_PYTHON_GREEDY = "pythonGreedy";
 	public static final String ALIGNMENT_METHOD_PYTHON_MW = "pythonMW";
 	
 	// calls mzMine Join aligner

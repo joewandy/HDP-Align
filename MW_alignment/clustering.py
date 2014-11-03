@@ -55,6 +55,8 @@ class GreedyClustering:
                 n = row.row_id
                 Z[n, k] = 1
             k = k + 1
+
+        print " - " + str(k) + " groups obtained"
                 
         ZZ = Z.tocsr() * Z.tocsr().transpose()
         return ZZ.tolil()

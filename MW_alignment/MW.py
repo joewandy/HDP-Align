@@ -38,7 +38,7 @@ def get_options(argv):
     parser.set_defaults(grouping_method='posterior')
     parser.add_argument('-alpha', help='clustering weight ratio')
     parser.set_defaults(alpha=0.3)
-    parser.add_argument('-grt', help='grouping RT tolerance window. Only for greedy grouping method')
+    parser.add_argument('-grt', help='grouping RT tolerance window.')
     parser.set_defaults(grt=2)
     parser.add_argument('-dp_alpha', help='DP concentration parameter')
     parser.set_defaults(dp_alpha=1)
