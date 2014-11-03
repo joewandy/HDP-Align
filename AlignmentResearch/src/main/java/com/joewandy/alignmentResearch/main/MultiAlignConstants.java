@@ -47,6 +47,7 @@ public class MultiAlignConstants {
 	public static final boolean HDP_SPEED_UP = false;
 	public static final int HDP_SPEED_UP_NUM_SAMPLE = 100;
 	public static final int HDP_REF_FILE_IDX = -1; // not using any reference file
+	public static final int HDP_MINSPAN = 2; // by default we consider pairwise alignments
 
 	public static final String SCORING_METHOD_HDP_MASS_RT_JAVA = "hdpmassrtjava";
 	public static final String SCORING_METHOD_HDP_RT_JAVA = "hdprtjava";

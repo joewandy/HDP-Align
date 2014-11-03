@@ -1,6 +1,7 @@
 package com.joewandy.alignmentResearch.objectModel;
 
-import no.uib.cipr.matrix.Matrix;
+import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HDPResults;
+
 
 public interface HDPClustering {
 
@@ -8,10 +9,10 @@ public interface HDPClustering {
 
 	int getSamplesTaken();
 	
-	Matrix getSimilarityResult();
+	HDPResults getResults();
 	
-	public HDPAnnotation getIonisationProductAnnotations();
+	public HDPAnnotation<Feature> getIonisationProductAnnotations();
 
-	public HDPAnnotation getMetaboliteAnnotations();
+	public HDPAnnotation<Feature> getMetaboliteAnnotations();
 	
 }

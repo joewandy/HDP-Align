@@ -22,8 +22,9 @@ import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
 import com.joewandy.alignmentResearch.alignmentMethod.BaseAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.FeatureMatching;
+import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HDPResultItem;
 import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HdpProbabilityMatching;
-import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HdpResult;
+import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HDPResults;
 import com.joewandy.alignmentResearch.main.MultiAlignConstants;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
@@ -36,9 +37,6 @@ import com.joewandy.alignmentResearch.objectModel.HDPMassRTClustering;
 /**
  * An alignment method using Hierarchical Dirichlet Process mixture model
  * @author joewandy
- * 
- * TODO: Need to remove hardcoded constants. 
- * TODO: Need to make this able to deal with positive & negative mode
  *
  */
 public class HdpAlignment extends BaseAlignment implements AlignmentMethod {
@@ -48,8 +46,7 @@ public class HdpAlignment extends BaseAlignment implements AlignmentMethod {
 	private int totalPeaks;							// Count of total number of peaks
 	private AlignmentMethodParam param;				// Alignment parameters	
 
-	private Map<Integer, Feature> sequenceMap;		// Map of sequence ID to peak feature
-	private Map<HdpResult, HdpResult> resultMap;	// Map of the results
+	private HDPResults results;
 	private Map<String, String> compoundGroundTruthDatabase;
 	
 	/**
@@ -69,9 +66,7 @@ public class HdpAlignment extends BaseAlignment implements AlignmentMethod {
 		}
 		this.param = param;
 		
-		this.sequenceMap = new HashMap<Integer, Feature>();
-		this.resultMap = new HashMap<HdpResult, HdpResult>();
-
+		this.results = new HDPResults();
 		String databaseFile = param.getGroundTruthDatabase();
 		this.compoundGroundTruthDatabase = loadGroundTruthDB(databaseFile);
 
@@ -81,46 +76,43 @@ public class HdpAlignment extends BaseAlignment implements AlignmentMethod {
 	public AlignmentList matchFeatures() {
 		
 		AlignmentList masterList = new AlignmentList("");
-		MatFileReader mfr = getMfr(dataList);
-		if (mfr != null) {
+		int samplesTaken = 0;
+		
+		// use the java HDP Mass-RT clustering			
+		if (MultiAlignConstants.SCORING_METHOD_HDP_MASS_RT_JAVA
+				.equals(this.param.getScoringMethod())) {
 
-			// load from matlab
-			resultMap = getMatlabResultMap(dataList, mfr);
+			// run the HDP RT+mass clustering
+			HDPClustering clustering = new HDPMassRTClustering(dataList,
+					param);
+			clustering.runClustering();
 
-		} else {
+			// process the matching results
+			samplesTaken = clustering.getSamplesTaken();
+			System.out.println("Samples taken = " + samplesTaken);
+			results = clustering.getResults();
 
-			// use the java HDP Mass-RT clustering			
-			if (MultiAlignConstants.SCORING_METHOD_HDP_MASS_RT_JAVA
-					.equals(this.param.getScoringMethod())) {
-
-				// assign a sequential ID to all peaks to store the result later
-				assignSequenceID(dataList);
-
-				// run the HDP RT+mass clustering
-				HDPClustering clustering = new HDPMassRTClustering(dataList,
-						param);
-				clustering.runClustering();
-
-				// process the matching results
-				int samplesTaken = clustering.getSamplesTaken();
-				System.out.println("Samples taken = " + samplesTaken);
-				resultMap = getHDPMassRTResultMap(clustering, samplesTaken);
-
-				// process the ionisation product and metabolite annotations
-				printAnnotations(clustering);
-
-			} else if (MultiAlignConstants.SCORING_METHOD_HDP_RT_JAVA
-					.equals(this.param.getScoringMethod())) {
-
-				// use the java HDP RT clustering
-
+			// print out all the partners of each peak
+			for (Entry<HDPResultItem, Integer> entry : results.getEntries()) {
+				HDPResultItem item = entry.getKey();
+				int count = results.getCount(item);
+				double prob = ((double)count) / samplesTaken;
+				System.out.println(item + " has probability " + prob );
 			}
+						
+			// process the ionisation product and metabolite annotations
+			printAnnotations(clustering);
+
+		} else if (MultiAlignConstants.SCORING_METHOD_HDP_RT_JAVA
+				.equals(this.param.getScoringMethod())) {
+
+			// use the java HDP RT clustering
 
 		}
 		
 		// construct the actual feature matching here 
-		FeatureMatching matcher = new HdpProbabilityMatching(resultMap,
-				dataList);
+		FeatureMatching matcher = new HdpProbabilityMatching(results,
+				dataList, samplesTaken);
 		masterList = matcher.getMatchedList();	
 		return masterList;
 		
@@ -185,139 +177,7 @@ public class HdpAlignment extends BaseAlignment implements AlignmentMethod {
 		return mfr;
 
 	}
-
-	/**
-	 * Imports HDP alignment results from matlab prototype
-	 * @param dataList The list of files
-	 * @param mfr The matlab file reader
-	 * @return The resultMap object
-	 */
-	private Map<HdpResult, HdpResult> getMatlabResultMap(
-			List<AlignmentFile> dataList, MatFileReader mfr) {
-
-		Map<HdpResult, HdpResult> resultMap = new HashMap<HdpResult, HdpResult>();
-
-		double[][] result = ((MLDouble) mfr.getMLArray("sorted_res"))
-				.getArray();
-		for (int i = 0; i < result.length; i++) {
-
-			double[] row = result[i];
-			int peakID1 = (int) row[0];
-			int fileID1 = (int) row[1] - 1;
-			int peakID2 = (int) row[2];
-			int fileID2 = (int) row[3] - 1;
-			double similarity = row[4];
-
-			// find features
-			AlignmentFile file1 = dataList.get(fileID1);
-			Feature feature1 = file1.getFeatureByPeakID(peakID1);
-			AlignmentFile file2 = dataList.get(fileID2);
-			Feature feature2 = file2.getFeatureByPeakID(peakID2);
-
-			HdpResult hdpRes = new HdpResult(feature1, feature2);
-			hdpRes.setSimilarity(similarity);
-
-		}
-		
-		return resultMap;
-
-	}
 	
-	/**
-	 * Assigns a sequential ID numbers to all features across all input files
-	 * @param dataList The input files
-	 * @return A map from ID to feature
-	 */
-	private void assignSequenceID(List<AlignmentFile> dataList) {
-
-		int sequenceID = 0;
-		for (int j = 0; j < dataList.size(); j++) {
-
-			AlignmentFile alignmentFile = dataList.get(j);
-			for (Feature f : alignmentFile.getFeatures()) {
-				f.setSequenceID(sequenceID);
-				sequenceMap.put(sequenceID, f);
-				sequenceID++;
-			}
-
-		}
-		
-	}
-	
-	/**
-	 * Constructs HDP alignment results
-	 * @param sequenceMap Map of sequence ID of each peak
-	 * @param clustering
-	 * @param samplesTaken
-	 * @return
-	 */
-	private Map<HdpResult, HdpResult> getHDPMassRTResultMap(HDPClustering clustering, int samplesTaken) {
-
-		Map<HdpResult, HdpResult> resultMap = new HashMap<HdpResult, HdpResult>();
-		Map<Feature, List<Feature>> pairings = new HashMap<Feature, List<Feature>>();
-		Matrix simMatrix = clustering.getSimilarityResult();
-
-		Iterator<MatrixEntry> it = simMatrix.iterator();
-		while (it.hasNext()) {
-
-			MatrixEntry entry = it.next();
-			int m = entry.row();
-			int n = entry.column();
-			double similarity = entry.get() / samplesTaken;
-			Feature feature1 = sequenceMap.get(m);
-			Feature feature2 = sequenceMap.get(n);
-
-			// skip alignment of a feature to itself
-			if (feature1.equals(feature2)) {
-				continue;
-			}
-
-			// skip alignment of features in the same file
-			if (feature1.getData().getId() == feature2.getData()
-					.getId()) {
-				continue;
-			}
-
-			// track the partner peaks for debugging
-			List<Feature> partners = null;
-			if (pairings.containsKey(feature1)) {
-				partners = pairings.get(feature1);
-			} else {
-				partners = new ArrayList<Feature>();
-				pairings.put(feature1, partners);
-			}
-			feature2.setScore(similarity);
-			partners.add(feature2);
-
-			// HACK: ensure that f1 file id is always smaller than f2
-			// file id
-			if (feature1.getData().getId() > feature2.getData().getId()) {
-				Feature temp = feature1;
-				feature1 = feature2;
-				feature2 = temp;
-			}
-
-			HdpResult hdpRes = new HdpResult(feature1, feature2);
-			hdpRes.setSimilarity(similarity);
-			resultMap.put(hdpRes, hdpRes);
-
-		}
-
-		// print out all the partners of each peak
-		for (Entry<Feature, List<Feature>> entry : pairings.entrySet()) {
-			Feature f = entry.getKey();
-			List<Feature> partners = entry.getValue();
-			System.out.println(f + " has " + partners.size()
-					+ " partners = ");
-			for (Feature partner : partners) {
-				System.out.println("\t" + partner);
-			}
-		}
-		
-		return resultMap;
-		
-	}
-
 	/**
 	 * Annotates features by inferred ionisation products
 	 * @param clustering The HDP clustering results

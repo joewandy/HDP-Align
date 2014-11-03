@@ -1,8 +1,8 @@
 package com.joewandy.alignmentResearch.alignmentMethod.custom.hdp;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import com.joewandy.alignmentResearch.alignmentMethod.FeatureMatching;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
@@ -12,12 +12,14 @@ import com.joewandy.alignmentResearch.objectModel.Feature;
 
 public class HdpProbabilityMatching implements FeatureMatching {
 
-	private Map<HdpResult, HdpResult> hdpResults;
+	private HDPResults hdpResults;
 	private List<AlignmentFile> dataList;
+	private int samplesTaken;
 	
-	public HdpProbabilityMatching(Map<HdpResult, HdpResult> resultMap, List<AlignmentFile> dataList) {			
-		this.hdpResults = resultMap;
+	public HdpProbabilityMatching(HDPResults hdpResults, List<AlignmentFile> dataList, int samplesTaken) {			
+		this.hdpResults = hdpResults;
 		this.dataList = dataList;
+		this.samplesTaken = samplesTaken;
 	}
 
 	public AlignmentList getMatchedList() {
@@ -25,15 +27,14 @@ public class HdpProbabilityMatching implements FeatureMatching {
 		// add matched entries
 		AlignmentList matchedList = new AlignmentList("matched_list");
 		int rowId = 0;		
-		for (Entry<HdpResult, HdpResult> match : hdpResults.entrySet()) {
-			HdpResult hdpResult = match.getKey();
-			Feature f1 = hdpResult.getFeature1();
-			Feature f2 = hdpResult.getFeature2();
-			double score = hdpResult.getSimilarity();
+		for (Entry<HDPResultItem, Integer> match : hdpResults.getEntries()) {
+			HDPResultItem item = match.getKey();
+			int count = hdpResults.getCount(item);
+			double prob = ((double)count) / samplesTaken;
 			AlignmentRow merged = new AlignmentRow(matchedList, rowId++);
-			merged.addAlignedFeature(f1);
-			merged.addAlignedFeature(f2);
-			merged.setScore(score);
+			Set<Feature> features = item.getFeatures();
+			merged.addAlignedFeatures(features);
+			merged.setScore(prob);
 			matchedList.addRow(merged);
 		}
 		

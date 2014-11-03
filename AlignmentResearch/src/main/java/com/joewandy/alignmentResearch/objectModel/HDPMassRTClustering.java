@@ -19,13 +19,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import no.uib.cipr.matrix.Matrix;
-
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.math3.random.RandomData;
 import org.apache.commons.math3.random.RandomDataImpl;
 
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
+import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HDPResults;
 
 public class HDPMassRTClustering implements HDPClustering {
 
@@ -72,7 +71,9 @@ public class HDPMassRTClustering implements HDPClustering {
 		double massTol = methodParam.getHdpMassTol();
 		String idDatabase = methodParam.getIdentificationDatabase();
 		String mode = methodParam.getMode();
-		this.sampleHandler = new HDPSamplerHandler(hdpFiles, hdpMetabolites, totalPeaks, massTol, idDatabase, mode);
+		int minSpan = methodParam.getHdpMinSpan();
+		this.sampleHandler = new HDPSamplerHandler(hdpFiles, hdpMetabolites, 
+				totalPeaks, massTol, idDatabase, mode, minSpan);
 
 	}
 
@@ -104,9 +105,9 @@ public class HDPMassRTClustering implements HDPClustering {
 	}
 	
 	/**
-	 * Returns the similarity matrix of peak-vs-peak in the samples obtained
+	 * Returns the probabilities of aligned features
 	 */
-	public Matrix getSimilarityResult() {		
+	public HDPResults getResults() {		
 		return sampleHandler.getResultMap();
 	}
 	
@@ -159,6 +160,13 @@ public class HDPMassRTClustering implements HDPClustering {
 		hdpParam.setSpeedUpHacks(methodParam.isHdpSpeedUp());
 		hdpParam.setSpeedUpNumSample(methodParam.getHdpSpeedUpNumSample());
 		hdpParam.setRefFileIdx(methodParam.getHdpRefFileIdx());
+		
+		int minSpan = methodParam.getHdpMinSpan();
+		int numFiles = dataList.size();
+		if (minSpan > numFiles) {
+			minSpan = numFiles;
+		}
+		hdpParam.setMinSpan(minSpan);
 		
 	}
 	

@@ -2,15 +2,20 @@ package com.joewandy.alignmentResearch.objectModel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import no.uib.cipr.matrix.Matrix;
-import no.uib.cipr.matrix.sparse.FlexCompRowMatrix;
+import org.paukov.combinatorics.Factory;
+import org.paukov.combinatorics.Generator;
+import org.paukov.combinatorics.ICombinatoricsVector;
+
 import peakml.chemistry.Molecule;
 
 import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HDPKeggQuery;
+import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HDPResultItem;
+import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HDPResults;
 import com.joewandy.alignmentResearch.main.MultiAlignConstants;
 import com.joewandy.alignmentResearch.precursorPrediction.AdductTransformComputer;
 import com.joewandy.mzmatch.query.CompoundQuery;
@@ -20,9 +25,10 @@ public class HDPSamplerHandler {
 	private List<HDPFile> hdpFiles;
 	private List<HDPMetabolite> hdpMetabolites;
 	private int totalPeaks;
-	private Matrix resultMap;
+	private HDPResults results;
 	private double ppm;
 	private int samplesTaken;
+	private int minSpan;
 	
 	private String mode;
 	private AdductTransformComputer adductCalc;
@@ -32,13 +38,15 @@ public class HDPSamplerHandler {
 	private HDPAnnotation<Feature> ionisationProductAnnotations;
 	private HDPAnnotation<Feature> metaboliteAnnotations;
 	
-	public HDPSamplerHandler(List<HDPFile> hdpFiles, List<HDPMetabolite> hdpMetabolites, int totalPeaks, double ppm, String dbPath, String mode) {
+	public HDPSamplerHandler(List<HDPFile> hdpFiles, List<HDPMetabolite> hdpMetabolites, 
+			int totalPeaks, double ppm, String dbPath, String mode, int minSpan) {
 	
 		this.hdpFiles = hdpFiles;
 		this.hdpMetabolites = hdpMetabolites;
 		this.totalPeaks = totalPeaks;
-		this.resultMap = new FlexCompRowMatrix(totalPeaks, totalPeaks); // TODO: don't use a matrix!
+		this.results = new HDPResults();
 		this.ppm = ppm;
+		this.minSpan = minSpan;
 
 		if (dbPath != null) {
 			this.idDatabase = new HDPKeggQuery(dbPath);			
@@ -122,8 +130,8 @@ public class HDPSamplerHandler {
 		
 	}
 	
-	public Matrix getResultMap() {
-		return resultMap;
+	public HDPResults getResultMap() {
+		return results;
 	}
 	
 	public HDPAnnotation<Feature> getIonisationProductAnnotations() {
@@ -169,15 +177,23 @@ public class HDPSamplerHandler {
 			// for all mass clusters
 			for (int a = 0; a < met.getA(); a++) {
 				List <Feature> peaksInside = met.getPeaksInMassCluster(a);
-				for (Feature f1 : peaksInside) {
-					for (Feature f2 : peaksInside) {
-						int m = f1.getSequenceID();
-						int n = f2.getSequenceID();
-						double currentValue = resultMap.get(m, n);
-						double newValue = currentValue+1;
-						resultMap.set(m, n, newValue);
-					}
-				}
+				
+				// create the initial vector
+				ICombinatoricsVector<Feature> initialVector = Factory
+						.createVector(peaksInside);
+
+				// create a simple combination generator to generate q-combinations of the initial vector
+				int q = minSpan;
+				Generator<Feature> gen = Factory
+						.createSimpleCombinationGenerator(initialVector, q);
+
+				// print all possible combinations
+				for (ICombinatoricsVector<Feature> combination : gen) {
+					Set<Feature> features = new HashSet<Feature>(combination.getVector());
+					HDPResultItem item = new HDPResultItem(features);
+					results.store(item);
+				}								
+				
 			}
 			
 		}
