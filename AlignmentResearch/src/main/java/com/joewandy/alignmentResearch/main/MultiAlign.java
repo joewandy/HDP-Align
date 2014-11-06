@@ -86,6 +86,16 @@ public class MultiAlign {
 			extendedLibrary = builder.combineLibraries(allLibraries);			
 			this.aligner = AlignmentMethodFactory.getAlignmentMethod(method, param, data, extendedLibrary);			
 
+		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_MAXIMUM_WEIGHT_MATCHING_REFERENCE.equals(method)) {
+
+			// cluster peaks within files
+			if (param.isUseGroup()) {
+				FeatureGrouper grouper = new FeatureGrouper(data.getAlignmentDataList(), param);
+				grouper.groupFeatures();				
+			}
+
+			this.aligner = AlignmentMethodFactory.getAlignmentMethod(method, param, data, null);			
+
 		} else {
 
 			this.aligner = AlignmentMethodFactory.getAlignmentMethod(method, param, data, null);			

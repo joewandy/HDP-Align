@@ -27,8 +27,8 @@ import domsax.XmlParserException;
 
 public class GreedyFeatureGroupingMethod extends BaseFeatureGroupingMethod implements FeatureGroupingMethod {
 
-	private static final int MASS_TOLERANCE_PPM = 10;
-	private static final double MIN_CORR_SIGNALS = 0.70;
+	private static final int MASS_TOLERANCE_PPM = 3;
+	private static final double MIN_CORR_SIGNALS = 0.90;
 	private double rtTolerance;
 	private boolean usePeakShape;
 	
