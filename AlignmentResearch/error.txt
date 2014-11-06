@@ -1,5 +1,5 @@
 cmdline.CmdLineException: Unhandled situation:
-java.lang.NumberFormatException: For input string: "-dpAlpha"
+java.lang.NumberFormatException: For input string: "-alignmentRt"
 	at cmdline.CmdLineParser.parse(CmdLineParser.java:227)
 	at com.joewandy.alignmentResearch.main.MultiAlignCmd.parseCommandLine(MultiAlignCmd.java:102)
 	at com.joewandy.alignmentResearch.main.MultiAlignCmd.main(MultiAlignCmd.java:36)

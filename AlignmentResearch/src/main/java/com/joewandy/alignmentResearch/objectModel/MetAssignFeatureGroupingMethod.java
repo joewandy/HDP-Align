@@ -39,8 +39,8 @@ import domsax.XmlParserException;
 
 public class MetAssignFeatureGroupingMethod extends BaseFeatureGroupingMethod implements FeatureGroupingMethod {
 
-	private static final int BURN_IN = 0;
-	private static final int NUM_DRAWS = 10;
+	private static final int BURN_IN = 100;
+	private static final int NUM_DRAWS = 100;
 	private static final int MASS_TOLERANCE_PPM = 3;
 	private String groupingMethod;
 	private double rtTolerance;
@@ -105,10 +105,11 @@ public class MetAssignFeatureGroupingMethod extends BaseFeatureGroupingMethod im
 				options.corrClustering = false;
 				options.rtClustering = true;
 			}
-			options.rtwindow = rtTolerance;
-			options.retentionTimeSD = rtTolerance/2;
-			options.alpha0 = 10;
-			options.alpha1 = 20;
+			options.verbose = true;
+			options.rtwindow = 0;
+			options.retentionTimeSD = 1;
+			options.alpha0 = 2.0;
+			options.alpha1 = 10.0;
 			options.p0 = 0.97;
 			options.p1 = 0.001;
 			
@@ -198,7 +199,7 @@ public class MetAssignFeatureGroupingMethod extends BaseFeatureGroupingMethod im
 		final List<SampleHandler<Data,SimpleClustering>> handlers = new ArrayList<SampleHandler<Data,SimpleClustering>>();
 
 		final int n = peaks.size();
-		PeakClusteringSamplerHandler peakClusteringHandler = new PeakClusteringSamplerHandler(n);
+		PeakClusteringSamplerHandler peakClusteringHandler = new PeakClusteringSamplerHandler(n, groupingMethod);
 		handlers.add(peakClusteringHandler);		
 		List<IPeak> basepeaks = Clusterer.findRelatedPeaks(peaks, clusterer, random, handlers);
 		

@@ -8,6 +8,7 @@ import java.util.List;
 import com.jmatio.io.MatFileWriter;
 import com.jmatio.types.MLArray;
 import com.jmatio.types.MLDouble;
+import com.joewandy.alignmentResearch.main.MultiAlignConstants;
 
 import no.uib.cipr.matrix.DenseMatrix;
 import no.uib.cipr.matrix.Matrix;
@@ -25,10 +26,13 @@ public class PeakClusteringSamplerHandler implements SampleHandler<Data, SimpleC
 	// peaks vs peaks probability to be in the same cluster
 	private Matrix ZZall;
 	
-	public PeakClusteringSamplerHandler(int numPeaks) {
+	private String groupingMethod;
+	
+	public PeakClusteringSamplerHandler(int numPeaks, String groupingMethod) {
 		System.err.println("-- PeakClusteringSamplerHandler --");
 		this.numPeaks = numPeaks;
 		this.ZZall = new DenseMatrix(numPeaks, numPeaks); 
+		this.groupingMethod = groupingMethod;
 	}
 	
 	public void handleSample(SimpleClustering clustering) {
@@ -54,7 +58,9 @@ public class PeakClusteringSamplerHandler implements SampleHandler<Data, SimpleC
 		 * A = lastZ, B = lastZ, C = ZZall
 		 * C = A*BT + C
 		 */
-		ZZall = lastZ.transBmultAdd(lastZ, ZZall);
+		if (MultiAlignConstants.GROUPING_METHOD_METASSIGN_POSTERIOR.equals(groupingMethod)) {
+			ZZall = lastZ.transBmultAdd(lastZ, ZZall);
+		}
 		
 	}
 	

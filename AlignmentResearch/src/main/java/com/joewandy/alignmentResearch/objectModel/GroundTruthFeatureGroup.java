@@ -78,5 +78,11 @@ public class GroundTruthFeatureGroup extends FeatureGroup {
 			return false;
 		}
 	}
+
+	@Override
+	public String toString() {
+		return "GroundTruthFeatureGroup [filenameToFeatureMap="
+				+ filenameToFeatureMap + "]";
+	}
 			
 }

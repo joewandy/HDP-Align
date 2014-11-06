@@ -1,11 +1,13 @@
 package com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import com.joewandy.alignmentResearch.alignmentExperiment.AlignmentData;
 import com.joewandy.alignmentResearch.noiseModel.AlignmentNoise;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
+import com.joewandy.alignmentResearch.objectModel.Feature;
 import com.joewandy.alignmentResearch.objectModel.GroundTruth;
 
 
@@ -34,6 +36,20 @@ public abstract class BaseDataGenerator implements AlignmentDataGenerator {
 		for (AlignmentNoise noiseModel : noiseModels) {
 			noiseModel.addNoise(alignmentData);
 		}
+		
+		// do post-processing
+//		for (AlignmentFile file : alignmentFiles) {
+//			Iterator<Feature> it = file.getFeatures().iterator();
+//			while (it.hasNext()) {
+//				Feature f = it.next();
+//				if (f.getIntensity() < 1E8) {
+//					it.remove();
+//					// remove from gt too
+//					groundTruth.clearFeature(f);
+//				}
+//			}
+//		}
+//		groundTruth.buildPairwise();
 		
 		return alignmentData;
 		
