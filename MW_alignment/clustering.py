@@ -93,7 +93,7 @@ class MixtureModelClustering:
         print " - Grouping " + self.alignment_file.filename
         sys.stdout.flush()
         
-        target = os.path.join(MixtureModelClustering.MATRIX_SAVE_PATH, self.alignment_file.filename + '.mat')
+        target = os.path.join(MixtureModelClustering.MATRIX_SAVE_PATH, self.alignment_file.filename + '.mixture_model_rt.mat')
         if os.path.isfile(target):
             print "\tReading clustering from " + target
             mdict = scipy.io.loadmat(target)

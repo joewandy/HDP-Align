@@ -106,6 +106,10 @@ public class MultiAlign {
 			
 	public EvaluationResult runExperiment() throws FileNotFoundException {
 		
+		if (aligner == null) {
+			return null;
+		}
+		
 		// actually do the alignment now, filtering of alignment results also happen inside align()
 		AlignmentList result = aligner.align();
 		if (result != null) {

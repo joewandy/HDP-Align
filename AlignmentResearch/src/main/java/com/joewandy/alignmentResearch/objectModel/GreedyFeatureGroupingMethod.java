@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -15,18 +16,23 @@ import mzmatch.ipeak.sort.PeakComparer;
 import mzmatch.ipeak.sort.RelatedPeaks;
 import no.uib.cipr.matrix.DenseMatrix;
 import no.uib.cipr.matrix.Matrix;
+import no.uib.cipr.matrix.MatrixEntry;
 import peakml.IPeak;
 import peakml.IPeakSet;
 import peakml.io.Header;
 import peakml.io.ParseResult;
 import peakml.io.peakml.PeakMLParser;
 
+import com.jmatio.io.MatFileWriter;
+import com.jmatio.types.MLArray;
+import com.jmatio.types.MLDouble;
 import com.joewandy.alignmentResearch.matrix.LinkedSparseMatrix;
 
 import domsax.XmlParserException;
 
 public class GreedyFeatureGroupingMethod extends BaseFeatureGroupingMethod implements FeatureGroupingMethod {
 
+	private static final String MATRIX_SAVE_PATH = "/home/joewandy/mat/";
 	private static final int MASS_TOLERANCE_PPM = 3;
 	private static final double MIN_CORR_SIGNALS = 0.90;
 	private double rtTolerance;
@@ -217,6 +223,37 @@ public class GreedyFeatureGroupingMethod extends BaseFeatureGroupingMethod imple
 		}			
 		System.out.println("groupedCount = " + groupedCount);
 
+		// save the clustering output to mat file as well
+		if (usePeakShape) {
+			
+			String filename = data.getFilenameWithoutExtension() + ".greedy." + rtTolerance + ".mat";	
+			String fullPath = MATRIX_SAVE_PATH + filename;
+					
+			System.err.println("Saving clustering output");
+			MLDouble ZZProbMat = new MLDouble("ZZ_all", toArray(ZZprob));
+			final Collection<MLArray> output1 = new ArrayList<MLArray>();
+			output1.add(ZZProbMat);
+			final MatFileWriter writer = new MatFileWriter();
+			try {
+				writer.write(fullPath, output1);
+				System.err.println("Written to " + fullPath);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+		}
+		
+	}
+	
+	private double[][] toArray(Matrix matrix) {
+		double[][] arr = new double[matrix.numRows()][matrix.numColumns()];
+		for (MatrixEntry e : matrix) {
+			int i = e.row();
+			int j = e.column();
+			double val = e.get();
+			arr[i][j] = val;
+		}
+		return arr;
 	}
 	
 }

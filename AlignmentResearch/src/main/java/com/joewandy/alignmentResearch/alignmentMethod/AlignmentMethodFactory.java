@@ -71,7 +71,7 @@ public class AlignmentMethodFactory {
 			aligner = new HdpAlignment(alignmentDataList, param);
 		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_PYTHON_MW.equals(method)) {
 			aligner = new PythonMW(alignmentDataList, param);
-		}		
+		}
 
 		return aligner;
 
