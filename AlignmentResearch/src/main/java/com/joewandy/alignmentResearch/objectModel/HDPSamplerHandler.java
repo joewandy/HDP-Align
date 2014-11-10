@@ -176,17 +176,21 @@ public class HDPSamplerHandler {
 
 			// for all mass clusters
 			for (int a = 0; a < met.getA(); a++) {
-				List <Feature> peaksInside = met.getPeaksInMassCluster(a);
 				
+				List <Feature> peaksInside = met.getPeaksInMassCluster(a);
+				int q = minSpan;
+				if (peaksInside.size() < q) {
+					System.out.println("break here?");
+				}
+
 				// create the initial vector
 				ICombinatoricsVector<Feature> initialVector = Factory
 						.createVector(peaksInside);
 
 				// create a simple combination generator to generate q-combinations of the initial vector
-				int q = minSpan;
 				Generator<Feature> gen = Factory
 						.createSimpleCombinationGenerator(initialVector, q);
-
+				
 				// print all possible combinations
 				for (ICombinatoricsVector<Feature> combination : gen) {
 					Set<Feature> features = new HashSet<Feature>(combination.getVector());

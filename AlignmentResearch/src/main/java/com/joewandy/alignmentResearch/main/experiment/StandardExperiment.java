@@ -17,7 +17,7 @@ public class StandardExperiment extends MultiAlignBaseExp implements MultiAlignE
 		2, 4, 6, 8, 10
 	};
 	public static final double[] ALL_ALIGNMENT_MZ = { 0.05, 0.1, 0.25 };
-	public static final double[] ALL_ALIGNMENT_RT = { 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60 };
+	public static final double[] ALL_ALIGNMENT_RT = { 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100 };
 	
 	public List<MultiAlignExpResult> performExperiment(
 			MultiAlignCmdOptions options) throws FileNotFoundException {
