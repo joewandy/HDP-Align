@@ -96,6 +96,14 @@ public class MultiAlign {
 
 			this.aligner = AlignmentMethodFactory.getAlignmentMethod(method, param, data, null);			
 
+		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_GROUP_ONLY.equals(method)) {
+
+			// cluster peaks within files
+			if (param.isUseGroup()) {
+				FeatureGrouper grouper = new FeatureGrouper(data.getAlignmentDataList(), param);
+				grouper.groupFeatures();				
+			}
+
 		} else {
 
 			this.aligner = AlignmentMethodFactory.getAlignmentMethod(method, param, data, null);			

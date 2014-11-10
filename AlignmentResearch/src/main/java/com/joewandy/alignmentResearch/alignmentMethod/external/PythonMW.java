@@ -36,6 +36,7 @@ public class PythonMW extends BaseAlignment implements AlignmentMethod {
 	private String groupingMethod;
 	private double groupingRtTolerance;
 	private boolean useGroup;
+	private boolean usePeakShape;
 	private boolean exactMatch;
 	private double alpha;	
 	private int groupingNSamples;
@@ -53,6 +54,7 @@ public class PythonMW extends BaseAlignment implements AlignmentMethod {
 		this.groupingMethod = param.getGroupingMethod();
 		this.groupingRtTolerance = param.getGroupingRtTolerance();
 		this.useGroup = param.isUseGroup();
+		this.usePeakShape = param.isUsePeakShape();
 		this.exactMatch = param.isExactMatch();
 		this.alpha = param.getAlpha();
 		this.groupingNSamples = param.getGroupingNSamples();
@@ -146,6 +148,9 @@ public class PythonMW extends BaseAlignment implements AlignmentMethod {
 		// grouping parameters
 		if (this.useGroup) {
 			cmdLine.addArgument("-g");			
+		}
+		if (this.usePeakShape) {
+			cmdLine.addArgument("-p");			
 		}
 		cmdLine.addArgument("-gm");
 		cmdLine.addArgument("${groupingMethod}");		

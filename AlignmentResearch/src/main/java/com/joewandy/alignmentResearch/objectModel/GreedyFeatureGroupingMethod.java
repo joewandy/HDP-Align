@@ -26,6 +26,7 @@ import peakml.io.peakml.PeakMLParser;
 import com.jmatio.io.MatFileWriter;
 import com.jmatio.types.MLArray;
 import com.jmatio.types.MLDouble;
+import com.jmatio.types.MLSparse;
 import com.joewandy.alignmentResearch.matrix.LinkedSparseMatrix;
 
 import domsax.XmlParserException;
@@ -191,7 +192,7 @@ public class GreedyFeatureGroupingMethod extends BaseFeatureGroupingMethod imple
 		
 			System.out.println("Computing Z");
 			Matrix Z = null;
-			if (data.getFeaturesCount() < 10000) {
+			if (data.getFeaturesCount() < 1000) {
 				Z = new DenseMatrix(data.getFeaturesCount(), fileGroups.size());				
 			} else {
 				Z = new LinkedSparseMatrix(data.getFeaturesCount(), fileGroups.size());				
@@ -205,7 +206,7 @@ public class GreedyFeatureGroupingMethod extends BaseFeatureGroupingMethod imple
 			}
 			
 			System.out.println("Computing ZZprob");
-			if (data.getFeaturesCount() < 10000) {
+			if (data.getFeaturesCount() < 1000) {
 				ZZprob = new DenseMatrix(data.getFeaturesCount(), data.getFeaturesCount());
 			} else {
 				ZZprob = new LinkedSparseMatrix(data.getFeaturesCount(), data.getFeaturesCount());				
@@ -224,36 +225,77 @@ public class GreedyFeatureGroupingMethod extends BaseFeatureGroupingMethod imple
 		System.out.println("groupedCount = " + groupedCount);
 
 		// save the clustering output to mat file as well
+		String filename = null;
 		if (usePeakShape) {
-			
-			String filename = data.getFilenameWithoutExtension() + ".greedy." + rtTolerance + ".mat";	
-			String fullPath = MATRIX_SAVE_PATH + filename;
+			filename = data.getFilenameWithoutExtension() + ".greedy_peakshape." + rtTolerance + ".mat";	
+		} else {
+			filename = data.getFilenameWithoutExtension() + ".greedy_rt." + rtTolerance + ".mat";	
+		}			
+		String fullPath = MATRIX_SAVE_PATH + filename;
 					
-			System.err.println("Saving clustering output");
-			MLDouble ZZProbMat = new MLDouble("ZZ_all", toArray(ZZprob));
-			final Collection<MLArray> output1 = new ArrayList<MLArray>();
-			output1.add(ZZProbMat);
-			final MatFileWriter writer = new MatFileWriter();
-			try {
-				writer.write(fullPath, output1);
-				System.err.println("Written to " + fullPath);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+		System.err.println("Saving clustering output");
+		int nzmax = getNnz(ZZprob);
+		int nRows = ZZprob.numRows();
+		int nCols = ZZprob.numColumns();
 
+//		System.out.println("nzmax = " + nzmax);
+//		System.out.println("nRows = " + nRows);
+//		System.out.println("nCols = " + nCols);
+		MLSparse ZZProbMat = new MLSparse("ZZ_all", new int[]{nRows, nCols}, 0, nzmax);
+		setValue(ZZprob, ZZProbMat);
+		final Collection<MLArray> output1 = new ArrayList<MLArray>();
+		output1.add(ZZProbMat);
+		final MatFileWriter writer = new MatFileWriter();
+		try {
+			writer.write(fullPath, output1);
+			System.out.println("Written to " + fullPath);
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 		
 	}
 	
-	private double[][] toArray(Matrix matrix) {
-		double[][] arr = new double[matrix.numRows()][matrix.numColumns()];
+	private int getNnz(Matrix matrix) {
+		int nnz = 0;
 		for (MatrixEntry e : matrix) {
-			int i = e.row();
-			int j = e.column();
-			double val = e.get();
-			arr[i][j] = val;
+			nnz++;
 		}
-		return arr;
+		return nnz;
+	}
+	
+	private void setValue(Matrix matrix, MLSparse mat) {
+		for (MatrixEntry e : matrix) {
+			int m = e.row();
+			int n = e.column();
+			double val = e.get();
+			mat.set(val, m, n);
+		}
+	}
+	
+	public static void main(String[] args) {
+		
+		int nRows = 10;
+		int nCols = 10;
+		MLSparse test = new MLSparse("ZZ_all", new int[]{nRows, nCols}, 0, 6);
+		test.set(1.0, 0, 0);
+		test.set(2.0, 1, 0);
+		test.set(3.0, 2, 0);
+		test.set(4.0, 0, 1);
+		test.set(5.0, 1, 1);
+		test.set(6.0, 2, 1);
+		System.out.println(test.contentToString());
+
+		final Collection<MLArray> output1 = new ArrayList<MLArray>();
+		output1.add(test);
+		final MatFileWriter writer = new MatFileWriter();
+		try {
+			String fullPath = "/home/joewandy/mat/test.mat";
+			writer.write(fullPath, output1);
+			System.err.println("Written to " + fullPath);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 	}
 	
 }

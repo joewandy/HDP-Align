@@ -162,7 +162,7 @@ public class MaximumWeightMatching implements FeatureMatching {
 			// for the case when we don't use the weight
 			List<AlignmentRow> rows = dataList.getRows();
 			int n = rows.size();
-			if (n < 10000) {
+			if (n < 1000) {
 				return new DenseMatrix(n, n);								
 			} else {
 				return new LinkedSparseMatrix(n, n);				

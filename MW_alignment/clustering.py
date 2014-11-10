@@ -25,12 +25,13 @@ class GreedyClustering:
         print " - Grouping " + self.alignment_file.filename
         sys.stdout.flush()
         
-        '''target = os.path.join(GreedyClustering.MATRIX_SAVE_PATH, self.alignment_file.filename + '.greedy.mat')
-        if os.path.isfile(target):
-            print "\tReading clustering from " + target
-            mdict = scipy.io.loadmat(target)
-            ZZ_all = mdict['ZZ_all']
-            return ZZ_all'''
+        if self.options.use_peakshape:
+            target = os.path.join(GreedyClustering.MATRIX_SAVE_PATH, self.alignment_file.filename + '.greedy_peakshape.mat')
+            if os.path.isfile(target):
+                print "\tReading clustering from " + target
+                mdict = scipy.io.loadmat(target)
+                ZZ_all = mdict['ZZ_all']
+                return ZZ_all
         
         rows = sorted(self.alignment_file.rows, key=lambda x: x.get_average_intensity(), reverse=True)
         N = len(rows)

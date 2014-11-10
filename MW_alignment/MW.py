@@ -34,10 +34,12 @@ def get_options(argv):
     # grouping arguments
     parser.add_argument('-g', dest='use_group', action='store_true', help='use grouping information?')
     parser.set_defaults(use_group=False)
+    parser.add_argument('-p', dest='use_peakshape', action='store_true', help='use peak shape correlations information?')
+    parser.set_defaults(use_peakshape=False)    
     parser.add_argument('-gm', dest='grouping_method', help='grouping method. Choices are greedy, posterior')
     parser.set_defaults(grouping_method='posterior')
     parser.add_argument('-alpha', help='clustering weight ratio')
-    parser.set_defaults(alpha=0.3)
+    parser.set_defaults(alpha=0.5)
     parser.add_argument('-grt', help='grouping RT tolerance window.')
     parser.set_defaults(grt=2)
     parser.add_argument('-dp_alpha', help='DP concentration parameter')

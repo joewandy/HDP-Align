@@ -29,6 +29,7 @@ public class AlignmentMethodFactory {
 	public static final String ALIGNMENT_METHOD_MY_MAXIMUM_WEIGHT_MATCHING_REFERENCE = "myMaxWeightRef";
 	public static final String ALIGNMENT_METHOD_MY_MAXIMUM_WEIGHT_MATCHING_HIERARCHICAL = "myMaxWeight";
 	public static final String ALIGNMENT_METHOD_MY_HDP_ALIGNMENT = "myHdp";
+	public static final String ALIGNMENT_METHOD_GROUP_ONLY = "groupOnly";
 
 	// same but implemented in python
 	public static final String ALIGNMENT_METHOD_PYTHON_MW = "pythonMW";
