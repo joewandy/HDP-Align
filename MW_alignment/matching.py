@@ -197,7 +197,6 @@ class MaxWeightedMatching:
         # do the multiplication to upweight / downweight
         print "\tComputing D=(AW)"
         sys.stdout.flush()
-        print A
         AW = A * W
         print "\tComputing D=(AW)B"
         sys.stdout.flush()

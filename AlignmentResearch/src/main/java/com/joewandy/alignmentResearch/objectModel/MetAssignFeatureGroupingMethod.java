@@ -199,7 +199,7 @@ public class MetAssignFeatureGroupingMethod extends BaseFeatureGroupingMethod im
 		final List<SampleHandler<Data,SimpleClustering>> handlers = new ArrayList<SampleHandler<Data,SimpleClustering>>();
 
 		final int n = peaks.size();
-		PeakClusteringSamplerHandler peakClusteringHandler = new PeakClusteringSamplerHandler(n, groupingMethod);
+		PeakClusteringSamplerHandler peakClusteringHandler = new PeakClusteringSamplerHandler(n);
 		handlers.add(peakClusteringHandler);		
 		List<IPeak> basepeaks = Clusterer.findRelatedPeaks(peaks, clusterer, random, handlers);
 		

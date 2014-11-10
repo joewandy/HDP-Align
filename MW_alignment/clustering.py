@@ -26,9 +26,13 @@ class GreedyClustering:
         sys.stdout.flush()
         
         if self.options.use_peakshape:
-            target = os.path.join(GreedyClustering.MATRIX_SAVE_PATH, self.alignment_file.filename + '.greedy_peakshape.mat')
+            tol = '%.1f' % self.grt
+            front_part, extension = os.path.splitext(self.alignment_file.filename)
+            filename = front_part + '.greedy_peakshape.' + tol + '.mat'
+            target = os.path.join(GreedyClustering.MATRIX_SAVE_PATH, filename)
+            print target
             if os.path.isfile(target):
-                print "\tReading clustering from " + target
+                print "\tReading peak shape clustering from " + target
                 mdict = scipy.io.loadmat(target)
                 ZZ_all = mdict['ZZ_all']
                 return ZZ_all

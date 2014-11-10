@@ -19,23 +19,7 @@ public abstract class MultiAlignBaseExp implements MultiAlignExperiment {
 			if (evalRes == null) {
 				continue;
 			}
-			String precision = String.format("%.3f", evalRes.getPrecision());
-			String recall = String.format("%.3f", evalRes.getRecall());
-			String f1 = String.format("%.3f", evalRes.getF1());
-			String tp = String.format("%.1f", evalRes.getTotalTp());
-			String fp = String.format("%.1f", evalRes.getTotalFp());
-			String fn = String.format("%.1f", evalRes.getTotalFn());			
-			String note = evalRes.getNote();
-			System.out.println("!TRAINING, " + 
-					evalRes.getDmz() + ", " + 
-					evalRes.getDrt() + ", " + 
-					precision + ", " + 
-					recall + ", " + 
-					f1 + ", " + 
-					tp + ", " + 
-					fp + ", " + 
-					fn + ", " + 
-					note);
+			printRes("!TRAINING, ", evalRes);
 		}			
 	}	
 	
@@ -47,23 +31,7 @@ public abstract class MultiAlignBaseExp implements MultiAlignExperiment {
 				if (evalRes == null) {
 					continue;
 				}
-				String precision = String.format("%.3f", evalRes.getPrecision());
-				String recall = String.format("%.3f", evalRes.getRecall());
-				String f1 = String.format("%.3f", evalRes.getF1());
-				String tp = String.format("%.1f", evalRes.getTotalTp());
-				String fp = String.format("%.1f", evalRes.getTotalFp());
-				String fn = String.format("%.1f", evalRes.getTotalFn());			
-				String note = evalRes.getNote();
-				System.out.println("!OUTPUT, " + 
-						evalRes.getDmz() + ", " + 
-						evalRes.getDrt() + ", " + 
-						precision + ", " + 
-						recall + ", " + 
-						f1 + ", " + 
-						tp + ", " + 
-						fp + ", " + 
-						fn + ", " + 
-						note);
+				printRes("!OUTPUT, ", evalRes);
 			}			
 		}		 
 	}	
@@ -90,7 +58,27 @@ public abstract class MultiAlignBaseExp implements MultiAlignExperiment {
 
 	}
 
+	protected void printRes(String msg, EvaluationResult evalRes) {
+		String precision = String.format("%.3f", evalRes.getPrecision());
+		String recall = String.format("%.3f", evalRes.getRecall());
+		String f1 = String.format("%.3f", evalRes.getF1());
+		String tp = String.format("%.1f", evalRes.getTotalTp());
+		String fp = String.format("%.1f", evalRes.getTotalFp());
+		String fn = String.format("%.1f", evalRes.getTotalFn());			
+		String note = evalRes.getNote();
+		System.out.println(msg + 
+				evalRes.getDmz() + ", " + 
+				evalRes.getDrt() + ", " + 
+				precision + ", " + 
+				recall + ", " + 
+				f1 + ", " + 
+				tp + ", " + 
+				fp + ", " + 
+				fn + ", " + 
+				note);
+	}
+	
 	public abstract List<MultiAlignExpResult> performExperiment(
 			MultiAlignCmdOptions options) throws Exception;
-
+	
 }

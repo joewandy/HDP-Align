@@ -25,14 +25,11 @@ public class PeakClusteringSamplerHandler implements SampleHandler<Data, SimpleC
 
 	// peaks vs peaks probability to be in the same cluster
 	private Matrix ZZall;
-	
-	private String groupingMethod;
-	
-	public PeakClusteringSamplerHandler(int numPeaks, String groupingMethod) {
+		
+	public PeakClusteringSamplerHandler(int numPeaks) {
 		System.err.println("-- PeakClusteringSamplerHandler --");
 		this.numPeaks = numPeaks;
 		this.ZZall = new DenseMatrix(numPeaks, numPeaks); 
-		this.groupingMethod = groupingMethod;
 	}
 	
 	public void handleSample(SimpleClustering clustering) {
@@ -58,9 +55,7 @@ public class PeakClusteringSamplerHandler implements SampleHandler<Data, SimpleC
 		 * A = lastZ, B = lastZ, C = ZZall
 		 * C = A*BT + C
 		 */
-		if (MultiAlignConstants.GROUPING_METHOD_METASSIGN_POSTERIOR.equals(groupingMethod)) {
-			ZZall = lastZ.transBmultAdd(lastZ, ZZall);
-		}
+		ZZall = lastZ.transBmultAdd(lastZ, ZZall);
 		
 	}
 	

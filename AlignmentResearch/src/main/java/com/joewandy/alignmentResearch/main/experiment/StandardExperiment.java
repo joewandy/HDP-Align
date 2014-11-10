@@ -17,8 +17,7 @@ public class StandardExperiment extends MultiAlignBaseExp implements MultiAlignE
 		2, 4, 6, 8, 10
 	};
 	public static final double[] ALL_ALIGNMENT_MZ = { 0.05, 0.1, 0.25 };
-	public static final double[] ALL_ALIGNMENT_RT = { 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 
-			85, 90, 95, 100, 105, 110, 115, 120 };
+	public static final double[] ALL_ALIGNMENT_RT = { 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60 };
 	
 	public List<MultiAlignExpResult> performExperiment(
 			MultiAlignCmdOptions options) throws FileNotFoundException {
@@ -29,29 +28,29 @@ public class StandardExperiment extends MultiAlignBaseExp implements MultiAlignE
 		
 		double[] alphas = new double[] { options.alpha };	
 		double[] groupingRts = new double[] { options.groupingRtWindow };														
-		if (options.useGroup && options.autoAlpha) {
+		if (options.autoAlpha) {
 			alphas = ALL_ALPHA;
 		}
-		if (options.useGroup && options.autoOptimiseGreedy && MultiAlignConstants.GROUPING_METHOD_GREEDY.equals(options.groupingMethod)) {
+		if (options.autoOptimiseGreedy && options.useGroup && MultiAlignConstants.GROUPING_METHOD_GREEDY.equals(options.groupingMethod)) {
 			groupingRts = ALL_GROUPING_RT;
-		}
+		}	
 		
-		// quick hack: obtained from randsample(12, 2)
+		// quick hack: obtained from randsample(11, 2)
 		int[][] trainingIndices = { 
-				{10, 11}, 	{2, 8}, 	{2, 12}, 	{6, 10}, 	{10, 11},
-				{1, 11}, 	{9, 10}, 	{3, 9}, 	{1, 2}, 	{4, 12},
-				{5, 10},	{6, 8}, 	{4, 9}, 	{2, 6}, 	{3, 8},
-				{7, 9},		{2, 7}, 	{4, 11}, 	{5, 12},	{6, 8},
-				{7, 8},		{5, 10},	{1, 7},		{2, 7},		{2, 5},
-				{2, 7}, 	{8, 9},		{2, 3},		{7, 10}, 	{2, 6}
+				{9, 10}, 	{2, 7}, 	{11, 2}, 	{6, 9}, 	{6, 4},
+				{10, 1}, 	{9, 5}, 	{8, 1}, 	{10, 2}, 	{11, 1},
+				{9, 3},		{8, 9}, 	{2, 8}, 	{11, 4}, 	{3, 9},
+				{11, 10},	{3, 2}, 	{7, 3}, 	{7, 10},	{9, 4},
+				{1, 7},		{7, 2},		{6, 1},		{9, 4},		{3, 7},
+				{5, 9}, 	{11, 2},	{10, 1},	{1, 5}, 	{2, 3}
 		};
 		int[][] testingIndices= {
-				{4, 10},	{3, 4}, 	{7, 11},	{8, 11},	{1, 5},
-				{3, 6},		{6, 12}, 	{5, 11}, 	{3, 5}, 	{2, 12},
-				{1, 3}, 	{6, 8},		{3, 9}, 	{5, 8},		{10, 12},
-				{4, 6},		{8, 10},	{5, 7},		{7, 8}, 	{4, 6},
-				{3, 6},		{2, 6},		{4, 8},		{2, 3},		{6, 7},
-				{1, 10},	{7, 12},	{6, 8},		{5, 12}, 	{10, 11}						
+				{6, 4}, 	{9, 2}, 	{2, 5}, 	{7, 11}, 	{4, 10},
+				{8, 2}, 	{5, 7}, 	{3, 8}, 	{7, 9}, 	{6, 9},
+				{4, 6},		{8, 9}, 	{3, 7}, 	{3, 10}, 	{5, 11},
+				{5, 4},		{3, 9}, 	{9, 6}, 	{11, 6},	{4, 8},
+				{6, 10},	{11, 2},	{6, 1},		{8, 9},		{5, 10},
+				{7, 8}, 	{11, 1},	{5, 3},		{7, 5}, 	{11, 4}
 		};
 		
 		assert(trainingIndices.length == testingIndices.length);
@@ -105,6 +104,7 @@ public class StandardExperiment extends MultiAlignBaseExp implements MultiAlignE
 			// report the result on another set of random n files
 			System.out.println();
 			EvaluationResult bestResult = tempResult.getResultBestF1();	
+			super.printRes("!BEST_TRAINING, ", bestResult);
 			data = getData(options,	testingSet);	
 			if (bestResult != null) {
 
