@@ -1,5 +1,7 @@
-cmdline.CmdLineException: Unhandled situation:
-java.lang.NumberFormatException: For input string: "-alignmentRt"
-	at cmdline.CmdLineParser.parse(CmdLineParser.java:227)
-	at com.joewandy.alignmentResearch.main.MultiAlignCmd.parseCommandLine(MultiAlignCmd.java:102)
-	at com.joewandy.alignmentResearch.main.MultiAlignCmd.main(MultiAlignCmd.java:36)
+java.lang.NullPointerException
+	at com.joewandy.alignmentResearch.alignmentMethod.external.HdpAlignment.printAnnotations(HdpAlignment.java:331)
+	at com.joewandy.alignmentResearch.alignmentMethod.external.HdpAlignment.matchFeatures(HdpAlignment.java:104)
+	at com.joewandy.alignmentResearch.alignmentMethod.BaseAlignment.align(BaseAlignment.java:46)
+	at com.joewandy.alignmentResearch.main.MultiAlign.runPRExperiment(MultiAlign.java:139)
+	at com.joewandy.alignmentResearch.main.experiment.HdpExperiment.performExperiment(HdpExperiment.java:26)
+	at com.joewandy.alignmentResearch.main.MultiAlignCmd.main(MultiAlignCmd.java:42)

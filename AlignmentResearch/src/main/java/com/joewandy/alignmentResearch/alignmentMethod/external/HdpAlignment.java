@@ -326,7 +326,7 @@ public class HdpAlignment extends BaseAlignment implements AlignmentMethod {
 			
 		}
 		
-		if (metaboliteAnnotations != null) {
+		if (metaboliteAnnotations != null && compoundGroundTruthDatabase != null) {
 		
 			System.out.println("Metabolite DB size = " + compoundGroundTruthDatabase.size());			
 

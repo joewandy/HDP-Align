@@ -46,7 +46,20 @@ public class HDPSamplerHandler {
 		this.totalPeaks = totalPeaks;
 		this.results = new HDPResults();
 		this.ppm = ppm;
-		this.minSpan = minSpan;
+		
+		if (minSpan != -1) {
+			this.minSpan = minSpan;			
+		} else {
+			int totalFiles = hdpFiles.size();
+			if (totalFiles < 4) {
+				// if aligning 2 or 3 files, just set the minSpan to 2
+				this.minSpan = 2;
+			} else {
+				// otherwise set minSpan to half of the total files by default
+				this.minSpan = totalFiles/2;				
+			}
+		}
+		System.out.println("HDP minSpan = " + this.minSpan);
 
 		if (dbPath != null) {
 			this.idDatabase = new HDPKeggQuery(dbPath);			
@@ -179,24 +192,33 @@ public class HDPSamplerHandler {
 				
 				List <Feature> peaksInside = met.getPeaksInMassCluster(a);
 				int q = minSpan;
-				if (peaksInside.size() < q) {
-					System.out.println("break here?");
-				}
-
-				// create the initial vector
-				ICombinatoricsVector<Feature> initialVector = Factory
-						.createVector(peaksInside);
-
-				// create a simple combination generator to generate q-combinations of the initial vector
-				Generator<Feature> gen = Factory
-						.createSimpleCombinationGenerator(initialVector, q);
 				
-				// print all possible combinations
-				for (ICombinatoricsVector<Feature> combination : gen) {
-					Set<Feature> features = new HashSet<Feature>(combination.getVector());
+				if (peaksInside.size() < q) {
+
+					Set<Feature> features = new HashSet<Feature>(peaksInside);
 					HDPResultItem item = new HDPResultItem(features);
-					results.store(item);
-				}								
+					results.store(item);					
+				
+				} else {
+				
+					// otherwise take all the q-combinations of peaksInside
+
+					// create the initial vector
+					ICombinatoricsVector<Feature> initialVector = Factory
+							.createVector(peaksInside);
+
+					// create a simple combination generator to generate q-combinations of the initial vector
+					Generator<Feature> gen = Factory
+							.createSimpleCombinationGenerator(initialVector, q);
+					
+					// print all possible combinations
+					for (ICombinatoricsVector<Feature> combination : gen) {
+						Set<Feature> features = new HashSet<Feature>(combination.getVector());
+						HDPResultItem item = new HDPResultItem(features);
+						results.store(item);
+					}								
+					
+				}
 				
 			}
 			

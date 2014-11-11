@@ -194,8 +194,8 @@ public class MultiAlignCmdOptions {
 	@Option(name = "hdpRefFileIdx", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Optional. Reference file index.")
 	public int hdpRefFileIdx = MultiAlignConstants.HDP_REF_FILE_IDX;
 
-	@Option(name = "hdpMinSpan", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Optional. Minimum number of files that need to be spanned by aligned peaksets")
-	public int hdpMinSpan = MultiAlignConstants.HDP_MINSPAN;
+	@Option(name = "hdpMinSpan", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Optional. Minimum number of files that need to be spanned by aligned peaksets. If not, this is auto-set to half of the number of files or 2")
+	public int hdpMinSpan = -1;
 	
 	@Option(name = "mode", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Ionisation mode. If this is provided, then the model will also annotate peaks by possible adduct transformations.")
 	public String mode = MultiAlignConstants.IONISATION_MODE_POSITIVE;	
