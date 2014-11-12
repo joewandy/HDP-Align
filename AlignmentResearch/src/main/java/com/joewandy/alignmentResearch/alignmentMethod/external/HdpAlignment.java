@@ -193,7 +193,7 @@ public class HdpAlignment extends BaseAlignment implements AlignmentMethod {
 				.getIsotopeAnnotations();
 		HDPAnnotation<Feature> metaboliteAnnotations = clustering
 				.getMetaboliteAnnotations();
-		
+
 		if (ipAnnotations != null) {
 			System.out.println("Ionisation product annotations size = " + ipAnnotations.size());			
 		}		
@@ -203,20 +203,24 @@ public class HdpAlignment extends BaseAlignment implements AlignmentMethod {
 		if (metaboliteAnnotations != null) {
 			System.out.println("Metabolite annotations size = " + metaboliteAnnotations.size());			
 		}
-		
-		// for all features in all data files
-		int metAnnotCleared = 0;
-		for (Feature feature : allFeatures) {
 
-			// remove its metabolite annotations if the feature has a putative isotope annotation
-			if (isotopeAnnotations.contains(feature)) {
-				metaboliteAnnotations.clear(feature);
-				metAnnotCleared++;
+		if (isotopeAnnotations != null && metaboliteAnnotations != null) {
+		
+			// for all features in all data files
+			int metAnnotCleared = 0;
+			for (Feature feature : allFeatures) {
+
+				// remove its metabolite annotations if the feature has a putative isotope annotation
+				if (isotopeAnnotations.contains(feature)) {
+					metaboliteAnnotations.clear(feature);
+					metAnnotCleared++;
+				}
+				
 			}
+			System.out.println("Features with metabolite annotations removed = " + metAnnotCleared + "/" + allFeatures.size());
 			
 		}
-		System.out.println("Features with metabolite annotations removed = " + metAnnotCleared + "/" + allFeatures.size());
-
+		
 	}
 	
 	/**

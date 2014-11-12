@@ -1,10 +1,6 @@
 java.lang.NullPointerException
-	at com.joewandy.alignmentResearch.objectModel.HDPSamplerHandler.annotateIsotopes(HDPSamplerHandler.java:439)
-	at com.joewandy.alignmentResearch.objectModel.HDPSamplerHandler.annotateMetabolites(HDPSamplerHandler.java:397)
-	at com.joewandy.alignmentResearch.objectModel.HDPSamplerHandler.doProcess(HDPSamplerHandler.java:181)
-	at com.joewandy.alignmentResearch.objectModel.HDPSamplerHandler.handleSample(HDPSamplerHandler.java:107)
-	at com.joewandy.alignmentResearch.objectModel.HDPMassRTClustering.runClustering(HDPMassRTClustering.java:100)
-	at com.joewandy.alignmentResearch.alignmentMethod.external.HdpAlignment.matchFeatures(HdpAlignment.java:88)
+	at com.joewandy.alignmentResearch.alignmentMethod.external.HdpAlignment.postProcessAnnotations(HdpAlignment.java:212)
+	at com.joewandy.alignmentResearch.alignmentMethod.external.HdpAlignment.matchFeatures(HdpAlignment.java:104)
 	at com.joewandy.alignmentResearch.alignmentMethod.BaseAlignment.align(BaseAlignment.java:46)
 	at com.joewandy.alignmentResearch.main.MultiAlign.runPRExperiment(MultiAlign.java:139)
 	at com.joewandy.alignmentResearch.main.experiment.HdpExperiment.performExperiment(HdpExperiment.java:26)

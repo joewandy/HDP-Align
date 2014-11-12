@@ -198,7 +198,7 @@ public class MultiAlignCmdOptions {
 	public int hdpMinSpan = -1;
 	
 	@Option(name = "mode", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Ionisation mode. If this is provided, then the model will also annotate peaks by possible adduct transformations.")
-	public String mode = MultiAlignConstants.IONISATION_MODE_POSITIVE;	
+	public String mode = null;
 	
 	// 	private static final String KEGG_PATH = "/home/joewandy/Project/mzMatch/scripts/standards/kegg.xml";
 	@Option(name = "idDatabase", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Identification database. If this is provided, then the model will also annotate peaks by putative identities of formulae")
