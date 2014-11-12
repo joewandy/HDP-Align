@@ -36,7 +36,7 @@ public class HDPPrecursorMass implements Comparable<HDPPrecursorMass> {
 			return false;
 		}				
 	}
-	
+		
 	public int getCount() {
 		return count;
 	}

@@ -14,5 +14,7 @@ public interface HDPClustering {
 	public HDPAnnotation<Feature> getIonisationProductAnnotations();
 
 	public HDPAnnotation<Feature> getMetaboliteAnnotations();
+
+	public HDPAnnotation<Feature> getIsotopeAnnotations();
 	
 }

@@ -2,6 +2,7 @@ package com.joewandy.alignmentResearch.objectModel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,6 +35,17 @@ public class HDPMetabolite {
 		
 	public List<HDPMassCluster> getMassClusters() {
 		return massClusters;
+	}
+	
+	public Set<HDPPrecursorMass> getPrecursorMasses() {
+		Set<HDPPrecursorMass> pcs = new HashSet<HDPPrecursorMass>();
+		for (HDPMassCluster mc : this.getMassClusters()) {
+			HDPPrecursorMass pc = mc.getPrecursorMass();
+			if (pc != null) {
+				pcs.add(mc.getPrecursorMass());				
+			}
+		}
+		return pcs;
 	}
 
 	public int addMassCluster() {

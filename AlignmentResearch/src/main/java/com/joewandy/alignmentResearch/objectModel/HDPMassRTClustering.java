@@ -118,12 +118,16 @@ public class HDPMassRTClustering implements HDPClustering {
 		return sampleHandler.getSamplesTaken();
 	}
 	
-	public HDPAnnotation getIonisationProductAnnotations() {
+	public HDPAnnotation<Feature> getIonisationProductAnnotations() {
 		return sampleHandler.getIonisationProductAnnotations();
 	}
 
-	public HDPAnnotation getMetaboliteAnnotations() {
+	public HDPAnnotation<Feature> getMetaboliteAnnotations() {
 		return sampleHandler.getMetaboliteAnnotations();
+	}
+	
+	public HDPAnnotation<Feature> getIsotopeAnnotations() {
+		return sampleHandler.getIsotopeAnnotations();
 	}
 			
 	/**
