@@ -1,10 +1,11 @@
 package com.joewandy.alignmentResearch.alignmentMethod;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.joewandy.alignmentResearch.filter.AlignmentResultFilter;
-import com.joewandy.alignmentResearch.main.MultiAlignConstants;
 import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
 import com.joewandy.alignmentResearch.objectModel.AlignmentList;
 import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
@@ -19,6 +20,8 @@ public abstract class BaseAlignment implements AlignmentMethod {
 	protected List<AlignmentFile> dataList;	
 	protected List<AlignmentResultFilter> filters;
 	protected List<AlignmentRow> filteredResult;
+	
+	protected Path parentPath;
 		
 	/**
 	 * Initialise our aligner
@@ -29,7 +32,9 @@ public abstract class BaseAlignment implements AlignmentMethod {
 	 */
 	public BaseAlignment(List<AlignmentFile> dataList, AlignmentMethodParam param) {		
 
-		this.dataList = dataList;		
+		this.dataList = dataList;	
+		AlignmentFile firstFile = dataList.get(0);
+		this.parentPath = Paths.get(firstFile.getParentPath());
 		
 		this.massTolerance = param.getMassTolerance();
 		this.usePpm = param.isUsePpm();
