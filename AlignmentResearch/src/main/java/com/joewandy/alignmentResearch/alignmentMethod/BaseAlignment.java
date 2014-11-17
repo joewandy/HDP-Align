@@ -34,7 +34,8 @@ public abstract class BaseAlignment implements AlignmentMethod {
 
 		this.dataList = dataList;	
 		AlignmentFile firstFile = dataList.get(0);
-		this.parentPath = Paths.get(firstFile.getParentPath());
+		Path parentPath = Paths.get(firstFile.getParentPath());
+		this.parentPath = parentPath.toAbsolutePath();
 		
 		this.massTolerance = param.getMassTolerance();
 		this.usePpm = param.isUsePpm();

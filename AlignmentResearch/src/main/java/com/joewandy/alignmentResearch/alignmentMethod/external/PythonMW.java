@@ -94,6 +94,7 @@ public class PythonMW extends BaseAlignment implements AlignmentMethod {
 	
 		// create temporary directory to hold our intermediate input files
         Path tempPath = Files.createTempDirectory(parentPath, "MW_INPUT_");
+        System.out.println("tempPath = " + tempPath);
 		
 		// put all spectra files inside TEMP_INPUT_DIR
 		for (AlignmentFile data : dataList) {
