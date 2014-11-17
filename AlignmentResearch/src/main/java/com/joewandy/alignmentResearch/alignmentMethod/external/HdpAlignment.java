@@ -100,6 +100,9 @@ public class HdpAlignment extends BaseAlignment implements AlignmentMethod {
 				System.out.println(item + " has probability " + prob );
 			}
 						
+			// do post-processing of annotations
+			postProcessAnnotations(clustering);
+			
 			// process the ionisation product and metabolite annotations
 			printAnnotations(clustering);
 
@@ -177,6 +180,44 @@ public class HdpAlignment extends BaseAlignment implements AlignmentMethod {
 		return mfr;
 
 	}
+
+	/**
+	 * Annotates features by inferred ionisation products
+	 * @param clustering The HDP clustering results
+	 */
+	private void postProcessAnnotations(HDPClustering clustering) {
+		
+		HDPAnnotation<Feature> ipAnnotations = clustering
+				.getIonisationProductAnnotations();
+		HDPAnnotation<Feature> isotopeAnnotations = clustering
+				.getIsotopeAnnotations();
+		HDPAnnotation<Feature> metaboliteAnnotations = clustering
+				.getMetaboliteAnnotations();
+		
+		if (ipAnnotations != null) {
+			System.out.println("Ionisation product annotations size = " + ipAnnotations.size());			
+		}		
+		if (isotopeAnnotations != null) {
+			System.out.println("Isotope annotations size = " + isotopeAnnotations.size());			
+		}
+		if (metaboliteAnnotations != null) {
+			System.out.println("Metabolite annotations size = " + metaboliteAnnotations.size());			
+		}
+		
+		// for all features in all data files
+		int metAnnotCleared = 0;
+		for (Feature feature : allFeatures) {
+
+			// remove its metabolite annotations if the feature has a putative isotope annotation
+			if (isotopeAnnotations.contains(feature)) {
+				metaboliteAnnotations.clear(feature);
+				metAnnotCleared++;
+			}
+			
+		}
+		System.out.println("Features with metabolite annotations removed = " + metAnnotCleared + "/" + allFeatures.size());
+
+	}
 	
 	/**
 	 * Annotates features by inferred ionisation products
@@ -184,25 +225,17 @@ public class HdpAlignment extends BaseAlignment implements AlignmentMethod {
 	 */
 	private void printAnnotations(HDPClustering clustering) {
 		
-		HDPAnnotation ipAnnotations = clustering
+		HDPAnnotation<Feature> ipAnnotations = clustering
 				.getIonisationProductAnnotations();
-		HDPAnnotation metaboliteAnnotations = clustering
+		HDPAnnotation<Feature> isotopeAnnotations = clustering
+				.getIsotopeAnnotations();
+		HDPAnnotation<Feature> metaboliteAnnotations = clustering
 				.getMetaboliteAnnotations();
-		
-		if (ipAnnotations != null) {
-			System.out.println("IP annotations size = " + ipAnnotations.size());			
-		}
-		
-		if (metaboliteAnnotations != null) {
-			System.out.println("Metabolite annotations size = " + metaboliteAnnotations.size());			
-		}
-		
+				
 		int correctIPCount = 0;
 		int nonAmbiguousIPCount = 0;
 		int ambiguousIPCount = 0;
 		
-		Set<String> mapMetaboliteFoundInDB = new HashSet<String>();
-		Set<String> mapMetaboliteNotFoundInDB = new HashSet<String>();
 		Set<String> metaboliteFoundInDB = new HashSet<String>();
 		Set<String> metaboliteNotFoundInDB = new HashSet<String>();
 
@@ -213,6 +246,33 @@ public class HdpAlignment extends BaseAlignment implements AlignmentMethod {
 					+ feature.getRt() + " " + feature.getIntensity() + " "
 					+ feature.getTheoAdductType());
 
+			// do isotope annotations
+			if (isotopeAnnotations != null) {
+
+				// first find the isotope annotations for this peak ...
+				HDPAnnotationItem featureIsotopes = isotopeAnnotations.get(feature);
+
+				// if there's any ..
+				if (featureIsotopes != null) {
+					
+					// computes the total frequencies of all annotations
+					double sum = 0;
+					for (Entry<String, Integer> e2 : featureIsotopes.entrySet()) {
+						sum += e2.getValue();
+					}
+					
+					// normalise frequency by sum
+					for (Entry<String, Integer> e2 : featureIsotopes.entrySet()) {
+						int count = e2.getValue();
+						double prob = (count) / sum;
+						System.out.println("\tISOTOPE " + e2.getKey() + "="
+								+ String.format("%.2f", prob));
+					}
+										
+				}				
+								
+			}
+			
 			// do metabolite annotations
 			if (metaboliteAnnotations != null) {
 
@@ -229,18 +289,13 @@ public class HdpAlignment extends BaseAlignment implements AlignmentMethod {
 					}
 					
 					// normalise frequency by sum
-					double maxProb = 0;
-					String msg = null;
 					for (Entry<String, Integer> e2 : featureMets.entrySet()) {
 						String key = e2.getKey();
 						int count = e2.getValue();
 						double prob = (count) / sum;
 						System.out.println("\tMETABOLITE " + e2.getKey() + "="
 								+ String.format("%.2f", prob));
-						if (prob > maxProb) {
-							maxProb = prob;
-							msg = key;
-						}
+						// for debugging only, compare against ground truth
 						if (compoundGroundTruthDatabase != null && 
 								compoundGroundTruthDatabase.containsKey(key)) {
 							metaboliteFoundInDB.add(key);
@@ -248,17 +303,7 @@ public class HdpAlignment extends BaseAlignment implements AlignmentMethod {
 							metaboliteNotFoundInDB.add(key);
 						}
 					}
-					
-					// for debugging only, compare against ground truth
-					if (msg != null) {
-						if (compoundGroundTruthDatabase != null && 
-								compoundGroundTruthDatabase.containsKey(msg)) {
-							mapMetaboliteFoundInDB.add(msg);
-						} else {
-							mapMetaboliteNotFoundInDB.add(msg);
-						}					
-					}
-					
+										
 				}
 	
 			}
@@ -295,8 +340,7 @@ public class HdpAlignment extends BaseAlignment implements AlignmentMethod {
 					// for debugging only, compare against ground truth
 					if (msg != null
 							&& msg.equals(feature.getTheoAdductType())) {
-						correctIPCount++;
-						
+						correctIPCount++;						
 						if (featureIPs.entrySet().size() == 1) {
 							nonAmbiguousIPCount++;
 						} else {
@@ -308,8 +352,7 @@ public class HdpAlignment extends BaseAlignment implements AlignmentMethod {
 				
 			}
 						
-			
-		}
+		} // end feature loop
 
 		// print some overall statistics
 
@@ -337,15 +380,7 @@ public class HdpAlignment extends BaseAlignment implements AlignmentMethod {
 			for (String met : metaboliteFoundInDB) {
 				System.out.println("\t- " + met);
 			}
-			
-			ratio = ((double)mapMetaboliteFoundInDB.size()) / mapMetaboliteNotFoundInDB.size();
-			System.out.println("Metabolites MAP matching vs. non-matching = " + mapMetaboliteFoundInDB.size()
-					+ "/" + mapMetaboliteNotFoundInDB.size() + " ratio = " + ratio);
-			System.out.println("MAP matching found = ");
-			for (String met : mapMetaboliteFoundInDB) {
-				System.out.println("\t- " + met);
-			}
-			
+						
 		}
 				
 	}

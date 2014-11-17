@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.paukov.combinatorics.Factory;
@@ -35,8 +36,11 @@ public class HDPSamplerHandler {
 	private List<String> adductList;
 	private CompoundQuery idDatabase;
 	private Map<HDPMetabolite, List<HDPPrecursorMass>> metabolitePrecursors;
-	private HDPAnnotation<Feature> ionisationProductAnnotations;
-	private HDPAnnotation<Feature> metaboliteAnnotations;
+	
+	private HDPAnnotation<HDPPrecursorMass> isotopePrecursorMassAnnots;
+	private HDPAnnotation<Feature> isotopeFeatureAnnots;
+	private HDPAnnotation<Feature> ionisationProductFeatureAnnotations;
+	private HDPAnnotation<Feature> metaboliteFeatureAnnotations;
 	
 	public HDPSamplerHandler(List<HDPFile> hdpFiles, List<HDPMetabolite> hdpMetabolites, 
 			int totalPeaks, double ppm, String dbPath, String mode, int minSpan) {
@@ -63,7 +67,7 @@ public class HDPSamplerHandler {
 
 		if (dbPath != null) {
 			this.idDatabase = new HDPKeggQuery(dbPath);			
-			this.metaboliteAnnotations = new HDPAnnotation<Feature>();
+			this.metaboliteFeatureAnnotations = new HDPAnnotation<Feature>();
 		}
 		
 		if (mode != null) {
@@ -75,8 +79,12 @@ public class HDPSamplerHandler {
 			}
 			this.adductCalc = new AdductTransformComputer(this.adductList);
 			this.adductCalc.makeLists();
+			
 			this.metabolitePrecursors = new HashMap<HDPMetabolite, List<HDPPrecursorMass>>(); 		
-			this.ionisationProductAnnotations = new HDPAnnotation<Feature>();
+			this.ionisationProductFeatureAnnotations = new HDPAnnotation<Feature>();
+			this.isotopePrecursorMassAnnots = new HDPAnnotation<HDPPrecursorMass>();
+			this.isotopeFeatureAnnots = new HDPAnnotation<Feature>();
+
 		}
 
 				
@@ -148,13 +156,21 @@ public class HDPSamplerHandler {
 	}
 	
 	public HDPAnnotation<Feature> getIonisationProductAnnotations() {
-		return ionisationProductAnnotations;
+		return ionisationProductFeatureAnnotations;
 	}
 
 	public HDPAnnotation<Feature> getMetaboliteAnnotations() {
-		return metaboliteAnnotations;
+		return metaboliteFeatureAnnotations;
 	}
 	
+	public HDPAnnotation<Feature> getIsotopeAnnotations() {
+		return isotopeFeatureAnnots;
+	}
+
+	public void setIsotopeFeatureAnnots(HDPAnnotation<Feature> isotopeFeatureAnnots) {
+		this.isotopeFeatureAnnots = isotopeFeatureAnnots;
+	}
+
 	public int getSamplesTaken() {
 		return samplesTaken;
 	}
@@ -367,14 +383,15 @@ public class HDPSamplerHandler {
 				continue;
 			}
 			
+			// check mass tolerance to determine if precursorMass2 is an adduct type
 			if (precursorMass1.withinTolerance(precursorMass2)) {
-				// if yes, then annotate peaks in both mass clusters with the adduct types
+				// if yes, then annotate peaks in both mass clusters with the respective adduct types
 				for (Feature f1 : mc1.getPeakData()) {
-					ionisationProductAnnotations.annotate(f1, adductList.get(c1));
+					ionisationProductFeatureAnnotations.annotate(f1, adductList.get(c1));
 				}
 				for (Feature f2 : mc2.getPeakData()) {
-					ionisationProductAnnotations.annotate(f2, adductList.get(c2));
-				}
+					ionisationProductFeatureAnnotations.annotate(f2, adductList.get(c2));
+				}				
 				return true;
 			}
 
@@ -389,26 +406,89 @@ public class HDPSamplerHandler {
 		
 		for (HDPMetabolite met : inferredMetabolites) {
 			
-			// annotate all features inside with the mols
+			// first annotate each precursorMass by isotope, if any
+			annotateIsotopes(met);
+			
+			// for every mass cluster inside met, annotate features by molecule identity
 			for (HDPMassCluster mc : met.getMassClusters()) {
+
 				HDPPrecursorMass pc = mc.getPrecursorMass();
+				
+				// if no precursor mass, skip
 				if (pc == null) {
 					continue;
 				}
+				
+				// if isotope mass cluster, skip too
+				HDPAnnotationItem isoAnnot = isotopePrecursorMassAnnots.get(pc);
+				if (isoAnnot != null) {
+					// but annotate all peaks inside by this isotope type first
+					for (Feature f : mc.getPeakData()) {
+						for (Entry<String, Integer> e : isoAnnot.entrySet()) {
+							String msg = e.getKey();
+							isotopeFeatureAnnots.annotate(f, msg);
+						}
+					}
+					continue;
+				}
+				
+				// initialise the molecule identity for this mass cluster
 				Set<Molecule> mols = pc.initMolecules();
 				if (mols.isEmpty()) {
 					continue;
 				}
+				
+				// annotate all the peaks inside with mol
 				for (Molecule mol : mols) {
 					String msg = mol.getPlainFormula();
 					for (Feature f : mc.getPeakData()) {
-						metaboliteAnnotations.annotate(f, msg);
+						metaboliteFeatureAnnotations.annotate(f, msg);
 					}					
 				}
+
 			}
 
 		}
 				
+	}
+
+	private void annotateIsotopes(HDPMetabolite met) {
+
+		// for all precursor masses
+		Set<HDPPrecursorMass> pcs = met.getPrecursorMasses();
+
+		// compare against each other
+		for (HDPPrecursorMass pc1 : pcs) {
+			for (HDPPrecursorMass pc2 : pcs) {
+				
+				if (pc1.equals(pc2)) {
+					continue;
+				}
+
+				// check using various heuristics to find which masses are the isotopes
+				double[] isotopeDiffs = new double[] {
+						13.00335483780 - 12.00000000000, 	// carbon
+						15.00010889840 - 14.00307400524, 	// nitrogen
+						17.99916040000 - 15.99491462210, 	// oxygen
+						33.96786683000 - 31.97207069000}; 	// sulfur
+				String[] isotopeLabels = new String[] {
+						"C13", "N15", "O18", "S34" 
+				};
+				assert(isotopeDiffs.length == isotopeLabels.length);
+				
+				// check the masses to annotate isotopes
+				for (int k = 0; k < isotopeDiffs.length; k++) {
+					double diff = isotopeDiffs[k];
+					String label = isotopeLabels[k];
+					if (pc2.withinTolerance(pc1.getMass()+diff)) {
+						// pc2 is probably an isotope of pc1 if within tolerance
+						String annotation = label + " of " + pc1.getMass();
+						isotopePrecursorMassAnnots.annotate(pc2, annotation);
+					}
+				}
+
+			}
+		}
 	}	
 		
 }

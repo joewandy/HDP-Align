@@ -45,7 +45,7 @@ public class HDPResultItem {
 
 	@Override
 	public String toString() {
-		return "HDPResultItem [features=" + features + "]";
+		return "HDPResultItem size=" + features.size() + " [features=" + features + "]";
 	}
 	
 }

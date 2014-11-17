@@ -16,6 +16,10 @@ public class HDPAnnotation<T> {
 	public HDPAnnotationItem get(T key) {
 		return annotations.get(key);
 	}
+	
+	public boolean contains(T key) {
+		return annotations.containsKey(key);
+	}
 
 	public void annotate(T key, String msg) {
 		
@@ -38,6 +42,10 @@ public class HDPAnnotation<T> {
 
 		this.annotations.put(key, annots);
 	
+	}
+	
+	public void clear(T key) {
+		this.annotations.remove(key);
 	}
 	
 	public int size() {
