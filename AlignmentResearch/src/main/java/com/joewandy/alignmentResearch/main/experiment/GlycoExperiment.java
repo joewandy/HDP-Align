@@ -105,6 +105,7 @@ public class GlycoExperiment extends MultiAlignBaseExp implements MultiAlignExpe
 			// report the result on another set of random n files
 			System.out.println();
 			EvaluationResult bestResult = tempResult.getResultBestF1();	
+			super.printRes("!BEST_TRAINING, ", bestResult);
 			data = getData(options,	testingSet);	
 			if (bestResult != null) {
 

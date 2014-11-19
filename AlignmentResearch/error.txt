@@ -1,11 +1,6 @@
-java.lang.NullPointerException
-	at com.joewandy.alignmentResearch.objectModel.HDPSamplerHandler.annotateIsotopes(HDPSamplerHandler.java:439)
-	at com.joewandy.alignmentResearch.objectModel.HDPSamplerHandler.annotateMetabolites(HDPSamplerHandler.java:397)
-	at com.joewandy.alignmentResearch.objectModel.HDPSamplerHandler.doProcess(HDPSamplerHandler.java:181)
-	at com.joewandy.alignmentResearch.objectModel.HDPSamplerHandler.handleSample(HDPSamplerHandler.java:107)
-	at com.joewandy.alignmentResearch.objectModel.HDPMassRTClustering.runClustering(HDPMassRTClustering.java:100)
-	at com.joewandy.alignmentResearch.alignmentMethod.external.HdpAlignment.matchFeatures(HdpAlignment.java:88)
-	at com.joewandy.alignmentResearch.alignmentMethod.BaseAlignment.align(BaseAlignment.java:46)
-	at com.joewandy.alignmentResearch.main.MultiAlign.runPRExperiment(MultiAlign.java:139)
-	at com.joewandy.alignmentResearch.main.experiment.HdpExperiment.performExperiment(HdpExperiment.java:26)
-	at com.joewandy.alignmentResearch.main.MultiAlignCmd.main(MultiAlignCmd.java:42)
+java.lang.IndexOutOfBoundsException: Index: 0, Size: 0
+	at java.util.ArrayList.rangeCheck(ArrayList.java:635)
+	at java.util.ArrayList.get(ArrayList.java:411)
+	at com.joewandy.alignmentResearch.main.experiment.MultiAlignExpResult.printResult(MultiAlignExpResult.java:42)
+	at com.joewandy.alignmentResearch.main.experiment.MultiAlignBaseExp.printTestingResult(MultiAlignBaseExp.java:28)
+	at com.joewandy.alignmentResearch.main.MultiAlignCmd.main(MultiAlignCmd.java:43)

@@ -39,6 +39,10 @@ public class MultiAlignExpResult {
 	
 	public void printResult() {
 				
+		if (results.isEmpty()) {
+			return;
+		}
+		
 		System.out.print(label + "_prec = [ ");
 		for (EvaluationResult result : results) {
 			if (result == null) {

@@ -174,6 +174,9 @@ public class MultiAlign {
 						massTolerance, rtTolerance);												
 			}
 		}		
+		if (evalRes == null) {
+			return null;
+		}
 		evalRes.setTh(alpha);
 		String note = alpha + ", " + groupingRtWindow;
 		evalRes.setNote(note);
