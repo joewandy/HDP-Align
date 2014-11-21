@@ -1,6 +1,5 @@
 package com.joewandy.alignmentResearch.alignmentMethod.external;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -83,6 +82,8 @@ public class PythonMW extends BaseAlignment implements AlignmentMethod {
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.exit(1);
+		} finally {
+			
 		}
 
 		return alignedList;
@@ -92,9 +93,8 @@ public class PythonMW extends BaseAlignment implements AlignmentMethod {
 	private Path writeTempFiles() throws IOException, FileNotFoundException {
 	
 		// create temporary directory to hold our intermediate input files
-        String default_tmp = System.getProperty("java.io.tmpdir");
-        System.out.println("default_tmp = " + default_tmp);		
-        Path tempPath = Files.createTempDirectory("MW_INPUT_");
+        Path tempPath = Files.createTempDirectory(parentPath, "MW_INPUT_");
+        System.out.println("tempPath = " + tempPath);
 		
 		// put all spectra files inside TEMP_INPUT_DIR
 		for (AlignmentFile data : dataList) {
