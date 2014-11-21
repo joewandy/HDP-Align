@@ -69,8 +69,8 @@ public class SimaAlignment extends BaseAlignment implements AlignmentMethod {
 			alignedList = new AlignmentList(outputPath, dataList, "");
 			
 			// clean all files inside directory
-//			FileUtils.cleanDirectory(tempDirPath.toFile());
-			tempDirPath.toFile().deleteOnExit();
+			FileUtils.cleanDirectory(tempDirPath.toFile());
+			tempDirPath.toFile().delete();
 						
 		} catch (IOException e) {
 			e.printStackTrace();

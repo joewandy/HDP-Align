@@ -12,7 +12,7 @@ import com.joewandy.alignmentResearch.objectModel.EvaluationResult;
 
 public class StandardExperiment extends MultiAlignBaseExp implements MultiAlignExperiment {
 
-	public static final double[] ALL_ALPHA = { 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0  };
+	public static final double[] ALL_ALPHA = { 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0  };
 	public static final double[] ALL_GROUPING_RT = { 
 		2, 4, 6, 8, 10
 	};

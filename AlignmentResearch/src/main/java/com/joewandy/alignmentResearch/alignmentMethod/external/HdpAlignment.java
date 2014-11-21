@@ -235,7 +235,11 @@ public class HdpAlignment extends BaseAlignment implements AlignmentMethod {
 				.getIsotopeAnnotations();
 		HDPAnnotation<Feature> metaboliteAnnotations = clustering
 				.getMetaboliteAnnotations();
-				
+
+		if (ipAnnotations == null && isotopeAnnotations == null && metaboliteAnnotations == null) {
+			return;
+		}
+		
 		int correctIPCount = 0;
 		int nonAmbiguousIPCount = 0;
 		int ambiguousIPCount = 0;

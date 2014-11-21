@@ -52,6 +52,9 @@ public class HDPSamplerHandler {
 		this.ppm = ppm;
 		
 		if (minSpan != -1) {
+			if (minSpan > hdpFiles.size()) {
+				minSpan = hdpFiles.size();
+			}
 			this.minSpan = minSpan;			
 		} else {
 			int totalFiles = hdpFiles.size();
