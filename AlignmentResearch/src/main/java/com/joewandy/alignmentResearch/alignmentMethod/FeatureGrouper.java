@@ -19,14 +19,15 @@ public class FeatureGrouper  {
 	protected boolean usePeakShape;
 	protected String groupingMethod;
 	protected double groupingRtWindow;
+	protected double minCorrSignals;
 	
 	public FeatureGrouper(List<AlignmentFile> dataList, AlignmentMethodParam param) {		
 
-		this.dataList = dataList;		
-				
-		usePeakShape = param.isUsePeakShape();
-		groupingMethod = param.getGroupingMethod();
-		groupingRtWindow = param.getGroupingRtTolerance();
+		this.dataList = dataList;			
+		this.usePeakShape = param.isUsePeakShape();
+		this.groupingMethod = param.getGroupingMethod();
+		this.groupingRtWindow = param.getGroupingRtTolerance();
+		this.minCorrSignals = param.getMinCorrSignal();
 	
 	}
 		
@@ -54,7 +55,7 @@ public class FeatureGrouper  {
 	protected FeatureGroupingMethod getFeatureGroupingMethod() {
 		FeatureGroupingMethod grouping = null;
 		if (MultiAlignConstants.GROUPING_METHOD_GREEDY.equals(groupingMethod)) {
-			grouping = new GreedyFeatureGroupingMethod(groupingRtWindow, usePeakShape);	
+			grouping = new GreedyFeatureGroupingMethod(groupingRtWindow, usePeakShape, minCorrSignals);	
 		} else if (MultiAlignConstants.GROUPING_METHOD_METASSIGN_MIXTURE.equals(groupingMethod) || 
 				MultiAlignConstants.GROUPING_METHOD_METASSIGN_POSTERIOR.equals(groupingMethod)) {
 			grouping = new MetAssignFeatureGroupingMethod(groupingMethod, groupingRtWindow, usePeakShape);																			

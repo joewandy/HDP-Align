@@ -11,6 +11,7 @@ public class AlignmentMethodParam {
 	private boolean useGroup;
 	private boolean exactMatch;
 	private boolean usePeakShape;
+	private double minCorrSignal;
 
 	// for ransac alignment
 	private double ransacRtToleranceBeforeMinute;
@@ -62,6 +63,7 @@ public class AlignmentMethodParam {
 		this.useGroup = options.useGroup;
 		this.exactMatch = options.exactMatch;
 		this.usePeakShape = options.usePeakShape;
+		this.minCorrSignal = options.minCorrSignal;
 		this.ransacRtToleranceBeforeMinute = options.ransacRtToleranceBeforeCorrection;
 		this.ransacRtToleranceAfterMinute = options.alignmentRtWindow;
 		this.ransacIteration = options.ransacIteration;
@@ -138,6 +140,14 @@ public class AlignmentMethodParam {
 
 	public void setUsePeakShape(boolean usePeakShape) {
 		this.usePeakShape = usePeakShape;
+	}
+
+	public double getMinCorrSignal() {
+		return minCorrSignal;
+	}
+
+	public void setMinCorrSignal(double minCorrSignal) {
+		this.minCorrSignal = minCorrSignal;
 	}
 
 	public double getRansacRtToleranceBeforeMinute() {

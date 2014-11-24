@@ -34,6 +34,7 @@ public class PythonMW extends BaseAlignment implements AlignmentMethod {
 
 	private String groupingMethod;
 	private double groupingRtTolerance;
+	private double minCorrSignal;
 	private boolean useGroup;
 	private boolean usePeakShape;
 	private boolean exactMatch;
@@ -52,6 +53,7 @@ public class PythonMW extends BaseAlignment implements AlignmentMethod {
 		super(dataList, param);
 		this.groupingMethod = param.getGroupingMethod();
 		this.groupingRtTolerance = param.getGroupingRtTolerance();
+		this.minCorrSignal = param.getMinCorrSignal();
 		this.useGroup = param.isUseGroup();
 		this.usePeakShape = param.isUsePeakShape();
 		this.exactMatch = param.isExactMatch();
@@ -120,6 +122,7 @@ public class PythonMW extends BaseAlignment implements AlignmentMethod {
 		map.put("groupingMethod", this.groupingMethod);	
 		map.put("alpha", String.valueOf(this.alpha));
 		map.put("groupingRtTolerance", String.valueOf(this.groupingRtTolerance));
+		map.put("minCorrSignal", String.valueOf(this.minCorrSignal));		
 		map.put("dpAlpha", String.valueOf(this.groupingDpAlpha));
 		map.put("numSamples", String.valueOf(this.groupingNSamples));
 		map.put("burnIn", String.valueOf(this.groupingBurnIn));
@@ -152,6 +155,8 @@ public class PythonMW extends BaseAlignment implements AlignmentMethod {
 		}
 		if (this.usePeakShape) {
 			cmdLine.addArgument("-p");			
+			cmdLine.addArgument("-minCorrSignal");
+			cmdLine.addArgument("${minCorrSignal}");					
 		}
 		cmdLine.addArgument("-gm");
 		cmdLine.addArgument("${groupingMethod}");		

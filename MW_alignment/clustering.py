@@ -19,6 +19,7 @@ class GreedyClustering:
         self.alignment_file = alignment_file
         self.options = options
         self.grt = float(self.options.grt)  
+        self.min_corr_signal = float(self.options.min_corr_signal)
 
     def do_clustering(self):
         
@@ -27,8 +28,9 @@ class GreedyClustering:
         
         if self.options.use_peakshape:
             tol = '%.1f' % self.grt
+            mcs = '%.2f' % self.min_corr_signal
             front_part, extension = os.path.splitext(self.alignment_file.filename)
-            filename = front_part + '.greedy_peakshape.' + tol + '.mat'
+            filename = front_part + '.greedy_peakshape.' + tol + '_' + mcs + '.mat'
             target = os.path.join(GreedyClustering.MATRIX_SAVE_PATH, filename)
             print target
             if os.path.isfile(target):

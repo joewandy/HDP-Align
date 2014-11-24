@@ -35,7 +35,7 @@ public class GreedyFeatureGroupingMethod extends BaseFeatureGroupingMethod imple
 
 	private static final String MATRIX_SAVE_PATH = "/home/joewandy/mat/";
 	private static final int MASS_TOLERANCE_PPM = 3;
-	private static final double MIN_CORR_SIGNALS = 0.90;
+	private double minCorrSignals;
 	private double rtTolerance;
 	private boolean usePeakShape;
 	
@@ -45,9 +45,10 @@ public class GreedyFeatureGroupingMethod extends BaseFeatureGroupingMethod imple
 	 * @param massTolerance Mass tolerance in ppm
 	 * @param rtTolerance Retention time tolerance in seconds
 	 */
-	public GreedyFeatureGroupingMethod(double rtTolerance, boolean usePeakShape) {
+	public GreedyFeatureGroupingMethod(double rtTolerance, boolean usePeakShape, double minCorrSignals) {
 		this.rtTolerance = rtTolerance;
 		this.usePeakShape = usePeakShape;
+		this.minCorrSignals = minCorrSignals;
 	}
 	
 	@Override
@@ -76,7 +77,8 @@ public class GreedyFeatureGroupingMethod extends BaseFeatureGroupingMethod imple
 			fileGroups = greedyRTGrouping(data, rtTolerance);			
 		} else {
 			// call mzmatch to do greedy peakshape correlation grouping
-			fileGroups = greedyPeakShapeGrouping(data, rtTolerance);
+			double minCorrSignals = this.minCorrSignals;
+			fileGroups = greedyPeakShapeGrouping(data, rtTolerance, minCorrSignals);
 		}		
 		System.out.println("fileGroups.size() = " + fileGroups.size());
 
@@ -86,7 +88,7 @@ public class GreedyFeatureGroupingMethod extends BaseFeatureGroupingMethod imple
 					
 	}
 
-	private List<FeatureGroup> greedyPeakShapeGrouping(AlignmentFile data, double rtTolerance) {
+	private List<FeatureGroup> greedyPeakShapeGrouping(AlignmentFile data, double rtTolerance, double minCorrSignals) {
 
 		List<FeatureGroup> fileGroups = new ArrayList<FeatureGroup>();
 		
@@ -110,7 +112,7 @@ public class GreedyFeatureGroupingMethod extends BaseFeatureGroupingMethod imple
 			final HashMap<Integer,double[]> intensity_courses = new HashMap<Integer,double[]>();
 			CorrelationMeasure measure = new PeakComparer.PearsonMeasure();
 
-			final PeakComparer comparer = new PeakComparer(intensity_courses, header, measure, false, MIN_CORR_SIGNALS);
+			final PeakComparer comparer = new PeakComparer(intensity_courses, header, measure, false, minCorrSignals);
 			List<IPeak> basePeaks = IPeak.findRelatedPeaks(peaks.getPeaks(), -1, rtTolerance, comparer);
 			assert basePeaks != null;
 			RelatedPeaks.labelRelationships(peaks, true, MASS_TOLERANCE_PPM);
@@ -227,7 +229,7 @@ public class GreedyFeatureGroupingMethod extends BaseFeatureGroupingMethod imple
 		// save the clustering output to mat file as well
 		String filename = null;
 		if (usePeakShape) {
-			filename = data.getFilenameWithoutExtension() + ".greedy_peakshape." + rtTolerance + ".mat";	
+			filename = data.getFilenameWithoutExtension() + ".greedy_peakshape." + rtTolerance + "_" + minCorrSignals + ".mat";	
 		} else {
 			filename = data.getFilenameWithoutExtension() + ".greedy_rt." + rtTolerance + ".mat";	
 		}			

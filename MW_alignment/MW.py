@@ -36,6 +36,8 @@ def get_options(argv):
     parser.set_defaults(use_group=False)
     parser.add_argument('-p', dest='use_peakshape', action='store_true', help='use peak shape correlations information?')
     parser.set_defaults(use_peakshape=False)    
+    parser.add_argument('-minCorrSignal', help='minimum correlations of peak shapes signal.')
+    parser.set_defaults(min_corr_signal=0.9)
     parser.add_argument('-gm', dest='grouping_method', help='grouping method. Choices are greedy, posterior')
     parser.set_defaults(grouping_method='posterior')
     parser.add_argument('-alpha', help='clustering weight ratio')

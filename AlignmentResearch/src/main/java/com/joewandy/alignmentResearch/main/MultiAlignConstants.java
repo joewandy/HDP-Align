@@ -37,6 +37,7 @@ public class MultiAlignConstants {
 	public static final int GROUPING_METHOD_BURN_IN = 100;
 	public static final double GROUPING_METHOD_RT_TOLERANCE = 5;
 	public static final double GROUPING_METHOD_ALPHA = 1;
+	public static final double GROUPING_MIN_CORR_SIGNAL = 0.90;
 	
 	public static final double HDP_ALPHA_RT = 10;
 	public static final double HDP_ALPHA_MASS = 100;

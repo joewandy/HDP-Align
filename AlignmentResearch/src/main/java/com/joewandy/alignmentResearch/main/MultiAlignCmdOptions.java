@@ -136,6 +136,9 @@ public class MultiAlignCmdOptions {
 			usage="Whether to use peak shape correlation when grouping")
 	public boolean usePeakShape = MultiAlignConstants.USE_PEAK_SHAPE;
 	
+	@Option(name = "minCorrSignal", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Min corr threshold for greedy peakshape grouping")
+	public double minCorrSignal = MultiAlignConstants.GROUPING_MIN_CORR_SIGNAL;
+	
 	@Option(name = "alpha", param = "float", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, 
 			usage = "Controls the ratio of weights used in similarity calculation during matching.")
 	public double alpha = MultiAlignConstants.PARAM_ALPHA;
