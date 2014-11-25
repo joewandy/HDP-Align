@@ -16,8 +16,11 @@ public class StandardExperiment extends MultiAlignBaseExp implements MultiAlignE
 	public static final double[] ALL_GROUPING_RT = { 
 		2, 4, 6, 8, 10
 	};
-	public static final double[] ALL_ALIGNMENT_MZ = { 0.05, 0.1, 0.25 };
-	public static final double[] ALL_ALIGNMENT_RT = { 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100 };
+//	public static final double[] ALL_ALIGNMENT_MZ = { 0.05, 0.1, 0.25 };
+//	public static final double[] ALL_ALIGNMENT_RT = { 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100 };
+	public static final double[] ALL_MIN_CORR = { 0.70, 0.75, 0.80, 0.85, 0.90, 0.95 };
+	public static final double[] ALL_ALIGNMENT_MZ = { 0.05 };
+	public static final double[] ALL_ALIGNMENT_RT = { 60, 65, 70, 75, 80, 85, 90, 95, 100 };
 	
 	public List<MultiAlignExpResult> performExperiment(
 			MultiAlignCmdOptions options) throws FileNotFoundException {
@@ -28,11 +31,13 @@ public class StandardExperiment extends MultiAlignBaseExp implements MultiAlignE
 		
 		double[] alphas = new double[] { options.alpha };	
 		double[] groupingRts = new double[] { options.groupingRtWindow };														
+		double[] minCorrs = new double[] { options.minCorrSignal };														
 		if (options.autoAlpha) {
 			alphas = ALL_ALPHA;
 		}
 		if (options.autoOptimiseGreedy && options.useGroup && MultiAlignConstants.GROUPING_METHOD_GREEDY.equals(options.groupingMethod)) {
 			groupingRts = ALL_GROUPING_RT;
+			minCorrs = ALL_MIN_CORR;
 		}	
 		
 		// quick hack: obtained from randsample(11, 2)
@@ -73,26 +78,30 @@ public class StandardExperiment extends MultiAlignBaseExp implements MultiAlignE
 			for (double alignmentMz : ALL_ALIGNMENT_MZ) {
 				for (double alignmentRt : ALL_ALIGNMENT_RT) {
 					for (int k = 0; k < groupingRts.length; k++) {
-						for (int j = 0; j < alphas.length; j++) {
-				
-							System.out.println();
-							System.out.println("--- alignmentMz = " + alignmentMz + " alignmentRt = " + alignmentRt + 
-									" groupingRt = " + groupingRts[k] + " alpha = " + alphas[j] + " ---");
-							System.out.println();
-
-							options.alignmentPpm = alignmentMz;
-							options.alignmentRtWindow = alignmentRt;
-							options.alpha = alphas[j];
-							options.groupingRtWindow = groupingRts[k];
-							MultiAlign multiAlign = new MultiAlign(options, data);
-							EvaluationResult evalRes = multiAlign.runExperiment();	
-							if (evalRes != null) {
-								evalRes.setTh(options.alpha);
-								String note = options.alpha + ", " + options.groupingRtWindow + ", " + i;
-								evalRes.setNote(note);
-								tempResult.addResult(evalRes);	
-							}		
+							for (int j = 0; j < alphas.length; j++) {
+								for (int l = 0; l < minCorrs.length; l++) {
 					
+								System.out.println();
+								System.out.println("--- alignmentMz = " + alignmentMz + " alignmentRt = " + alignmentRt + 
+										" groupingRt = " + groupingRts[k] + " minCorrSignal = " + minCorrs[l] + 
+										" alpha = " + alphas[j] + " ---");
+								System.out.println();
+	
+								options.alignmentPpm = alignmentMz;
+								options.alignmentRtWindow = alignmentRt;
+								options.alpha = alphas[j];
+								options.groupingRtWindow = groupingRts[k];
+								options.minCorrSignal = minCorrs[l];
+								MultiAlign multiAlign = new MultiAlign(options, data);
+								EvaluationResult evalRes = multiAlign.runExperiment();	
+								if (evalRes != null) {
+									evalRes.setTh(options.alpha);
+									String note = options.alpha + ", " + options.groupingRtWindow + ", " + i + ", " + options.minCorrSignal;
+									evalRes.setNote(note);
+									tempResult.addResult(evalRes);	
+								}		
+						
+							}
 						}
 					}
 
@@ -116,12 +125,15 @@ public class StandardExperiment extends MultiAlignBaseExp implements MultiAlignE
 				String[] toks = bestNote.split(",");
 				double bestAlpha = Double.parseDouble(toks[0].trim());
 				double bestGroupingRtWindow = Double.parseDouble(toks[1].trim());
+				double bestMinCorrSignal = Double.parseDouble(toks[3].trim());
 				options.alpha = bestAlpha;
 				options.groupingRtWindow = bestGroupingRtWindow;
+				options.minCorrSignal = bestMinCorrSignal;
 				System.out.println();
 				System.out.println("##################  TESTING PHASE ################## ");
 				System.out.println("--- alignmentMz = " + bestMz + " alignmentRt = " + bestRt + 
-						" groupingRt = " + bestGroupingRtWindow + " alpha = " + bestAlpha + " ---");
+						" groupingRt = " + bestGroupingRtWindow + " minCorrSignal = " + bestMinCorrSignal + 
+						" alpha = " + bestAlpha + " ---");
 				System.out.println();
 				// cluster peaks within files
 				MultiAlign multiAlign = new MultiAlign(options, data);
