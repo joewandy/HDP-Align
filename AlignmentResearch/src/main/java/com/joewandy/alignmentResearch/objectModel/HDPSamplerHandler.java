@@ -50,12 +50,12 @@ public class HDPSamplerHandler {
 		this.totalPeaks = totalPeaks;
 		this.results = new HDPResults();
 		this.ppm = ppm;
-		
+
+		this.minSpan = minSpan;			
 		if (minSpan != -1) {
-			if (minSpan > hdpFiles.size()) {
-				minSpan = hdpFiles.size();
+			if (minSpan > hdpFiles.size() || minSpan < 2) {
+				minSpan = -1;
 			}
-			this.minSpan = minSpan;			
 		}
 		System.out.println("HDP minSpan = " + this.minSpan);
 
