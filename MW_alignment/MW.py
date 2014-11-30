@@ -52,6 +52,8 @@ def get_options(argv):
     parser.set_defaults(burn_in=100)
     parser.add_argument('-s', dest='skip_matching', action='store_true', help='skip the matching stage, only do clustering')
     parser.set_defaults(skip_matching=False)
+    parser.add_argument('-always_recluster', dest='always_recluster', action='store_true', help='always initialise a new mixture model clustering instead of reading previously-cached results')
+    parser.set_defaults(always_recluster=False)
 
     # parse it
     options = parser.parse_args(argv)

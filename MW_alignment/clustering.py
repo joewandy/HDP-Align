@@ -67,10 +67,6 @@ class GreedyClustering:
                 
         ZZ = Z.tocsr() * Z.tocsr().transpose()
         return ZZ.tolil()
-            
-        '''print "Saving clustering result to " + target
-        mdict = {'ZZ_all' : ZZ}
-        scipy.io.savemat(target, mdict, do_compression=True)'''
 
         return ZZ
                 
@@ -101,7 +97,7 @@ class MixtureModelClustering:
         sys.stdout.flush()
         
         target = os.path.join(MixtureModelClustering.MATRIX_SAVE_PATH, self.alignment_file.filename + '.mixture_model_rt.mat')
-        if os.path.isfile(target):
+        if os.path.isfile(target) and not self.options.always_recluster:
             print "\tReading clustering from " + target
             mdict = scipy.io.loadmat(target)
             ZZ_all = mdict['ZZ_all']
@@ -216,9 +212,10 @@ class MixtureModelClustering:
         
         ZZ_all = ZZ_all / self.nsamps
         
-        print "Saving clustering result to " + target
-        mdict = {'ZZ_all' : ZZ_all}
-        scipy.io.savemat(target, mdict, do_compression=True)
+        if not self.options.always_recluster:
+            print "Saving clustering result to " + target
+            mdict = {'ZZ_all' : ZZ_all}
+            scipy.io.savemat(target, mdict, do_compression=True)
                 
         return ZZ_all
     

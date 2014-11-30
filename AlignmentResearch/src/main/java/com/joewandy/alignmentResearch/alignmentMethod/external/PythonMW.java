@@ -137,8 +137,6 @@ public class PythonMW extends BaseAlignment implements AlignmentMethod {
 		cmdLine.addArgument("${inputDir}");
 		cmdLine.addArgument("-o");
 		cmdLine.addArgument("${outputFile}");
-//		cmdLine.addArgument("-m");
-//		cmdLine.addArgument("${matlabDir}");
 		cmdLine.addArgument("-dmz");
 		cmdLine.addArgument("${dmz}");
 		cmdLine.addArgument("-drt");
@@ -173,6 +171,9 @@ public class PythonMW extends BaseAlignment implements AlignmentMethod {
 		cmdLine.addArgument("-burn_in");
 		cmdLine.addArgument("${burnIn}");		
 
+		// for debugging
+		cmdLine.addArgument("-always_recluster");		
+		
 		cmdLine.setSubstitutionMap(map);
 		DefaultExecutor executor = new DefaultExecutor();
 		
