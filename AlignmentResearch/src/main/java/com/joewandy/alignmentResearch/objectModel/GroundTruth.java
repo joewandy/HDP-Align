@@ -22,14 +22,15 @@ public class GroundTruth {
 
 	private static final String GROUND_TRUTH_NEW = "new";
 	private static final String GROUND_TRUTH_OLD = "old";
-	private final static double EPSILON = 0.0001;
 	private List<GroundTruthFeatureGroup> groundTruth;
 	private List<GroundTruthPair> pairwiseGroundTruth;	
 	private Set<Feature> G;
+	private boolean verbose;
 	
-	public GroundTruth(List<GroundTruthFeatureGroup> groundTruthEntries) {		
+	public GroundTruth(List<GroundTruthFeatureGroup> groundTruthEntries, boolean verbose) {		
 		
 		this.groundTruth = groundTruthEntries;		
+		this.verbose = verbose;
 		buildPairwise();
 		
 	}
@@ -42,7 +43,7 @@ public class GroundTruth {
 				
 		// convert ground truth entries into a pairwise of aligned features
 		this.pairwiseGroundTruth = new ArrayList<GroundTruthPair>();
-		System.out.print("Generating all positive pairwise combinations ");
+//		System.out.print("Generating all positive pairwise combinations ");
 		for (GroundTruthFeatureGroup g : this.groundTruth) {
 
 			// skip single entry ground truth
@@ -70,38 +71,36 @@ public class GroundTruth {
 			}
 						
 		}		
-		System.out.println();
-		System.out.println("Total pairwise ground truth combinations = " + pairwiseGroundTruth.size());
-		System.out.println(sizeMap);
-		
-		double avgRt = 0;
-		double avgMass = 0;
-		for (GroundTruthPair pairwise : pairwiseGroundTruth) {
-			avgRt += pairwise.getAbsRtDiff();
-			avgMass += pairwise.getAbsMassDiff();
+
+		// print debug message
+		if (verbose) {
+
+			System.out.println();
+			System.out.println("Total pairwise ground truth combinations = " + pairwiseGroundTruth.size());
+			System.out.println(sizeMap);
+			
+			double avgRt = 0;
+			double avgMass = 0;
+			for (GroundTruthPair pairwise : pairwiseGroundTruth) {
+				avgRt += pairwise.getAbsRtDiff();
+				avgMass += pairwise.getAbsMassDiff();
+			}
+			avgRt = avgRt / pairwiseGroundTruth.size();
+			avgMass = avgMass / pairwiseGroundTruth.size();		
+			System.out.println("Average abs RT diff = " + avgRt);
+			System.out.println("Average abs mass diff = " + avgMass);
+			
 		}
-		avgRt = avgRt / pairwiseGroundTruth.size();
-		avgMass = avgMass / pairwiseGroundTruth.size();		
-		System.out.println("Average abs RT diff = " + avgRt);
-		System.out.println("Average abs mass diff = " + avgMass);
 		
 	}
 
 	private GroundTruthPair getGroundTruthPair(Feature f1, Feature f2) {
 		GroundTruthPair pairwise = null;
-//		if (f1.getPeakID() == f2.getPeakID()) {
-			if (f1.getData().getId() < f2.getData().getId()) {
-				pairwise = new GroundTruthPair(f1, f2);
-			} else {
-				pairwise = new GroundTruthPair(f2, f1);					
-			}
-//		} else {
-//			if (f1.getPeakID() < f2.getPeakID()) {
-//				pairwise = new GroundTruthPair(f1, f2);
-//			} else {
-//				pairwise = new GroundTruthPair(f2, f1);					
-//			}			
-//		}
+		if (f1.getData().getId() < f2.getData().getId()) {
+			pairwise = new GroundTruthPair(f1, f2);
+		} else {
+			pairwise = new GroundTruthPair(f2, f1);					
+		}
 		return pairwise;
 	}
 		
@@ -112,12 +111,9 @@ public class GroundTruth {
 		}
 		return allGtFeatures;
 	}
-	
-	/**
-	 * Repeating (non-unique) features may be counted more than once here ...
-	 * Although it shouldn't happen
-	 * @return The feature count
-	 */
+
+	// Repeating (non-unique) features may be counted more than once here ...
+	// Although it shouldn't happen
 	public int getFeatureCount() {
 		int count = 0;
 		for (GroundTruthFeatureGroup entry : this.groundTruth) {
@@ -177,11 +173,9 @@ public class GroundTruth {
 		}
 	}
 
-	public EvaluationResult evaluateOld(List<AlignmentRow> alignmentResult, int noOfFiles, double dmz, double drt) {
+	public EvaluationResult evaluateLange(List<AlignmentRow> alignmentResult, int noOfFiles, double dmz, double drt) {
 		
 		List<FeatureGroup> tool = convertToFeatureGroup(alignmentResult);
-		
-//		System.out.println("Calculating ");
 		
 		// for every consensus feature in ground truth
 		int N = this.groundTruth.size();
@@ -192,11 +186,7 @@ public class GroundTruth {
 		int totalFp = 0;
 		int totalPositives = 0;
 		for (int i = 0; i < N; i++) {
-			
-			if (i % 100 == 0) {
-//				System.out.print('.');
-			}
-						
+									
 			/* 
 			 * Lange, et al. (2008):
 			 * 
@@ -208,9 +198,6 @@ public class GroundTruth {
 			 */
 			
 			FeatureGroup gtConsensus = this.groundTruth.get(i);
-//			if (gtConsensus.getFeatureCount() == 1) {
-//				System.out.println("skip ?");
-//			}
 			
 			// -1 since ID means nothing for our purpose later
 			FeatureGroup toolAll = new FeatureGroup(-1); 
@@ -223,7 +210,6 @@ public class GroundTruth {
 				}								
 				int count = getIntersectCount(toolConsensus, gtConsensus);
 				if (count > 0) {
-//					System.out.println(toolConsensus);
 					toolAll.addFeatures(toolConsensus.getFeatures());
 					m++;
 				}
@@ -246,9 +232,6 @@ public class GroundTruth {
 
 			totalTp += tp;
 			totalFp += fp;
-//			if (fp > 0) {
-//				System.out.println();
-//			}
 			totalPositives += toolAllCount;
 			
 			// total number of groups that are aligned from tool for all gold_i
@@ -257,10 +240,6 @@ public class GroundTruth {
 		}
 				
 		precision = precision / N;		
-
-		// NOTE: slightly different from the paper here, divide precision by M, not N ?
-		// precision = precision / M;
-		
 		recall = recall / N;
 
 		/*
@@ -286,7 +265,7 @@ public class GroundTruth {
 
 	}
 
-	public EvaluationResult evaluateNew(List<AlignmentRow> alignmentResult, int noOfFiles, double dmz, double drt) {
+	public EvaluationResult evaluatePairwise(List<AlignmentRow> alignmentResult, int noOfFiles, double dmz, double drt) {
 				
 		// construct G+, the set of positive pairwise ground truth ==> things that should be aligned together
 		Set<GroundTruthPair> gPlus = new HashSet<GroundTruthPair>(this.pairwiseGroundTruth);				
@@ -295,43 +274,24 @@ public class GroundTruth {
 		Set<GroundTruthPair> t = new HashSet<GroundTruthPair>(convertToPairwiseFeatureGroup(alignmentResult));		
 	
 		// TP = should be aligned & are aligned = G+ intersect t
-//		System.out.println("Computing TP");		
 		Set<GroundTruthPair> intersect = new HashSet<GroundTruthPair>(gPlus);
 		intersect.retainAll(t);
 		int TP = intersect.size();
 		
 		// FN = should be aligned & aren't aligned = G+ \ t
-//		System.out.println("Computing FN");		
 		Set<GroundTruthPair> diff1 = new HashSet<GroundTruthPair>(gPlus);
 		diff1.removeAll(t);
 		int FN = diff1.size();
 						
 		// FP = shouldn't be aligned & are aligned = t \ G+
-//		System.out.println("Computing FP");
 		Set<GroundTruthPair> diff2 = new HashSet<GroundTruthPair>(t);
 		diff2.removeAll(gPlus);
 		int FP = diff2.size();
 		
 		int totalPositives = t.size();
-//		System.out.println("TP = " + TP);
-//		System.out.println("FP = " + FP);
-//		System.out.println("totalPositives = " + totalPositives);
-//		System.out.println("totalPositives-TP = " + (totalPositives-TP));
 		assert(FP == (totalPositives-TP));
 		
-		// how many ground truth entries are aligned ?
-//		System.out.println("Ground truth entries = ");
-//		System.out.print('[');
-//		for (GroundTruthPair entry : gPlus) {
-//			if (t.contains(entry)) {
-//				System.out.print("1, ");
-//			} else {
-//				System.out.print("0, ");
-//			}
-//		}
-//		System.out.println("];");
-
-		// TN = big number, don't compute
+		// TN = big number, no need to compute
 		
 		double precision = (double)TP/(TP+FP);
 		double recall = (double)TP/(TP+FN);
@@ -428,6 +388,7 @@ public class GroundTruth {
 			double precision, double recall, int totalTp, int totalFp, int totalFn,
 			int totalPositives, double f1, double f05, double totalTpRatio,
 			double totalFpRatio, double totalPositiveRatio, double dmz, double drt, String version) {
+		
 		int coverageCount = 0;		
 		List<Double> sdrtList = new ArrayList<Double>();
 		List<Double> mdrtList = new ArrayList<Double>();		
@@ -470,13 +431,13 @@ public class GroundTruth {
 		// compute coverage
 		double coverage = (double)coverageCount / alignmentResult.size();
 		
-//		System.out.println();		
 		EvaluationResult evalRes = new EvaluationResult(
 				dmz, drt,
 				precision, recall, f1, f05, 
 				totalTp, totalFp, totalFn, totalPositives, totalTpRatio, totalFpRatio, totalPositiveRatio,
 				medSdrt, meanSdrt, medMdrt, meanMdrt, coverage, version);
 		return evalRes;
+
 	}
 	
 	private double[] listToArray(List<Double> list) {
@@ -524,20 +485,6 @@ public class GroundTruth {
 	}
 	
 	public static boolean compareFeature(Feature f1, Feature f2) {
-
-//		double mass1 = f1.getMass();
-//		double rt1 = f1.getRt();
-//		double intense1 = f1.getIntensity();
-//		
-//		double mass2 = f2.getMass();
-//		double rt2 = f2.getRt();
-//		double intense2 = f2.getIntensity();
-//	
-//		boolean massOk = compareDouble(mass1, mass2);
-//		boolean rtOk = compareDouble(rt1, rt2);
-//		boolean intenseOk = compareDouble(intense1, intense2);
-//		
-//		return (massOk && rtOk && intenseOk);
 		
 		if (f1.getPeakID() == f2.getPeakID() && 
 				f1.getData().equals(f2.getData())) {
@@ -547,9 +494,5 @@ public class GroundTruth {
 		}
 		
 	}
-		
-	public static boolean compareDouble(double a, double b){
-	    return a == b ? true : Math.abs(a - b) < EPSILON;
-	}	
 			
 }

@@ -35,7 +35,7 @@ public class SimaAlignment extends BaseAlignment implements AlignmentMethod {
 	private String firstFileName;
 	
 	// the executable name of SIMA
-	private static final String SIMA_EXEC = "/home/joewandy/Dropbox/Project/real_datasets/SIMA_full/SIMA";
+	private static final String SIMA_EXEC = "/SIMA/SIMA";
 	
 	// the output to read after running SIMA_EXEC
 	private static final String SIMA_OUTPUT = "/results/result.txt";
@@ -91,7 +91,9 @@ public class SimaAlignment extends BaseAlignment implements AlignmentMethod {
 			String out = tempPath.toString() + "/" + 
 					data.getFilenameWithoutExtension() + ".csv";
 			data.saveSimaFeatures(out);
-			System.out.println("Written to " + out);
+			if (verbose) {
+				System.out.println("Written to " + out);				
+			}
 		}
 		return tempPath;
 	
@@ -106,10 +108,12 @@ public class SimaAlignment extends BaseAlignment implements AlignmentMethod {
 		map.put("mz", String.valueOf(this.massTolerance));		    
 		map.put("tempDirPath", tempDirPath);
 		map.put("reference", firstFileName);
-		System.out.println(map);
+		if (verbose) {
+			System.out.println(map);			
+		}
 		
 		// for non-blocking version, see http://commons.apache.org/proper/commons-exec/tutorial.html
-		final String execPath = SimaAlignment.SIMA_EXEC;
+		final String execPath = this.getExecutablePath() + SIMA_EXEC;
 		CommandLine cmdLine = new CommandLine(execPath);
 		cmdLine.addArgument("-R");
 		cmdLine.addArgument("${rt}");
@@ -125,7 +129,9 @@ public class SimaAlignment extends BaseAlignment implements AlignmentMethod {
 		DefaultExecutor executor = new DefaultExecutor();
 		
 		// exitCode is useless here, the SIMA program returns 0 even if error occurs ?!
-		System.out.println("cmdLine=" + cmdLine);
+		if (verbose) {
+			System.out.println("cmdLine=" + cmdLine);			
+		}
 		int exitCode = executor.execute(cmdLine); 
 		
 	}

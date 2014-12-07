@@ -15,9 +15,7 @@ from alignment import MaxWeightedAligner
 
 def print_banner():
     '''Prints some banner at program start'''
-    print "==================================="
-    print "Maximum weighted matching alignment"
-    print "==================================="
+    print "MW.py -- maximum-weighted matching alignment"
     
 def get_options(argv):
     '''Parses command-line options'''
@@ -54,11 +52,13 @@ def get_options(argv):
     parser.set_defaults(skip_matching=False)
     parser.add_argument('-always_recluster', dest='always_recluster', action='store_true', help='always initialise a new mixture model clustering instead of reading previously-cached results')
     parser.set_defaults(always_recluster=False)
+    parser.add_argument('-v', dest='verbose', action='store_true', help='Be verbose')
+    parser.set_defaults(verbose=False)
 
     # parse it
     options = parser.parse_args(argv)
-    print "Options", options
-    print
+    if options.verbose:
+        print "Options", options
     return options
     
 def natural_sort(l): 
@@ -66,7 +66,7 @@ def natural_sort(l):
     alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
     return sorted(l, key = alphanum_key)    
     
-def read_files(input_dir):
+def read_files(input_dir, verbose):
     '''Reads all csv and txt files inside input_dir'''
     filelist = []
     # process only csv and txt files in input_dir
@@ -79,7 +79,7 @@ def read_files(input_dir):
     alignment_files = []        
     for fileitem in filelist:
         full_path = os.path.join(input_dir, fileitem);
-        alignment_file = AlignmentFile(full_path)
+        alignment_file = AlignmentFile(full_path, verbose)
         alignment_file.get_data()
         alignment_files.append(alignment_file)
     return alignment_files
@@ -88,7 +88,8 @@ def do_alignment(options):
     '''Performs feature-based alignment'''
     # retrieve input files
     input_dir = options.input_dir
-    alignment_files = read_files(input_dir)    
+    verbose = options.verbose
+    alignment_files = read_files(input_dir, verbose)    
     # pick alignment method
     alignment_method = options.alignment_method
     aligner = BaseAligner.select_aligner(alignment_method, alignment_files, options)
@@ -101,7 +102,6 @@ def main(argv):
     print_banner()
     options = get_options(argv)
     do_alignment(options)
-    print "DONE!"
 
 if __name__ == "__main__":
    main(sys.argv[1:])

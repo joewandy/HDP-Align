@@ -80,7 +80,8 @@ public class FeatureXMLToText {
 				cmdline.printOptions();
 			}
 
-			AlignmentDataGenerator generator = new FeatureXMLDataGenerator(options.inputDirectory, options.gt);
+			AlignmentDataGenerator generator = new FeatureXMLDataGenerator(
+					options.inputDirectory, options.gt, options.verbose);
 			AlignmentData data = generator.generate();
 			
 			// sort input file alphabetically to look nicer

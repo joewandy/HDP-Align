@@ -66,8 +66,8 @@ public class MultiAlign {
 		this.options = options;
 		this.data = data;
 		this.method = options.method;
-		this.massTolerance = options.alignmentPpm;
-		this.rtTolerance = options.alignmentRtWindow;
+		this.massTolerance = options.alignmentMzTol;
+		this.rtTolerance = options.alignmentRtTol;
 		this.groupingRtWindow = options.groupingRtWindow;
 		this.alpha = options.alpha;		
 		this.param = new AlignmentMethodParam(options);
@@ -120,7 +120,7 @@ public class MultiAlign {
 		
 		// actually do the alignment now, filtering of alignment results also happen inside align()
 		AlignmentList result = aligner.align();
-		if (result != null) {
+		if (result != null && options.verbose) {
 			System.out.println("Total " + result.getRowsCount() + " rows aligned");			
 		}
 		if (result != null) {
@@ -137,7 +137,7 @@ public class MultiAlign {
 
 		MultiAlignExpResult expResult = new MultiAlignExpResult("");						
 		AlignmentList result = aligner.align();
-		if (result != null) {
+		if (result != null && options.verbose) {
 			System.out.println("Total " + result.getRowsCount() + " rows aligned");			
 		}
 		if (result != null) {
@@ -167,10 +167,10 @@ public class MultiAlign {
 			int noOfFiles = data.getNoOfFiles();
 			GroundTruth gt = data.getGroundTruth();
 			if (measureType.equals(MultiAlignConstants.PERFORMANCE_MEASURE_LANGE)) {
-				evalRes = gt.evaluateOld(Collections.unmodifiableList(result.getRows()), noOfFiles, 
+				evalRes = gt.evaluateLange(Collections.unmodifiableList(result.getRows()), noOfFiles, 
 						massTolerance, rtTolerance);								
-			} else if (measureType.equals(MultiAlignConstants.PERFORMANCE_MEASURE_JOE)) {
-				evalRes = gt.evaluateNew(Collections.unmodifiableList(result.getRows()), noOfFiles, 
+			} else if (measureType.equals(MultiAlignConstants.PERFORMANCE_MEASURE_PAIRWISE)) {
+				evalRes = gt.evaluatePairwise(Collections.unmodifiableList(result.getRows()), noOfFiles, 
 						massTolerance, rtTolerance);												
 			}
 		}		
@@ -181,11 +181,11 @@ public class MultiAlign {
 		String note = alpha + ", " + groupingRtWindow;
 		evalRes.setNote(note);
 		
-		System.out.println();
-		System.out.println("******************************************************");
-		System.out.println("evalRes method=" + method + " mz=" + evalRes.getDmz() + " RT=" + evalRes.getDrt() + " F1=" + evalRes.getF1());
-		System.out.println("******************************************************");
-		System.out.println();
+//		System.out.println();
+//		System.out.println("******************************************************");
+//		System.out.println("evalRes method=" + method + " mz=" + evalRes.getDmz() + " RT=" + evalRes.getDrt() + " F1=" + evalRes.getF1());
+//		System.out.println("******************************************************");
+//		System.out.println();
 					
 		// RetentionTimePrinter rtp = new RetentionTimePrinter();
 		// rtp.printRt1(alignmentDataList.get(0), alignmentDataList.get(1));
@@ -225,9 +225,9 @@ public class MultiAlign {
 			
 			List<AlignmentRow> filtered = new ArrayList<AlignmentRow>(pq);
 			if (measureType.equals(MultiAlignConstants.PERFORMANCE_MEASURE_LANGE)) {
-				evalRes = gt.evaluateOld(filtered, noOfFiles, massTolerance, rtTolerance);								
-			} else if (measureType.equals(MultiAlignConstants.PERFORMANCE_MEASURE_JOE)) {
-				evalRes = gt.evaluateNew(filtered, noOfFiles, massTolerance, rtTolerance);												
+				evalRes = gt.evaluateLange(filtered, noOfFiles, massTolerance, rtTolerance);								
+			} else if (measureType.equals(MultiAlignConstants.PERFORMANCE_MEASURE_PAIRWISE)) {
+				evalRes = gt.evaluatePairwise(filtered, noOfFiles, massTolerance, rtTolerance);												
 			}
 			evalRes.setTh(lastScore);
 			String note = alpha + ", " + groupingRtWindow;

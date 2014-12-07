@@ -22,9 +22,7 @@ public class MultiAlignExpResult {
 	public EvaluationResult getResultBestF1() {
 		double lowest = 0;
 		EvaluationResult best = null;
-		System.out.println("Finding best result");
 		for (EvaluationResult res : results) {
-			System.out.println("\tmz=" + res.getDmz() + " rt=" + res.getDrt() + " note=" + res.getNote() + " f1=" + res.getF1());
 			if (res.getF1() > lowest) {
 				best = res;
 				lowest = best.getF1();
@@ -106,65 +104,65 @@ public class MultiAlignExpResult {
 		}
 		System.out.println(" ]';");		
 		
-		System.out.print(label + "_medSdrt = [ ");
-		for (EvaluationResult result : results) {
-			if (result == null) {
-				continue;
-			}
-			System.out.print(String.format("%.3f,", result.getMedSdrt()));
-		}
-		System.out.println(" ]';");		
+//		System.out.print(label + "_medSdrt = [ ");
+//		for (EvaluationResult result : results) {
+//			if (result == null) {
+//				continue;
+//			}
+//			System.out.print(String.format("%.3f,", result.getMedSdrt()));
+//		}
+//		System.out.println(" ]';");		
+//
+//		System.out.print(label + "_meanSdrt = [ ");
+//		for (EvaluationResult result : results) {
+//			if (result == null) {
+//				continue;
+//			}
+//			System.out.print(String.format("%.3f,", result.getMeanSdrt()));
+//		}
+//		System.out.println(" ]';");		
+//
+//		System.out.print(label + "_medMdrt = [ ");
+//		for (EvaluationResult result : results) {
+//			if (result == null) {
+//				continue;
+//			}
+//			System.out.print(String.format("%.3f,", result.getMedMdrt()));
+//		}
+//		System.out.println(" ]';");		
+//
+//		System.out.print(label + "_meanMdrt = [ ");
+//		for (EvaluationResult result : results) {
+//			if (result == null) {
+//				continue;
+//			}
+//			System.out.print(String.format("%.3f,", result.getMeanMdrt()));
+//		}
+//		System.out.println(" ]';");		
+//
+//		System.out.print(label + "_coverage = [ ");
+//		for (EvaluationResult result : results) {
+//			if (result == null) {
+//				continue;
+//			}
+//			System.out.print(String.format("%.3f,", result.getCoverage()));
+//		}
+//		System.out.println(" ]';");		
 
-		System.out.print(label + "_meanSdrt = [ ");
-		for (EvaluationResult result : results) {
-			if (result == null) {
-				continue;
-			}
-			System.out.print(String.format("%.3f,", result.getMeanSdrt()));
-		}
-		System.out.println(" ]';");		
-
-		System.out.print(label + "_medMdrt = [ ");
-		for (EvaluationResult result : results) {
-			if (result == null) {
-				continue;
-			}
-			System.out.print(String.format("%.3f,", result.getMedMdrt()));
-		}
-		System.out.println(" ]';");		
-
-		System.out.print(label + "_meanMdrt = [ ");
-		for (EvaluationResult result : results) {
-			if (result == null) {
-				continue;
-			}
-			System.out.print(String.format("%.3f,", result.getMeanMdrt()));
-		}
-		System.out.println(" ]';");		
-
-		System.out.print(label + "_coverage = [ ");
-		for (EvaluationResult result : results) {
-			if (result == null) {
-				continue;
-			}
-			System.out.print(String.format("%.3f,", result.getCoverage()));
-		}
-		System.out.println(" ]';");		
-
-		System.out.println();
-		for (EvaluationResult result : results) {
-			if (result == null) {
-				continue;
-			}
-			String precision = String.format("%.3f", result.getPrecision());
-			String recall = String.format("%.3f", result.getRecall());
-			String f1 = String.format("%.3f", result.getF1());
-			String tp = String.format("%.1f", result.getTotalTp());
-			String fp = String.format("%.1f", result.getTotalFp());
-			String fn = String.format("%.1f", result.getTotalFn());			
-			String note = result.getNote();
-			System.out.println(precision + "\t" + recall + "\t" + f1 + "\t" + tp + "\t" + fp + "\t" + fn + "\t" + note);
-		}
+//		System.out.println();
+//		for (EvaluationResult result : results) {
+//			if (result == null) {
+//				continue;
+//			}
+//			String precision = String.format("%.3f", result.getPrecision());
+//			String recall = String.format("%.3f", result.getRecall());
+//			String f1 = String.format("%.3f", result.getF1());
+//			String tp = String.format("%.1f", result.getTotalTp());
+//			String fp = String.format("%.1f", result.getTotalFp());
+//			String fn = String.format("%.1f", result.getTotalFn());			
+//			String note = result.getNote();
+//			System.out.println(precision + "\t" + recall + "\t" + f1 + "\t" + tp + "\t" + fp + "\t" + fn + "\t" + note);
+//		}
 		
 	}
 	

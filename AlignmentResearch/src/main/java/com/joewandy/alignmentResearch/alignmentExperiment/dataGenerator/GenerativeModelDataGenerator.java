@@ -52,7 +52,7 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 	
 	private Cloner cloner;
 	
-	public GenerativeModelDataGenerator(String molPath, GenerativeModelParameter params) {
+	public GenerativeModelDataGenerator(String molPath, GenerativeModelParameter params, boolean verbose) {
 
 		super();
 		
@@ -61,12 +61,16 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 		this.params = params;
 		this.predictor = new RTPredictor(params);
 		this.r = new Random();
-		
-		System.out.println();
-		System.out.println("Loading molecules");
+		this.verbose = verbose;
+
+		if (verbose) {
+			System.out.println("Loading molecules");			
+		}
 		this.molecules = loadMolecules(molPath);
 
-		System.out.println("Loading replacement");
+		if (verbose) {
+			System.out.println("Loading replacement");			
+		}
 		this.replacement = loadMolecules(subsPath);
 		
 		this.cloner = new Cloner();
@@ -95,7 +99,9 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 			// select the molecules in each replicate
 			List<GenerativeMolecule> selectedMols = database.getAllMoleculeInfo(i);
 			int N = database.countTheoreticalPeaks(selectedMols);
-			System.out.println("Total " + selectedMols.size() + " molecules selected with " + N + " theoretical features");
+			if (verbose) {
+				System.out.println("Total " + selectedMols.size() + " molecules selected with " + N + " theoretical features");				
+			}
 
 			// collect all the theoretical features for each metabolite
 			List<Feature> theoFeatures = new ArrayList<Feature>();
@@ -106,12 +112,16 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 			}
 			
 			// generate observed features from theoretical featues
-			System.out.println("Generating observed features ..");
+			if (verbose) {
+				System.out.println("Generating observed features ..");				
+			}
 			List<Feature> observedFeatures = generateObservedFeatures(theoFeatures);
 									
 			String fileName = filePrefix + i + fileSuffix;
 			AlignmentFile file = new AlignmentFile(i, fileName, observedFeatures);
-			System.out.println(file.getFilename() + " contains " + file.getFeaturesCount() + " observed features");
+			if (verbose) {
+				System.out.println(file.getFilename() + " contains " + file.getFeaturesCount() + " observed features");				
+			}
 
 			alignmentDataList.add(file);
 			
@@ -183,10 +193,12 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 			for (Feature feature : features) {
 				feature.setAligned(false);
 			}
+		}		
+		if (verbose) {			
+			System.out.println("Load ground truth = " + groundTruthEntries.size() + " rows");
 		}
-		
-		System.out.println("Ground truth loaded = " + groundTruthEntries.size() + " rows");
 
+//		System.out.println("Retaining only entries size >= 2 = " + groundTruthEntries.size() + " rows");
 		Iterator<GroundTruthFeatureGroup> it = groundTruthEntries.iterator();
 		while (it.hasNext()) {
 			GroundTruthFeatureGroup gg = it.next();
@@ -194,9 +206,8 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 				it.remove();
 			}
 		}
-		System.out.println("Retaining only entries size >= 2 = " + groundTruthEntries.size() + " rows");
 		
-		GroundTruth groundTruth = new GroundTruth(groundTruthEntries);
+		GroundTruth groundTruth = new GroundTruth(groundTruthEntries, verbose);
 		return groundTruth;
 		
 	}
@@ -214,14 +225,18 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 			
 			if (params.getExpType() == GenerativeModelParameter.ExperimentType.TECHNICAL) {
 
-				System.out.println("Technical replicates #" + i);
+				if (verbose) {
+					System.out.println("Technical replicates #" + i);					
+				}
 				selected.addAll(molecules);
 				originalCount += selected.size();
 			
 			} else if (params.getExpType() == GenerativeModelParameter.ExperimentType.BIOLOGICAL) {
 
-				System.out.println("Biological replicate #" + i);
-				System.out.println("a = " + a);
+				if (verbose) {
+					System.out.println("Biological replicate #" + i);
+					System.out.println("a = " + a);					
+				}
 				originalCount = (int) (molecules.size() * a);
 				substituteCount = molecules.size() - originalCount;
 				
@@ -252,9 +267,11 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 				
 			}
 			
-			System.out.println("\tOriginal molecules = " + originalCount);
-			System.out.println("\tSubstitute molecules = " + substituteCount);
-			System.out.println("\t" + selected.size() + " inserted into database");
+			if (verbose) {
+				System.out.println("\tOriginal molecules = " + originalCount);
+				System.out.println("\tSubstitute molecules = " + substituteCount);
+				System.out.println("\t" + selected.size() + " inserted into database");				
+			}
 
 			for (Molecule molecule : selected) {
 				database.insert(i, molecule); // also predict molecule's retention time inside

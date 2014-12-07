@@ -5,13 +5,11 @@ import com.joewandy.alignmentResearch.main.MultiAlignConstants;
 
 public class AlignmentMethodParam {
 		
+	// general parameters
 	private boolean usePpm;
 	private double massTolerance;
 	private double rtTolerance;
-	private boolean useGroup;
-	private boolean exactMatch;
-	private boolean usePeakShape;
-	private double minCorrSignal;
+	private boolean verbose;
 
 	// for ransac alignment
 	private double ransacRtToleranceBeforeMinute;
@@ -35,6 +33,11 @@ public class AlignmentMethodParam {
 	private String groupingMethod;
 	private double groupingRtTolerance;
 	private double groupingDpAlpha;
+	private boolean useGroup;
+	private boolean exactMatch;
+	private boolean usePeakShape;
+	private double minCorrSignal;
+	private boolean alwaysRecluster;
 
 	// for HDP alignment
 	private double hdpAlphaRt;
@@ -48,24 +51,25 @@ public class AlignmentMethodParam {
 	private int hdpRefFileIdx;
 	private int hdpMinSpan;
 	
+	// for other HDP stuff
 	private String identificationDatabase;
 	private String groundTruthDatabase;
 	private String mode;
-
+	
 	public AlignmentMethodParam() {
 	
 	}
 	
 	public AlignmentMethodParam(MultiAlignCmdOptions options) {
 		this.usePpm = options.usePpm;
-		this.massTolerance = options.alignmentPpm;
-		this.rtTolerance = options.alignmentRtWindow;
+		this.massTolerance = options.alignmentMzTol;
+		this.rtTolerance = options.alignmentRtTol;
 		this.useGroup = options.useGroup;
 		this.exactMatch = options.exactMatch;
 		this.usePeakShape = options.usePeakShape;
 		this.minCorrSignal = options.minCorrSignal;
 		this.ransacRtToleranceBeforeMinute = options.ransacRtToleranceBeforeCorrection;
-		this.ransacRtToleranceAfterMinute = options.alignmentRtWindow;
+		this.ransacRtToleranceAfterMinute = options.alignmentRtTol;
 		this.ransacIteration = options.ransacIteration;
 		this.ransacNMinPoints = options.ransacNMinPoints;
 		this.ransacThreshold = options.ransacThreshold;
@@ -92,6 +96,8 @@ public class AlignmentMethodParam {
 		this.identificationDatabase = options.idDatabase;
 		this.groundTruthDatabase = options.gtDatabase;
 		this.mode = options.mode;
+		this.verbose = options.verbose;
+		this.alwaysRecluster = options.alwaysRecluster;
 	}
 
 	public boolean isUsePpm() {
@@ -373,6 +379,22 @@ public class AlignmentMethodParam {
 
 	public void setMode(String mode) {
 		this.mode = mode;
+	}
+
+	public boolean isVerbose() {
+		return verbose;
+	}
+
+	public void setVerbose(boolean verbose) {
+		this.verbose = verbose;
+	}
+
+	public boolean isAlwaysRecluster() {
+		return alwaysRecluster;
+	}
+
+	public void setAlwaysRecluster(boolean alwaysRecluster) {
+		this.alwaysRecluster = alwaysRecluster;
 	}
 
 }

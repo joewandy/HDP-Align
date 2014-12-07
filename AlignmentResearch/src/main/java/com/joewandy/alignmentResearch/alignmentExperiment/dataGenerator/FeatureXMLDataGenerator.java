@@ -34,10 +34,11 @@ public class FeatureXMLDataGenerator extends BaseDataGenerator implements Alignm
 	private String inputDirectory;
 	private String gtPath;
 	
-	public FeatureXMLDataGenerator(String inputDirectory, String gtPath) {
+	public FeatureXMLDataGenerator(String inputDirectory, String gtPath, boolean verbose) {
 		super();
 		this.inputDirectory = inputDirectory;
 		this.gtPath = gtPath;
+		this.verbose = verbose;
 	}
 	
 	@Override
@@ -76,7 +77,9 @@ public class FeatureXMLDataGenerator extends BaseDataGenerator implements Alignm
 					e.printStackTrace();
 				}
 				AlignmentFile alignmentData = new AlignmentFile(i, myFile, features);
-				System.out.println("Load " + filename + " with " + alignmentData.getFeaturesCount() + " features");
+				if (verbose) {
+					System.out.println("Load " + filename + " with " + alignmentData.getFeaturesCount() + " features");
+				}
 				alignmentDataList.add(alignmentData);
 				allFeatures.addAll(alignmentData.getFeatures());
 			
@@ -197,9 +200,11 @@ public class FeatureXMLDataGenerator extends BaseDataGenerator implements Alignm
 				in.close();				
 			}
 		}
+		if (verbose) {
+			System.out.println("Load ground truth = " + groundTruthEntries.size() + " rows");			
+		}
 
-		System.out.println("Ground truth loaded = " + groundTruthEntries.size() + " rows");
-
+//		System.out.println("Retaining only entries size >= 2 = " + groundTruthEntries.size() + " rows");
 		Iterator<GroundTruthFeatureGroup> it = groundTruthEntries.iterator();
 		while (it.hasNext()) {
 			GroundTruthFeatureGroup gg = it.next();
@@ -207,9 +212,8 @@ public class FeatureXMLDataGenerator extends BaseDataGenerator implements Alignm
 				it.remove();
 			}
 		}
-		System.out.println("Retaining only entries size >= 2 = " + groundTruthEntries.size() + " rows");
 		
-		GroundTruth groundTruth = new GroundTruth(groundTruthEntries);
+		GroundTruth groundTruth = new GroundTruth(groundTruthEntries, verbose);
 		return groundTruth;
 		
 	}

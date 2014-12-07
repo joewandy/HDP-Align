@@ -25,10 +25,9 @@ import com.joewandy.alignmentResearch.objectModel.AlignmentList;
  * @author joewandy
  */
 public class PythonMW extends BaseAlignment implements AlignmentMethod {
-	
-	// the executable name of the script
-	private static final String SCRIPT_EXEC = System.getProperty("user.home") + "/scripts/MW.py";
-	
+		
+	private static final String SCRIPT_EXEC = "/MW/MW.py";
+
 	// the output to read after running SCRIPT EXEC
 	private static final String SCRIPT_OUTPUT = "result.txt";
 
@@ -42,6 +41,7 @@ public class PythonMW extends BaseAlignment implements AlignmentMethod {
 	private int groupingNSamples;
 	private int groupingBurnIn;
 	private double groupingDpAlpha;
+	private boolean alwaysRecluster;
 	
 	/**
 	 * Creates a simple aligner
@@ -61,6 +61,7 @@ public class PythonMW extends BaseAlignment implements AlignmentMethod {
 		this.groupingNSamples = param.getGroupingNSamples();
 		this.groupingBurnIn = param.getGroupingBurnIn();
 		this.groupingDpAlpha = param.getGroupingDpAlpha();
+		this.alwaysRecluster = param.isAlwaysRecluster();
 	}
 	
 	@Override
@@ -96,14 +97,18 @@ public class PythonMW extends BaseAlignment implements AlignmentMethod {
 	
 		// create temporary directory to hold our intermediate input files
         Path tempPath = Files.createTempDirectory(parentPath, "MW_INPUT_");
-        System.out.println("tempPath = " + tempPath);
+        if (verbose) {
+            System.out.println("tempPath = " + tempPath);        	
+        }
 		
 		// put all spectra files inside TEMP_INPUT_DIR
 		for (AlignmentFile data : dataList) {
 			String out = tempPath.toString() + "/" + 
 					data.getFilenameWithoutExtension() + ".csv";
 			data.saveSimaFeatures(out);
-			System.out.println("Written to " + out);
+			if (verbose) {
+				System.out.println("Written to " + out);				
+			}
 		}
 		return tempPath;
 	
@@ -126,10 +131,12 @@ public class PythonMW extends BaseAlignment implements AlignmentMethod {
 		map.put("dpAlpha", String.valueOf(this.groupingDpAlpha));
 		map.put("numSamples", String.valueOf(this.groupingNSamples));
 		map.put("burnIn", String.valueOf(this.groupingBurnIn));
-		System.out.println(map);
+		if (verbose) {
+			System.out.println(map);
+		}
 		
 		// for non-blocking version, see http://commons.apache.org/proper/commons-exec/tutorial.html
-		final String execPath = PythonMW.SCRIPT_EXEC;
+		final String execPath = this.getExecutablePath() + SCRIPT_EXEC;
 		CommandLine cmdLine = new CommandLine(execPath);
 
 		// basic parameters
@@ -143,6 +150,9 @@ public class PythonMW extends BaseAlignment implements AlignmentMethod {
 		cmdLine.addArgument("${drt}");
 		cmdLine.addArgument("-method");
 		cmdLine.addArgument("${method}");
+		if (this.verbose) {
+			cmdLine.addArgument("-v");			
+		}
 		if (this.exactMatch) {
 			cmdLine.addArgument("-exact_match");			
 		}
@@ -172,15 +182,21 @@ public class PythonMW extends BaseAlignment implements AlignmentMethod {
 		cmdLine.addArgument("${burnIn}");		
 
 		// for debugging
-		cmdLine.addArgument("-always_recluster");		
+		if (this.alwaysRecluster) {
+			cmdLine.addArgument("-always_recluster");			
+		}
 		
 		cmdLine.setSubstitutionMap(map);
 		DefaultExecutor executor = new DefaultExecutor();
 		
 		// handle the exitcode properly ..
-		System.out.println("cmdLine=" + cmdLine);
+		if (verbose) {
+			System.out.println("cmdLine=" + cmdLine);
+		}
 		int exitCode = executor.execute(cmdLine); 
-		System.out.println("exitCode=" + exitCode);
+		if (verbose) {
+			System.out.println("exitCode=" + exitCode);			
+		}
 		
 	}
 	

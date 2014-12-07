@@ -82,8 +82,8 @@ public class M1Experiment extends MultiAlignBaseExp implements MultiAlignExperim
 									" groupingRt = " + groupingRts[k] + " alpha = " + alphas[j] + " ---");
 							System.out.println();
 
-							options.alignmentPpm = alignmentMz;
-							options.alignmentRtWindow = alignmentRt;
+							options.alignmentMzTol = alignmentMz;
+							options.alignmentRtTol = alignmentRt;
 							options.alpha = alphas[j];
 							options.groupingRtWindow = groupingRts[k];
 							MultiAlign multiAlign = new MultiAlign(options, data);
@@ -111,8 +111,8 @@ public class M1Experiment extends MultiAlignBaseExp implements MultiAlignExperim
 
 				double bestMz = bestResult.getDmz();
 				double bestRt = bestResult.getDrt();
-				options.alignmentPpm = bestMz;
-				options.alignmentRtWindow = bestRt;
+				options.alignmentMzTol = bestMz;
+				options.alignmentRtTol = bestRt;
 				String bestNote = bestResult.getNote();
 				String[] toks = bestNote.split(",");
 				double bestAlpha = Double.parseDouble(toks[0].trim());

@@ -34,23 +34,22 @@ class MaxWeightedMatching:
         self.num_samples = int(self.options.num_samples)
         self.burn_in = int(self.options.burn_in)
         self.skip_matching = self.options.skip_matching
+        self.verbose = self.options.verbose
 
     def do_matching(self):
         
         if len(self.men.rows) == 0:
 
             # for first time matching 
-            matched_results = AlignmentFile(self.women.filename)
+            matched_results = AlignmentFile(self.women.filename, self.verbose)
             matched_results.parent_dir = self.women.parent_dir   
             matched_results.add_rows(self.women.rows)         
-            draw_progress_bar(1)
-            print
             return matched_results
         
         else:
             
             # for subsequent merging
-            matched_results = AlignmentFile(self.men.filename + "_" + self.women.filename)
+            matched_results = AlignmentFile(self.men.filename + "_" + self.women.filename, self.verbose)
 
             # do clustering only
             if self.skip_matching:
@@ -62,13 +61,11 @@ class MaxWeightedMatching:
 
             # compute distance matrix            
             print "Computing score matrix"
-            sys.stdout.flush()
             score_arr, Q = self.compute_scores(self.men, self.women, self.dmz, self.drt)
 
             # combine scores, if necessary
             if self.options.use_group:
                 print "\nCombining grouping information"
-                sys.stdout.flush()            
                 clusterer = self.get_clusterer(self.men, self.options)
                 A = clusterer.do_clustering()
                 clusterer = self.get_clusterer(self.women, self.options)
@@ -76,13 +73,13 @@ class MaxWeightedMatching:
                 score_arr = self.combine_scores(score_arr, A, B, Q)
             
             # do approximate or exact matching here
-            print "\nRunning matching"
-            sys.stdout.flush()
+            print "Running matching"
             if self.options.exact_match:
                 mate = self.hungarian_matching(self.men, self.women, score_arr)
             else:
                 # mate = self.approximate_matching_scipy(self.men, self.women, score_arr)
                 mate = self.approximate_matching_pq(self.men, self.women, score_arr)
+            print
 
             # process the matched rows
             row_id = 0
@@ -104,7 +101,6 @@ class MaxWeightedMatching:
             matched_results.add_rows(unaligned_rows)
             for row in unaligned_rows:
                 row.aligned = True
-            draw_progress_bar(1)
 
             return matched_results
         
@@ -135,7 +131,6 @@ class MaxWeightedMatching:
         
         # construct a score matrix
         n_row = len(men.rows)
-        tick = n_row / 10
         n_col = len(women.rows)
         dist_arr = lil_matrix((n_row, n_col))
         max_dist = 0        
@@ -152,13 +147,8 @@ class MaxWeightedMatching:
                     dist_arr[i, j] = dist
                     if dist > max_dist:
                         max_dist = dist
-            # show matching progress
-            if i % tick == 0:
-                percent = float(i) / n_row
-                draw_progress_bar(percent)
 
         # make this into a score matrix
-        draw_progress_bar(1)            
         dist_arr = dist_arr.tocoo()
         score_arr = lil_matrix((n_row, n_col))
         Q = lil_matrix((n_row, n_col))
@@ -196,24 +186,20 @@ class MaxWeightedMatching:
         
         # do the multiplication to upweight / downweight
         print "\tComputing D=(AW)"
-        sys.stdout.flush()
         AW = A * W
         print "\tComputing D=(AW)B"
-        sys.stdout.flush()
         AWB = AW * B
         
         # mask the resulting output
         print "\tComputing D.*Q"                    
-        sys.stdout.flush()        
         D = AWB.multiply(Q)
         
-        # normalise it -- NO NEED TO DO THIS ?!
+        # normalise it
         max_score = D.max()
         D = D * (1/max_score)
 
         # combine with original scores
         print "\tComputing W'=(alpha.*W)+((1-alpha).*D)"            
-        sys.stdout.flush()        
         W = W * self.alpha
         D = D * (1-self.alpha)
         score_arr = W + D
@@ -251,9 +237,7 @@ class MaxWeightedMatching:
         tick = total / 20
         if tick == 0:
             tick = total
-        
-        draw_progress_bar(0)                        
-        
+                
         # while there's an edge
         i = G.number_of_edges()
         while i > 0:
@@ -277,14 +261,6 @@ class MaxWeightedMatching:
             for neighbour in neighbours:
                 G.remove_edge(value_row, neighbour)
             
-            # show matching progress
-            i = G.number_of_edges()            
-            processed = total - i
-            if processed % tick == 0:
-                percent = float(processed) / total
-                draw_progress_bar(percent)                        
-            
-        draw_progress_bar(1)                                    
         return M
                         
     def approximate_matching_pq(self, men, women, score_arr):
@@ -303,12 +279,6 @@ class MaxWeightedMatching:
         
         while not q.empty():
 
-            processed = total - q.size
-
-            if processed % tick == 0:
-                percent = float(processed) / total
-                draw_progress_bar(percent)                                    
-
             pq_entry = q.get()
             priority = pq_entry[0]
             item = pq_entry[1]
@@ -322,7 +292,6 @@ class MaxWeightedMatching:
                 score_arr[i, :] = 0
                 score_arr[:, j] = 0
         
-        draw_progress_bar(1)
         return mate
     
     def make_queue(self, score_arr):

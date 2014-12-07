@@ -110,7 +110,7 @@ public class AlignmentList {
 				}
 			} catch (IndexOutOfBoundsException e) {
 				// invalid entry in the alignment result, skipping ...
-				System.out.println("Invalid index " + peakIdx + " for " + data.getFilename() + " (" + data.getFeaturesCount() + ")");
+//				System.out.println("Invalid index " + peakIdx + " for " + data.getFilename() + " (" + data.getFeaturesCount() + ")");
 				continue;
 			} finally {
 				lineSplitter.close();				
@@ -146,7 +146,7 @@ public class AlignmentList {
 		row.addAlignedFeatures(alignedFeatures);
 		this.addRow(row);		
 		
-		System.out.println("Alignment entries loaded = " + this.rows.size() + " rows");
+//		System.out.println("Alignment entries loaded = " + this.rows.size() + " rows");
 
 	}
 	

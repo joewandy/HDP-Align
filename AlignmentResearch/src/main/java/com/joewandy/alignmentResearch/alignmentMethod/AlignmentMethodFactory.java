@@ -32,7 +32,7 @@ public class AlignmentMethodFactory {
 	public static final String ALIGNMENT_METHOD_GROUP_ONLY = "groupOnly";
 
 	// same but implemented in python
-	public static final String ALIGNMENT_METHOD_PYTHON_MW = "pythonMW";
+	public static final String ALIGNMENT_METHOD_PYTHON_MW = "MW";
 	
 	// calls mzMine Join aligner
 	public static final String ALIGNMENT_METHOD_MZMINE_JOIN = "join";
@@ -47,30 +47,31 @@ public class AlignmentMethodFactory {
 	public static final String ALIGNMENT_METHOD_OPENMS = "openMS";
 	
 	
-	public static AlignmentMethod getAlignmentMethod(final String method, AlignmentMethodParam param, 
+	public static AlignmentMethod getAlignmentMethod(String method, AlignmentMethodParam param, 
 			AlignmentData data, ExtendedLibrary library) {
 
+		method = method.toLowerCase();
 		List<AlignmentFile> alignmentDataList = data.getAlignmentDataList();
 		AlignmentMethod aligner = null; 
-		if (AlignmentMethodFactory.ALIGNMENT_METHOD_BASELINE.equals(method)) {				
+		if (AlignmentMethodFactory.ALIGNMENT_METHOD_BASELINE.toLowerCase().equals(method)) {				
 			aligner = new BaselineAlignment(alignmentDataList, param);
-		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_JOIN.equals(method)) {
+		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_JOIN.toLowerCase().equals(method)) {
 			aligner = new MyJoinAlignment(alignmentDataList, param);
-		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_MAXIMUM_WEIGHT_MATCHING_REFERENCE.equals(method)) {
+		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_MAXIMUM_WEIGHT_MATCHING_REFERENCE.toLowerCase().equals(method)) {
 			aligner = new MyMaximumMatchingAlignment(alignmentDataList, param);
-		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MZMINE_RANSAC.equals(method)) {
+		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MZMINE_RANSAC.toLowerCase().equals(method)) {
 			aligner = new MzMineRansacAlignment(alignmentDataList, param);
-		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MZMINE_JOIN.equals(method)) {
+		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MZMINE_JOIN.toLowerCase().equals(method)) {
 			aligner = new MzMineJoinAlignment(alignmentDataList, param);
-		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_SIMA.equals(method)) {
+		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_SIMA.toLowerCase().equals(method)) {
 			aligner = new SimaAlignment(alignmentDataList, param);
-		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_OPENMS.equals(method)) {
+		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_OPENMS.toLowerCase().equals(method)) {
 			aligner = new OpenMSAlignment(alignmentDataList, param);
-		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_MAXIMUM_WEIGHT_MATCHING_HIERARCHICAL.equals(method)) {
+		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_MAXIMUM_WEIGHT_MATCHING_HIERARCHICAL.toLowerCase().equals(method)) {
 			aligner = new HierarchicalAlignment(alignmentDataList, param, library);
-		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_HDP_ALIGNMENT.equals(method)) {
+		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_HDP_ALIGNMENT.toLowerCase().equals(method)) {
 			aligner = new HdpAlignment(alignmentDataList, param);
-		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_PYTHON_MW.equals(method)) {
+		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_PYTHON_MW.toLowerCase().equals(method)) {
 			aligner = new PythonMW(alignmentDataList, param);
 		}
 

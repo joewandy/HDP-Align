@@ -21,12 +21,12 @@ public class AlignmentDataGeneratorFactory {
 
 		AlignmentDataGenerator generator = null; 
 		if (AlignmentDataGeneratorFactory.FEATURE_XML_DATA.equals(options.dataType)) {				
-			generator = new FeatureXMLDataGenerator(options.inputDirectory, options.gt);
+			generator = new FeatureXMLDataGenerator(options.inputDirectory, options.gt, options.verbose);
 		} else if (AlignmentDataGeneratorFactory.SIMA_DATA.equals(options.dataType)) {				
-				generator = new SimaFormatDataGenerator(options.inputDirectory, options.gt);
+				generator = new SimaFormatDataGenerator(options.inputDirectory, options.gt, options.verbose);
 		} else if (AlignmentDataGeneratorFactory.GENERATIVE_MODEL_DATA.equals(options.dataType)) {				
 			GenerativeModelParameter params = options.generativeParams;
-			generator = new GenerativeModelDataGenerator(options.inputDirectory, params);
+			generator = new GenerativeModelDataGenerator(options.inputDirectory, params, options.verbose);
 		}
 		
 		return generator;

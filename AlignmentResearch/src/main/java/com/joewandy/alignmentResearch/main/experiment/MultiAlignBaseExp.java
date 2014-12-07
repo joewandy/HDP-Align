@@ -25,6 +25,7 @@ public abstract class MultiAlignBaseExp implements MultiAlignExperiment {
 	
 	public void printTestingResult(List<MultiAlignExpResult> results) {
 		for (MultiAlignExpResult result : results) {
+			System.out.println("TESTING RESULTS");
 			result.printResult();
 			System.out.println();			
 			for (EvaluationResult evalRes : result.getEvaluationResults()) {
@@ -46,12 +47,12 @@ public abstract class MultiAlignBaseExp implements MultiAlignExperiment {
 			// pick files according to file indices
 			data = dataGenerator.generateByIndices(fileIndices);
 			for (AlignmentFile file : data.getAlignmentDataList()) {
-				System.out.println("test on " + file.getFilename());
+				System.out.println("Processing " + file.getFilename());
 			}
 		} else {
 			data = dataGenerator.generate();
 			for (AlignmentFile file : data.getAlignmentDataList()) {
-				System.out.println("test on " + file.getFilename());
+				System.out.println("Processing " + file.getFilename());
 			}
 		}
 		return data;

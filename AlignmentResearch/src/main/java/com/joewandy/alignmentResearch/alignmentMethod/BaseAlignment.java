@@ -1,5 +1,6 @@
 package com.joewandy.alignmentResearch.alignmentMethod;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -16,12 +17,14 @@ public abstract class BaseAlignment implements AlignmentMethod {
 	protected double massTolerance;
 	protected boolean usePpm;
 	protected double rtTolerance;
+	protected boolean verbose;
 
 	protected List<AlignmentFile> dataList;	
 	protected List<AlignmentResultFilter> filters;
 	protected List<AlignmentRow> filteredResult;
 	
 	protected Path parentPath;
+	
 		
 	/**
 	 * Initialise our aligner
@@ -40,7 +43,8 @@ public abstract class BaseAlignment implements AlignmentMethod {
 		this.massTolerance = param.getMassTolerance();
 		this.usePpm = param.isUsePpm();
 		this.rtTolerance = param.getRtTolerance();
-		
+		this.verbose = param.isVerbose();
+
 		this.filters = new ArrayList<AlignmentResultFilter>();
 		this.filteredResult = new ArrayList<AlignmentRow>();	
 			
@@ -103,5 +107,20 @@ public abstract class BaseAlignment implements AlignmentMethod {
 	 * @return a list of aligned features in every row
 	 */
 	protected abstract AlignmentList matchFeatures();
-		
+	
+    protected String getExecutablePath() {
+    	
+        String className = this.getClass().getName().replace('.', '/');
+        String classJar =  
+            this.getClass().getResource("/" + className + ".class").toString();
+        if (classJar.startsWith("jar:")) {
+            String jarFilePath = BaseAlignment.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+            File jarFile = new File(jarFilePath);
+            return jarFile.getParent();
+        } else {
+        	return System.getProperty("user.home") + "/scripts";
+        }
+
+    }
+    
 }

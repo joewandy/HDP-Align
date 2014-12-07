@@ -45,8 +45,8 @@ public class MultiAlignCmdOptions {
 	@Option(name = "gt", param = "filename", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "The ground truth file for these data, if any.")
 	public String gt = null;
 	
-	@Option(name = "measureType", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Which way to compute performance measures: lange or joe")
-	public String measureType = MultiAlignConstants.PERFORMANCE_MEASURE_LANGE;	
+	@Option(name = "measureType", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Which way to compute performance measures: lange or pairwise")
+	public String measureType = MultiAlignConstants.PERFORMANCE_MEASURE_PAIRWISE;	
 		
 	/*
 	 * Grouping experiment options
@@ -55,9 +55,12 @@ public class MultiAlignCmdOptions {
 	@Option(name = "experimentType", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "greedy or mzMine join aligner.")
 	public String experimentType = null;	
 
-	@Option(name = "experimentIter", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "No. of iterations or experiment index")
+	@Option(name = "experimentIter", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "No. of iterations")
 	public int experimentIter = 1;
-			
+
+	@Option(name = "trainingIndex", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Index of training-testing set")
+	public int trainingIndex = -1;
+	
 	@Option(name = "autoAlpha", param = "", type = Option.Type.NO_ARGUMENT, level = Option.Level.SYSTEM, usage = "When this is set, automatically adjust alpha from 0 to 1.")
 	public boolean autoAlpha = false;
 
@@ -72,13 +75,13 @@ public class MultiAlignCmdOptions {
 	@Option(name = "method", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Which alignment method to choose.")
 	public String method = AlignmentMethodFactory.ALIGNMENT_METHOD_BASELINE;
 
-	@Option(name = "alignmentPpm", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "The accuracy of the measurement in parts-per-milion. This value is used for the "
+	@Option(name = "alignmentMzTol", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "The accuracy of the m/z measurement, usually in parts-per-milion. This value is used for the "
 			+ "matching of mass chromatogram (collections) and needs to be reasonable for the equipment "
 			+ "used to make the measurement (the LTQ-Orbitrap manages approximately 3 ppm).")
-	public double alignmentPpm = -1;
+	public double alignmentMzTol = -1;
 
-	@Option(name = "alignmentRtWindow", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "The retention time window in seconds, defining the range where to look for matches.")
-	public double alignmentRtWindow = -1;
+	@Option(name = "alignmentRtTol", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "The retention time window in seconds, defining the range where to look for matches.")
+	public double alignmentRtTol = -1;
 	
 	@Option(name="usePpm", param="boolean", type=Option.Type.NO_ARGUMENT, 
 			usage="Whether to use calculate mass difference in parts-per-million (ppm) or absolute value")
@@ -157,6 +160,10 @@ public class MultiAlignCmdOptions {
 
 	@Option(name = "groupingBurnIn", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "No. of burn-in samples")
 	public int groupingBurnIn = MultiAlignConstants.GROUPING_METHOD_BURN_IN;
+	
+	@Option(name="alwaysRecluster", param="boolean", type=Option.Type.NO_ARGUMENT, 
+			usage="Always recluster instead of using previous clustering results")
+	public boolean alwaysRecluster = MultiAlignConstants.ALWAYS_RECLUSTER;
 	
 	// for greedy grouping
 	

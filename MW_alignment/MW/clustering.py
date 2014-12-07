@@ -12,8 +12,6 @@ from models import *
 
 class GreedyClustering:
 
-    MATRIX_SAVE_PATH = '/home/joewandy/mat'
-
     def __init__(self, alignment_file, options):
         
         self.alignment_file = alignment_file
@@ -30,8 +28,9 @@ class GreedyClustering:
             tol = '%.1f' % self.grt
             mcs = '%.2f' % self.min_corr_signal
             front_part, extension = os.path.splitext(self.alignment_file.filename)
+            mat_path = self.alignment_file.parent_dir + '/../mat'
             filename = front_part + '.greedy_peakshape.' + tol + '_' + mcs + '.mat'
-            target = os.path.join(GreedyClustering.MATRIX_SAVE_PATH, filename)
+            target = os.path.join(mat_path, filename)
             print target
             if os.path.isfile(target):
                 print "\tReading peak shape clustering from " + target
@@ -71,9 +70,7 @@ class GreedyClustering:
         return ZZ
                 
 class MixtureModelClustering:
-    
-    MATRIX_SAVE_PATH = '/home/joewandy/mat'
-    
+        
     def __init__(self, alignment_file, options):
         
         self.alignment_file = alignment_file
@@ -96,7 +93,8 @@ class MixtureModelClustering:
         print " - Grouping " + self.alignment_file.filename
         sys.stdout.flush()
         
-        target = os.path.join(MixtureModelClustering.MATRIX_SAVE_PATH, self.alignment_file.filename + '.mixture_model_rt.mat')
+        mat_path = self.alignment_file.parent_dir + '/../mat'
+        target = os.path.join(mat_path, self.alignment_file.filename + '.mixture_model_rt.mat')
         if os.path.isfile(target) and not self.options.always_recluster:
             print "\tReading clustering from " + target
             mdict = scipy.io.loadmat(target)

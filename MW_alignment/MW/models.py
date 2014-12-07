@@ -122,12 +122,13 @@ class AlignmentRow(object):
     
 class AlignmentFile(object):
     
-    def __init__(self, full_path):
+    def __init__(self, full_path, verbose):
         self.full_path = full_path
         parent_dir, filename = os.path.split(full_path)
         self.parent_dir = parent_dir
         self.filename = filename
         self.rows = []
+        self.verbose = verbose
         
     def __repr__(self):
         return "full_path " + self.full_path + " with " + len(self.rows) + " rows"
@@ -136,7 +137,8 @@ class AlignmentFile(object):
         '''Reads features from input file pointed by full_path'''
         row_id = 0
         peak_id = 0
-        print "Loading " + self.full_path
+        if self.verbose:
+            print "Loading " + self.full_path
         with open(self.full_path, 'rb') as f:
             # skip header if present
             has_header = csv.Sniffer().has_header(f.read(1024))
@@ -160,7 +162,8 @@ class AlignmentFile(object):
                 self.rows.append(alignment_row)                            
         # print summary
         row_count = str(len(self.rows))
-        print " - " + row_count + " rows read"    
+        if self.verbose:
+            print " - " + row_count + " rows read"    
     
     def add_rows(self, other_rows):
         '''Adds the rows from another file into this file'''

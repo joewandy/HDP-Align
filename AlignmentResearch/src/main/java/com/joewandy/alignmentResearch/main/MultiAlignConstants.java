@@ -35,6 +35,7 @@ public class MultiAlignConstants {
 
 	public static final int GROUPING_METHOD_NUM_SAMPLES = 200;
 	public static final int GROUPING_METHOD_BURN_IN = 100;
+	public static final boolean ALWAYS_RECLUSTER = false;
 	public static final double GROUPING_METHOD_RT_TOLERANCE = 5;
 	public static final double GROUPING_METHOD_ALPHA = 1;
 	public static final double GROUPING_MIN_CORR_SIGNAL = 0.90;
@@ -98,8 +99,8 @@ public class MultiAlignConstants {
 	public static final String PERFORMANCE_MEASURE_LANGE = "lange";
 
 	// use my own performance measure
-	public static final String PERFORMANCE_MEASURE_JOE = "joe";
-	public static final String PERFORMANCE_MEASURE_JOE_PR = "joePR";
+	public static final String PERFORMANCE_MEASURE_PAIRWISE = "pairwise";
+	public static final String PERFORMANCE_MEASURE_PAIRWISE_PR = "pairwisePR";
 	
 	/**
 	 * Show setup dialog or not during MZMine alignment ?

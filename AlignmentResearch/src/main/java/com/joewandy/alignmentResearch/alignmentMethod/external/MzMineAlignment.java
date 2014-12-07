@@ -95,7 +95,6 @@ public abstract class MzMineAlignment extends BaseAlignment implements
 	 */
 	public AlignmentList matchFeatures() {
 
-		System.out.println("Hiding main window");
 		Desktop desktop = MZmineCore.getDesktop();
 		JFrame mainFrame = desktop.getMainFrame();
 		mainFrame.setVisible(false);			
@@ -121,7 +120,9 @@ public abstract class MzMineAlignment extends BaseAlignment implements
 		
 		// show alignment dialog
 		MZmineProcessingModule module = this.getAlignerModule();
-		System.out.println("Setting parameters for module " + module.getName());
+		if (verbose) {
+			System.out.println("Setting parameters for module " + module.getName());			
+		}
 		ExitCode exitCode = ExitCode.OK;
 		if (MultiAlignConstants.SHOW_PARAM_SETUP_DIALOG) {
 			exitCode = params.showSetupDialog();			
@@ -130,8 +131,10 @@ public abstract class MzMineAlignment extends BaseAlignment implements
 		if (exitCode == ExitCode.OK) {
 			
 			ParameterSet parametersCopy = params.cloneParameter();
-			System.out.println("Starting module " + module.getName()
-					+ " with parameters " + parametersCopy);
+			if (verbose) {
+				System.out.println("Starting module " + module.getName()
+						+ " with parameters " + parametersCopy);				
+			}
 
 			List<Task> tasks = new ArrayList<Task>();
 
@@ -159,6 +162,7 @@ public abstract class MzMineAlignment extends BaseAlignment implements
 		
 //		mainFrame.dispose();
 		mainFrame = null; // for gc
+		System.out.println();
 
 		PeakList[] allPeakLists = currentProject.getPeakLists();
 		for (PeakList pl : allPeakLists) {
@@ -229,7 +233,9 @@ public abstract class MzMineAlignment extends BaseAlignment implements
 			Map<AlignmentFile, RawDataFile> dataMap) {
 
 		String peakListname = data.getFilename();
-		System.out.println("Processing " + peakListname);
+		if (verbose) {
+			System.out.println("Processing " + peakListname);			
+		}
 
 		RawDataFile[] dataFiles = new RawDataFile[1];
 		try {
@@ -286,7 +292,9 @@ public abstract class MzMineAlignment extends BaseAlignment implements
 
 		}
 
-		System.out.println("Processed " + (rowId - 1) + " features");
+		if (verbose) {
+			System.out.println("Processed " + (rowId - 1) + " features");			
+		}
 
 		return buildingPeakList;
 
@@ -315,7 +323,9 @@ public abstract class MzMineAlignment extends BaseAlignment implements
 			field.setAccessible(true);
 			Object hooks = field.get(null);
 
-			System.out.println(hooks); // hooks is a Map<Thread, Thread>
+			if (verbose) {
+				System.out.println(hooks); // hooks is a Map<Thread, Thread>				
+			}
 			@SuppressWarnings("unchecked")
 			Map<Thread, Thread> hooksMap = (Map<Thread, Thread>) hooks;
 			Iterator<Thread> it = hooksMap.values().iterator();
