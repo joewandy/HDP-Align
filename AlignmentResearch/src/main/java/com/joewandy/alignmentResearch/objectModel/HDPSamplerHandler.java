@@ -66,9 +66,9 @@ public class HDPSamplerHandler {
 		
 		if (mode != null) {
 			this.mode = mode;
-			if (mode.equals(MultiAlignConstants.IONISATION_MODE_POSITIVE)) {
+			if (mode.toLowerCase().equals(MultiAlignConstants.IONISATION_MODE_POSITIVE)) {
 				this.adductList = MultiAlignConstants.adductListPositive;				
-			} else if (mode.equals(MultiAlignConstants.IONISATION_MODE_NEGATIVE)) {
+			} else if (mode.toLowerCase().equals(MultiAlignConstants.IONISATION_MODE_NEGATIVE)) {
 				this.adductList = MultiAlignConstants.adductListNegative;								
 			}
 			this.adductCalc = new AdductTransformComputer(this.adductList);
