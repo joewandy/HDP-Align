@@ -169,7 +169,7 @@ public class MultiAlign {
 			if (measureType.equals(MultiAlignConstants.PERFORMANCE_MEASURE_LANGE)) {
 				evalRes = gt.evaluateLange(Collections.unmodifiableList(result.getRows()), noOfFiles, 
 						massTolerance, rtTolerance);								
-			} else if (measureType.equals(MultiAlignConstants.PERFORMANCE_MEASURE_PAIRWISE)) {
+			} else if (measureType.equals(MultiAlignConstants.PERFORMANCE_MEASURE_COMBINATION)) {
 				evalRes = gt.evaluatePairwise(Collections.unmodifiableList(result.getRows()), noOfFiles, 
 						massTolerance, rtTolerance);												
 			}
@@ -226,7 +226,7 @@ public class MultiAlign {
 			List<AlignmentRow> filtered = new ArrayList<AlignmentRow>(pq);
 			if (measureType.equals(MultiAlignConstants.PERFORMANCE_MEASURE_LANGE)) {
 				evalRes = gt.evaluateLange(filtered, noOfFiles, massTolerance, rtTolerance);								
-			} else if (measureType.equals(MultiAlignConstants.PERFORMANCE_MEASURE_PAIRWISE)) {
+			} else if (measureType.equals(MultiAlignConstants.PERFORMANCE_MEASURE_COMBINATION)) {
 				evalRes = gt.evaluatePairwise(filtered, noOfFiles, massTolerance, rtTolerance);												
 			}
 			evalRes.setTh(lastScore);

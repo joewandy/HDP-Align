@@ -34,11 +34,12 @@ public class FeatureXMLDataGenerator extends BaseDataGenerator implements Alignm
 	private String inputDirectory;
 	private String gtPath;
 	
-	public FeatureXMLDataGenerator(String inputDirectory, String gtPath, boolean verbose) {
+	public FeatureXMLDataGenerator(String inputDirectory, String gtPath, int gtCombinationSize, boolean verbose) {
 		super();
 		this.inputDirectory = inputDirectory;
 		this.gtPath = gtPath;
 		this.verbose = verbose;
+		this.gtCombinationSize = gtCombinationSize;
 	}
 	
 	@Override
@@ -213,7 +214,7 @@ public class FeatureXMLDataGenerator extends BaseDataGenerator implements Alignm
 			}
 		}
 		
-		GroundTruth groundTruth = new GroundTruth(groundTruthEntries, verbose);
+		GroundTruth groundTruth = new GroundTruth(groundTruthEntries, gtCombinationSize, verbose);
 		return groundTruth;
 		
 	}

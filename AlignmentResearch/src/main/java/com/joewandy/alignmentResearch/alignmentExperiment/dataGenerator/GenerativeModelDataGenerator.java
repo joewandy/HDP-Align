@@ -52,7 +52,7 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 	
 	private Cloner cloner;
 	
-	public GenerativeModelDataGenerator(String molPath, GenerativeModelParameter params, boolean verbose) {
+	public GenerativeModelDataGenerator(String molPath, GenerativeModelParameter params, int gtCombinationSize, boolean verbose) {
 
 		super();
 		
@@ -207,7 +207,7 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 			}
 		}
 		
-		GroundTruth groundTruth = new GroundTruth(groundTruthEntries, verbose);
+		GroundTruth groundTruth = new GroundTruth(groundTruthEntries, gtCombinationSize, verbose);
 		return groundTruth;
 		
 	}

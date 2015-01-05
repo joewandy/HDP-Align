@@ -99,8 +99,7 @@ public class MultiAlignConstants {
 	public static final String PERFORMANCE_MEASURE_LANGE = "lange";
 
 	// use my own performance measure
-	public static final String PERFORMANCE_MEASURE_PAIRWISE = "pairwise";
-	public static final String PERFORMANCE_MEASURE_PAIRWISE_PR = "pairwisePR";
+	public static final String PERFORMANCE_MEASURE_COMBINATION = "combination";
 	
 	/**
 	 * Show setup dialog or not during MZMine alignment ?

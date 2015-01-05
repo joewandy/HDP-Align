@@ -33,11 +33,12 @@ public class SimaFormatDataGenerator extends BaseDataGenerator implements Alignm
 	private String inputDirectory;
 	private String gtPath;
 	
-	public SimaFormatDataGenerator(String inputDirectory, String gtPath, boolean verbose) {
+	public SimaFormatDataGenerator(String inputDirectory, String gtPath, int gtCombinationSize, boolean verbose) {
 		super();
 		this.inputDirectory = inputDirectory;
 		this.gtPath = gtPath;
 		this.verbose = verbose;
+		this.gtCombinationSize = gtCombinationSize;
 	}
 	
 	@Override
@@ -177,7 +178,7 @@ public class SimaFormatDataGenerator extends BaseDataGenerator implements Alignm
 			}
 		}
 		
-		GroundTruth groundTruth = new GroundTruth(groundTruthEntries, verbose);
+		GroundTruth groundTruth = new GroundTruth(groundTruthEntries, gtCombinationSize, verbose);
 		return groundTruth;
 		
 	}

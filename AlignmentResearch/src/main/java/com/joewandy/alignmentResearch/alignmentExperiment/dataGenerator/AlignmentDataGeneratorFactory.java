@@ -6,7 +6,7 @@ import com.joewandy.alignmentResearch.main.MultiAlignCmdOptions;
 public class AlignmentDataGeneratorFactory {
 
 	// generate alignment data from benchmark dataset
-	public static final String FEATURE_XML_DATA = "featureXml";
+	public static final String FEATURE_XML_DATA = "featureXML";
 
 	// generate alignment data from sima data format
 	public static final String SIMA_DATA = "simaFormat";
@@ -21,12 +21,15 @@ public class AlignmentDataGeneratorFactory {
 
 		AlignmentDataGenerator generator = null; 
 		if (AlignmentDataGeneratorFactory.FEATURE_XML_DATA.equals(options.dataType)) {				
-			generator = new FeatureXMLDataGenerator(options.inputDirectory, options.gt, options.verbose);
+			generator = new FeatureXMLDataGenerator(options.inputDirectory, options.gt, options.gtCombinationSize, options.verbose);
 		} else if (AlignmentDataGeneratorFactory.SIMA_DATA.equals(options.dataType)) {				
-				generator = new SimaFormatDataGenerator(options.inputDirectory, options.gt, options.verbose);
+				generator = new SimaFormatDataGenerator(options.inputDirectory, options.gt, options.gtCombinationSize, options.verbose);
 		} else if (AlignmentDataGeneratorFactory.GENERATIVE_MODEL_DATA.equals(options.dataType)) {				
 			GenerativeModelParameter params = options.generativeParams;
-			generator = new GenerativeModelDataGenerator(options.inputDirectory, params, options.verbose);
+			generator = new GenerativeModelDataGenerator(options.inputDirectory, params, options.gtCombinationSize, options.verbose);
+		} else {
+			System.err.println("Unknown data format");
+			System.exit(1);
 		}
 		
 		return generator;

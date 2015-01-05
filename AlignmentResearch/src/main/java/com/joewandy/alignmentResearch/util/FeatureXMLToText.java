@@ -81,7 +81,7 @@ public class FeatureXMLToText {
 			}
 
 			AlignmentDataGenerator generator = new FeatureXMLDataGenerator(
-					options.inputDirectory, options.gt, options.verbose);
+					options.inputDirectory, options.gt, 2, options.verbose);
 			AlignmentData data = generator.generate();
 			
 			// sort input file alphabetically to look nicer

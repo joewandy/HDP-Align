@@ -66,7 +66,7 @@ public class GroundTruthFeatureGroup extends FeatureGroup {
 	public boolean clearFeature(Feature example) {
 		String key = null;
 		for (Entry<String, Feature> entry : filenameToFeatureMap.entrySet()) {
-			if (GroundTruth.compareFeature(entry.getValue(), example)) {
+			if (entry.getValue().equals(example)) {
 				key = entry.getKey();
 				break;
 			}

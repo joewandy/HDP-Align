@@ -17,38 +17,40 @@ import org.paukov.combinatorics.Factory;
 import org.paukov.combinatorics.Generator;
 import org.paukov.combinatorics.ICombinatoricsVector;
 
+import com.joewandy.alignmentResearch.main.MultiAlignConstants;
+
 
 public class GroundTruth {
 
-	private static final String GROUND_TRUTH_NEW = "new";
-	private static final String GROUND_TRUTH_OLD = "old";
 	private List<GroundTruthFeatureGroup> groundTruth;
-	private List<GroundTruthPair> pairwiseGroundTruth;	
+	private List<AlignedPeakset> groundTruthPeaksets;	
 	private Set<Feature> G;
 	private boolean verbose;
+	private int gtCombinationSize;
 	
-	public GroundTruth(List<GroundTruthFeatureGroup> groundTruthEntries, boolean verbose) {		
+	public GroundTruth(List<GroundTruthFeatureGroup> groundTruthEntries, int gtCombinationSize, boolean verbose) {		
 		
 		this.groundTruth = groundTruthEntries;		
 		this.verbose = verbose;
-		buildPairwise();
+		this.gtCombinationSize = gtCombinationSize;
+		buildKSizeCombination();
 		
 	}
 
-	public void buildPairwise() {
+	public void buildKSizeCombination() {
 		
 		Map<Integer, Integer> sizeMap = new HashMap<Integer, Integer>();		
 		this.G = new HashSet<Feature>();
 		G.addAll(this.getAllUniqueFeatures());
 				
 		// convert ground truth entries into a pairwise of aligned features
-		this.pairwiseGroundTruth = new ArrayList<GroundTruthPair>();
+		this.groundTruthPeaksets = new ArrayList<AlignedPeakset>();
 //		System.out.print("Generating all positive pairwise combinations ");
 		for (GroundTruthFeatureGroup g : this.groundTruth) {
 
 			// skip single entry ground truth
 			int size = g.getFeatureCount();
-			if (size < 2) {
+			if (size < this.gtCombinationSize) {
 				continue;
 			}
 			
@@ -59,15 +61,16 @@ public class GroundTruth {
 				sizeMap.put(size, 1);
 			}
 			
-			// Create a simple combination generator to generate 2-combinations of
+			// Create a simple combination generator to generate k-combinations of
 			// the initial vector
 			Set<Feature> features = g.getFeatures();			
-			Generator<Feature> gen = nChoose2(features);
-			for (ICombinatoricsVector<Feature> combination : gen) {
-				Feature f1 = combination.getValue(0);
-				Feature f2 = combination.getValue(1);	
-				GroundTruthPair pairwise = getGroundTruthPair(f1, f2);
-				pairwiseGroundTruth.add(pairwise);
+			Generator<Feature> gen = nChoosek(features, this.gtCombinationSize);
+//			System.out.println(features);
+			for (ICombinatoricsVector<Feature> combination : gen) {		
+				List<Feature> combList = combination.getVector();
+//				System.out.println("\t" + combList);
+				AlignedPeakset peakset = new AlignedPeakset(combList);
+				groundTruthPeaksets.add(peakset);
 			}
 						
 		}		
@@ -76,32 +79,22 @@ public class GroundTruth {
 		if (verbose) {
 
 			System.out.println();
-			System.out.println("Total pairwise ground truth combinations = " + pairwiseGroundTruth.size());
-			System.out.println(sizeMap);
+			System.out.println("Initial ground truth sizes = " + sizeMap);
+			System.out.println("Total " + this.gtCombinationSize + "-combinations from ground truth = " + groundTruthPeaksets.size());
 			
-			double avgRt = 0;
-			double avgMass = 0;
-			for (GroundTruthPair pairwise : pairwiseGroundTruth) {
-				avgRt += pairwise.getAbsRtDiff();
-				avgMass += pairwise.getAbsMassDiff();
-			}
-			avgRt = avgRt / pairwiseGroundTruth.size();
-			avgMass = avgMass / pairwiseGroundTruth.size();		
-			System.out.println("Average abs RT diff = " + avgRt);
-			System.out.println("Average abs mass diff = " + avgMass);
+//			double avgRt = 0;
+//			double avgMass = 0;
+//			for (GroundTruthPeakset pairwise : pairwiseGroundTruth) {
+//				avgRt += pairwise.getAbsRtDiff();
+//				avgMass += pairwise.getAbsMassDiff();
+//			}
+//			avgRt = avgRt / pairwiseGroundTruth.size();
+//			avgMass = avgMass / pairwiseGroundTruth.size();		
+//			System.out.println("Average abs RT diff = " + avgRt);
+//			System.out.println("Average abs mass diff = " + avgMass);
 			
 		}
 		
-	}
-
-	private GroundTruthPair getGroundTruthPair(Feature f1, Feature f2) {
-		GroundTruthPair pairwise = null;
-		if (f1.getData().getId() < f2.getData().getId()) {
-			pairwise = new GroundTruthPair(f1, f2);
-		} else {
-			pairwise = new GroundTruthPair(f2, f1);					
-		}
-		return pairwise;
 	}
 		
 	public Set<Feature> getAllUniqueFeatures() {
@@ -259,7 +252,7 @@ public class GroundTruth {
 		
 		EvaluationResult evalRes = computeAdditional(alignmentResult,
 				noOfFiles, precision, recall, totalTp, totalFp, 0, totalPositives,
-				f1, f05, totalTpRatio, totalFpRatio, totalPositiveRatio, dmz, drt, GROUND_TRUTH_OLD);
+				f1, f05, totalTpRatio, totalFpRatio, totalPositiveRatio, dmz, drt, MultiAlignConstants.PERFORMANCE_MEASURE_LANGE);
 		
 		return evalRes;
 
@@ -268,23 +261,23 @@ public class GroundTruth {
 	public EvaluationResult evaluatePairwise(List<AlignmentRow> alignmentResult, int noOfFiles, double dmz, double drt) {
 				
 		// construct G+, the set of positive pairwise ground truth ==> things that should be aligned together
-		Set<GroundTruthPair> gPlus = new HashSet<GroundTruthPair>(this.pairwiseGroundTruth);				
+		Set<AlignedPeakset> gPlus = new HashSet<AlignedPeakset>(this.groundTruthPeaksets);				
 		
 		// convert tool output into t = a set of pairwise alignments as well
-		Set<GroundTruthPair> t = new HashSet<GroundTruthPair>(convertToPairwiseFeatureGroup(alignmentResult));		
+		Set<AlignedPeakset> t = new HashSet<AlignedPeakset>(getAlignedPeaksetCombinations(alignmentResult, this.gtCombinationSize));		
 	
 		// TP = should be aligned & are aligned = G+ intersect t
-		Set<GroundTruthPair> intersect = new HashSet<GroundTruthPair>(gPlus);
+		Set<AlignedPeakset> intersect = new HashSet<AlignedPeakset>(gPlus);
 		intersect.retainAll(t);
 		int TP = intersect.size();
 		
 		// FN = should be aligned & aren't aligned = G+ \ t
-		Set<GroundTruthPair> diff1 = new HashSet<GroundTruthPair>(gPlus);
+		Set<AlignedPeakset> diff1 = new HashSet<AlignedPeakset>(gPlus);
 		diff1.removeAll(t);
 		int FN = diff1.size();
 						
 		// FP = shouldn't be aligned & are aligned = t \ G+
-		Set<GroundTruthPair> diff2 = new HashSet<GroundTruthPair>(t);
+		Set<AlignedPeakset> diff2 = new HashSet<AlignedPeakset>(t);
 		diff2.removeAll(gPlus);
 		int FP = diff2.size();
 		
@@ -305,7 +298,7 @@ public class GroundTruth {
 				
 		EvaluationResult evalRes = computeAdditional(alignmentResult,
 				noOfFiles, precision, recall, TP, FP, FN, totalPositives,
-				f1, f05, totalTpRatio, totalFpRatio, totalPositiveRatio, dmz, drt, GROUND_TRUTH_NEW);
+				f1, f05, totalTpRatio, totalFpRatio, totalPositiveRatio, dmz, drt, MultiAlignConstants.PERFORMANCE_MEASURE_COMBINATION);
 		
 		return evalRes;
 
@@ -339,14 +332,14 @@ public class GroundTruth {
 	
 	}
 	
-	private List<GroundTruthPair> convertToPairwiseFeatureGroup(
-			List<AlignmentRow> alignmentResult) {
+	private List<AlignedPeakset> getAlignedPeaksetCombinations(
+			List<AlignmentRow> alignmentResult, int k) {
 	
-		List<GroundTruthPair> tool = new ArrayList<GroundTruthPair>();
+		List<AlignedPeakset> tool = new ArrayList<AlignedPeakset>();
 		for (AlignmentRow row : alignmentResult) {
 
 			// skip single entry row
-			if (row.getFeaturesCount() < 2) {
+			if (row.getFeaturesCount() < k) {
 				continue;
 			}
 			
@@ -355,20 +348,26 @@ public class GroundTruth {
 				feature.clearGroups();
 			}
 			
-			// Create a simple combination generator to generate 2-combinations of
+			// Create a simple combination generator to generate k-combinations of
 			// the initial vector
 			Set<Feature> features = row.getFeatures();			
-			Generator<Feature> gen = nChoose2(features);
+			Generator<Feature> gen = nChoosek(features, k);
 			for (ICombinatoricsVector<Feature> combination : gen) {
-				Feature f1 = combination.getValue(0);
-				Feature f2 = combination.getValue(1);
-				
-				// only add into tool if either feature is present in G ?
-				if (G.contains(f1) || G.contains(f2)) {
-					GroundTruthPair pairwise = getGroundTruthPair(f1, f2);
-					tool.add(pairwise);					
+
+				boolean valid = false;
+				for (Feature f : combination) {
+					if (G.contains(f)) {
+						valid = true;
+						break;						
+					}
 				}
-								
+			
+				// only add into tool if any of the feature is present in G ?
+				if (valid) {
+					AlignedPeakset peakset = new AlignedPeakset(combination.getVector());
+					tool.add(peakset);					
+				}
+				
 			}
 		
 		}
@@ -376,10 +375,10 @@ public class GroundTruth {
 	
 	}
 	
-	private Generator<Feature> nChoose2(Set<Feature> features) {
+	private Generator<Feature> nChoosek(Set<Feature> features, int k) {
 		ICombinatoricsVector<Feature> initialVector = Factory.createVector(features);
 		Generator<Feature> gen = Factory.createSimpleCombinationGenerator(
-				initialVector, 2);
+				initialVector, k);
 		return gen;
 	}
 
@@ -462,7 +461,7 @@ public class GroundTruth {
 		Set<Feature> intersect = new HashSet<Feature>();
 		for (Feature f1 : set1) {
 			for (Feature f2 : set2) {
-				boolean same = compareFeature(f1, f2);
+				boolean same = f1.equals(f2);
 				if (same) {
 					intersect.add(f2);
 					break;
@@ -483,16 +482,5 @@ public class GroundTruth {
 		Set<Feature> common = getIntersection(group1, group2);
 		return common.size();
 	}
-	
-	public static boolean compareFeature(Feature f1, Feature f2) {
-		
-		if (f1.getPeakID() == f2.getPeakID() && 
-				f1.getData().equals(f2.getData())) {
-			return true;
-		} else {
-			return false;
-		}
-		
-	}
-			
+				
 }

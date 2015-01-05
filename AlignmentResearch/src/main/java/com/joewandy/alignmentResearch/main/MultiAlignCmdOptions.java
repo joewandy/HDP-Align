@@ -45,9 +45,12 @@ public class MultiAlignCmdOptions {
 	@Option(name = "gt", param = "filename", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "The ground truth file for these data, if any.")
 	public String gt = null;
 	
-	@Option(name = "measureType", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Which way to compute performance measures: lange or pairwise")
-	public String measureType = MultiAlignConstants.PERFORMANCE_MEASURE_PAIRWISE;	
-		
+	@Option(name = "measureType", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Which way to compute performance measures: lange or set combination")
+	public String measureType = MultiAlignConstants.PERFORMANCE_MEASURE_COMBINATION;	
+
+	@Option(name = "gtCombinationSize", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Size for the k-combinations to enumerate from the ground truth")
+	public int gtCombinationSize = 2;
+	
 	/*
 	 * Grouping experiment options
 	 */

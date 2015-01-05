@@ -16,6 +16,7 @@ public abstract class BaseDataGenerator implements AlignmentDataGenerator {
 	protected List<AlignmentNoise> noiseModels;
 	protected List<AlignmentFile> alignmentFiles;
 	protected boolean verbose;
+	protected int gtCombinationSize;
 	
 	public BaseDataGenerator() {
 		this.noiseModels = new ArrayList<AlignmentNoise>();
