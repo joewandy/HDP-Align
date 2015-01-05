@@ -22,7 +22,7 @@ import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
 import com.joewandy.alignmentResearch.alignmentMethod.BaseAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.FeatureMatching;
-import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HDPResultItem;
+import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HDPMassClusterFeatures;
 import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HdpProbabilityMatching;
 import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HDPResults;
 import com.joewandy.alignmentResearch.main.MultiAlignConstants;
@@ -89,12 +89,11 @@ public class HdpAlignment extends BaseAlignment implements AlignmentMethod {
 
 			// process the matching results
 			samplesTaken = clustering.getSamplesTaken();
-			System.out.println("Samples taken = " + samplesTaken);
 			results = clustering.getResults();
 
 			// print out all the partners of each peak
-			for (Entry<HDPResultItem, Integer> entry : results.getEntries()) {
-				HDPResultItem item = entry.getKey();
+			for (Entry<HDPMassClusterFeatures, Integer> entry : results.getEntries()) {
+				HDPMassClusterFeatures item = entry.getKey();
 				int count = results.getCount(item);
 				double prob = ((double)count) / samplesTaken;
 				System.out.println(item + " has probability " + prob );

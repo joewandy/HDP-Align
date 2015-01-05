@@ -22,7 +22,6 @@ public class HDPClusteringParam {
 	private boolean speedUpHacks;
 	private int speedUpNumSample;
 	private int refFileIdx;
-	private int minSpan;
 		
 	public int getNsamps() {
 		return nsamps;
@@ -142,14 +141,6 @@ public class HDPClusteringParam {
 
 	public void setRefFileIdx(int refFileIdx) {
 		this.refFileIdx = refFileIdx;
-	}
-
-	public int getMinSpan() {
-		return minSpan;
-	}
-
-	public void setMinSpan(int minSpan) {
-		this.minSpan = minSpan;
 	}
 	
 }

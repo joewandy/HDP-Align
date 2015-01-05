@@ -71,9 +71,8 @@ public class HDPMassRTClustering implements HDPClustering {
 		double massTol = methodParam.getHdpMassTol();
 		String idDatabase = methodParam.getIdentificationDatabase();
 		String mode = methodParam.getMode();
-		int minSpan = methodParam.getHdpMinSpan();
-		this.sampleHandler = new HDPSamplerHandler(hdpFiles, hdpMetabolites, 
-				totalPeaks, massTol, idDatabase, mode, minSpan);
+		this.sampleHandler = new HDPSamplerHandler(hdpMetabolites, 
+				totalPeaks, massTol, idDatabase, mode);
 
 	}
 
@@ -97,10 +96,11 @@ public class HDPMassRTClustering implements HDPClustering {
 			if (s == hdpParam.getNsamps()-1) {
 				last = true;
 			}
-			sampleHandler.handleSample(s, peaksProcessed, timeTaken, hdpParam, last);
+			sampleHandler.storeSample(s, peaksProcessed, timeTaken, hdpParam, last);
 			
 		}
 		System.out.println(String.format("TOTAL TIME = %5.2fs", totalTime));
+		sampleHandler.processSample();
 		
 	}
 	
@@ -164,14 +164,7 @@ public class HDPMassRTClustering implements HDPClustering {
 		hdpParam.setSpeedUpHacks(methodParam.isHdpSpeedUp());
 		hdpParam.setSpeedUpNumSample(methodParam.getHdpSpeedUpNumSample());
 		hdpParam.setRefFileIdx(methodParam.getHdpRefFileIdx());
-		
-		int minSpan = methodParam.getHdpMinSpan();
-		int numFiles = dataList.size();
-		if (minSpan > numFiles) {
-			minSpan = numFiles;
-		}
-		hdpParam.setMinSpan(minSpan);
-		
+				
 	}
 	
 	/**

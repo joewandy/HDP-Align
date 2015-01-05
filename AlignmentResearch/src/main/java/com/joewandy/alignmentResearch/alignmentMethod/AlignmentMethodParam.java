@@ -49,7 +49,6 @@ public class AlignmentMethodParam {
 	private boolean hdpSpeedUp;
 	private int hdpSpeedUpNumSample;
 	private int hdpRefFileIdx;
-	private int hdpMinSpan;
 	
 	// for other HDP stuff
 	private String identificationDatabase;
@@ -91,7 +90,7 @@ public class AlignmentMethodParam {
 		this.hdpSpeedUp = options.hdpSpeedUp;
 		this.hdpSpeedUpNumSample = options.hdpSpeedUpNumSample;
 		this.hdpRefFileIdx = options.hdpRefFileIdx;
-		this.hdpMinSpan = options.hdpMinSpan;
+//		this.hdpMinSpan = options.hdpMinSpan;
 		this.scoringMethod = options.scoringMethod;
 		this.identificationDatabase = options.idDatabase;
 		this.groundTruthDatabase = options.gtDatabase;
@@ -349,14 +348,6 @@ public class AlignmentMethodParam {
 		this.hdpRefFileIdx = hdpRefFileIdx;
 	}
 	
-	public int getHdpMinSpan() {
-		return hdpMinSpan;
-	}
-
-	public void setHdpMinSpan(int hdpMinSpan) {
-		this.hdpMinSpan = hdpMinSpan;
-	}
-
 	public String getIdentificationDatabase() {
 		return identificationDatabase;
 	}

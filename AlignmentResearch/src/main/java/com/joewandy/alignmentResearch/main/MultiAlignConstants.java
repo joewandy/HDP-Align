@@ -59,41 +59,33 @@ public class MultiAlignConstants {
 	public static final String IONISATION_MODE_NEGATIVE = "neg";	
 	public static final List<String> adductListPositive = new ArrayList<String>();
 	static {
-		adductListPositive.add("M+3H");
-		adductListPositive.add("M+2H+Na");
-		adductListPositive.add("M+H+2Na");
-		adductListPositive.add("M+3Na");
 		adductListPositive.add("M+2H");
-		adductListPositive.add("M+H+NH4");
-		adductListPositive.add("M+H+Na");
-		adductListPositive.add("M+H+K");
-		adductListPositive.add("M+ACN+2H");
-		adductListPositive.add("M+2Na");
-		adductListPositive.add("M+2ACN+2H");
-		adductListPositive.add("M+3ACN+2H");
 		adductListPositive.add("M+H");
-		adductListPositive.add("M+NH4");
-		adductListPositive.add("M+Na");
-		adductListPositive.add("M+CH3OH+H");
-		adductListPositive.add("M+K");
 		adductListPositive.add("M+ACN+H");
-		adductListPositive.add("M+2Na-H");
-		adductListPositive.add("M+IsoProp+H");
-		adductListPositive.add("M+ACN+Na");
-		adductListPositive.add("M+2K-H");
-		adductListPositive.add("M+DMSO+H");
-		adductListPositive.add("M+2ACN+H");
-		adductListPositive.add("M+IsoProp+Na+H");
-		adductListPositive.add("2M+H");
-		adductListPositive.add("2M+NH4");
 		adductListPositive.add("2M+Na");
-		adductListPositive.add("2M+3H2O+2H");
-		adductListPositive.add("2M+K");
+		adductListPositive.add("M+H+NH4");
+		adductListPositive.add("M+NH4");
+		adductListPositive.add("M+ACN+Na");
 		adductListPositive.add("2M+ACN+H");
-		adductListPositive.add("2M+ACN+Na");		
+		adductListPositive.add("M+ACN+2H");
+		adductListPositive.add("M+Na");
+		adductListPositive.add("M+2ACN+H");
+		adductListPositive.add("M+2ACN+2H");
+		adductListPositive.add("M+CH3OH+H");
+		adductListPositive.add("2M+H");
 	}
 
 	public static final List<String> adductListNegative = new ArrayList<String>();
+	static {
+		adductListNegative.add("M-H2O-H");
+		adductListNegative.add("M+K-2H");
+		adductListNegative.add("M-H");
+		adductListNegative.add("M+FA-H");
+		adductListNegative.add("M+Na-2H");
+		adductListNegative.add("2M-H");
+		adductListNegative.add("M+Cl");
+		adductListNegative.add("2M+FA-H");
+	}
 	
 	// use Lange, et al. (2008) measure
 	public static final String PERFORMANCE_MEASURE_LANGE = "lange";

@@ -27,8 +27,8 @@ public class HdpProbabilityMatching implements FeatureMatching {
 		// add matched entries
 		AlignmentList matchedList = new AlignmentList("matched_list");
 		int rowId = 0;		
-		for (Entry<HDPResultItem, Integer> match : hdpResults.getEntries()) {
-			HDPResultItem item = match.getKey();
+		for (Entry<HDPMassClusterFeatures, Integer> match : hdpResults.getEntries()) {
+			HDPMassClusterFeatures item = match.getKey();
 			int count = hdpResults.getCount(item);
 			double prob = ((double)count) / samplesTaken;
 			AlignmentRow merged = new AlignmentRow(matchedList, rowId++);

@@ -5,11 +5,11 @@ import java.util.Set;
 
 import com.joewandy.alignmentResearch.objectModel.Feature;
 
-public class HDPResultItem {
+public class HDPMassClusterFeatures {
 
 	private Set<Feature> features;
 	
-	public HDPResultItem(Set<Feature> features) {
+	public HDPMassClusterFeatures(Set<Feature> features) {
 		this.features = Collections.unmodifiableSet(features);
 	}
 
@@ -34,7 +34,7 @@ public class HDPResultItem {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		HDPResultItem other = (HDPResultItem) obj;
+		HDPMassClusterFeatures other = (HDPMassClusterFeatures) obj;
 		if (features == null) {
 			if (other.features != null)
 				return false;

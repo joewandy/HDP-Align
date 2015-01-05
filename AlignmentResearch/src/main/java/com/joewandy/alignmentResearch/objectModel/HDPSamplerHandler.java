@@ -8,28 +8,23 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.paukov.combinatorics.Factory;
-import org.paukov.combinatorics.Generator;
-import org.paukov.combinatorics.ICombinatoricsVector;
-
 import peakml.chemistry.Molecule;
 
 import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HDPKeggQuery;
-import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HDPResultItem;
+import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HDPMassClusterFeatures;
 import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HDPResults;
+import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HDPResultsSample;
 import com.joewandy.alignmentResearch.main.MultiAlignConstants;
 import com.joewandy.alignmentResearch.precursorPrediction.AdductTransformComputer;
 import com.joewandy.mzmatch.query.CompoundQuery;
 
 public class HDPSamplerHandler {
 	
-	private List<HDPFile> hdpFiles;
 	private List<HDPMetabolite> hdpMetabolites;
 	private int totalPeaks;
 	private HDPResults results;
 	private double ppm;
 	private int samplesTaken;
-	private int minSpan;
 	
 	private String mode;
 	private AdductTransformComputer adductCalc;
@@ -42,22 +37,13 @@ public class HDPSamplerHandler {
 	private HDPAnnotation<Feature> ionisationProductFeatureAnnotations;
 	private HDPAnnotation<Feature> metaboliteFeatureAnnotations;
 	
-	public HDPSamplerHandler(List<HDPFile> hdpFiles, List<HDPMetabolite> hdpMetabolites, 
-			int totalPeaks, double ppm, String dbPath, String mode, int minSpan) {
+	public HDPSamplerHandler(List<HDPMetabolite> hdpMetabolites, 
+			int totalPeaks, double ppm, String dbPath, String mode) {
 	
-		this.hdpFiles = hdpFiles;
 		this.hdpMetabolites = hdpMetabolites;
 		this.totalPeaks = totalPeaks;
 		this.results = new HDPResults();
 		this.ppm = ppm;
-
-		this.minSpan = minSpan;			
-		if (minSpan != -1) {
-			if (minSpan > hdpFiles.size() || minSpan < 2) {
-				minSpan = -1;
-			}
-		}
-		System.out.println("HDP minSpan = " + this.minSpan);
 
 		if (dbPath != null) {
 			this.idDatabase = new HDPKeggQuery(dbPath);			
@@ -84,16 +70,19 @@ public class HDPSamplerHandler {
 				
 	}
 
-	public void handleSample(int s, int peaksProcessed, double timeTaken, HDPClusteringParam hdpParam, boolean lastSample) {
+	public void storeSample(int s, int peaksProcessed, double timeTaken, HDPClusteringParam hdpParam, boolean lastSample) {
 
 		int I = hdpMetabolites.size();
 		
 		boolean printMsg = true;	
 		if ((s+1) > hdpParam.getBurnIn()) {
 			if (printMsg) {
-				System.out.print(String.format("Sample S#%05d ", (s+1)));					
+				System.out.print(String.format("Sample S#%05d ", (s+1)));		
+				saveResults();
+				samplesTaken++;
 			}
 		} else {
+			// ignore the burn-in samples
 			if (printMsg) {
 				System.out.print(String.format("Sample B#%05d ", (s+1)));					
 			}
@@ -101,12 +90,8 @@ public class HDPSamplerHandler {
 		
 		StringBuilder sb = new StringBuilder();
 		if ((s+1) > hdpParam.getBurnIn()) {
-			// store the actual samples
 			sb.append(String.format("(%5.2fs) peaks=%d/%d I=%d ", timeTaken, peaksProcessed, totalPeaks, I));
-			doProcess();
-			samplesTaken++;
 		} else {
-			// discard the burn-in samples
 			sb.append(String.format("(%5.2fs) peaks=%d/%d I=%d ", timeTaken, peaksProcessed, totalPeaks, I));			
 		}
 		
@@ -122,29 +107,9 @@ public class HDPSamplerHandler {
 		if (printMsg) {
 			System.out.println(sb.toString());				
 		}
-		
-		// extra stuff in the last sample
-		if (lastSample) {
-			
-			// print peak RT vs. local cluster RT if reference file is enabled
-			if (hdpParam.getRefFileIdx() != -1) {
-				System.out.println("peakrt, tjk");
-				for (HDPFile hdpFile : hdpFiles) {					
-					for (int n = 0; n < hdpFile.N(); n++) {
-						Feature f = hdpFile.getFeature(n);
-						int k = hdpFile.Z(n);
-						if (k != -1) {
-							double tjk = hdpFile.tjk(k);
-							System.out.println(f.getRt() + ", " + tjk);							
-						}
-					}
-				}
-			}
-			
-		}
-		
+				
 	}
-	
+		
 	public HDPResults getResultMap() {
 		return results;
 	}
@@ -172,91 +137,69 @@ public class HDPSamplerHandler {
 	public Map<HDPMetabolite, List<HDPPrecursorMass>> getMetabolitePrecursors() {
 		return metabolitePrecursors;
 	}
-
-	private void doProcess() {
+	
+	public void processSample() {
+		
+		int counter = 1;
+		for (HDPResultsSample sampleResult : results.getResultsSamples()) {		
+			System.out.println("Processing sample " + counter + "/" + results.getResultsSamplesCount());
+			doProcess(sampleResult);
+			counter++;
+		}
+		
+	}	
+	
+	private void saveResults() {		
+		results.store(hdpMetabolites);
+	}
+	
+	private void doProcess(HDPResultsSample resultsSample) {
+				
+		List<HDPMetabolite> metabolites = resultsSample.getMetabolites();
 		
 		// track alignment probabilities
-		updateResultMap();
+		updateResultMap(metabolites);
 	
 		// annotate ionisation products
 		if (mode != null) {
-			annotateIP();			
+			annotateIP(metabolites);			
 		}
 		
 		// annotate metabolites
 		if (idDatabase != null) {
-			annotateMetabolites();			
+			annotateMetabolites(metabolites);			
 		}
 		
 	}
-	
-	private void updateResultMap() {
+		
+	private void updateResultMap(List<HDPMetabolite> metabolites) {
 		
 		// for all metabolite
-		for (int i = 0; i < hdpMetabolites.size(); i++) {
+		for (int i = 0; i < metabolites.size(); i++) {
 
-			HDPMetabolite met = hdpMetabolites.get(i);
+			HDPMetabolite met = metabolites.get(i);
 
 			// for all mass clusters
 			for (int a = 0; a < met.getA(); a++) {
-				
+				// accumulate the frequencies of the set of peaks inside
 				List <Feature> peaksInside = met.getPeaksInMassCluster(a);
-				int q = minSpan;
-				
-				if (q == -1) {
-
-					// if q not specified, then store as it is
-					Set<Feature> features = new HashSet<Feature>(peaksInside);
-					HDPResultItem item = new HDPResultItem(features);
-					results.store(item);					
-					
-				} else {
-				
-					if (peaksInside.size() < q) {
-
-						// if smaller than q, then store as it is
-						
-						Set<Feature> features = new HashSet<Feature>(peaksInside);
-						HDPResultItem item = new HDPResultItem(features);
-						results.store(item);					
-					
-					} else {
-					
-						// otherwise take all the q-combinations of peaksInside
-
-						// create the initial vector
-						ICombinatoricsVector<Feature> initialVector = Factory
-								.createVector(peaksInside);
-
-						// create a simple combination generator to generate q-combinations of the initial vector
-						Generator<Feature> gen = Factory
-								.createSimpleCombinationGenerator(initialVector, q);
-						
-						// print all possible combinations
-						for (ICombinatoricsVector<Feature> combination : gen) {
-							Set<Feature> features = new HashSet<Feature>(combination.getVector());
-							HDPResultItem item = new HDPResultItem(features);
-							results.store(item);
-						}								
-						
-					}
-					
-				}
-								
+				Set<Feature> features = new HashSet<Feature>(peaksInside);
+				HDPMassClusterFeatures item = new HDPMassClusterFeatures(features);
+				results.store(item);					
 			}
 			
 		}
 		
 	}
 	
-	private void annotateIP() {
+	private void annotateIP(List<HDPMetabolite> metabolites) {
 
 		// precompute precursor masses for each mass cluster
 		Map<HDPMassCluster, List<Double>> precursorMap = new HashMap<HDPMassCluster, List<Double>>();
-		for (int i = 0; i < hdpMetabolites.size(); i++) {
+		for (int i = 0; i < metabolites.size(); i++) {
 			
 			// for every mass cluster
-			HDPMetabolite met = hdpMetabolites.get(i);
+			HDPMetabolite met = metabolites.get(i);
 			for (int j = 0; j < met.getMassClusters().size(); j++) {				
 
 				// use the calculator to compute precursor masses under possible adduct transformations
@@ -273,10 +216,10 @@ public class HDPSamplerHandler {
 		}
 		
 		// then build the 'consensus' counts of precursor masses
-		for (int i = 0; i < hdpMetabolites.size(); i++) {
+		for (int i = 0; i < metabolites.size(); i++) {
 			
 			// initialise the precursor map for each metablite
-			HDPMetabolite met = hdpMetabolites.get(i);
+			HDPMetabolite met = metabolites.get(i);
 			List<HDPPrecursorMass> precursorList = metabolitePrecursors.get(met);
 			if (precursorList == null) {
 				precursorList = new ArrayList<HDPPrecursorMass>();
@@ -345,9 +288,9 @@ public class HDPSamplerHandler {
 		 * if there's any metabolite without any consensus precursor mass, then
 		 * take the highest intensity peak and use that to annotate with M+H / M-H
 		 */
-		for (int i = 0; i < hdpMetabolites.size(); i++) {
+		for (int i = 0; i < metabolites.size(); i++) {
 
-			HDPMetabolite met = hdpMetabolites.get(i);
+			HDPMetabolite met = metabolites.get(i);
 			List<HDPPrecursorMass> precursorList = metabolitePrecursors.get(met);
 			assert(precursorList != null); // cannot be null
 			
@@ -366,7 +309,13 @@ public class HDPSamplerHandler {
 				HDPMassCluster mc = met.getMassClusterOfPeak(selectedPeak);
 
 				// get the precursor mass under M+H / M-H, and use this
-				double precursorMass = adductCalc.getPrecursorMass(mc.getTheta(), "M+H");
+				String defaultAdduct = "";
+				if (mode.toLowerCase().equals(MultiAlignConstants.IONISATION_MODE_POSITIVE)) {
+					defaultAdduct = "M+H";				
+				} else if (mode.toLowerCase().equals(MultiAlignConstants.IONISATION_MODE_NEGATIVE)) {
+					defaultAdduct = "M-H";				
+				}				
+				double precursorMass = adductCalc.getPrecursorMass(mc.getTheta(), defaultAdduct);
 				HDPPrecursorMass precursor = new HDPPrecursorMass(precursorMass, this.ppm, this.idDatabase);
 
 				mc.setPrecursorMass(precursor);
@@ -407,9 +356,9 @@ public class HDPSamplerHandler {
 
 	}
 	
-	private void annotateMetabolites() {
+	private void annotateMetabolites(List<HDPMetabolite> metabolites) {
 
-		List<HDPMetabolite> inferredMetabolites = this.hdpMetabolites;
+		List<HDPMetabolite> inferredMetabolites = metabolites;
 		
 		for (HDPMetabolite met : inferredMetabolites) {
 			
@@ -496,6 +445,6 @@ public class HDPSamplerHandler {
 
 			}
 		}
-	}	
+	}
 		
 }
