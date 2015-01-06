@@ -1,5 +1,6 @@
 package com.joewandy.alignmentResearch.alignmentMethod.custom.hdp;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -7,11 +8,14 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.joewandy.alignmentResearch.objectModel.HDPMetabolite;
 import com.rits.cloning.Cloner;
 
-public class HDPResults {
+public class HDPResults implements Serializable {
 	
+	private static final long serialVersionUID = 398275171032368664L;
+
 	private List<HDPResultsSample> allResults;
 	private Map<HDPMassClusterFeatures, Integer> counts;
 	
@@ -29,6 +33,7 @@ public class HDPResults {
 		return allResults;
 	}
 	
+	@JsonIgnore
 	public int getResultsSamplesCount() {
 		return allResults.size();
 	}

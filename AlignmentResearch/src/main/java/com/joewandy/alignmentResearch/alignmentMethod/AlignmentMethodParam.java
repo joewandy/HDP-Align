@@ -54,6 +54,7 @@ public class AlignmentMethodParam {
 	private String identificationDatabase;
 	private String groundTruthDatabase;
 	private String mode;
+	private String hdpClusteringResultsPath;
 	
 	public AlignmentMethodParam() {
 	
@@ -90,13 +91,13 @@ public class AlignmentMethodParam {
 		this.hdpSpeedUp = options.hdpSpeedUp;
 		this.hdpSpeedUpNumSample = options.hdpSpeedUpNumSample;
 		this.hdpRefFileIdx = options.hdpRefFileIdx;
-//		this.hdpMinSpan = options.hdpMinSpan;
 		this.scoringMethod = options.scoringMethod;
 		this.identificationDatabase = options.idDatabase;
 		this.groundTruthDatabase = options.gtDatabase;
 		this.mode = options.mode;
 		this.verbose = options.verbose;
 		this.alwaysRecluster = options.alwaysRecluster;
+		this.hdpClusteringResultsPath = options.hdpClusteringResultsPath;
 	}
 
 	public boolean isUsePpm() {
@@ -386,6 +387,14 @@ public class AlignmentMethodParam {
 
 	public void setAlwaysRecluster(boolean alwaysRecluster) {
 		this.alwaysRecluster = alwaysRecluster;
+	}
+
+	public String getHdpClusteringResultsPath() {
+		return hdpClusteringResultsPath;
+	}
+
+	public void setHdpClusteringResultsPath(String hdpClusteringResultsPath) {
+		this.hdpClusteringResultsPath = hdpClusteringResultsPath;
 	}
 
 }

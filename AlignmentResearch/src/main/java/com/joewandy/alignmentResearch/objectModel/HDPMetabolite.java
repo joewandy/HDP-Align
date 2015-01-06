@@ -1,5 +1,6 @@
 package com.joewandy.alignmentResearch.objectModel;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -7,7 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class HDPMetabolite {
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+public class HDPMetabolite implements Serializable {
+
+	private static final long serialVersionUID = -6776646651530842805L;
 
 	private int id;									// id of this metabolite
 	private List<Feature> peakData;					// all the peaks under this metabolite
@@ -16,6 +21,11 @@ public class HDPMetabolite {
 	private List<HDPMassCluster> massClusters;		// list of mass clusters objects
 	private Map<Feature, HDPMassCluster> V;			// which peak assigned to which mass clusters
 	private List<Double> metaboliteMasses;
+	
+	// dummy constructor for jackson
+	public HDPMetabolite() {
+		
+	}
 	
 	public HDPMetabolite(int id) {
 		this.id = id;
@@ -29,6 +39,7 @@ public class HDPMetabolite {
 		return id;
 	}
 	
+	@JsonIgnore
 	public int getA() {
 		return massClusters.size();
 	}

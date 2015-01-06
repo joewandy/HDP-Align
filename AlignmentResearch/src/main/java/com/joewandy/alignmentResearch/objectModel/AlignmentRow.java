@@ -107,14 +107,6 @@ public class AlignmentRow {
 		intersection.retainAll(another);
 		return intersection;
 	}
-
-	public Set<Integer> getGroupIds() {
-		Set<Integer> groupIds = new HashSet<Integer>();
-		for (Feature f : features) {
-			groupIds.add(f.getFirstGroupID());
-		}
-		return groupIds;
-	}
 	
 	public Feature getFirstFeature() {
 		Iterator<Feature> iter = features.iterator();

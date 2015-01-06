@@ -1,5 +1,7 @@
 package com.joewandy.alignmentResearch.objectModel;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,6 +12,10 @@ import java.util.Set;
 
 import peakml.chemistry.Molecule;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HDPKeggQuery;
 import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HDPMassClusterFeatures;
 import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HDPResults;
@@ -67,7 +73,73 @@ public class HDPSamplerHandler {
 
 		}
 
-				
+	}
+	
+	public boolean initialiseResultsFromPath(String hdpClusteringResultsPath) {
+
+		System.out.println("Loading previous clustering results from " + hdpClusteringResultsPath);
+		File f = new File(hdpClusteringResultsPath);
+		if(!f.exists()) {
+			return false;
+		}
+		
+		boolean loadSuccess = false;
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			results = mapper.readValue(new File(hdpClusteringResultsPath),
+					HDPResults.class);
+			loadSuccess = true;
+		} catch (JsonParseException e) {
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+//		boolean loadSuccess = false;
+//		try (
+//			InputStream file = new FileInputStream(hdpClusteringResultsPath);
+//			InputStream buffer = new BufferedInputStream(file);
+//			ObjectInput input = new ObjectInputStream(buffer);
+//		) {
+//			results = (HDPResults) input.readObject();
+//			loadSuccess = true;
+//		} catch (ClassNotFoundException ex) {
+//			ex.printStackTrace();
+//		} catch (IOException ex) {
+//			ex.printStackTrace();
+//		}
+		
+	    return loadSuccess;
+
+	}
+	
+	public void persistResultsToPath(String hdpClusteringResultsPath) {
+
+		System.out.println("Saving previous clustering results to " + hdpClusteringResultsPath);
+		
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			mapper.writeValue(new File(hdpClusteringResultsPath), results);
+		} catch (JsonGenerationException e) {
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+//		try (
+//			OutputStream file = new FileOutputStream(hdpClusteringResultsPath);
+//			OutputStream buffer = new BufferedOutputStream(file);
+//			ObjectOutput output = new ObjectOutputStream(buffer);
+//		) {
+//			output.writeObject(results);
+//		} catch (IOException ex) {
+//			ex.printStackTrace();
+//		}
+	
 	}
 
 	public void storeSample(int s, int peaksProcessed, double timeTaken, HDPClusteringParam hdpParam, boolean lastSample) {
@@ -78,8 +150,7 @@ public class HDPSamplerHandler {
 		if ((s+1) > hdpParam.getBurnIn()) {
 			if (printMsg) {
 				System.out.print(String.format("Sample S#%05d ", (s+1)));		
-				saveResults();
-				samplesTaken++;
+				results.store(hdpMetabolites);
 			}
 		} else {
 			// ignore the burn-in samples
@@ -110,34 +181,6 @@ public class HDPSamplerHandler {
 				
 	}
 		
-	public HDPResults getResultMap() {
-		return results;
-	}
-	
-	public HDPAnnotation<Feature> getIonisationProductAnnotations() {
-		return ionisationProductFeatureAnnotations;
-	}
-
-	public HDPAnnotation<Feature> getMetaboliteAnnotations() {
-		return metaboliteFeatureAnnotations;
-	}
-	
-	public HDPAnnotation<Feature> getIsotopeAnnotations() {
-		return isotopeFeatureAnnots;
-	}
-
-	public void setIsotopeFeatureAnnots(HDPAnnotation<Feature> isotopeFeatureAnnots) {
-		this.isotopeFeatureAnnots = isotopeFeatureAnnots;
-	}
-
-	public int getSamplesTaken() {
-		return samplesTaken;
-	}
-
-	public Map<HDPMetabolite, List<HDPPrecursorMass>> getMetabolitePrecursors() {
-		return metabolitePrecursors;
-	}
-	
 	public void processSample() {
 		
 		int counter = 1;
@@ -149,12 +192,10 @@ public class HDPSamplerHandler {
 		
 	}	
 	
-	private void saveResults() {		
-		results.store(hdpMetabolites);
-	}
-	
 	private void doProcess(HDPResultsSample resultsSample) {
 				
+		samplesTaken++;
+		
 		List<HDPMetabolite> metabolites = resultsSample.getMetabolites();
 		
 		// track alignment probabilities
@@ -445,6 +486,34 @@ public class HDPSamplerHandler {
 
 			}
 		}
+	}
+	
+	public HDPResults getResultMap() {
+		return results;
+	}
+	
+	public HDPAnnotation<Feature> getIonisationProductAnnotations() {
+		return ionisationProductFeatureAnnotations;
+	}
+
+	public HDPAnnotation<Feature> getMetaboliteAnnotations() {
+		return metaboliteFeatureAnnotations;
+	}
+	
+	public HDPAnnotation<Feature> getIsotopeAnnotations() {
+		return isotopeFeatureAnnots;
+	}
+
+	public void setIsotopeFeatureAnnots(HDPAnnotation<Feature> isotopeFeatureAnnots) {
+		this.isotopeFeatureAnnots = isotopeFeatureAnnots;
+	}
+
+	public int getSamplesTaken() {
+		return samplesTaken;
+	}
+
+	public Map<HDPMetabolite, List<HDPPrecursorMass>> getMetabolitePrecursors() {
+		return metabolitePrecursors;
 	}
 		
 }

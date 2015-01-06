@@ -1,9 +1,12 @@
 package com.joewandy.alignmentResearch.objectModel;
 
+import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
-public class HDPMassCluster {
+public class HDPMassCluster implements Serializable {
+
+	private static final long serialVersionUID = -4499614245912320150L;
 
 	private int id;
 	private double theta;
@@ -11,6 +14,11 @@ public class HDPMassCluster {
 	private double sumPeaks;
 	private Set<Feature> peakData;
 	private HDPPrecursorMass precursorMass;
+	
+	// dummy constructor for jackson
+	public HDPMassCluster() {
+		
+	}
 	
 	public HDPMassCluster(int id) {
 		this.id = id;

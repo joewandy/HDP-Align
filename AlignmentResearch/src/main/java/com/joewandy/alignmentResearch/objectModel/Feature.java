@@ -1,5 +1,6 @@
 package com.joewandy.alignmentResearch.objectModel;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -8,6 +9,8 @@ import no.uib.cipr.matrix.Matrix;
 import nu.xom.Attribute;
 import nu.xom.Element;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 
 /**
  * Represents a feature being aligned
@@ -15,27 +18,34 @@ import nu.xom.Element;
  * @author joewandy
  *
  */
-public class Feature {
+public class Feature implements Serializable {
+
+	private static final long serialVersionUID = -3003827310427717456L;
 
 	private int peakID;
 	private double mass;
 	private double massLog;
 	private double rt;
 	private double intensity;
-	private AlignmentFile data;
+	private transient AlignmentFile data;
 	private boolean aligned;
 	private List<FeatureGroup> groups;
 	private double totalScore;
 	private double totalIntensityError;
 	private int noPairs;
 	private boolean delete;
-	private Element xmlElem;
+	private transient Element xmlElem;
 	private int theoPeakID;
 	private String theoAdductType;
 	private int metaboliteID;
 	private double score;
 	private boolean synthetic;
 	private int sequenceID;
+	
+	// dummy constructor for jackson
+	public Feature() {
+		
+	}
 	
 	public Feature(int peakID) {
 		// the peakID is also the position index, so it should start from 0
@@ -89,14 +99,17 @@ public class Feature {
 		this.intensity = intensity;
 	}
 
+	@JsonIgnore
 	public AlignmentFile getData() {
 		return data;
 	}
 
+	@JsonIgnore
 	public void setData(AlignmentFile data) {
 		this.data = data;
 	}
 
+	@JsonIgnore
 	public Element getXmlElem() {
 		
 		Element featureElem = null;
@@ -132,6 +145,7 @@ public class Feature {
 		
 	}
 
+	@JsonIgnore
 	public void setXmlElem(Element xmlElem) {
 		this.xmlElem = xmlElem;
 	}
@@ -176,6 +190,7 @@ public class Feature {
 		this.aligned = aligned;
 	}
 
+	@JsonIgnore
 	public boolean isGrouped() {
 		if (this.groups.isEmpty()) {
 			return false;
@@ -192,15 +207,12 @@ public class Feature {
 		this.delete = delete;
 	}
 
+	@JsonIgnore
 	public FeatureGroup getFirstGroup() {
 		if (this.groups.isEmpty()) {
 			return null;
 		}
 		return this.groups.get(0);
-	}
-
-	public int getFirstGroupID() {
-		return this.groups.get(0).getGroupId();
 	}
 	
 	public List<FeatureGroup> getGroups() {
@@ -231,6 +243,7 @@ public class Feature {
 //		return data.getZZProb();
 //	}
 
+	@JsonIgnore
 	public Matrix getZZProb() {
 		return data.getZZProb();
 	}	
@@ -262,10 +275,12 @@ public class Feature {
 		this.noPairs++;
 	}
 	
+	@JsonIgnore
 	public double getAverageScore() {
 		return this.totalScore / this.noPairs;
 	}
 	
+	@JsonIgnore
 	public double getAverageIntensityError() {
 		return this.totalIntensityError / this.noPairs;
 	}

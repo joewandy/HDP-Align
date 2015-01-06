@@ -25,6 +25,7 @@ import org.apache.commons.math3.random.RandomDataImpl;
 
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
 import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HDPResults;
+import com.thoughtworks.xstream.XStream;
 
 public class HDPMassRTClustering implements HDPClustering {
 
@@ -34,6 +35,7 @@ public class HDPMassRTClustering implements HDPClustering {
 	private int hdpMetaboliteId;					// sequence ID for metabolites
 	private final RandomData randomData;			// random data generator	
 	private HDPSamplerHandler sampleHandler;		// handles the samples obtained from Gibbs sampling
+	private String hdpClusteringResultsPath;		// path to previous clustering results to load, if any
 
 	// experimental hack to ignore peaks during gibbs update
 	private Map<Feature, Integer> singletonCount;		
@@ -59,7 +61,8 @@ public class HDPMassRTClustering implements HDPClustering {
 		// set HDP parameters
 		this.hdpParam = new HDPClusteringParam();
 		setHdpParam(dataList, methodParam);
-						
+		this.hdpClusteringResultsPath = methodParam.getHdpClusteringResultsPath();
+		
 		// assign a sequential ID to all peaks to store the result later
 		int totalPeaks = initialiseSequenceID(dataList);
 		this.hdpMetabolites = new ArrayList<HDPMetabolite>();
@@ -80,26 +83,44 @@ public class HDPMassRTClustering implements HDPClustering {
 	 * Calls Gibbs sampling and collects all the resulting samples
 	 */
 	public void runClustering() {
-
-		double totalTime = 0;
-		for (int s = 0; s < hdpParam.getNsamps(); s++) {
+		
+		// if path to previous clustering results is provided, then try to load it
+		boolean loadSuccess = false;
+		if (hdpClusteringResultsPath != null) {			
+			loadSuccess = sampleHandler.initialiseResultsFromPath(hdpClusteringResultsPath);
+		}
+		
+		if (!loadSuccess) {
 			
-			long startTime = System.currentTimeMillis();
-			int peaksProcessed = assignPeakMassRt();
-			updateParametersMassRt();
-			long endTime = System.currentTimeMillis();
-			double timeTaken = (endTime - startTime) / 1000.0;
-			totalTime += timeTaken;
-			
-			// process the sample
-			boolean last = false;
-			if (s == hdpParam.getNsamps()-1) {
-				last = true;
+			// need to run a new clustering here
+			double totalTime = 0;
+			for (int s = 0; s < hdpParam.getNsamps(); s++) {
+				
+				long startTime = System.currentTimeMillis();
+				int peaksProcessed = assignPeakMassRt();
+				updateParametersMassRt();
+				long endTime = System.currentTimeMillis();
+				double timeTaken = (endTime - startTime) / 1000.0;
+				totalTime += timeTaken;
+				
+				// process the sample
+				boolean last = false;
+				if (s == hdpParam.getNsamps()-1) {
+					last = true;
+				}
+				sampleHandler.storeSample(s, peaksProcessed, timeTaken, hdpParam, last);
+				
 			}
-			sampleHandler.storeSample(s, peaksProcessed, timeTaken, hdpParam, last);
+			System.out.println(String.format("TOTAL TIME = %5.2fs", totalTime));
+
+			// if path is provided, then try to save this clustering results
+			if (hdpClusteringResultsPath != null) {
+				sampleHandler.persistResultsToPath(hdpClusteringResultsPath);
+			}
 			
 		}
-		System.out.println(String.format("TOTAL TIME = %5.2fs", totalTime));
+		
+		// process the results, regardless of whether it's loaded or new clustering results
 		sampleHandler.processSample();
 		
 	}
