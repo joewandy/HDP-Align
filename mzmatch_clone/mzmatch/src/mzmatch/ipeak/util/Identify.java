@@ -310,7 +310,7 @@ public class Identify
 						molecule.getPlainFormula() + ", " + moleculeMass);
 			}
 
-			String databaseFile = "/home/joewandy/Dropbox/Project/documents/new_measure_experiment/input_data/standard_hdp/std1.csv";
+			String databaseFile = "/home/joewandy/Dropbox/Project/documents/new_measure_experiment/input_data/hdp_standard/std1.csv";
 			Map<String, String> compoundGroundTruthDatabase = loadIdentificationDB(databaseFile);
 
 			Set<String> correctFormulaeFound = new HashSet<String>();
