@@ -1,6 +1,6 @@
 package com.joewandy.alignmentResearch.alignmentMethod;
 
-import com.joewandy.alignmentResearch.objectModel.AlignmentList;
+import com.joewandy.alignmentResearch.model.AlignmentList;
 
 public interface FeatureMatching {
 

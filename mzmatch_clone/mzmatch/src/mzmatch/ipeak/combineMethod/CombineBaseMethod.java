@@ -20,22 +20,22 @@ import mzmatch.ipeak.sort.CorrelationParameters;
 import mzmatch.ipeak.sort.Data;
 import mzmatch.ipeak.sort.IdentifyPeaksets;
 import mzmatch.ipeak.sort.MetAssign;
+import mzmatch.ipeak.sort.MetAssign.TestOptions;
 import mzmatch.ipeak.sort.PeakComparer;
 import mzmatch.ipeak.sort.PeakLikelihoodScorer;
 import mzmatch.ipeak.sort.PeakPosteriorScorer;
 import mzmatch.ipeak.sort.RetentionTimeClusteringScorer;
 import mzmatch.ipeak.sort.SampleHandler;
 import mzmatch.ipeak.sort.SimpleClustering;
-import mzmatch.ipeak.sort.MetAssign.TestOptions;
 import peakml.IPeak;
 import peakml.IPeakSet;
 import peakml.io.Header;
 import peakml.io.ParseResult;
 import peakml.io.peakml.PeakMLWriter;
 
-import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
-import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
-import com.joewandy.alignmentResearch.objectModel.Feature;
+import com.joewandy.alignmentResearch.model.AlignmentFile;
+import com.joewandy.alignmentResearch.model.AlignmentRow;
+import com.joewandy.alignmentResearch.model.Feature;
 
 public abstract class CombineBaseMethod implements CombineMethod {
 
@@ -107,11 +107,11 @@ public abstract class CombineBaseMethod implements CombineMethod {
 			List<AlignmentRow> result) {
 		
 		// map data file to sample
-		Map<AlignmentFile, IPeakSet<IPeak>> dataToSampleMap = new HashMap<AlignmentFile, IPeakSet<IPeak>>();
+		Map<Integer, IPeakSet<IPeak>> dataToSampleMap = new HashMap<Integer, IPeakSet<IPeak>>();
 		for (int i = 0; i < dataList.size(); i++) {
 			AlignmentFile file = dataList.get(i);
 			IPeakSet<IPeak> sample = peaksets.get(i);
-			dataToSampleMap.put(file, sample);
+			dataToSampleMap.put(file.getId(), sample);
 		}
 
 		// map alignment row to ipeakset
@@ -125,14 +125,14 @@ public abstract class CombineBaseMethod implements CombineMethod {
 
 	}
 
-	private List<IPeak> mapAlignmentRowToIPeakList(AlignmentRow row, Map<AlignmentFile, IPeakSet<IPeak>> dataToSampleMap) {
+	private List<IPeak> mapAlignmentRowToIPeakList(AlignmentRow row, Map<Integer, IPeakSet<IPeak>> dataToSampleMap) {
 		
 		List<IPeak> match = new ArrayList<IPeak>();
 		
 		for (Feature feature : row.getFeatures()) {
 			
 			// find out which data file this feature comes from ?
-			AlignmentFile file = feature.getData();
+			Integer file = feature.getFileID();
 			
 			// find out which sample it is ?
 			IPeakSet<IPeak> sample = dataToSampleMap.get(file);

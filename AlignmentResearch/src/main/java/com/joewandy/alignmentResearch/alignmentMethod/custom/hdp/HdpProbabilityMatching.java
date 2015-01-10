@@ -5,10 +5,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.joewandy.alignmentResearch.alignmentMethod.FeatureMatching;
-import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
-import com.joewandy.alignmentResearch.objectModel.AlignmentList;
-import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
-import com.joewandy.alignmentResearch.objectModel.Feature;
+import com.joewandy.alignmentResearch.model.AlignmentFile;
+import com.joewandy.alignmentResearch.model.AlignmentList;
+import com.joewandy.alignmentResearch.model.AlignmentRow;
+import com.joewandy.alignmentResearch.model.Feature;
 
 public class HdpProbabilityMatching implements FeatureMatching {
 

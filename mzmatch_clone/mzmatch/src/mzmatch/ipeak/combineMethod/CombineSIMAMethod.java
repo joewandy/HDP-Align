@@ -11,9 +11,9 @@ import com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.Alignmen
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodFactory;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
-import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
-import com.joewandy.alignmentResearch.objectModel.AlignmentList;
-import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
+import com.joewandy.alignmentResearch.model.AlignmentFile;
+import com.joewandy.alignmentResearch.model.AlignmentList;
+import com.joewandy.alignmentResearch.model.AlignmentRow;
 
 public class CombineSIMAMethod extends CombineBaseMethod implements CombineMethod {
 
@@ -33,7 +33,7 @@ public class CombineSIMAMethod extends CombineBaseMethod implements CombineMetho
 		param.setRtTolerance(options.rtwindow);
 		AlignmentMethod aligner = AlignmentMethodFactory.getAlignmentMethod(
 				AlignmentMethodFactory.ALIGNMENT_METHOD_SIMA, 
-				param, data, null);
+				param, data);
 		AlignmentList result = aligner.align();
 		List<AlignmentRow> resultRows = result.getRows();
 		System.out.println("Total " + result.getRowsCount() + " rows aligned");

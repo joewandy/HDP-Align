@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import com.joewandy.alignmentResearch.objectModel.AlignmentList;
-import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
-import com.joewandy.alignmentResearch.objectModel.Feature;
-import com.joewandy.alignmentResearch.objectModel.FeatureGroup;
-import com.joewandy.alignmentResearch.objectModel.GroundTruth;
+import com.joewandy.alignmentResearch.model.AlignmentList;
+import com.joewandy.alignmentResearch.model.AlignmentRow;
+import com.joewandy.alignmentResearch.model.Feature;
+import com.joewandy.alignmentResearch.model.FeatureGroup;
+import com.joewandy.alignmentResearch.model.GroundTruth;
 
 public class GroundTruthResultFilter implements AlignmentResultFilter {
 

@@ -9,9 +9,9 @@ import peakml.chemistry.Molecule;
 
 import com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.GenerativeModelParameter;
 import com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.RetentionTimeWarping;
-import com.joewandy.alignmentResearch.objectModel.Feature;
-import com.joewandy.alignmentResearch.objectModel.GenerativeFeatureGroup;
-import com.joewandy.alignmentResearch.objectModel.GenerativeMolecule;
+import com.joewandy.alignmentResearch.model.Feature;
+import com.joewandy.alignmentResearch.model.GenerativeFeatureGroup;
+import com.joewandy.alignmentResearch.model.GenerativeMolecule;
 
 public class RTPredictor {
 
@@ -69,10 +69,11 @@ public class RTPredictor {
 		
 	}
 	
-	public double predict(Feature feature) {
+	public double predict(Feature feature, Map<Integer, GenerativeFeatureGroup> groupIDMap) {
 		
 		// get the cluster's predicted RT
-		GenerativeFeatureGroup cluster = (GenerativeFeatureGroup) feature.getFirstGroup();
+		Integer groupID = feature.getGroupID();
+		GenerativeFeatureGroup cluster = groupIDMap.get(groupID);
 		double clusterRT = cluster.getWarpedRT();
 		
 		double mean = clusterRT;

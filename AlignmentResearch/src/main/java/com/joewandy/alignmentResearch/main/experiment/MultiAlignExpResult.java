@@ -3,7 +3,7 @@ package com.joewandy.alignmentResearch.main.experiment;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.joewandy.alignmentResearch.objectModel.EvaluationResult;
+import com.joewandy.alignmentResearch.model.EvaluationResult;
 
 public class MultiAlignExpResult {
 

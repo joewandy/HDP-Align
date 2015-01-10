@@ -3,7 +3,7 @@ package com.joewandy.alignmentResearch.alignmentMethod.custom.hdp;
 import java.io.Serializable;
 import java.util.List;
 
-import com.joewandy.alignmentResearch.objectModel.HDPMetabolite;
+import com.joewandy.alignmentResearch.model.HDPMetabolite;
 import com.rits.cloning.Cloner;
 
 public class HDPResultsSample implements Serializable {

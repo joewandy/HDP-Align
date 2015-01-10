@@ -8,9 +8,9 @@ import peakml.IPeakSet;
 
 import com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.AlignmentDataGenerator;
 import com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.BaseDataGenerator;
-import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
-import com.joewandy.alignmentResearch.objectModel.Feature;
-import com.joewandy.alignmentResearch.objectModel.GroundTruth;
+import com.joewandy.alignmentResearch.model.AlignmentFile;
+import com.joewandy.alignmentResearch.model.Feature;
+import com.joewandy.alignmentResearch.model.GroundTruth;
 
 public class PeakMLDataGenerator extends BaseDataGenerator implements AlignmentDataGenerator {
 

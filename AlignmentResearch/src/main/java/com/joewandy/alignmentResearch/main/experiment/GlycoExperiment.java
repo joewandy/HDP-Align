@@ -8,7 +8,7 @@ import com.joewandy.alignmentResearch.alignmentExperiment.AlignmentData;
 import com.joewandy.alignmentResearch.main.MultiAlign;
 import com.joewandy.alignmentResearch.main.MultiAlignCmdOptions;
 import com.joewandy.alignmentResearch.main.MultiAlignConstants;
-import com.joewandy.alignmentResearch.objectModel.EvaluationResult;
+import com.joewandy.alignmentResearch.model.EvaluationResult;
 
 public class GlycoExperiment extends MultiAlignBaseExp implements
 		MultiAlignExperiment {

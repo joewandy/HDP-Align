@@ -7,10 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
-import com.joewandy.alignmentResearch.objectModel.Feature;
-import com.joewandy.alignmentResearch.objectModel.GroundTruth;
-import com.joewandy.alignmentResearch.objectModel.GroundTruthFeatureGroup;
+import com.joewandy.alignmentResearch.model.AlignmentFile;
+import com.joewandy.alignmentResearch.model.Feature;
+import com.joewandy.alignmentResearch.model.FeatureGroup;
+import com.joewandy.alignmentResearch.model.GroundTruth;
 
 public class AlignmentData {
 
@@ -77,21 +77,21 @@ public class AlignmentData {
 
 		// write header
 		PrintWriter pw = new PrintWriter(new FileOutputStream(path));
-		Map<AlignmentFile, Integer> fileMap = new HashMap<AlignmentFile, Integer>();
+		Map<Integer, Integer> fileMap = new HashMap<Integer, Integer>(); // map between file ID to counter
 		int counter = 1;
 		for (AlignmentFile file : alignmentDataList) {
-			fileMap.put(file, counter);
+			fileMap.put(file.getId(), counter);
 			pw.println("> " + counter + " " + file.getFilenameWithoutExtension());
 			counter++;
 		}
 		
 		// write features
-		List<GroundTruthFeatureGroup> groundTruthList = this.groundTruth.getGroundTruthFeatureGroups();		
-		for (GroundTruthFeatureGroup gt : groundTruthList) {
+		List<FeatureGroup> groundTruthList = this.groundTruth.getGroundTruthFeatureGroups();		
+		for (FeatureGroup gt : groundTruthList) {
 			StringBuilder sb = new StringBuilder();
 			sb.append("# ");
 			for (Feature f : gt.getFeatures()) {
-				AlignmentFile file = f.getData();
+				Integer file = f.getFileID();
 				int fileIdx = fileMap.get(file);
 				int peakID = f.getPeakID(); // starts from 0 too in the ground truth
 				sb.append(fileIdx + " " + peakID + " ");

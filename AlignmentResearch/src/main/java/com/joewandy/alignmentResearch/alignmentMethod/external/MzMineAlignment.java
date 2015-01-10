@@ -44,10 +44,10 @@ import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
 import com.joewandy.alignmentResearch.alignmentMethod.BaseAlignment;
 import com.joewandy.alignmentResearch.main.MultiAlignConstants;
-import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
-import com.joewandy.alignmentResearch.objectModel.AlignmentList;
-import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
-import com.joewandy.alignmentResearch.objectModel.Feature;
+import com.joewandy.alignmentResearch.model.AlignmentFile;
+import com.joewandy.alignmentResearch.model.AlignmentList;
+import com.joewandy.alignmentResearch.model.AlignmentRow;
+import com.joewandy.alignmentResearch.model.Feature;
 
 public abstract class MzMineAlignment extends BaseAlignment implements
 		AlignmentMethod, TaskListener {

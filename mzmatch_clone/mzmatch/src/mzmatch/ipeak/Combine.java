@@ -26,7 +26,6 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.Vector;
 
-import mzmatch.ipeak.combineMethod.CombineCustomJoinMethod;
 import mzmatch.ipeak.combineMethod.CombineGreedyMethod;
 import mzmatch.ipeak.combineMethod.CombineMethod;
 import mzmatch.ipeak.combineMethod.CombineMzMineJoinMethod;
@@ -265,8 +264,6 @@ public class Combine {
 			CombineMethod task = null;
 			if (AlignmentMethodFactory.ALIGNMENT_METHOD_GREEDY.equals(options.method)) {
 				task = new CombineGreedyMethod();
-			} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_JOIN.equals(options.method)) {
-				task = new CombineCustomJoinMethod();
 			} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MZMINE_JOIN.equals(options.method)) {
 				task = new CombineMzMineJoinMethod();
 			} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MZMINE_RANSAC.equals(options.method)) {

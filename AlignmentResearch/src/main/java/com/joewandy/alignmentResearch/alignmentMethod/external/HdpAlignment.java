@@ -26,13 +26,13 @@ import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HDPMassClusterF
 import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HdpProbabilityMatching;
 import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HDPResults;
 import com.joewandy.alignmentResearch.main.MultiAlignConstants;
-import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
-import com.joewandy.alignmentResearch.objectModel.AlignmentList;
-import com.joewandy.alignmentResearch.objectModel.Feature;
-import com.joewandy.alignmentResearch.objectModel.HDPAnnotation;
-import com.joewandy.alignmentResearch.objectModel.HDPAnnotationItem;
-import com.joewandy.alignmentResearch.objectModel.HDPClustering;
-import com.joewandy.alignmentResearch.objectModel.HDPMassRTClustering;
+import com.joewandy.alignmentResearch.model.AlignmentFile;
+import com.joewandy.alignmentResearch.model.AlignmentList;
+import com.joewandy.alignmentResearch.model.Feature;
+import com.joewandy.alignmentResearch.model.HDPAnnotation;
+import com.joewandy.alignmentResearch.model.HDPAnnotationItem;
+import com.joewandy.alignmentResearch.model.HDPClustering;
+import com.joewandy.alignmentResearch.model.HDPMassRTClustering;
 
 /**
  * An alignment method using Hierarchical Dirichlet Process mixture model

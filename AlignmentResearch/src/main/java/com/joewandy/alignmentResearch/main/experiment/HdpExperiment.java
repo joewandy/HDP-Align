@@ -10,7 +10,7 @@ import com.joewandy.alignmentResearch.filter.AlignmentResultFilter;
 import com.joewandy.alignmentResearch.filter.ScoreResultFilter;
 import com.joewandy.alignmentResearch.main.MultiAlign;
 import com.joewandy.alignmentResearch.main.MultiAlignCmdOptions;
-import com.joewandy.alignmentResearch.objectModel.EvaluationResult;
+import com.joewandy.alignmentResearch.model.EvaluationResult;
 
 public class HdpExperiment extends MultiAlignBaseExp implements MultiAlignExperiment {
 

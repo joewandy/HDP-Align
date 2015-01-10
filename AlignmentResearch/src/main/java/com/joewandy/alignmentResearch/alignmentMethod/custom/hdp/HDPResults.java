@@ -9,7 +9,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.joewandy.alignmentResearch.objectModel.HDPMetabolite;
+import com.joewandy.alignmentResearch.model.HDPMetabolite;
 import com.rits.cloning.Cloner;
 
 public class HDPResults implements Serializable {

@@ -9,7 +9,7 @@ import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
 import com.joewandy.alignmentResearch.main.MultiAlign;
 import com.joewandy.alignmentResearch.main.MultiAlignCmdOptions;
 import com.joewandy.alignmentResearch.main.MultiAlignConstants;
-import com.joewandy.alignmentResearch.objectModel.EvaluationResult;
+import com.joewandy.alignmentResearch.model.EvaluationResult;
 
 public class MultiAlignNormalRun extends MultiAlignBaseExp implements MultiAlignExperiment {
 

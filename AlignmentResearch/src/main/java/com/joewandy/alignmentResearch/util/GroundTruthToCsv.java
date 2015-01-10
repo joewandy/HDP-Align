@@ -29,7 +29,7 @@ import cmdline.Option;
 import cmdline.OptionsClass;
 
 import com.joewandy.alignmentResearch.comparator.NaturalOrderFilenameComparator;
-import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
+import com.joewandy.alignmentResearch.model.AlignmentFile;
 
 public class GroundTruthToCsv {
 

@@ -2,15 +2,15 @@ package com.joewandy.alignmentResearch.alignmentMethod;
 
 import java.util.List;
 
+import com.joewandy.alignmentResearch.grouping.FeatureGroupingMethod;
+import com.joewandy.alignmentResearch.grouping.GreedyFeatureGroupingMethod;
+import com.joewandy.alignmentResearch.grouping.MatlabFeatureGroupingMethod;
+import com.joewandy.alignmentResearch.grouping.MetAssignFeatureGroupingMethod;
+import com.joewandy.alignmentResearch.grouping.SavedMatlabFeatureGroupingMethod;
 import com.joewandy.alignmentResearch.main.MultiAlign;
 import com.joewandy.alignmentResearch.main.MultiAlignConstants;
-import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
-import com.joewandy.alignmentResearch.objectModel.AlignmentList;
-import com.joewandy.alignmentResearch.objectModel.FeatureGroupingMethod;
-import com.joewandy.alignmentResearch.objectModel.GreedyFeatureGroupingMethod;
-import com.joewandy.alignmentResearch.objectModel.MatlabFeatureGroupingMethod;
-import com.joewandy.alignmentResearch.objectModel.MetAssignFeatureGroupingMethod;
-import com.joewandy.alignmentResearch.objectModel.SavedMatlabFeatureGroupingMethod;
+import com.joewandy.alignmentResearch.model.AlignmentFile;
+import com.joewandy.alignmentResearch.model.AlignmentList;
 
 public class FeatureGrouper  {
 

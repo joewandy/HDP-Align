@@ -7,10 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.joewandy.alignmentResearch.filter.AlignmentResultFilter;
-import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
-import com.joewandy.alignmentResearch.objectModel.AlignmentList;
-import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
-import com.joewandy.alignmentResearch.objectModel.Feature;
+import com.joewandy.alignmentResearch.model.AlignmentFile;
+import com.joewandy.alignmentResearch.model.AlignmentList;
+import com.joewandy.alignmentResearch.model.AlignmentRow;
+import com.joewandy.alignmentResearch.model.Feature;
 
 public abstract class BaseAlignment implements AlignmentMethod {
 

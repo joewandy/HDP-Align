@@ -7,8 +7,8 @@ import com.joewandy.alignmentResearch.alignmentExperiment.AlignmentData;
 import com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.AlignmentDataGenerator;
 import com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.AlignmentDataGeneratorFactory;
 import com.joewandy.alignmentResearch.main.MultiAlignCmdOptions;
-import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
-import com.joewandy.alignmentResearch.objectModel.EvaluationResult;
+import com.joewandy.alignmentResearch.model.AlignmentFile;
+import com.joewandy.alignmentResearch.model.EvaluationResult;
 
 public abstract class MultiAlignBaseExp implements MultiAlignExperiment {
 

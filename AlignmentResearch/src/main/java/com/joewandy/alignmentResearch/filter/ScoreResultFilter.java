@@ -7,10 +7,10 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 
 import com.joewandy.alignmentResearch.alignmentExperiment.AlignmentData;
-import com.joewandy.alignmentResearch.objectModel.AlignmentList;
-import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
-import com.joewandy.alignmentResearch.objectModel.Feature;
-import com.joewandy.alignmentResearch.objectModel.GroundTruth;
+import com.joewandy.alignmentResearch.model.AlignmentList;
+import com.joewandy.alignmentResearch.model.AlignmentRow;
+import com.joewandy.alignmentResearch.model.Feature;
+import com.joewandy.alignmentResearch.model.GroundTruth;
 
 public class ScoreResultFilter implements AlignmentResultFilter {
 

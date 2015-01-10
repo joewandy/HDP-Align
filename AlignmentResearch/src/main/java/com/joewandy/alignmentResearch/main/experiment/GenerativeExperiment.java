@@ -14,8 +14,8 @@ import com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.Alignmen
 import com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.AlignmentDataGeneratorFactory;
 import com.joewandy.alignmentResearch.main.MultiAlign;
 import com.joewandy.alignmentResearch.main.MultiAlignCmdOptions;
-import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
-import com.joewandy.alignmentResearch.objectModel.EvaluationResult;
+import com.joewandy.alignmentResearch.model.AlignmentFile;
+import com.joewandy.alignmentResearch.model.EvaluationResult;
 
 public abstract class GenerativeExperiment extends MultiAlignBaseExp implements MultiAlignExperiment {
 

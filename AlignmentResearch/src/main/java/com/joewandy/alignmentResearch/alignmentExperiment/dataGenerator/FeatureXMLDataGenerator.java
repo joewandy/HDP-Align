@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.InputMismatchException;
 import java.util.Iterator;
@@ -24,10 +23,10 @@ import nu.xom.ParsingException;
 import nu.xom.ValidityException;
 
 import com.joewandy.alignmentResearch.comparator.NaturalOrderFilenameComparator;
-import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
-import com.joewandy.alignmentResearch.objectModel.Feature;
-import com.joewandy.alignmentResearch.objectModel.GroundTruth;
-import com.joewandy.alignmentResearch.objectModel.GroundTruthFeatureGroup;
+import com.joewandy.alignmentResearch.model.AlignmentFile;
+import com.joewandy.alignmentResearch.model.Feature;
+import com.joewandy.alignmentResearch.model.FeatureGroup;
+import com.joewandy.alignmentResearch.model.GroundTruth;
 
 public class FeatureXMLDataGenerator extends BaseDataGenerator implements AlignmentDataGenerator {
 
@@ -101,7 +100,7 @@ public class FeatureXMLDataGenerator extends BaseDataGenerator implements Alignm
 		}
 		
 		// store only features present in files that we're aligning
-		List<GroundTruthFeatureGroup> groundTruthEntries = new ArrayList<GroundTruthFeatureGroup>();
+		List<FeatureGroup> groundTruthEntries = new ArrayList<FeatureGroup>();
 
 		Scanner in = null;
 		try {
@@ -120,7 +119,7 @@ public class FeatureXMLDataGenerator extends BaseDataGenerator implements Alignm
 			while (in.hasNextLine()) {
 				String line = in.nextLine();
 				Scanner lineSplitter = new Scanner(line);
-				GroundTruthFeatureGroup gtFeatures = new GroundTruthFeatureGroup(groupID);
+				FeatureGroup gtFeatures = new FeatureGroup(groupID);
 				
 				// we can implement a finite-state machine, or we can just hack this ...
 				while (lineSplitter.hasNext()) {
@@ -206,9 +205,9 @@ public class FeatureXMLDataGenerator extends BaseDataGenerator implements Alignm
 		}
 
 //		System.out.println("Retaining only entries size >= 2 = " + groundTruthEntries.size() + " rows");
-		Iterator<GroundTruthFeatureGroup> it = groundTruthEntries.iterator();
+		Iterator<FeatureGroup> it = groundTruthEntries.iterator();
 		while (it.hasNext()) {
-			GroundTruthFeatureGroup gg = it.next();
+			FeatureGroup gg = it.next();
 			if (gg.getFeatureCount() < 2) {
 				it.remove();
 			}

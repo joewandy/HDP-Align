@@ -10,23 +10,19 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.InputMismatchException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
-import nu.xom.Attribute;
-import nu.xom.Element;
-import nu.xom.Elements;
 import nu.xom.ParsingException;
 import nu.xom.ValidityException;
 
 import com.joewandy.alignmentResearch.comparator.NaturalOrderFilenameComparator;
-import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
-import com.joewandy.alignmentResearch.objectModel.Feature;
-import com.joewandy.alignmentResearch.objectModel.GroundTruth;
-import com.joewandy.alignmentResearch.objectModel.GroundTruthFeatureGroup;
+import com.joewandy.alignmentResearch.model.AlignmentFile;
+import com.joewandy.alignmentResearch.model.Feature;
+import com.joewandy.alignmentResearch.model.FeatureGroup;
+import com.joewandy.alignmentResearch.model.GroundTruth;
 
 public class SimaFormatDataGenerator extends BaseDataGenerator implements AlignmentDataGenerator {
 
@@ -100,7 +96,7 @@ public class SimaFormatDataGenerator extends BaseDataGenerator implements Alignm
 		}
 		
 		// store only features present in files that we're aligning
-		List<GroundTruthFeatureGroup> groundTruthEntries = new ArrayList<GroundTruthFeatureGroup>();
+		List<FeatureGroup> groundTruthEntries = new ArrayList<FeatureGroup>();
 
 		Scanner in = null;
 		try {
@@ -132,7 +128,7 @@ public class SimaFormatDataGenerator extends BaseDataGenerator implements Alignm
 						
 					} else if ("#".equals(firstToken)) {
 
-						GroundTruthFeatureGroup gtFeatures = new GroundTruthFeatureGroup(groupID);
+						FeatureGroup gtFeatures = new FeatureGroup(groupID);
 						while (lineSplitter.hasNext()) {
 
 							int fileIdx = lineSplitter.nextInt();
@@ -170,9 +166,9 @@ public class SimaFormatDataGenerator extends BaseDataGenerator implements Alignm
 		System.out.println("Load ground truth = " + groundTruthEntries.size() + " rows");
 
 //		System.out.println("Retaining only entries size >= 2 = " + groundTruthEntries.size() + " rows");
-		Iterator<GroundTruthFeatureGroup> it = groundTruthEntries.iterator();
+		Iterator<FeatureGroup> it = groundTruthEntries.iterator();
 		while (it.hasNext()) {
-			GroundTruthFeatureGroup gg = it.next();
+			FeatureGroup gg = it.next();
 			if (gg.getFeatureCount() < 2) {
 				it.remove();
 			}
@@ -212,7 +208,7 @@ public class SimaFormatDataGenerator extends BaseDataGenerator implements Alignm
 		        	double intensity = Double.valueOf(tokens[2]);
 		        	double rt = Double.valueOf(tokens[3]);
 		        	int theoPeakId = Integer.valueOf(tokens[4]);
-		        	int metId = Integer.valueOf(tokens[5]);
+		        	String metId = tokens[5];
 		        	String adduct = tokens[6];
 		        	Feature feature = new Feature(peakId, mass/charge, rt, intensity);
 		        	feature.setTheoPeakID(theoPeakId);

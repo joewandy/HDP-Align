@@ -11,7 +11,7 @@ import com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.Generati
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodFactory;
 import com.joewandy.alignmentResearch.main.MultiAlignCmdOptions;
 import com.joewandy.alignmentResearch.main.MultiAlignConstants;
-import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
+import com.joewandy.alignmentResearch.model.AlignmentFile;
 
 public class GenerativeBiologicalExperiment extends GenerativeExperiment implements MultiAlignExperiment {
 

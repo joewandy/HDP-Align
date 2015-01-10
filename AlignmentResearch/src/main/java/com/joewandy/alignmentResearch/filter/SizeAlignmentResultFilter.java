@@ -3,8 +3,8 @@ package com.joewandy.alignmentResearch.filter;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.joewandy.alignmentResearch.objectModel.AlignmentList;
-import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
+import com.joewandy.alignmentResearch.model.AlignmentList;
+import com.joewandy.alignmentResearch.model.AlignmentRow;
 
 public class SizeAlignmentResultFilter implements AlignmentResultFilter {
 

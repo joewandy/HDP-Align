@@ -2,7 +2,7 @@ package com.joewandy.alignmentResearch.comparator;
 
 import java.util.Comparator;
 
-import com.joewandy.alignmentResearch.objectModel.Feature;
+import com.joewandy.alignmentResearch.model.Feature;
 
 public class FeatureIntensityComparator implements Comparator<Feature> {
 

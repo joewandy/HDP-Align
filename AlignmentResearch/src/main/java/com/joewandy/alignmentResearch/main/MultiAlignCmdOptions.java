@@ -76,7 +76,7 @@ public class MultiAlignCmdOptions {
 	 */
 	
 	@Option(name = "method", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Which alignment method to choose.")
-	public String method = AlignmentMethodFactory.ALIGNMENT_METHOD_BASELINE;
+	public String method = AlignmentMethodFactory.ALIGNMENT_METHOD_PYTHON_MW;
 
 	@Option(name = "alignmentMzTol", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "The accuracy of the m/z measurement, usually in parts-per-milion. This value is used for the "
 			+ "matching of mass chromatogram (collections) and needs to be reasonable for the equipment "

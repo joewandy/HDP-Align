@@ -18,14 +18,14 @@ import org.apache.commons.math3.distribution.NormalDistribution;
 import peakml.chemistry.Molecule;
 import peakml.io.chemistry.MoleculeIO;
 
-import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
-import com.joewandy.alignmentResearch.objectModel.Feature;
-import com.joewandy.alignmentResearch.objectModel.GenerativeFeatureClusterer;
-import com.joewandy.alignmentResearch.objectModel.GenerativeFeatureGroup;
-import com.joewandy.alignmentResearch.objectModel.GenerativeMolecule;
-import com.joewandy.alignmentResearch.objectModel.GenerativeMoleculeDB;
-import com.joewandy.alignmentResearch.objectModel.GroundTruth;
-import com.joewandy.alignmentResearch.objectModel.GroundTruthFeatureGroup;
+import com.joewandy.alignmentResearch.model.AlignmentFile;
+import com.joewandy.alignmentResearch.model.Feature;
+import com.joewandy.alignmentResearch.model.FeatureGroup;
+import com.joewandy.alignmentResearch.model.GenerativeFeatureClusterer;
+import com.joewandy.alignmentResearch.model.GenerativeFeatureGroup;
+import com.joewandy.alignmentResearch.model.GenerativeMolecule;
+import com.joewandy.alignmentResearch.model.GenerativeMoleculeDB;
+import com.joewandy.alignmentResearch.model.GroundTruth;
 import com.joewandy.alignmentResearch.rtPrediction.RTPredictor;
 import com.rits.cloning.Cloner;
 
@@ -41,7 +41,8 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 	
 	// parameters for generative models
 	private GenerativeModelParameter params;
-	
+	private GenerativeFeatureClusterer clusterer;
+
 	// RT predictor
 	private RTPredictor predictor;
 		
@@ -51,6 +52,7 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 	private List<Molecule> replacement;
 	
 	private Cloner cloner;
+
 	
 	public GenerativeModelDataGenerator(String molPath, GenerativeModelParameter params, int gtCombinationSize, boolean verbose) {
 
@@ -62,6 +64,7 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 		this.predictor = new RTPredictor(params);
 		this.r = new Random();
 		this.verbose = verbose;
+		this.clusterer = new GenerativeFeatureClusterer(params);
 
 		if (verbose) {
 			System.out.println("Loading molecules");			
@@ -103,10 +106,17 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 				System.out.println("Total " + selectedMols.size() + " molecules selected with " + N + " theoretical features");				
 			}
 
+			// map between group ID and it's parent molecule ID
+			Map<Integer, GenerativeFeatureGroup> groupIdMap = new HashMap<Integer, GenerativeFeatureGroup>();
+						
 			// collect all the theoretical features for each metabolite
 			List<Feature> theoFeatures = new ArrayList<Feature>();
 			for (GenerativeMolecule mol : selectedMols) {
-				initialiseClusters(mol, i); // initialise RT clustering
+				List<GenerativeFeatureGroup> groups = initialiseClusters(mol, i); // initialise RT clustering
+				for (GenerativeFeatureGroup group : groups) {
+					Integer groupID = group.getGroupID();
+					groupIdMap.put(groupID, group);
+				}
 				List<Feature> molFeatures = mol.getTheoFeatures();
 				theoFeatures.addAll(molFeatures);
 			}
@@ -115,7 +125,7 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 			if (verbose) {
 				System.out.println("Generating observed features ..");				
 			}
-			List<Feature> observedFeatures = generateObservedFeatures(theoFeatures);
+			List<Feature> observedFeatures = generateObservedFeatures(theoFeatures, groupIdMap);
 									
 			String fileName = filePrefix + i + fileSuffix;
 			AlignmentFile file = new AlignmentFile(i, fileName, observedFeatures);
@@ -135,7 +145,7 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 	@Override
 	protected GroundTruth getGroundTruth() {
 		
-		List<GroundTruthFeatureGroup> groundTruthEntries = new ArrayList<GroundTruthFeatureGroup>();
+		List<FeatureGroup> groundTruthEntries = new ArrayList<FeatureGroup>();
 		
 		int groupID = 1;
 		for (int i = 0; i < alignmentFiles.size(); i++) {
@@ -150,7 +160,7 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 				}
 				
 				// add ourselves
-				GroundTruthFeatureGroup gt = new GroundTruthFeatureGroup(groupID);
+				FeatureGroup gt = new FeatureGroup(groupID);
 				gt.addFeature(feature1);
 				feature1.setAligned(true);
 
@@ -199,9 +209,9 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 		}
 
 //		System.out.println("Retaining only entries size >= 2 = " + groundTruthEntries.size() + " rows");
-		Iterator<GroundTruthFeatureGroup> it = groundTruthEntries.iterator();
+		Iterator<FeatureGroup> it = groundTruthEntries.iterator();
 		while (it.hasNext()) {
-			GroundTruthFeatureGroup gg = it.next();
+			FeatureGroup gg = it.next();
 			if (gg.getFeatureCount() < 2) {
 				it.remove();
 			}
@@ -305,11 +315,9 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 		return molecules;
 	}
 				
-	private void initialiseClusters(GenerativeMolecule mol,
+	private List<GenerativeFeatureGroup> initialiseClusters(GenerativeMolecule mol,
 			int replicateIndex) {
-		
-		GenerativeFeatureClusterer clusterer = new GenerativeFeatureClusterer(params);
-			
+					
 		// divide these features into clusters
 		List<Feature> theoFeatures = mol.getTheoFeatures();
 		assert(theoFeatures.size() != 0) : "Zero theoretical features for " + mol;
@@ -321,21 +329,23 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 			double warpedRT = predictor.predict(group, replicateIndex);
 			group.setWarpedRT(warpedRT);
 		}
+		
+		return groups;
 
 	}		
 	
 	/**
 	 * Generate observed features from theoretical features
 	 * @param theoFeatures The theoretical features
+	 * @param groupIdMap 
 	 * @return The observed features
 	 */
-	private List<Feature> generateObservedFeatures(List<Feature> theoFeatures) {
+	private List<Feature> generateObservedFeatures(List<Feature> theoFeatures, Map<Integer, GenerativeFeatureGroup> groupIdMap) {
 
 		List<Feature> observedFeatures = new ArrayList<Feature>();
 		int observedPeakID = 0;
 //		Map<GenerativeMolecule, List<Feature>> molFeatures = new HashMap<GenerativeMolecule, List<Feature>>();
 		
-		Map<GenerativeMolecule, Integer> molToId = getMolToId(theoFeatures);
 		for (Feature theoFeature : theoFeatures) {
 										
 			// get the observed mass, intensity and RT
@@ -348,7 +358,7 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 			NormalDistribution intensityDist = new NormalDistribution(logIntensity, params.getSigma_q());
 			double observedMass = Math.exp(massDist.sample());
 			double observedIntensity = Math.exp(intensityDist.sample());
-			double observedRT = predictor.predict(theoFeature);
+			double observedRT = predictor.predict(theoFeature, groupIdMap);
 						
 			// skip if feature has intensity below threshold 
 			if (observedIntensity < params.getThreshold_q()) {
@@ -371,17 +381,11 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 			observedFeature.setTheoPeakID(id);
 			observedFeature.setTheoAdductType(adduct);
 			
-			GenerativeFeatureGroup group = (GenerativeFeatureGroup) theoFeature.getFirstGroup();
-			GenerativeMolecule mol = group.getParent();
-//			if (molFeatures.containsKey(mol)) {
-//				molFeatures.get(mol).add(observedFeature);
-//			} else {
-//				List<Feature> newList = new ArrayList<Feature>();
-//				newList.add(observedFeature);
-//				molFeatures.put(mol, newList);
-//			}
-
-			observedFeature.setMetaboliteID(molToId.get(mol));
+			Integer groupID = theoFeature.getGroupID();
+			GenerativeFeatureGroup group = groupIdMap.get(groupID);
+			GenerativeMolecule met = group.getParent();
+			String metaboliteID = met.getId();
+			observedFeature.setMetaboliteID(metaboliteID);
 			observedFeature.setSynthetic(true);
 			
 			observedFeatures.add(observedFeature);
@@ -398,21 +402,6 @@ public class GenerativeModelDataGenerator extends BaseDataGenerator implements A
 		
 		return observedFeatures;
 
-	}
-
-	private Map<GenerativeMolecule, Integer> getMolToId(
-			List<Feature> theoFeatures) {
-		Map<GenerativeMolecule, Integer> molToId = new HashMap<GenerativeMolecule, Integer>();
-		int molId = 0;
-		for (Feature theoFeature : theoFeatures) {
-			GenerativeFeatureGroup group = (GenerativeFeatureGroup) theoFeature.getFirstGroup();
-			GenerativeMolecule mol = group.getParent();
-			if (!molToId.containsKey(mol)) {
-				molToId.put(mol, molId);
-				molId++;
-			}
-		}
-		return molToId;
 	}
 	
 }

@@ -33,16 +33,13 @@ import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethod;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodFactory;
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
 import com.joewandy.alignmentResearch.alignmentMethod.FeatureGrouper;
-import com.joewandy.alignmentResearch.alignmentMethod.custom.extension.ExtendedLibraryBuilder;
 import com.joewandy.alignmentResearch.filter.AlignmentResultFilter;
 import com.joewandy.alignmentResearch.main.experiment.MultiAlignExpResult;
-import com.joewandy.alignmentResearch.objectModel.AlignmentLibrary;
-import com.joewandy.alignmentResearch.objectModel.AlignmentList;
-import com.joewandy.alignmentResearch.objectModel.AlignmentRow;
-import com.joewandy.alignmentResearch.objectModel.EvaluationResult;
-import com.joewandy.alignmentResearch.objectModel.ExtendedLibrary;
-import com.joewandy.alignmentResearch.objectModel.Feature;
-import com.joewandy.alignmentResearch.objectModel.GroundTruth;
+import com.joewandy.alignmentResearch.model.AlignmentList;
+import com.joewandy.alignmentResearch.model.AlignmentRow;
+import com.joewandy.alignmentResearch.model.EvaluationResult;
+import com.joewandy.alignmentResearch.model.Feature;
+import com.joewandy.alignmentResearch.model.GroundTruth;
 
 
 public class MultiAlign {
@@ -59,7 +56,6 @@ public class MultiAlign {
 	private double alpha;
 	
 	private AlignmentMethod aligner;
-	private ExtendedLibrary extendedLibrary;
 		
 	public MultiAlign(MultiAlignCmdOptions options, AlignmentData data) {
 
@@ -72,31 +68,7 @@ public class MultiAlign {
 		this.alpha = options.alpha;		
 		this.param = new AlignmentMethodParam(options);
 				
-		if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_MAXIMUM_WEIGHT_MATCHING_HIERARCHICAL.equals(method)) {
-
-			// cluster peaks within files
-			if (param.isUseGroup()) {
-				FeatureGrouper grouper = new FeatureGrouper(data.getAlignmentDataList(), param);
-				grouper.groupFeatures();				
-			}
-			
-			// build pairwise library
-			ExtendedLibraryBuilder builder = new ExtendedLibraryBuilder(data.getAlignmentDataList(), param);		
-			List<AlignmentLibrary> allLibraries = builder.buildPrimaryLibrary();
-			extendedLibrary = builder.combineLibraries(allLibraries);			
-			this.aligner = AlignmentMethodFactory.getAlignmentMethod(method, param, data, extendedLibrary);			
-
-		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_MAXIMUM_WEIGHT_MATCHING_REFERENCE.equals(method)) {
-
-			// cluster peaks within files
-			if (param.isUseGroup()) {
-				FeatureGrouper grouper = new FeatureGrouper(data.getAlignmentDataList(), param);
-				grouper.groupFeatures();				
-			}
-
-			this.aligner = AlignmentMethodFactory.getAlignmentMethod(method, param, data, null);			
-
-		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_GROUP_ONLY.equals(method)) {
+		if (AlignmentMethodFactory.ALIGNMENT_METHOD_GROUP_ONLY.equals(method)) {
 
 			// cluster peaks within files
 			if (param.isUseGroup()) {
@@ -106,7 +78,7 @@ public class MultiAlign {
 
 		} else {
 
-			this.aligner = AlignmentMethodFactory.getAlignmentMethod(method, param, data, null);			
+			this.aligner = AlignmentMethodFactory.getAlignmentMethod(method, param, data);			
 					
 		}
 				

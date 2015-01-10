@@ -42,8 +42,8 @@ import com.joewandy.alignmentResearch.alignmentExperiment.AlignmentData;
 import com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.AlignmentDataGenerator;
 import com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.FeatureXMLDataGenerator;
 import com.joewandy.alignmentResearch.comparator.NaturalOrderFilenameComparator;
-import com.joewandy.alignmentResearch.objectModel.AlignmentFile;
-import com.joewandy.alignmentResearch.objectModel.Feature;
+import com.joewandy.alignmentResearch.model.AlignmentFile;
+import com.joewandy.alignmentResearch.model.Feature;
 
 public class SimaFormatToText {
 
