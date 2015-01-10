@@ -96,7 +96,9 @@ public class MultiAlign {
 			System.out.println("Total " + result.getRowsCount() + " rows aligned");			
 		}
 		if (result != null) {
+			System.out.println("Writing alignment results to " + options.output);
 			writeAlignmentResult(result, options.output);
+			System.out.println("Computing performance evaluation");
 			EvaluationResult evalRes = evaluate(result, options.measureType);
 			return evalRes;			
 		} else {
@@ -113,6 +115,7 @@ public class MultiAlign {
 			System.out.println("Total " + result.getRowsCount() + " rows aligned");			
 		}
 		if (result != null) {
+			System.out.println("Computing performance evaluation");
 			EvaluationResult evalRes = null;
 			double lastThreshold = 0;
 			do {

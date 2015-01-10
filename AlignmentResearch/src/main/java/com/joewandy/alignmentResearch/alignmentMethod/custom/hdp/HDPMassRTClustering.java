@@ -33,7 +33,6 @@ import com.joewandy.alignmentResearch.model.HDPClusteringParam;
 import com.joewandy.alignmentResearch.model.HDPFile;
 import com.joewandy.alignmentResearch.model.HDPMassCluster;
 import com.joewandy.alignmentResearch.model.HDPMetabolite;
-import com.thoughtworks.xstream.XStream;
 
 public class HDPMassRTClustering implements HDPClustering {
 
@@ -42,7 +41,8 @@ public class HDPMassRTClustering implements HDPClustering {
 	private List<HDPMetabolite> hdpMetabolites;		// inferred metabolites
 	private int hdpMetaboliteId;					// sequence ID for metabolites
 	private final RandomData randomData;			// random data generator	
-	private HDPSamplerHandler sampleHandler;		// handles the samples obtained from Gibbs sampling
+	private HDPSampleHandler sampleHandler;		// stores the samples obtained from Gibbs sampling
+	private HDPSampleProcessor sampleProcessor;	// process the samples after Gibbs sampling is done
 	private String hdpClusteringResultsPath;		// path to previous clustering results to load, if any
 
 	// experimental hack to ignore peaks during gibbs update
@@ -72,18 +72,20 @@ public class HDPMassRTClustering implements HDPClustering {
 		this.hdpClusteringResultsPath = methodParam.getHdpClusteringResultsPath();
 		
 		// assign a sequential ID to all peaks to store the result later
-		int totalPeaks = initialiseSequenceID(dataList);
+		initialiseSequenceID(dataList);
 		this.hdpMetabolites = new ArrayList<HDPMetabolite>();
 		
 		// put all peaks into 1 RT cluster, 1 metabolite, 1 mass cluster
 		initialiseGibbsSampling(dataList);
 
-		// setup sample handler, do this after gibbs sampling has been initialised
+		// setup sample handler, call this only after gibbs sampling has been initialised
+		this.sampleHandler = new HDPSampleHandler(hdpMetabolites);
+		
+		// setup sample processor
 		double massTol = methodParam.getHdpMassTol();
 		String idDatabase = methodParam.getIdentificationDatabase();
 		String mode = methodParam.getMode();
-		this.sampleHandler = new HDPSamplerHandler(hdpMetabolites, 
-				totalPeaks, massTol, idDatabase, mode);
+		this.sampleProcessor = new HDPSampleProcessor(massTol, idDatabase, mode);
 
 	}
 
@@ -129,34 +131,48 @@ public class HDPMassRTClustering implements HDPClustering {
 		}
 		
 		// process the results, regardless of whether it's loaded or new clustering results
-		sampleHandler.processSample();
+		HDPAllSamples resultsList = sampleHandler.getSamplingResults();
+		sampleProcessor.processSample(resultsList);
 		
 	}
 	
 	/**
-	 * Returns the probabilities of aligned features
+	 * Returns the probabilities of aligned features set
 	 */
-	public HDPResults getResults() {		
-		return sampleHandler.getResultMap();
+	public HDPAlignmentResults getAlignmentResults() {		
+		return sampleProcessor.getAlignmentResults();
 	}
 	
 	/**
 	 * Returns the number of samples taken
 	 */
 	public int getSamplesTaken() {
-		return sampleHandler.getSamplesTaken();
-	}
-	
-	public HDPAnnotation<Feature> getIonisationProductAnnotations() {
-		return sampleHandler.getIonisationProductAnnotations();
+		return sampleProcessor.getSamplesTaken();
 	}
 
-	public HDPAnnotation<Feature> getMetaboliteAnnotations() {
-		return sampleHandler.getMetaboliteAnnotations();
+	/**
+	 * Returns annotations on features for ionisation products
+	 */
+	public HDPAnnotation<Feature> getIonisationProductFeatureAnnotations() {
+		return sampleProcessor.getIonisationProductFeatureAnnotations();
+	}
+
+	/**
+	 * Returns annotations on features for metabolites
+	 */
+	public HDPAnnotation<Feature> getMetaboliteFeatureAnnotations() {
+		return sampleProcessor.getMetaboliteFeatureAnnotations();
 	}
 	
-	public HDPAnnotation<Feature> getIsotopeAnnotations() {
-		return sampleHandler.getIsotopeAnnotations();
+	/**
+	 * Returns annotations on features for isotope types
+	 */
+	public HDPAnnotation<Feature> getIsotopeFeatureAnnotations() {
+		return sampleProcessor.getIsotopeFeatureAnnotations();
+	}
+	
+	public HDPSingleSample getLastSample() {
+		return sampleProcessor.getLastSample();
 	}
 			
 	/**

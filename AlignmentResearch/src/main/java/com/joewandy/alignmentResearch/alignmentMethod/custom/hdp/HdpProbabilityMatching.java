@@ -12,12 +12,12 @@ import com.joewandy.alignmentResearch.model.Feature;
 
 public class HdpProbabilityMatching implements FeatureMatching {
 
-	private HDPResults hdpResults;
+	private HDPAlignmentResults alignmentResults;
 	private List<AlignmentFile> dataList;
 	private int samplesTaken;
 	
-	public HdpProbabilityMatching(HDPResults hdpResults, List<AlignmentFile> dataList, int samplesTaken) {			
-		this.hdpResults = hdpResults;
+	public HdpProbabilityMatching(HDPAlignmentResults alignmentResults, List<AlignmentFile> dataList, int samplesTaken) {			
+		this.alignmentResults = alignmentResults;
 		this.dataList = dataList;
 		this.samplesTaken = samplesTaken;
 	}
@@ -27,9 +27,9 @@ public class HdpProbabilityMatching implements FeatureMatching {
 		// add matched entries
 		AlignmentList matchedList = new AlignmentList("matched_list");
 		int rowId = 0;		
-		for (Entry<HDPMassClusterFeatures, Integer> match : hdpResults.getEntries()) {
+		for (Entry<HDPMassClusterFeatures, Integer> match : alignmentResults.getEntries()) {
 			HDPMassClusterFeatures item = match.getKey();
-			int count = hdpResults.getCount(item);
+			int count = alignmentResults.getCount(item);
 			double prob = ((double)count) / samplesTaken;
 			AlignmentRow merged = new AlignmentRow(matchedList, rowId++);
 			Set<Feature> features = item.getFeatures();

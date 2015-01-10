@@ -1,6 +1,7 @@
 package com.joewandy.alignmentResearch.model;
 
-import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HDPResults;
+import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HDPAlignmentResults;
+import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HDPSingleSample;
 
 
 public interface HDPClustering {
@@ -9,12 +10,14 @@ public interface HDPClustering {
 
 	int getSamplesTaken();
 	
-	HDPResults getResults();
+	public HDPAlignmentResults getAlignmentResults();
 	
-	public HDPAnnotation<Feature> getIonisationProductAnnotations();
+	public HDPAnnotation<Feature> getIonisationProductFeatureAnnotations();
 
-	public HDPAnnotation<Feature> getMetaboliteAnnotations();
+	public HDPAnnotation<Feature> getMetaboliteFeatureAnnotations();
 
-	public HDPAnnotation<Feature> getIsotopeAnnotations();
+	public HDPAnnotation<Feature> getIsotopeFeatureAnnotations();
+	
+	public HDPSingleSample getLastSample();
 	
 }

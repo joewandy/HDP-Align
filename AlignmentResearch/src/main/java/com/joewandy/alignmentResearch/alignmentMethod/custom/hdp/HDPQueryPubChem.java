@@ -52,7 +52,7 @@ import com.joewandy.mzmatch.query.CompoundQuery;
  * @author joewandy
  * 
  */
-public class HDPPubChemQuery extends BaseQuery implements CompoundQuery {
+public class HDPQueryPubChem extends BaseQuery implements CompoundQuery {
 
 	// number of results per query
 	private static final int DEFAULT_NUM_RESULTS = 10;
@@ -68,17 +68,17 @@ public class HDPPubChemQuery extends BaseQuery implements CompoundQuery {
 	private final int batchSize;
 	private final int numResults;
 
-	public HDPPubChemQuery() {
+	public HDPQueryPubChem() {
 		super.result = new HashSet<Molecule>();
 		this.numResults = DEFAULT_NUM_RESULTS;		
 		this.batchSize = DEFAULT_BATCH_SIZE;
 	}
 	
-	public HDPPubChemQuery(Map<String, Molecule> molecules) {
-		this(molecules, HDPPubChemQuery.DEFAULT_NUM_RESULTS, HDPPubChemQuery.DEFAULT_BATCH_SIZE);
+	public HDPQueryPubChem(Map<String, Molecule> molecules) {
+		this(molecules, HDPQueryPubChem.DEFAULT_NUM_RESULTS, HDPQueryPubChem.DEFAULT_BATCH_SIZE);
 	}
 
-	public HDPPubChemQuery(Map<String, Molecule> molecules, int numResults, int batchSize) {
+	public HDPQueryPubChem(Map<String, Molecule> molecules, int numResults, int batchSize) {
 		super.result = new HashSet<Molecule>();
 		this.numResults = numResults;
 		this.batchSize = batchSize;
@@ -207,7 +207,7 @@ public class HDPPubChemQuery extends BaseQuery implements CompoundQuery {
 		}
 
 		StringBuilder builder = new StringBuilder();
-		builder.append(HDPPubChemQuery.QUERY_PROLOG);
+		builder.append(HDPQueryPubChem.QUERY_PROLOG);
 		final String input = "/compound/cid/";
 		builder.append(input);
 		for(String s : cids) {
@@ -215,7 +215,7 @@ public class HDPPubChemQuery extends BaseQuery implements CompoundQuery {
 		}
 		final String operation = "/property/IUPACName,MolecularFormula,MolecularWeight,MonoisotopicMass,Charge,InChIKey,InChI";
 		builder.append(operation);
-		builder.append(HDPPubChemQuery.QUERY_OUTPUT);
+		builder.append(HDPQueryPubChem.QUERY_OUTPUT);
 		URI uri = constructUri(builder);
 
 		HttpGet httpget = new HttpGet(uri);
@@ -256,14 +256,14 @@ public class HDPPubChemQuery extends BaseQuery implements CompoundQuery {
 	private URI constructUri(StringBuilder sb) throws URISyntaxException {
 		String path = sb.toString();
 		URIBuilder builder = new URIBuilder();
-		builder.setScheme("http").setHost(HDPPubChemQuery.QUERY_HOST).setPath(path);
+		builder.setScheme("http").setHost(HDPQueryPubChem.QUERY_HOST).setPath(path);
 		URI uri = builder.build();
 		return uri;
 	}
 	
 	public static void main(String [] args) throws Exception {
 		
-		HDPPubChemQuery query = new HDPPubChemQuery();
+		HDPQueryPubChem query = new HDPQueryPubChem();
 		final double ppm = 10;				
 		double[] terms = { 217.095, 218.098, 478.154, 576.126, 318.106, 347.982, 577.13 };
 		for (double term : terms) {
@@ -274,7 +274,7 @@ public class HDPPubChemQuery extends BaseQuery implements CompoundQuery {
 		
 	}
 
-	private static void queryAndPrint(HDPPubChemQuery query, final double ppm,
+	private static void queryAndPrint(HDPQueryPubChem query, final double ppm,
 			double term) throws Exception {
 		System.out.println("Query PubChem for monoisotopic mass " + term + " at " + ppm + " ppm");
 		Set<Molecule> results = query.findCompoundsByMass(term, ppm, 0);

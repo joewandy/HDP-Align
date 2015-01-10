@@ -18,11 +18,11 @@ import peakml.chemistry.Mass;
 import peakml.chemistry.Molecule;
 import peakml.io.chemistry.MoleculeIO;
 
-public class HDPKeggQuery extends BaseQuery implements CompoundQuery {
+public class HDPQueryKegg extends BaseQuery implements CompoundQuery {
 
 	private List<Molecule> localDb;
 	
-	public HDPKeggQuery(String moleculeDatabase) {
+	public HDPQueryKegg(String moleculeDatabase) {
 		
 		super.result = new HashSet<Molecule>();
 		try {

@@ -249,8 +249,11 @@ public class Feature implements Serializable {
 	@Override
 	public String toString() {
 		if (fileID != null) {
-			return "Feature [peakID=" + peakID + ", mass=" + mass + ", rt=" + rt
-					+ ", intensity=" + intensity + ", fileID=" + fileID
+			return "Feature [peakID=" + peakID 
+					+ ", fileID=" + fileID
+					+ ", mass=" + mass 
+					+ ", RT=" + rt
+					+ ", intensity=" + intensity 
 					+ ", theoPeakID=" + theoPeakID 
 					+ ", theoAdductType=" + theoAdductType 
 					+ ", metaboliteID=" + metaboliteID

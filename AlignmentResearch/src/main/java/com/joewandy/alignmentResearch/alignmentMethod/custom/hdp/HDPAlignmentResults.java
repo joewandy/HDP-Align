@@ -12,30 +12,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.joewandy.alignmentResearch.model.HDPMetabolite;
 import com.rits.cloning.Cloner;
 
-public class HDPResults implements Serializable {
+public class HDPAlignmentResults implements Serializable {
 	
 	private static final long serialVersionUID = 398275171032368664L;
 
-	private List<HDPResultsSample> allResults;
 	private Map<HDPMassClusterFeatures, Integer> counts;
 	
-	public HDPResults() {
-		this.allResults = new ArrayList<HDPResultsSample>();
+	public HDPAlignmentResults() {
 		this.counts = new HashMap<HDPMassClusterFeatures, Integer>();
-	}
-
-	public void store(List<HDPMetabolite> metabolites) {
-		HDPResultsSample resultsSample = new HDPResultsSample(metabolites);
-		allResults.add(resultsSample);
-	}
-	
-	public List<HDPResultsSample> getResultsSamples() {
-		return allResults;
-	}
-	
-	@JsonIgnore
-	public int getResultsSamplesCount() {
-		return allResults.size();
 	}
 
 	public int getCount(HDPMassClusterFeatures item) {
