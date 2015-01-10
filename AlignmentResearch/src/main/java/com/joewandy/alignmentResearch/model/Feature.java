@@ -6,6 +6,7 @@ import nu.xom.Attribute;
 import nu.xom.Element;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.joewandy.alignmentResearch.main.MultiAlignConstants;
 
 
 /**
@@ -248,23 +249,25 @@ public class Feature implements Serializable {
 
 	@Override
 	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("Feature [peakID=" + peakID);
 		if (fileID != null) {
-			return "Feature [peakID=" + peakID 
-					+ ", fileID=" + fileID
-					+ ", mass=" + mass 
-					+ ", RT=" + rt
-					+ ", intensity=" + intensity 
-					+ ", theoPeakID=" + theoPeakID 
-					+ ", theoAdductType=" + theoAdductType 
-					+ ", metaboliteID=" + metaboliteID
-					+ "]";			
-		} else {
-			return "Feature [peakID=" + peakID 
-					+ ", mass=" + mass 
-					+ ", rt=" + rt
-					+ ", intensity=" + intensity 
-					+ "]";			
+			builder.append(", fileID=" + fileID);
 		}
+		builder.append(", mass=" + String.format(MultiAlignConstants.MASS_FORMAT, mass));
+		builder.append(", RT=" + rt);
+		builder.append(", intensity=" + intensity);
+		if (theoPeakID != null) {
+			builder.append(", theoPeakID=" + theoPeakID);
+		}
+		if (theoAdductType != null) {
+			builder.append(", theoAdductType=" + theoAdductType);
+		}
+		if (metaboliteID != null) {
+			builder.append(", metaboliteID=" + metaboliteID);
+		}
+		builder.append("]");			
+		return builder.toString();
 	}
 	
 	public static String csvHeader() {

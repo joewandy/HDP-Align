@@ -16,6 +16,8 @@ public interface HDPClustering {
 
 	public HDPAnnotation<Feature> getMetaboliteFeatureAnnotations();
 
+	public HDPAnnotation<HDPMetabolite> getMetaboliteAnnotations();
+	
 	public HDPAnnotation<Feature> getIsotopeFeatureAnnotations();
 	
 	public HDPSingleSample getLastSample();

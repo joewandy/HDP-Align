@@ -1,9 +1,8 @@
 package com.joewandy.alignmentResearch.model;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 public class HDPAnnotation<T> {
 
@@ -51,5 +50,10 @@ public class HDPAnnotation<T> {
 	public int size() {
 		return this.annotations.size();
 	}
-			
+
+	@Override
+	public String toString() {
+		return "HDPAnnotation [annotations=" + annotations + "]";
+	}
+	
 }

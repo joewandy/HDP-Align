@@ -25,6 +25,7 @@ public class MultiAlignConstants {
 		
 	// false if the mass tolerance is absolute, true if it's relative value (in parts-per-million)
 	public static final boolean USE_PPM = false;
+	public static final String MASS_FORMAT = "%.5f";
 	
 	public static final String GROUPING_METHOD_GREEDY = "greedy";
 	public static final String GROUPING_METHOD_MIXTURE = "mixture";

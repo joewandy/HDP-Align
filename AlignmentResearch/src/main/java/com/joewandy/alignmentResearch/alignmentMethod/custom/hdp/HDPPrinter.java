@@ -10,6 +10,8 @@ import com.joewandy.alignmentResearch.model.Feature;
 import com.joewandy.alignmentResearch.model.HDPAnnotation;
 import com.joewandy.alignmentResearch.model.HDPAnnotationItem;
 import com.joewandy.alignmentResearch.model.HDPClustering;
+import com.joewandy.alignmentResearch.model.HDPMassCluster;
+import com.joewandy.alignmentResearch.model.HDPMetabolite;
 
 public class HDPPrinter {
 	
@@ -30,9 +32,44 @@ public class HDPPrinter {
 	}
 
 	public void printLastSample(HDPClustering clustering) {
+
 		System.out.println("LAST SAMPLE");
 		HDPSingleSample lastSample = clustering.getLastSample();
-		System.out.println(lastSample);		
+
+		HDPAnnotation<HDPMetabolite> metaboliteAnnotations = clustering
+				.getMetaboliteAnnotations();
+		if (metaboliteAnnotations == null) {
+			return;
+		}
+		System.out.println("Metabolite annotations size = " + metaboliteAnnotations.size());			
+
+		List<HDPMetabolite> metabolites = lastSample.getMetabolites();
+		for (HDPMetabolite met : metabolites) {
+
+			// print putative identities
+			System.out.println(met);
+			HDPAnnotationItem annot = metaboliteAnnotations.get(met);
+			System.out.println("Putative identities");
+			if (annot != null) {
+				System.out.println(annot);
+			} else {
+				System.out.println("\t- no metabolite annotations -");
+			}
+			
+			// print mass clusters and the features inside
+			System.out.println("Mass clusters");
+			List<HDPMassCluster> massClusters = met.getMassClusters();
+			for (HDPMassCluster mc : massClusters) {
+				System.out.println("\t" + mc);
+				for (Feature f : mc.getPeakData()) {
+					System.out.println("\t\t" + f);
+				}
+			}
+		
+			System.out.println();
+			
+		}
+			
 	}
 	
 	public void printAnnotations(HDPClustering clustering) {
@@ -43,15 +80,15 @@ public class HDPPrinter {
 				.getIonisationProductFeatureAnnotations();
 		HDPAnnotation<Feature> isotopeAnnotations = clustering
 				.getIsotopeFeatureAnnotations();
-		HDPAnnotation<Feature> metaboliteAnnotations = clustering
+		HDPAnnotation<Feature> metaboliteFeatureAnnotations = clustering
 				.getMetaboliteFeatureAnnotations();
 
 		if (ipAnnotations != null) {
 			System.out.println("Ionisation product annotations size = " + ipAnnotations.size());			
 		} else if (isotopeAnnotations != null) {
 			System.out.println("Isotope annotations size = " + isotopeAnnotations.size());			
-		} else if (metaboliteAnnotations != null) {
-			System.out.println("Metabolite annotations size = " + metaboliteAnnotations.size());			
+		} else if (metaboliteFeatureAnnotations != null) {
+			System.out.println("Metabolite annotations size = " + metaboliteFeatureAnnotations.size());			
 		} else {
 			return;
 		}
@@ -96,10 +133,10 @@ public class HDPPrinter {
 			}
 			
 			// do metabolite annotations
-			if (metaboliteAnnotations != null) {
+			if (metaboliteFeatureAnnotations != null) {
 
 				// first find the metabolite annotations for this feature
-				HDPAnnotationItem featureMets = metaboliteAnnotations.get(feature);
+				HDPAnnotationItem featureMets = metaboliteFeatureAnnotations.get(feature);
 
 				// if there's any ..
 				if (featureMets != null) {
@@ -191,7 +228,7 @@ public class HDPPrinter {
 			
 		}
 		
-		if (metaboliteAnnotations != null && compoundGroundTruthDatabase != null) {
+		if (metaboliteFeatureAnnotations != null && compoundGroundTruthDatabase != null) {
 		
 			System.out.println("Metabolite DB size = " + compoundGroundTruthDatabase.size());			
 

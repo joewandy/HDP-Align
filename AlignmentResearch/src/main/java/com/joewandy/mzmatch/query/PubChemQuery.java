@@ -40,6 +40,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.joewandy.alignmentResearch.main.MultiAlignConstants;
 import com.joewandy.mzmatch.model.PubChemMolecule;
 import com.joewandy.mzmatch.model.PugCidsToProperties;
 
@@ -90,8 +91,8 @@ public class PubChemQuery extends BaseQuery implements CompoundQuery {
 			double delta) throws Exception {
 		
 		System.out.print("Querying remote PubChem");
-		System.out.print("\tmass=" + String.format("%.5f", mass));
-		System.out.print("\tdelta=" + String.format("%.5f", delta));
+		System.out.print("\tmass=" + String.format(MultiAlignConstants.MASS_FORMAT, mass));
+		System.out.print("\tdelta=" + String.format(MultiAlignConstants.MASS_FORMAT, delta));
 		System.out.println("\tppm=" + String.format("%.1f", ppm));
 
 		DBGateway gw = new PubChemGateway(); 

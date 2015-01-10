@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.joewandy.alignmentResearch.main.MultiAlignConstants;
+
 import domsax.XmlParserException;
 
 import peakml.chemistry.Mass;
@@ -37,8 +39,8 @@ public class KeggQuery extends BaseQuery implements CompoundQuery {
 	public Set<Molecule> findCompoundsByMass(double mass, double ppm, double delta) throws Exception {
 
 		System.out.print("Querying local KEGG");
-		System.out.print("\tmass=" + String.format("%.5f", mass));
-		System.out.print("\tdelta=" + String.format("%.5f", delta));
+		System.out.print("\tmass=" + String.format(MultiAlignConstants.MASS_FORMAT, mass));
+		System.out.print("\tdelta=" + String.format(MultiAlignConstants.MASS_FORMAT, delta));
 		System.out.println("\tppm=" + String.format("%.1f", ppm));
 		
 		Set<Molecule> rows = new HashSet<Molecule>();

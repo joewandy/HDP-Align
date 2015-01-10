@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
+import com.joewandy.alignmentResearch.main.MultiAlignConstants;
+
 import mzmatch.ipeak.util.Common;
 import mzmatch.ipeak.util.GeneralDerivative;
 import mzmatch.util.Tool;
@@ -131,7 +133,7 @@ public class CompoundToCsv {
 						String[] arr = new String[5];
 						arr[0] = molecule.getDatabaseID();
 
-						// arr[1] = String.format("%.5f",
+						// arr[1] = String.format(MultiAlignConstants.MASS_FORMAT,
 						// molecule.getMass(Mass.MONOISOTOPIC, true));
 						arr[1] = String.format("%.6f", mass);
 

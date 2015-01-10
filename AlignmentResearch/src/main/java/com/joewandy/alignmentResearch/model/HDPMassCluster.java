@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.joewandy.alignmentResearch.main.MultiAlignConstants;
+
 public class HDPMassCluster implements Serializable {
 
 	private static final long serialVersionUID = -4499614245912320150L;
@@ -75,7 +77,9 @@ public class HDPMassCluster implements Serializable {
 
 	@Override
 	public String toString() {
-		return "HDPMassCluster [id=" + id + ", mass=" + Math.exp(theta)
+		double mass = Math.exp(theta);
+		return "HDPMassCluster [id=" + id + ", mass=" 
+				+ String.format(MultiAlignConstants.MASS_FORMAT, mass)
 				+ ", countPeaks=" + countPeaks + "]";
 	}
 	

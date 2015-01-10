@@ -38,6 +38,7 @@ public class HDPSampleProcessor {
 	private HDPAnnotation<Feature> isotopeFeatureAnnotations;
 	private HDPAnnotation<Feature> ionisationProductFeatureAnnotations;
 	private HDPAnnotation<Feature> metaboliteFeatureAnnotations;
+	private HDPAnnotation<HDPMetabolite> metaboliteAnnotations;
 	
 	public HDPSampleProcessor(double ppm, String dbPath, String mode) {
 	
@@ -47,6 +48,7 @@ public class HDPSampleProcessor {
 		if (dbPath != null) {
 			this.idDatabase = new HDPQueryKegg(dbPath);			
 			this.metaboliteFeatureAnnotations = new HDPAnnotation<Feature>();
+			this.metaboliteAnnotations = new HDPAnnotation<HDPMetabolite>();
 		}
 		
 		if (mode != null) {
@@ -332,16 +334,19 @@ public class HDPSampleProcessor {
 					continue;
 				}
 				
-				// annotate all the peaks inside with mol
+				// annotate objects based on the molecule identity
 				for (Molecule mol : mols) {
 					String msg = mol.getPlainFormula();
+					// annotate all the peaks inside with mol
 					for (Feature f : mc.getPeakData()) {
 						metaboliteFeatureAnnotations.annotate(f, msg);
-					}					
-				}
-
+					}
+					// annotate the inferred HDP metabolite object too
+					msg = msg + " @ m/z " + String.format(MultiAlignConstants.MASS_FORMAT, pc.getMass());
+					metaboliteAnnotations.annotate(met, msg);
+				}				
 			}
-
+			
 		}
 				
 	}
@@ -411,6 +416,10 @@ public class HDPSampleProcessor {
 
 	public HDPAnnotation<Feature> getMetaboliteFeatureAnnotations() {
 		return metaboliteFeatureAnnotations;
+	}
+	
+	public HDPAnnotation<HDPMetabolite> getMetaboliteAnnotations() {
+		return metaboliteAnnotations;
 	}
 
 	public HDPSingleSample getLastSample() {

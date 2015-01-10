@@ -20,6 +20,7 @@ import peakml.chemistry.Molecule;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.joewandy.alignmentResearch.main.MultiAlignConstants;
 import com.joewandy.mzmatch.model.CouchDbResponse;
 import com.joewandy.mzmatch.model.CouchDbRow;
 import com.joewandy.mzmatch.model.PubChemSnapshot;
@@ -43,8 +44,8 @@ public class LocalPubChemQuery extends BaseQuery implements CompoundQuery {
 
 		System.out.println("Querying local PubChem snapshot");
 		System.out
-				.println("\tmonoisotopic mass=" + String.format("%.5f", mass));
-		System.out.println("\tdelta=" + String.format("%.5f", delta));
+				.println("\tmonoisotopic mass=" + String.format(MultiAlignConstants.MASS_FORMAT, mass));
+		System.out.println("\tdelta=" + String.format(MultiAlignConstants.MASS_FORMAT, delta));
 
 		/*
 		 * Request: 

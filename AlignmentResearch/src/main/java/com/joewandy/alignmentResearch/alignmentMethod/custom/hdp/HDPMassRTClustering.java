@@ -163,6 +163,13 @@ public class HDPMassRTClustering implements HDPClustering {
 	public HDPAnnotation<Feature> getMetaboliteFeatureAnnotations() {
 		return sampleProcessor.getMetaboliteFeatureAnnotations();
 	}
+
+	/**
+	 * Returns annotations on features for metabolites
+	 */
+	public HDPAnnotation<HDPMetabolite> getMetaboliteAnnotations() {
+		return sampleProcessor.getMetaboliteAnnotations();
+	}
 	
 	/**
 	 * Returns annotations on features for isotope types
@@ -171,6 +178,9 @@ public class HDPMassRTClustering implements HDPClustering {
 		return sampleProcessor.getIsotopeFeatureAnnotations();
 	}
 	
+	/**
+	 * Returns last HDP sample
+	 */
 	public HDPSingleSample getLastSample() {
 		return sampleProcessor.getLastSample();
 	}
