@@ -282,12 +282,16 @@ public class HDPSampleProcessor {
 			// check mass tolerance to determine if precursorMass2 is an adduct type
 			if (precursorMass1.withinTolerance(precursorMass2)) {
 				// if yes, then annotate peaks in both mass clusters with the respective adduct types
+				String adductType1 = adductList.get(c1);
 				for (Feature f1 : mc1.getPeakData()) {
-					ionisationProductFeatureAnnotations.annotate(f1, adductList.get(c1));
+					ionisationProductFeatureAnnotations.annotate(f1, adductType1);
 				}
+				mc1.addMessage(adductType1);
+				String adductType2 = adductList.get(c2);
 				for (Feature f2 : mc2.getPeakData()) {
-					ionisationProductFeatureAnnotations.annotate(f2, adductList.get(c2));
+					ionisationProductFeatureAnnotations.annotate(f2, adductType2);
 				}				
+				mc2.addMessage(adductType2);
 				return true;
 			}
 
@@ -341,6 +345,8 @@ public class HDPSampleProcessor {
 					for (Feature f : mc.getPeakData()) {
 						metaboliteFeatureAnnotations.annotate(f, msg);
 					}
+					// annotate the mass cluster
+					mc.addMessage(msg);
 					// annotate the inferred HDP metabolite object too
 					msg = msg + " @ m/z " + String.format(MultiAlignConstants.MASS_FORMAT, pc.getMass());
 					metaboliteAnnotations.annotate(met, msg);
@@ -381,8 +387,9 @@ public class HDPSampleProcessor {
 					String label = isotopeLabels[k];
 					if (pc2.withinTolerance(pc1.getMass()+diff)) {
 						// pc2 is probably an isotope of pc1 if within tolerance
-						String annotation = label + " of " + pc1.getMass();
+						String annotation = label + " of " + String.format(MultiAlignConstants.MASS_FORMAT, pc1.getMass());
 						isotopePrecursorMassAnnots.annotate(pc2, annotation);
+						pc2.addMessage(annotation);
 					}
 				}
 

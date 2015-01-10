@@ -16,21 +16,26 @@ public class HDPMassCluster implements Serializable {
 	private double sumPeaks;
 	private Set<Feature> peakData;
 	private HDPPrecursorMass precursorMass;
+	private Set<String> messages;
 	
 	// dummy constructor for jackson
 	public HDPMassCluster() {
-		
 	}
 	
 	public HDPMassCluster(int id) {
 		this.id = id;
 		this.peakData = new HashSet<Feature>();
+		this.messages = new HashSet<String>();
 	}
 
 	public int getId() {
 		return id;
 	}
 
+	public void setId(int id) {
+		this.id = id;
+	}
+	
 	public double getTheta() {
 		return theta;
 	}
@@ -51,14 +56,38 @@ public class HDPMassCluster implements Serializable {
 		return countPeaks;
 	}
 
+	public void setCountPeaks(int countPeaks) {
+		this.countPeaks = countPeaks;
+	}
+	
 	public double getSumPeaks() {
 		return sumPeaks;
 	}
 
+	public void setSumPeaks(double sumPeaks) {
+		this.sumPeaks = sumPeaks;
+	}
+	
 	public Set<Feature> getPeakData() {
 		return peakData;
 	}
+
+	public void setPeakData(Set<Feature> peakData) {
+		this.peakData = peakData;
+	}
+
+	public Set<String> getMessages() {
+		return messages;
+	}
+
+	public void setMessages(Set<String> messages) {
+		this.messages = messages;
+	}
 	
+	public void addMessage(String message) {
+		this.messages.add(message);
+	}
+
 	public void addFeature(Feature f) {
 		countPeaks++;
 		sumPeaks += f.getMassLog();
@@ -78,9 +107,23 @@ public class HDPMassCluster implements Serializable {
 	@Override
 	public String toString() {
 		double mass = Math.exp(theta);
-		return "HDPMassCluster [id=" + id + ", mass=" 
-				+ String.format(MultiAlignConstants.MASS_FORMAT, mass)
-				+ ", countPeaks=" + countPeaks + "]";
+		StringBuilder builder = new StringBuilder();
+		builder.append("HDPMassCluster [id=");
+		builder.append(id);
+		builder.append(", mass=");
+		builder.append(String.format(MultiAlignConstants.MASS_FORMAT, mass));
+		builder.append(", countPeaks=");
+		builder.append(countPeaks);
+		builder.append(", messages=");
+		builder.append(messages);
+		if (precursorMass != null) {
+			builder.append(", precursorMass=");
+			builder.append(String.format(MultiAlignConstants.MASS_FORMAT, precursorMass.getMass()));
+			builder.append(", precursorMassMessages=");
+			builder.append(precursorMass.getMessages());
+		}
+		builder.append("]");
+		return builder.toString();
 	}
 	
 }

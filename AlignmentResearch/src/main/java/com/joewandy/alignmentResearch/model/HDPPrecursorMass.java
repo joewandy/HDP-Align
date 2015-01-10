@@ -14,12 +14,14 @@ public class HDPPrecursorMass implements Comparable<HDPPrecursorMass> {
 	private int count;
 	private Set<Molecule> molecules;
 	private CompoundQuery dbQuery;
+	private Set<String> messages;
 	
 	public HDPPrecursorMass(double mass, double ppm, CompoundQuery dbQuery) {
 		this.mass = mass;
 		this.ppm = ppm;
 		this.count = 1;
 		this.dbQuery = dbQuery;
+		this.messages = new HashSet<String>();
 	}
 
 	public double getMass() {
@@ -77,6 +79,50 @@ public class HDPPrecursorMass implements Comparable<HDPPrecursorMass> {
 
 	public int compareTo(HDPPrecursorMass o) {
 		return -Integer.compare(this.getCount(), o.getCount());
+	}
+
+	public double getPpm() {
+		return ppm;
+	}
+
+	public void setPpm(double ppm) {
+		this.ppm = ppm;
+	}
+
+	public Set<Molecule> getMolecules() {
+		return molecules;
+	}
+
+	public void setMolecules(Set<Molecule> molecules) {
+		this.molecules = molecules;
+	}
+
+	public CompoundQuery getDbQuery() {
+		return dbQuery;
+	}
+
+	public void setDbQuery(CompoundQuery dbQuery) {
+		this.dbQuery = dbQuery;
+	}
+
+	public Set<String> getMessages() {
+		return messages;
+	}
+
+	public void setMessages(Set<String> messages) {
+		this.messages = messages;
+	}
+	
+	public void addMessage(String message) {
+		this.messages.add(message);
+	}
+
+	public void setMass(double mass) {
+		this.mass = mass;
+	}
+
+	public void setCount(int count) {
+		this.count = count;
 	}
 	
 }

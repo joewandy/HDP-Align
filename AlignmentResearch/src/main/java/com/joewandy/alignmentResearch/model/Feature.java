@@ -38,7 +38,7 @@ public class Feature implements Serializable {
 	private String theoAdductType;
 	private String metaboliteID;
 	private boolean synthetic;
-	
+		
 	// dummy constructor for jackson
 	public Feature() {
 		
@@ -246,7 +246,7 @@ public class Feature implements Serializable {
 	public String asKey() {
 		return "[" + csvForm() + "]";
 	}
-
+	
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();

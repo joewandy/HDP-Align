@@ -85,14 +85,11 @@ public class HdpAlignment extends BaseAlignment implements AlignmentMethod {
 			samplesTaken = clustering.getSamplesTaken();
 			results = clustering.getAlignmentResults();
 			
-			printer.printHeader();
-						
-			// print annotation results
-			printer.printAnnotations(clustering);
-			System.out.println();
-
-			// print last samples
-			printer.printLastSample(clustering);
+			// print stuff out
+			printer.printHeader();						
+			Map<Feature, String> messages = printer.initialiseFeatureAnnotations(clustering);
+			// keep in mind that EVERYTHING in the last samples (including the features) have been deep-cloned from the originals
+			printer.printLastSample(clustering, messages); 
 			System.out.println();
 
 		} else if (MultiAlignConstants.SCORING_METHOD_HDP_RT_JAVA

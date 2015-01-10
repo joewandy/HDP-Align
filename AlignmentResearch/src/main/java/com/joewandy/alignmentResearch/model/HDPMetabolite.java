@@ -34,20 +34,69 @@ public class HDPMetabolite implements Serializable {
 		this.massClusters = new ArrayList<HDPMassCluster>();
 		this.metaboliteMasses = new ArrayList<Double>();
 	}
+	
+	/*
+	 * Getters and setters
+	 */
 
 	public int getId() {
 		return id;
 	}
+	
+	public void setId(int id) {
+		this.id = id;
+	}
+	
+	public int getMassClusterSeqId() {
+		return massClusterSeqId;
+	}
+
+	public void setMassClusterSeqId(int massClusterSeqId) {
+		this.massClusterSeqId = massClusterSeqId;
+	}
+
+	public Map<Feature, HDPMassCluster> getV() {
+		return V;
+	}
+
+	public void setV(Map<Feature, HDPMassCluster> v) {
+		V = v;
+	}
+	
+	public List<Double> getMetaboliteMasses() {
+		return this.metaboliteMasses;
+	}
+	
+	public void setMetaboliteMasses(List<Double> metaboliteMasses) {
+		this.metaboliteMasses = metaboliteMasses;
+	}
+
+	public List<HDPMassCluster> getMassClusters() {
+		return massClusters;
+	}
+	
+	public void setMassClusters(List<HDPMassCluster> massClusters) {
+		this.massClusters = massClusters;
+	}
+	
+	public List<Feature> getPeakData() {
+		return peakData;
+	}
+
+	public void setPeakData(List<Feature> peakData) {
+		this.peakData = peakData;
+	}
+	
+	/*
+	 * Additional methods
+	 */
 	
 	@JsonIgnore
 	public int getA() {
 		return massClusters.size();
 	}
 		
-	public List<HDPMassCluster> getMassClusters() {
-		return massClusters;
-	}
-	
+	@JsonIgnore
 	public Set<HDPPrecursorMass> getPrecursorMasses() {
 		Set<HDPPrecursorMass> pcs = new HashSet<HDPPrecursorMass>();
 		for (HDPMassCluster mc : this.getMassClusters()) {
@@ -59,6 +108,7 @@ public class HDPMetabolite implements Serializable {
 		return pcs;
 	}
 
+	@JsonIgnore
 	public int addMassCluster() {
 		HDPMassCluster newCluster = new HDPMassCluster(massClusterSeqId);
 		massClusterSeqId++;
@@ -66,11 +116,13 @@ public class HDPMetabolite implements Serializable {
 		int a = massClusters.size()-1;
 		return a;
 	}
-		
+
+	@JsonIgnore
 	public void removeMassCluster(HDPMassCluster mc) {
 		massClusters.remove(mc);
 	}
 	
+	@JsonIgnore
 	public List<HDPMassCluster> getEmptyMassClusters() {
 		List<HDPMassCluster> emptyList = new ArrayList<HDPMassCluster>();
 		for (HDPMassCluster mc : massClusters) {
@@ -80,36 +132,42 @@ public class HDPMetabolite implements Serializable {
 		}
 		return emptyList;
 	}
-	
+
+	@JsonIgnore
 	public void addPeak(Feature f, int a) {
 		HDPMassCluster massCluster = massClusters.get(a);
 		massCluster.addFeature(f);
 		V.put(f, massCluster);
 		peakData.add(f);
 	}
-	
+
+	@JsonIgnore
 	public HDPMassCluster removePeak(Feature f) {
 		HDPMassCluster massCluster = V.remove(f);
 		peakData.remove(f);
 		massCluster.removeFeature(f);
 		return massCluster;
 	}
-	
+
+	@JsonIgnore
 	public HDPMassCluster getMassClusterOfPeak(Feature f) {
 		HDPMassCluster massCluster = V.get(f);
 		return massCluster;
 	}
-	
+
+	@JsonIgnore
 	public List<Feature> getPeaksInMassCluster(int a) {
 		Set<Feature> massClusterData = massClusters.get(a).getPeakData();
 		return new ArrayList<Feature>(massClusterData);
 	}
-			
+
+	@JsonIgnore
 	public int fa(int a) {
 		HDPMassCluster massCluster = massClusters.get(a);
 		return massCluster.getCountPeaks();
 	}
-	
+
+	@JsonIgnore
 	public int[] faArray() {
 		int[] temp = new int[massClusters.size()];
 		for (int a = 0; a < massClusters.size(); a++) {
@@ -117,12 +175,14 @@ public class HDPMetabolite implements Serializable {
 		}
 		return temp;
 	}
-		
+
+	@JsonIgnore
 	public double sa(int a) {
 		HDPMassCluster massCluster = massClusters.get(a);
 		return massCluster.getSumPeaks();
 	}
-	
+
+	@JsonIgnore
 	public double[] saArray() {
 		double[] temp = new double[massClusters.size()];
 		for (int a = 0; a < massClusters.size(); a++) {
@@ -130,16 +190,19 @@ public class HDPMetabolite implements Serializable {
 		}
 		return temp;
 	}
-			
+
+	@JsonIgnore
 	public void setTheta(int a, double theta) {
 		HDPMassCluster massCluster = massClusters.get(a);
 		massCluster.setTheta(theta);
 	}
-	
+
+	@JsonIgnore
 	public int vSize() {
 		return V.size();
 	}
-		
+
+	@JsonIgnore
 	public int findPeakPos(Feature toFind) {
 		for (int peakPos = 0; peakPos < peakData.size(); peakPos++) {
 			Feature f = peakData.get(peakPos);
@@ -150,34 +213,32 @@ public class HDPMetabolite implements Serializable {
 		return -1;
 	}
 
+	@JsonIgnore
 	public Feature getPeakData(int peakPos) {
 		return peakData.get(peakPos);
 	}
-	
-	public List<Feature> getPeakData() {
-		return peakData;
-	}
-	
+
+	@JsonIgnore
 	public int peakDataSize() {
 		return peakData.size();
 	}
 
+	@JsonIgnore
 	public void addPeakData(Feature peak) {
 		this.peakData.add(peak);
 	}
-	
+
+	@JsonIgnore
 	public void addPeakData(List<Feature> peaks) {
 		this.peakData.addAll(peaks);
 	}
-	
+
+	@JsonIgnore
 	public void removePeakData(int peakPos) {
 		this.peakData.remove(peakPos);
 	}
-	
-	public List<Double> getMetaboliteMasses() {
-		return this.metaboliteMasses;
-	}
-	
+
+	@JsonIgnore
 	public void addMetaboliteMass(double mass) {
 		this.metaboliteMasses.add(mass);
 	}
@@ -187,6 +248,7 @@ public class HDPMetabolite implements Serializable {
 		return "HDPMetabolite [id=" + id + ", massClusters.size()=" + massClusters.size() + ", peakData.size()=" + peakData.size() + "]";
 	}
 
+	@JsonIgnore
 	public int[] getMassClusterIndicator(Feature thisPeak) {
 
 		int[] results = new int[getA()+1];

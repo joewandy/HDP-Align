@@ -1,5 +1,6 @@
 package com.joewandy.alignmentResearch.alignmentMethod.custom.hdp;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -30,51 +31,11 @@ public class HDPPrinter {
 		System.out.println("=============================================");
 		System.out.println();
 	}
-
-	public void printLastSample(HDPClustering clustering) {
-
-		System.out.println("LAST SAMPLE");
-		HDPSingleSample lastSample = clustering.getLastSample();
-
-		HDPAnnotation<HDPMetabolite> metaboliteAnnotations = clustering
-				.getMetaboliteAnnotations();
-		if (metaboliteAnnotations == null) {
-			return;
-		}
-		System.out.println("Metabolite annotations size = " + metaboliteAnnotations.size());			
-
-		List<HDPMetabolite> metabolites = lastSample.getMetabolites();
-		for (HDPMetabolite met : metabolites) {
-
-			// print putative identities
-			System.out.println(met);
-			HDPAnnotationItem annot = metaboliteAnnotations.get(met);
-			System.out.println("Putative identities");
-			if (annot != null) {
-				System.out.println(annot);
-			} else {
-				System.out.println("\t- no metabolite annotations -");
-			}
-			
-			// print mass clusters and the features inside
-			System.out.println("Mass clusters");
-			List<HDPMassCluster> massClusters = met.getMassClusters();
-			for (HDPMassCluster mc : massClusters) {
-				System.out.println("\t" + mc);
-				for (Feature f : mc.getPeakData()) {
-					System.out.println("\t\t" + f);
-				}
-			}
-		
-			System.out.println();
-			
-		}
-			
-	}
 	
-	public void printAnnotations(HDPClustering clustering) {
+	public Map<Feature, String> initialiseFeatureAnnotations(HDPClustering clustering) {
 		
-		System.out.println("FEATURES ANNOTATIONS");
+		System.out.println("INITIALISING FEATURES ANNOTATIONS");
+		Map<Feature, String> messages = new HashMap<Feature, String>();
 		
 		HDPAnnotation<Feature> ipAnnotations = clustering
 				.getIonisationProductFeatureAnnotations();
@@ -90,7 +51,7 @@ public class HDPPrinter {
 		} else if (metaboliteFeatureAnnotations != null) {
 			System.out.println("Metabolite annotations size = " + metaboliteFeatureAnnotations.size());			
 		} else {
-			return;
+			return messages;
 		}
 		
 		int correctIPCount = 0;
@@ -103,8 +64,8 @@ public class HDPPrinter {
 		// for all features in all data files
 		for (Feature feature : allFeatures) {
 
-			System.out.println(feature);
-
+			StringBuilder msgBuilder = new StringBuilder();
+			
 			// do isotope annotations
 			if (isotopeAnnotations != null) {
 
@@ -124,8 +85,9 @@ public class HDPPrinter {
 					for (Entry<String, Integer> e2 : featureIsotopes.entrySet()) {
 						int count = e2.getValue();
 						double prob = (count) / sum;
-						System.out.println("\tISOTOPE " + e2.getKey() + "="
+						msgBuilder.append("\t\t\tISOTOPE " + e2.getKey() + "="
 								+ String.format("%.2f", prob));
+						msgBuilder.append("\n");
 					}
 										
 				}				
@@ -152,8 +114,9 @@ public class HDPPrinter {
 						String key = e2.getKey();
 						int count = e2.getValue();
 						double prob = (count) / sum;
-						System.out.println("\tMETABOLITE " + e2.getKey() + "="
+						msgBuilder.append("\t\t\tMETABOLITE " + e2.getKey() + "="
 								+ String.format("%.2f", prob));
+						msgBuilder.append("\n");						
 						// for debugging only, compare against ground truth
 						if (compoundGroundTruthDatabase != null && 
 								compoundGroundTruthDatabase.containsKey(key)) {
@@ -188,8 +151,9 @@ public class HDPPrinter {
 					for (Entry<String, Integer> e2 : featureIPs.entrySet()) {
 						int count = e2.getValue();
 						double prob = (count) / sum;
-						System.out.println("\tADDUCT " + e2.getKey() + "="
+						msgBuilder.append("\t\t\tADDUCT " + e2.getKey() + "="
 								+ String.format("%.2f", prob));
+						msgBuilder.append("\n");						
 						if (prob > maxProb) {
 							maxProb = prob;
 							msg = e2.getKey();
@@ -209,6 +173,11 @@ public class HDPPrinter {
 					
 				}				
 				
+			}
+			
+			if (msgBuilder.length() != 0) {
+				String msg = msgBuilder.toString();
+				messages.put(feature, msg);				
 			}
 						
 		} // end feature loop
@@ -241,7 +210,54 @@ public class HDPPrinter {
 			}
 						
 		}
+		
+		return messages;
 				
 	}
+		
+	public void printLastSample(HDPClustering clustering, Map<Feature, String> messages) {
+
+		System.out.println("LAST SAMPLE");
+		HDPSingleSample lastSample = clustering.getLastSample();
+
+		HDPAnnotation<HDPMetabolite> metaboliteAnnotations = clustering
+				.getMetaboliteAnnotations();
+		if (metaboliteAnnotations == null) {
+			return;
+		}
+		System.out.println("Metabolite annotations size = " + metaboliteAnnotations.size());			
+
+		List<HDPMetabolite> metabolites = lastSample.getMetabolites();
+		for (HDPMetabolite met : metabolites) {
+
+			// print putative identities
+			System.out.println(met);
+			HDPAnnotationItem annot = metaboliteAnnotations.get(met);
+			System.out.println("Putative identities");
+			if (annot != null) {
+				System.out.println(annot);
+			} else {
+				System.out.println("\t- no metabolite annotations -");
+			}
+			
+			// print mass clusters and the features inside
+			System.out.println("Mass clusters");
+			List<HDPMassCluster> massClusters = met.getMassClusters();
+			for (HDPMassCluster mc : massClusters) {
+				System.out.println("\t" + mc);
+				for (Feature f : mc.getPeakData()) {
+					System.out.println("\t\t" + f);
+					String msg = messages.get(f);
+					if (msg != null) {
+						System.out.print(msg);											
+					}
+				}
+			}
+		
+			System.out.println();
+			
+		}
+			
+	}	
 	
 }
