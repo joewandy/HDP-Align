@@ -1,4 +1,4 @@
-package com.joewandy.alignmentResearch.model;
+package com.joewandy.alignmentResearch.alignmentMethod.custom.hdp;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,11 +16,14 @@ import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HDPKeggQuery;
-import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HDPMassClusterFeatures;
-import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HDPResults;
-import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HDPResultsSample;
 import com.joewandy.alignmentResearch.main.MultiAlignConstants;
+import com.joewandy.alignmentResearch.model.Feature;
+import com.joewandy.alignmentResearch.model.HDPAnnotation;
+import com.joewandy.alignmentResearch.model.HDPAnnotationItem;
+import com.joewandy.alignmentResearch.model.HDPClusteringParam;
+import com.joewandy.alignmentResearch.model.HDPMassCluster;
+import com.joewandy.alignmentResearch.model.HDPMetabolite;
+import com.joewandy.alignmentResearch.model.HDPPrecursorMass;
 import com.joewandy.alignmentResearch.precursorPrediction.AdductTransformComputer;
 import com.joewandy.mzmatch.query.CompoundQuery;
 

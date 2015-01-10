@@ -1,10 +1,13 @@
-package com.joewandy.alignmentResearch.model;
+package com.joewandy.alignmentResearch.grouping;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
 import com.joewandy.alignmentResearch.alignmentExperiment.dataGenerator.GenerativeModelParameter;
+import com.joewandy.alignmentResearch.model.ChineseRestaurant;
+import com.joewandy.alignmentResearch.model.Feature;
+import com.joewandy.alignmentResearch.model.GenerativeFeatureGroup;
 
 public class GenerativeFeatureClusterer {
 

@@ -1,4 +1,4 @@
-package com.joewandy.alignmentResearch.model;
+package com.joewandy.alignmentResearch.alignmentMethod.custom.hdp;
 
 import static com.joewandy.alignmentResearch.util.ArrayMathUtil.addArray;
 import static com.joewandy.alignmentResearch.util.ArrayMathUtil.append;
@@ -24,7 +24,15 @@ import org.apache.commons.math3.random.RandomData;
 import org.apache.commons.math3.random.RandomDataImpl;
 
 import com.joewandy.alignmentResearch.alignmentMethod.AlignmentMethodParam;
-import com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.HDPResults;
+import com.joewandy.alignmentResearch.model.AlignmentFile;
+import com.joewandy.alignmentResearch.model.DpResult;
+import com.joewandy.alignmentResearch.model.Feature;
+import com.joewandy.alignmentResearch.model.HDPAnnotation;
+import com.joewandy.alignmentResearch.model.HDPClustering;
+import com.joewandy.alignmentResearch.model.HDPClusteringParam;
+import com.joewandy.alignmentResearch.model.HDPFile;
+import com.joewandy.alignmentResearch.model.HDPMassCluster;
+import com.joewandy.alignmentResearch.model.HDPMetabolite;
 import com.thoughtworks.xstream.XStream;
 
 public class HDPMassRTClustering implements HDPClustering {

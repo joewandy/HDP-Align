@@ -18,10 +18,10 @@ import org.apache.commons.math3.distribution.NormalDistribution;
 import peakml.chemistry.Molecule;
 import peakml.io.chemistry.MoleculeIO;
 
+import com.joewandy.alignmentResearch.grouping.GenerativeFeatureClusterer;
 import com.joewandy.alignmentResearch.model.AlignmentFile;
 import com.joewandy.alignmentResearch.model.Feature;
 import com.joewandy.alignmentResearch.model.FeatureGroup;
-import com.joewandy.alignmentResearch.model.GenerativeFeatureClusterer;
 import com.joewandy.alignmentResearch.model.GenerativeFeatureGroup;
 import com.joewandy.alignmentResearch.model.GenerativeMolecule;
 import com.joewandy.alignmentResearch.model.GenerativeMoleculeDB;
