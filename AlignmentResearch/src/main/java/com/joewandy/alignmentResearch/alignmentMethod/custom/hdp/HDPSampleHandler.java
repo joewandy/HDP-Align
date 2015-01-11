@@ -2,30 +2,14 @@ package com.joewandy.alignmentResearch.alignmentMethod.custom.hdp;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import peakml.chemistry.Molecule;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.joewandy.alignmentResearch.main.MultiAlignConstants;
-import com.joewandy.alignmentResearch.model.Feature;
-import com.joewandy.alignmentResearch.model.HDPAnnotation;
-import com.joewandy.alignmentResearch.model.HDPAnnotationItem;
 import com.joewandy.alignmentResearch.model.HDPClusteringParam;
-import com.joewandy.alignmentResearch.model.HDPMassCluster;
 import com.joewandy.alignmentResearch.model.HDPMetabolite;
-import com.joewandy.alignmentResearch.model.HDPPrecursorMass;
-import com.joewandy.alignmentResearch.precursorPrediction.AdductTransformComputer;
-import com.joewandy.mzmatch.query.CompoundQuery;
 
 public class HDPSampleHandler {
 	
@@ -41,6 +25,11 @@ public class HDPSampleHandler {
 
 	}
 	
+	/**
+	 * Code broken!! Don't use yet
+	 * @param hdpClusteringResultsPath
+	 * @return
+	 */
 	public boolean initialiseResultsFromPath(String hdpClusteringResultsPath) {
 
 		System.out.println("Loading previous clustering results from " + hdpClusteringResultsPath);
@@ -71,7 +60,7 @@ public class HDPSampleHandler {
 //			InputStream buffer = new BufferedInputStream(file);
 //			ObjectInput input = new ObjectInputStream(buffer);
 //		) {
-//			results = (HDPResults) input.readObject();
+//			samplingResults = (HDPAllSamples) input.readObject();
 //			loadSuccess = true;
 //		} catch (ClassNotFoundException ex) {
 //			ex.printStackTrace();
@@ -83,6 +72,10 @@ public class HDPSampleHandler {
 
 	}
 	
+	/**
+	 * Code broken!! Don't use yet
+	 * @param hdpClusteringResultsPath
+	 */
 	public void persistResultsToPath(String hdpClusteringResultsPath) {
 
 		System.out.println("Saving previous clustering results to " + hdpClusteringResultsPath);
@@ -105,7 +98,7 @@ public class HDPSampleHandler {
 //			OutputStream buffer = new BufferedOutputStream(file);
 //			ObjectOutput output = new ObjectOutputStream(buffer);
 //		) {
-//			output.writeObject(results);
+//			output.writeObject(samplingResults);
 //		} catch (IOException ex) {
 //			ex.printStackTrace();
 //		}
