@@ -1,10 +1,10 @@
 package com.joewandy.alignmentResearch.alignmentMethod.custom.hdp;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.joewandy.alignmentResearch.model.HDPMetabolite;
-import com.rits.cloning.Cloner;
 
 public class HDPSingleSample implements Serializable {
 
@@ -18,8 +18,13 @@ public class HDPSingleSample implements Serializable {
 	}
 	
 	public HDPSingleSample(List<HDPMetabolite> metabolites) {
-		Cloner cloner = new Cloner();
-		this.metabolites = cloner.deepClone(metabolites);
+//		Cloner cloner = new Cloner();
+//		this.metabolites = cloner.deepClone(metabolites);
+		this.metabolites = new ArrayList<HDPMetabolite>();
+		for (HDPMetabolite met : metabolites) {
+			HDPMetabolite copy = new HDPMetabolite(met);
+			this.metabolites.add(copy);
+		}
 	}
 
 	public List<HDPMetabolite> getMetabolites() {

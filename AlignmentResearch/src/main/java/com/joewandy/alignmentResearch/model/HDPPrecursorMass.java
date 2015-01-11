@@ -24,6 +24,16 @@ public class HDPPrecursorMass implements Comparable<HDPPrecursorMass> {
 		this.messages = new HashSet<String>();
 	}
 
+	// copy constructor
+	public HDPPrecursorMass(HDPPrecursorMass another) {
+		this.mass = another.mass;
+		this.ppm = another.ppm;
+		this.count = another.count;
+		this.molecules = new HashSet<Molecule>(another.molecules);
+		this.dbQuery = another.dbQuery;
+		this.messages = new HashSet<String>(another.messages);
+	}
+
 	public double getMass() {
 		return mass;
 	}

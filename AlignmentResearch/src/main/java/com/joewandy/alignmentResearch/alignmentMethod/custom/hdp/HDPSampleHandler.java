@@ -33,10 +33,11 @@ public class HDPSampleHandler {
 	private int totalPeaks;
 	private HDPAllSamples samplingResults;
 		
-	public HDPSampleHandler(List<HDPMetabolite> hdpMetabolites) {
+	public HDPSampleHandler(int totalPeaks, List<HDPMetabolite> hdpMetabolites) {
 	
 		this.hdpMetabolites = hdpMetabolites;
 		this.samplingResults = new HDPAllSamples();
+		this.totalPeaks = totalPeaks;
 
 	}
 	

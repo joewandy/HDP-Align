@@ -28,6 +28,19 @@ public class HDPMassCluster implements Serializable {
 		this.messages = new HashSet<String>();
 	}
 
+	// copy constructor
+	public HDPMassCluster(HDPMassCluster another) {
+		this.id = another.id;
+		this.theta = another.theta;
+		this.countPeaks = another.countPeaks;
+		this.sumPeaks = another.sumPeaks;
+		this.peakData = new HashSet<Feature>(another.peakData);
+		if (another.precursorMass != null) {
+			this.precursorMass = new HDPPrecursorMass(another.precursorMass);			
+		}
+		this.messages = new HashSet<String>(another.messages);
+	}
+
 	public int getId() {
 		return id;
 	}

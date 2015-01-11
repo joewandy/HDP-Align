@@ -27,6 +27,20 @@ public class HDPMetabolite implements Serializable {
 		
 	}
 	
+	// copy constructor for storing results
+	public HDPMetabolite(HDPMetabolite another) {
+		this.id = another.id;
+		this.peakData = new ArrayList<Feature>(another.peakData);
+		this.massClusterSeqId = another.massClusterSeqId;
+		this.massClusters = new ArrayList<HDPMassCluster>();
+		for (HDPMassCluster mc : another.massClusters) {
+			HDPMassCluster copy = new HDPMassCluster(mc);
+			this.massClusters.add(copy);
+		}
+		this.V = new HashMap<Feature, HDPMassCluster>(another.V);
+		this.metaboliteMasses = new ArrayList<Double>(another.metaboliteMasses);
+	}
+	
 	public HDPMetabolite(int id) {
 		this.id = id;
 		this.V = new HashMap<Feature, HDPMassCluster>();

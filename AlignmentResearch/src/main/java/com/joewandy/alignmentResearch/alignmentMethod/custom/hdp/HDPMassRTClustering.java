@@ -79,7 +79,11 @@ public class HDPMassRTClustering implements HDPClustering {
 		initialiseGibbsSampling(dataList);
 
 		// setup sample handler, call this only after gibbs sampling has been initialised
-		this.sampleHandler = new HDPSampleHandler(hdpMetabolites);
+		int totalPeaks = 0;
+		for (AlignmentFile file : dataList) {
+			totalPeaks += file.getFeaturesCount();
+		}
+		this.sampleHandler = new HDPSampleHandler(totalPeaks, hdpMetabolites);
 		
 		// setup sample processor
 		double massTol = methodParam.getHdpMassTol();
