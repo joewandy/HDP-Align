@@ -1,16 +1,19 @@
-alignment-research
+HDP-Align
 ==================
 
-Research Codes for Peak Alignment Methods
+This repository primarily contains the implementation for **HDP-Align**, a hierarchical Bayesian non-parametric model, that performs peak matching for liquid-chromatography mass-spectrometry data using a Hierarchical Dirichlet Process mixture model. Detailed description of the paper can be found in "HDP-Align: Hierarchical Dirichlet Process Clustering for Multiple Peak Alignment of LC-MS Data" by Wandy, et al. (2015).
 
-- AlignmentModel: throwaway Matlab/Octave codes as proof-of-concepts
-- AlignmentResearch: Java implementations of various peak alignment algorithms that's being developed.
-- MW_alignment: Python implementation of feature matching + DP mixture on retention time clustering
-- MZmine_2_clone: fork of MZMine2 for evaluation purpose
-- mzmatch_clone: fork of mzMatch for evaluation and integration purpose
+Model prototypes in Matlab can be found in the **AlignmentModel** folder. The working Java implementation of HDP-Align is inside **AlignmentResearch** (the com.joewandy.alignmentResearch.alignmentMethod.custom.hdp.* package), alongside the evaluation pipeline used in the paper to evaluate performance against the selected benchmark methods (Join, SIMA). Copies of MzMine2 and SIMA used for the purpose of evaluation in the paper is also provided in this repository.
 
-Setting Up
+Experiments
 ======================================
+
+The folder **experiments** contains all the experiments done to produce the results in the paper. Further details can be found inside.
+
+Development Set-up
+======================================
+
+Only if you're a developer!! 
 
 Importing projects
 
@@ -25,3 +28,4 @@ Setting up dependencies
 2. Add mzmatch_clone and MZmine_2_clone too into the dependencies of AlignmentResearch
 3. Mark Circular dependencies as "Warning" in Eclipse tool to avoid "A CYCLE WAS DETECTED IN THE BUILD PATH" error. In Eclipse got to :-> Windows -> Prefereneces -> Java-> Compiler -> Buliding -> Circular Depencies. This is because of poor modularity in the code ! To be fixed soon.
 4. Right click AlignmentResearch project > Properties > Libraries > Add JARs > select the AlignmentResearch project/lib, add all the jars inside
+
