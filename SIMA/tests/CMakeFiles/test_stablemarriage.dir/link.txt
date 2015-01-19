@@ -1,0 +1,1 @@
+/usr/bin/c++       CMakeFiles/test_stablemarriage.dir/stablemarriage-test.o  -o test_stablemarriage -rdynamic -lms++ 

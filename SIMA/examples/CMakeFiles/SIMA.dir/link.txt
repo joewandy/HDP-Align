@@ -1,0 +1,1 @@
+/usr/bin/c++   -O2 -DNDEBUG -D_FILE_OFFSET_BITS=64    CMakeFiles/SIMA.dir/SIMA.cpp.o  -o SIMA  -L/src -rdynamic ../src/libms++.a -Wl,-rpath,/src: 

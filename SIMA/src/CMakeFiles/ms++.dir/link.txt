@@ -1,0 +1,2 @@
+/usr/bin/ar cr libms++.a  CMakeFiles/ms++.dir/Alignment.cpp.o CMakeFiles/ms++.dir/DistanceMatrix.cpp.o CMakeFiles/ms++.dir/MahalanobisDistance.cpp.o CMakeFiles/ms++.dir/Peak.cpp.o CMakeFiles/ms++.dir/PeakList.cpp.o CMakeFiles/ms++.dir/PeakListBase.cpp.o CMakeFiles/ms++.dir/PeakListCollection.cpp.o CMakeFiles/ms++.dir/PeakListPrivate.cpp.o CMakeFiles/ms++.dir/StableMarriage.cpp.o
+/usr/bin/ranlib libms++.a

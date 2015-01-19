@@ -1,0 +1,16 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/joewandy/Project/real_datasets/SIMA_full/tests/Alignment-test.cpp
+ms++/Alignment.h
+-
+ms++/PeakListCollection.h
+-
+tests/unittest.hxx
+-
+

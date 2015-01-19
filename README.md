@@ -1,9 +1,9 @@
 HDP-Align
 ==================
 
-This repository primarily contains the implementation for **HDP-Align**, a hierarchical Bayesian non-parametric model, that performs peak matching for liquid-chromatography mass-spectrometry data using a Hierarchical Dirichlet Process mixture model. Detailed description of the paper can be found in *HDP-Align: Hierarchical Dirichlet Process Clustering for Multiple Peak Alignment of LC-MS Data* by Wandy, et al. (2015).
+This repository primarily contains the implementation for **HDP-Align**, a hierarchical Bayesian non-parametric model that performs peak matching for liquid-chromatography mass-spectrometry data using a Hierarchical Dirichlet Process mixture model. Detailed description of the paper can be found in *HDP-Align: Hierarchical Dirichlet Process Clustering for Multiple Peak Alignment of LC-MS Data* by Wandy, et al. (2015).
 
-Model prototypes in Matlab can be found in the **AlignmentModel** folder. The working Java implementation of HDP-Align is inside **AlignmentResearch**, alongside the evaluation pipeline used in the paper to evaluate performance against the selected benchmark methods (Join, SIMA). Copies of MzMine2 and SIMA used for the purpose of evaluation in the paper is also provided in this repository.
+Model prototypes in Matlab can be found in the **AlignmentModel** folder. The working Java implementation of HDP-Align is inside **HDP-Align**, alongside a few other alignment methods used in the evaluation experiments. **MultiAlignPipeline** contains the pipeline used for loading feature data in FeatureXML or SIMA format, performs alignment on them and computes the performance measures (Precision/Recall as defined in the paper). Local copies of MzMine2 and SIMA used for the purpose of evaluation in the paper is also provided in this repository.
 
 Experiments
 ======================================
