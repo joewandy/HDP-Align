@@ -16,16 +16,26 @@ Development Set-up
 Only if you're a developer!! 
 
 Importing projects
+------------------
 
-1. Install eGit and maven plugins in eclipse
-2. Clone the repository. git clone https://github.com/joewandy/phd-research.git, either from command line or from within eclipse. If doing from command line, be sure to add it to Eclipse as well via Git Repositories view -> Add an existing local Git repository
-3. Expand the Working Directories in the added repository, right click 'mzmatch_clone', select Import Project > Use the New Project wizard > Java Project > enter 'mzmatch_clone' for the project name, change the location to the git working directory (e.g. /home/joewandy/git/phd-research/mzmatch_clone)
-4. Repeat for MZmine_2_clone and AlignmentResearch by importing as existing projects.
+1. Install the Maven and eGit plug-ins in Eclipse
+2. Clone the repository https://github.com/joewandy/HDP-Align.git using either the `git clone` command or do it from within Eclipse. If you're doing it from the command line via `git clone`, be sure to add the repository to Eclipse as well (via Git Repositories view -> Add an existing local Git repository).
+3. Go to the Git Repositories view in Eclipse and expand the Working Directories in the added repository. We want to add each project in the repository into Eclipse. Start with PeakML. Right click **PeakML**, select Import Project > Use the New Project wizard > Java Project > enter `PeakML` for the project name, change the default location to the git working directory (e.g. /home/joewandy/git/HDP-Align/PeakML), click Finish.
+4. Repeat for the remaining projects too: **mzMatch** and **cmdline** are imported as existing Java projects. **MZmine2**, **MUltiAlignPipeline** and **HDP-Align** should be imported as existing Maven projects (use File > Import > Existing Maven Projects from the menu). 
+5. There will be compilation errors in most of the projects due to unresolved dependencies. See next section.
 
 Setting up dependencies
+-----------------------
 
-1. Right click on mzmatch_clone project, select Properties, go to Projects tab, add AlignmentResearch
-2. Add mzmatch_clone and MZmine_2_clone too into the dependencies of AlignmentResearch
-3. Mark Circular dependencies as "Warning" in Eclipse tool to avoid "A CYCLE WAS DETECTED IN THE BUILD PATH" error. In Eclipse got to :-> Windows -> Prefereneces -> Java-> Compiler -> Buliding -> Circular Depencies. This is because of poor modularity in the code ! To be fixed soon.
-4. Right click AlignmentResearch project > Properties > Libraries > Add JARs > select the AlignmentResearch project/lib, add all the jars inside
+To keep it simple, we will manage dependencies between projects using Eclipse. 
 
+1. **PeakML** and **MZmine2** do not depend on anything. 
+2. **mzMatch** depends on **PeakML** and **cmdline**. Right-click on the **mzMatch** project from Package Explorer, select Properties, then go to Java Build Path, go to Projects tab, add **PeakML** and **cmdline** there.
+3. **MultiAlignPipeline** depends on **cmdline**, **HDP-Align** and **PeakML**, so follow step (2) to add these dependencies.
+4. **HDP-Align** depends on **mzMatch**, **MZmine2** and **PeakML**, so add these project dependencies as well. Additionally, go to the Libraries tab and also add all the jars inside HDP-Align/lib.
+
+Extra stuff
+-----------
+
+git config http.postBuffer 524288000
+git remote set-url origin https://<user>:<password>@github.com/joewandy/HDP-Align.git
