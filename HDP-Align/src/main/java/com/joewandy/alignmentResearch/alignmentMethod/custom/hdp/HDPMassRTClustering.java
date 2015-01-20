@@ -377,11 +377,8 @@ public class HDPMassRTClustering implements HDPClustering {
 					
 					// track how many times this peak is assigned to a singleton cluster
 					boolean ignored = trackSingletonCount(thisPeak, met);
-					if (ignored) {
-						// if ignore, then remove peak from model, and he remains a bachelor forever
-						removePeakFromModel(hdpFile, thisPeak, met, n, k, i);
-					} else {							
-						// otherwise perform the gibbs update as usual
+					if (!ignored) {
+						// if not ignored, then perform the gibbs update as usual
 						removePeakFromModel(hdpFile, thisPeak, met, n, k, i);
 						reassignPeak(hdpFile, thisPeak, n);					
 						peaksProcessed++;
@@ -512,11 +509,11 @@ public class HDPMassRTClustering implements HDPClustering {
 			massTermLogLike[thisCluster] = Math.log(metaboliteMassLike[metIndex]);					
 		}
 		
-		// finally, the likelihood of peak going into a current cluster eq #15 is the RT * mass terms
+		// finally, the likelihood of peak going into a current cluster eq #14 is the RT * mass terms
 		double[] currentClusterLogLike = addArray(rtTermLogLike, massTermLogLike);
 		
-		// now compute the likelihood for peak going into new cluster, eq #20      
-		// first, compute p( x_nj | existing metabolite ), eq #21
+		// now compute the likelihood for peak going into new cluster, eq #18    
+		// first, compute p( x_nj | existing metabolite )
 		double denum = sum(fiArray()) + hdpParam.getTop_alpha();
 		double[] currentMetabolitePost = new double[I];
 		
@@ -528,7 +525,7 @@ public class HDPMassRTClustering implements HDPClustering {
 			double rtLogLikelihood = computeLogLikelihood(thisPeak.getRt(), mu, prec);
 			// then compute the mass term
 			double massLogLikelihood = Math.log(metaboliteMassLike[idx]);
-			// multiply likelihood with prior to get the posterior p( % d_jn | existing metabolite )
+			// multiply likelihood with prior to get the posterior p( d_jn | existing metabolite )
 			double logLikelihood = rtLogLikelihood + massLogLikelihood;
 			double logPosterior = logPrior + logLikelihood;
 			currentMetabolitePost[idx] = Math.exp(logPosterior);
@@ -546,7 +543,7 @@ public class HDPMassRTClustering implements HDPClustering {
 		double logNewMetabolitePost = logPrior + logLikelihood;
 		double newMetabolitePost = Math.exp(logNewMetabolitePost);
 		
-		// sum over for eq #17
+		// sum over for eq #18
 		double[] metabolitePost = append(currentMetabolitePost, newMetabolitePost);
 		double newClusterLogLike = Math.log(sum(metabolitePost));
 					
