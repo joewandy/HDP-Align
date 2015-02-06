@@ -5,10 +5,12 @@ This repository primarily contains the implementation for **HDP-Align**, a hiera
 
 Model prototypes in Matlab can be found in the **AlignmentModel** folder. The working Java implementation of HDP-Align is inside **HDP-Align** (click [here](https://github.com/joewandy/HDP-Align/blob/master/HDP-Align/src/main/java/com/joewandy/alignmentResearch/alignmentMethod/custom/hdp/HDPMassRTClustering.java) for the primary class that performs the clustering), alongside a few other alignment methods used in the evaluation experiments. **MultiAlignPipeline** contains the pipeline used for loading feature data in FeatureXML or SIMA format, performs alignment on them and computes the performance measures (Precision/Recall as defined in the paper). Local copies of MzMine2 and SIMA used for the purpose of evaluation in the paper is also provided in this repository.
 
-Experiments
+Release & Experiments
 ======================================
 
-The folder **experiments** contains all the experiments done to produce the results in the paper. Further details can be found inside.
+Executable binary can be found at the repository's release page https://github.com/joewandy/HDP-Align/releases/tag/1.0
+
+The folder **experiments** contains all the experiments done to produce the results in the paper. Further details can be found inside. You need to download the binary from the release page first before you can run any experiments.
 
 Development Set-up
 ======================================
