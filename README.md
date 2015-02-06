@@ -10,10 +10,6 @@ Release & Experiments
 
 Executable binary and instructions on running experiments in the paper can be found at [the repository's release page](https://github.com/joewandy/HDP-Align/releases/tag/1.0).
 
-To make evaluation easy, the various alignment methods tested are called within a Java pipeline that reads input files in either in featureXML or following SIMA format. The pipeline also computes performance measures (Precision, Recall, F1) produced on the output produced by the script against user-defined alignment ground truth ([computed here](https://github.com/joewandy/HDP-Align/blob/master/HDP-Align/src/main/java/com/joewandy/alignmentResearch/model/GroundTruth.java)). 
-
-The pipeline here can be easily extended to load other data types (currently supporting featureXML and SIMA format files), run other aligment methods and compute various performance measures. Examples for the methods evaluated in the paper can be found here: [MzMine2 Join](https://github.com/joewandy/HDP-Align/blob/master/HDP-Align/src/main/java/com/joewandy/alignmentResearch/alignmentMethod/external/MzMineJoinAlignment.java), [SIMA](https://github.com/joewandy/HDP-Align/blob/master/HDP-Align/src/main/java/com/joewandy/alignmentResearch/alignmentMethod/external/SimaAlignment.java) and the [MW scripts](https://github.com/joewandy/HDP-Align/blob/master/HDP-Align/src/main/java/com/joewandy/alignmentResearch/alignmentMethod/external/PythonMW.java). Also, [OpenMS](https://github.com/joewandy/HDP-Align/blob/master/HDP-Align/src/main/java/com/joewandy/alignmentResearch/alignmentMethod/external/OpenMSAlignment.java) and [MzMine2 RANSAC](https://github.com/joewandy/HDP-Align/blob/master/HDP-Align/src/main/java/com/joewandy/alignmentResearch/alignmentMethod/external/MzMineRansacAlignment.java). The last two are old codes for methods which were not included for comparative evaluation -- the codes need to be cleaned up.
-
 Development Set-up
 ======================================
 
