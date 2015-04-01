@@ -16,7 +16,7 @@ public class FeatureXMLToText {
 	
 	public static void main(String args[]) throws Exception {
 
-		String inputDirectory = "/home/joewandy/Dropbox/Project/documents/new_measure_experiment/input_data/M2";
+		String inputDirectory = "/home/joewandy/Project/documents/new_measure_experiment/input_data/hdp_standard/rep_4/input";
 		FeatureXMLDataGenerator dataGen = new FeatureXMLDataGenerator(inputDirectory, null, 2, true);
 		AlignmentData data = dataGen.generate();
 		for (AlignmentFile file : data.getAlignmentDataList()) {
