@@ -112,6 +112,8 @@ public class AlignmentList {
 				}
 				// read the 4th and 5th column too if present
 				if (lineSplitter.hasNext()) {
+					double mass = lineSplitter.nextDouble(); // ignored
+					double rt = lineSplitter.nextDouble(); // ignored
 					prob = lineSplitter.nextDouble();
 					annot = lineSplitter.next();
 				}
