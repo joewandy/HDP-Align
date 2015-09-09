@@ -54,6 +54,20 @@ public class AlignmentMethodParam {
 	private String mode;
 	private String hdpClusteringResultsPath;
 	
+	// for precursor clustering
+	private String trans;
+	private String db;
+	private double binningMassTol;
+	private double binningRtTol;
+	private double withinFileRtSd;
+	private double acrossFileRtSd;
+	private double alphaMass;
+	private double alphaRt;
+	private double t;
+	private int massClusteringNoIters;
+	private int rtClusteringNsamps;
+	private int rtClusteringBurnIn;	
+	
 	public AlignmentMethodParam() {
 	
 	}
@@ -354,5 +368,102 @@ public class AlignmentMethodParam {
 	public void setHdpClusteringResultsPath(String hdpClusteringResultsPath) {
 		this.hdpClusteringResultsPath = hdpClusteringResultsPath;
 	}
+
+	public String getTrans() {
+		return trans;
+	}
+
+	public void setTrans(String trans) {
+		this.trans = trans;
+	}
+
+	public String getDb() {
+		return db;
+	}
+
+	public void setDb(String db) {
+		this.db = db;
+	}
+
+	public double getBinningMassTol() {
+		return binningMassTol;
+	}
+
+	public void setBinningMassTol(double binningMassTol) {
+		this.binningMassTol = binningMassTol;
+	}
+
+	public double getBinningRtTol() {
+		return binningRtTol;
+	}
+
+	public void setBinningRtTol(double binningRtTol) {
+		this.binningRtTol = binningRtTol;
+	}
+
+	public double getWithinFileRtSd() {
+		return withinFileRtSd;
+	}
+
+	public void setWithinFileRtSd(double withinFileRtSd) {
+		this.withinFileRtSd = withinFileRtSd;
+	}
+
+	public double getAcrossFileRtSd() {
+		return acrossFileRtSd;
+	}
+
+	public void setAcrossFileRtSd(double acrossFileRtSd) {
+		this.acrossFileRtSd = acrossFileRtSd;
+	}
+
+	public double getAlphaMass() {
+		return alphaMass;
+	}
+
+	public void setAlphaMass(double alphaMass) {
+		this.alphaMass = alphaMass;
+	}
+
+	public double getAlphaRt() {
+		return alphaRt;
+	}
+
+	public void setAlphaRt(double alphaRt) {
+		this.alphaRt = alphaRt;
+	}
+
+	public double getT() {
+		return t;
+	}
+
+	public void setT(double t) {
+		this.t = t;
+	}
+
+	public int getMassClusteringNoIters() {
+		return massClusteringNoIters;
+	}
+
+	public void setMassClusteringNoIters(int massClusteringNoIters) {
+		this.massClusteringNoIters = massClusteringNoIters;
+	}
+
+	public int getRtClusteringNsamps() {
+		return rtClusteringNsamps;
+	}
+
+	public void setRtClusteringNsamps(int rtClusteringNsamps) {
+		this.rtClusteringNsamps = rtClusteringNsamps;
+	}
+
+	public int getRtClusteringBurnIn() {
+		return rtClusteringBurnIn;
+	}
+
+	public void setRtClusteringBurnIn(int rtClusteringBurnIn) {
+		this.rtClusteringBurnIn = rtClusteringBurnIn;
+	}
+	
 
 }

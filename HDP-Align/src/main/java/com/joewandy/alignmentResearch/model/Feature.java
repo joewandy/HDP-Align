@@ -38,6 +38,7 @@ public class Feature implements Serializable {
 	private String theoAdductType;
 	private String metaboliteID;
 	private boolean synthetic;
+	private String annotation;
 		
 	// dummy constructor for jackson
 	public Feature() {
@@ -223,6 +224,14 @@ public class Feature implements Serializable {
 		this.delete = delete;
 	}
 		
+	public String getAnnotation() {
+		return annotation;
+	}
+
+	public void setAnnotation(String annotation) {
+		this.annotation = annotation;
+	}
+
 	public String csvForm() {
 		return peakID + ", " + mass + ", " + rt + ", " + intensity;
 	}

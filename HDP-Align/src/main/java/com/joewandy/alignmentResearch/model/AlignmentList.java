@@ -103,10 +103,17 @@ public class AlignmentList {
 			// third column in the line is position of feature in data
 			int peakIdx = lineSplitter.nextInt();
 			Feature feature = null;
+			double prob = 0.0;
+			String annot = "";
 			try {
 				feature = data.getFeatureByIndex(peakIdx);		
 				if (feature == null) {
 					continue;
+				}
+				// read the 4th and 5th column too if present
+				if (lineSplitter.hasNext()) {
+					prob = lineSplitter.nextDouble();
+					annot = lineSplitter.next();
 				}
 			} catch (IndexOutOfBoundsException e) {
 				// invalid entry in the alignment result, skipping ...
@@ -127,7 +134,11 @@ public class AlignmentList {
 				
 				// keep the current feature in a new set
 				alignedFeatures = new HashSet<Feature>();
-				alignedFeatures.add(feature);				
+				feature.setAnnotation(annot);
+				alignedFeatures.add(feature);		
+				
+				// the probability is the same for all member features in this alignment row
+				row.setScore(prob);
 				
 			} else {
 				

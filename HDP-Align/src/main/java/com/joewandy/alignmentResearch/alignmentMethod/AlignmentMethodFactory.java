@@ -7,6 +7,7 @@ import com.joewandy.alignmentResearch.alignmentMethod.external.HdpAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.external.MzMineJoinAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.external.MzMineRansacAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.external.OpenMSAlignment;
+import com.joewandy.alignmentResearch.alignmentMethod.external.PrecursorAlignment;
 import com.joewandy.alignmentResearch.alignmentMethod.external.PythonMW;
 import com.joewandy.alignmentResearch.alignmentMethod.external.SimaAlignment;
 import com.joewandy.alignmentResearch.model.AlignmentFile;
@@ -20,6 +21,7 @@ public class AlignmentMethodFactory {
 	public static final String ALIGNMENT_METHOD_MY_HDP_ALIGNMENT = "myHdp";
 	public static final String ALIGNMENT_METHOD_GROUP_ONLY = "groupOnly";
 	public static final String ALIGNMENT_METHOD_PYTHON_MW = "MW";
+	public static final String ALIGNMENT_METHOD_MY_PRECURSOR_ALIGNMENT = "myPrecursor";
 	
 	// calls mzMine Join aligner
 	public static final String ALIGNMENT_METHOD_MZMINE_JOIN = "join";
@@ -49,6 +51,8 @@ public class AlignmentMethodFactory {
 			aligner = new OpenMSAlignment(alignmentDataList, param);
 		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_HDP_ALIGNMENT.toLowerCase().equals(method)) {
 			aligner = new HdpAlignment(alignmentDataList, param);
+		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_PRECURSOR_ALIGNMENT.toLowerCase().equals(method)) {
+			aligner = new PrecursorAlignment(alignmentDataList, param);
 		} else if (AlignmentMethodFactory.ALIGNMENT_METHOD_PYTHON_MW.toLowerCase().equals(method)) {
 			aligner = new PythonMW(alignmentDataList, param);
 		}

@@ -22,7 +22,8 @@ public class HdpExperiment extends MultiAlignBaseExp implements MultiAlignExperi
 
 		final long startTime = System.currentTimeMillis();
 		MultiAlign multiAlign = new MultiAlign(options, data);
-		if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_HDP_ALIGNMENT.equals(options.method)) {
+		if (AlignmentMethodFactory.ALIGNMENT_METHOD_MY_HDP_ALIGNMENT.equals(options.method) || 
+				AlignmentMethodFactory.ALIGNMENT_METHOD_MY_PRECURSOR_ALIGNMENT.equals(options.method)) {
 			MultiAlignExpResult expResult = multiAlign.runPRExperiment();				
 			results.add(expResult);										
 		} else {

@@ -209,6 +209,32 @@ public class MultiAlignCmdOptions {
 
 	@Option(name = "hdpClusteringResultsPath", param = "filename", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "The output file for HDP clustering results.")
 	public String hdpClusteringResultsPath = null;	
+
+	// for precursor clustering alignment
+	@Option(name = "trans", param = "filename", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "transformation file")
+	public String trans = null;	
+	@Option(name = "db", param = "filename", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "transformation file")
+	public String db = null;	
+	@Option(name = "binningMassTol", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "HDP global RT cluster standard deviation")
+	public double binningMassTol = MultiAlignConstants.PRECURSOR_BINNING_MASS_TOL;
+	@Option(name = "binningRtTol", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "HDP global RT cluster standard deviation")
+	public double binningRtTol = MultiAlignConstants.PRECURSOR_BINNING_RT_TOL;
+	@Option(name = "withinFileRtSd", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "HDP global RT cluster standard deviation")
+	public double withinFileRtSd = MultiAlignConstants.PRECURSOR_WITHIN_FILE_RT_SD;
+	@Option(name = "acrossFileRtSd", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "HDP global RT cluster standard deviation")
+	public double acrossFileRtSd = MultiAlignConstants.PRECURSOR_ACROSS_FILE_RT_SD;
+	@Option(name = "alphaMass", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "HDP global RT cluster standard deviation")
+	public double alphaMass = MultiAlignConstants.PRECURSOR_ALPHA_MASS;
+	@Option(name = "alphaRt", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "HDP global RT cluster standard deviation")
+	public double alphaRt = MultiAlignConstants.PRECURSOR_ALPHA_RT;
+	@Option(name = "t", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "HDP global RT cluster standard deviation")
+	public double t = MultiAlignConstants.PRECURSOR_T;
+	@Option(name = "massClusteringNoIters", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Optional. Reference file index.")
+	public int massClusteringNoIters = MultiAlignConstants.PRECURSOR_MASS_CLUSTERING_NO_ITERS;
+	@Option(name = "rtClusteringNsamps", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Optional. Reference file index.")
+	public int rtClusteringNsamps = MultiAlignConstants.PRECURSOR_RT_CLUSTERING_NSAMPS;
+	@Option(name = "rtClusteringBurnIn", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Optional. Reference file index.")
+	public int rtClusteringBurnIn = MultiAlignConstants.PRECURSOR_RT_CLUSTERING_BURNIN;
 	
 	@Option(name = "mode", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Ionisation mode. If this is provided, then the model will also annotate peaks by possible adduct transformations.")
 	public String mode = null;
@@ -271,6 +297,18 @@ public class MultiAlignCmdOptions {
 		param.setVerbose(options.verbose);
 		param.setAlwaysRecluster(options.alwaysRecluster);
 		param.setHdpClusteringResultsPath(options.hdpClusteringResultsPath);
+		param.setTrans(options.trans);
+		param.setDb(options.db);
+		param.setBinningMassTol(options.binningMassTol);
+		param.setBinningRtTol(options.binningRtTol);
+		param.setWithinFileRtSd(options.withinFileRtSd);
+		param.setAcrossFileRtSd(options.acrossFileRtSd);
+		param.setAlphaMass(options.alphaMass);
+		param.setAlphaRt(options.alphaRt);
+		param.setT(options.t);
+		param.setMassClusteringNoIters(options.massClusteringNoIters);
+		param.setRtClusteringNsamps(options.rtClusteringNsamps);
+		param.setRtClusteringBurnIn(options.rtClusteringBurnIn);		
 		return param;
 	}
 	
