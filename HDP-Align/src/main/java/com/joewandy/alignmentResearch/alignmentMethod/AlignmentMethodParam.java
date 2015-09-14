@@ -57,7 +57,6 @@ public class AlignmentMethodParam {
 	
 	// for precursor clustering
 	private String trans;
-	private String db;
 	private double withinFileBinningMassTol;
 	private double withinFileBinningRtTol;
 	private double withinFileRtSd;
@@ -385,14 +384,6 @@ public class AlignmentMethodParam {
 
 	public void setTrans(String trans) {
 		this.trans = trans;
-	}
-
-	public String getDb() {
-		return db;
-	}
-
-	public void setDb(String db) {
-		this.db = db;
 	}
 
 	public double getWithinFileBinningMassTol() {

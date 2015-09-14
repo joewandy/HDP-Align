@@ -66,7 +66,7 @@ public class PrecursorAlignment extends BaseAlignment implements AlignmentMethod
 	public PrecursorAlignment(List<AlignmentFile> dataList, AlignmentMethodParam param) {		
 		super(dataList, param);
 		this.trans = param.getTrans();
-		this.db = param.getDb();
+		this.db = param.getIdentificationDatabase();
 		this.withinFileBinningMassTol = param.getWithinFileBinningMassTol();
 		this.withinFileBinningRtTol = param.getWithinFileBinningRtTol();
 		this.withinFileRtSd = param.getWithinFileRtSd();
@@ -166,8 +166,10 @@ public class PrecursorAlignment extends BaseAlignment implements AlignmentMethod
 		cmdLine.addArgument("${outputFile}");
 		cmdLine.addArgument("-trans");
 		cmdLine.addArgument("${trans}");
-		cmdLine.addArgument("-db");
-		cmdLine.addArgument("${db}");
+		if (this.db != null) {
+			cmdLine.addArgument("-db");
+			cmdLine.addArgument("${db}");			
+		}
 		if (this.verbose) {
 			cmdLine.addArgument("-v");			
 		}

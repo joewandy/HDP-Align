@@ -213,8 +213,6 @@ public class MultiAlignCmdOptions {
 	// for precursor clustering alignment
 	@Option(name = "trans", param = "filename", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "transformation file")
 	public String trans = null;	
-	@Option(name = "db", param = "filename", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "transformation file")
-	public String db = null;	
 	@Option(name = "withinFileBinningMassTol", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "HDP global RT cluster standard deviation")
 	public double withinFileBinningMassTol = MultiAlignConstants.PRECURSOR_WITHIN_FILE_BINNING_MASS_TOL;
 	@Option(name = "withinFileBinningRtTol", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "HDP global RT cluster standard deviation")
@@ -302,7 +300,6 @@ public class MultiAlignCmdOptions {
 		param.setAlwaysRecluster(options.alwaysRecluster);
 		param.setHdpClusteringResultsPath(options.hdpClusteringResultsPath);
 		param.setTrans(options.trans);
-		param.setDb(options.db);
 		param.setWithinFileBinningMassTol(options.withinFileBinningMassTol);
 		param.setWithinFileBinningRtTol(options.withinFileBinningRtTol);
 		param.setWithinFileRtSd(options.withinFileRtSd);
