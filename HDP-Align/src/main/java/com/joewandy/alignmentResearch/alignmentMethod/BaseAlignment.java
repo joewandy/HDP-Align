@@ -24,6 +24,7 @@ public abstract class BaseAlignment implements AlignmentMethod {
 	protected List<AlignmentRow> filteredResult;
 	
 	protected Path parentPath;
+	protected int seed;
 	
 		
 	/**
@@ -44,6 +45,7 @@ public abstract class BaseAlignment implements AlignmentMethod {
 		this.usePpm = param.isUsePpm();
 		this.rtTolerance = param.getRtTolerance();
 		this.verbose = param.isVerbose();
+		this.seed = param.getSeed();
 
 		this.filters = new ArrayList<AlignmentResultFilter>();
 		this.filteredResult = new ArrayList<AlignmentRow>();	

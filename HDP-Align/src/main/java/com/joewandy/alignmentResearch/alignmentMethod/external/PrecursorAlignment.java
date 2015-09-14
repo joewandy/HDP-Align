@@ -45,9 +45,10 @@ public class PrecursorAlignment extends BaseAlignment implements AlignmentMethod
 
 	private String trans;
 	private String db;
-	private double binningMassTol;
-	private double binningRtTol;
+	private double withinFileBinningMassTol;
+	private double withinFileBinningRtTol;
 	private double withinFileRtSd;
+	private double acrossFileBinningMassTol;
 	private double acrossFileRtSd;
 	private double alphaMass;
 	private double alphaRt;
@@ -66,9 +67,10 @@ public class PrecursorAlignment extends BaseAlignment implements AlignmentMethod
 		super(dataList, param);
 		this.trans = param.getTrans();
 		this.db = param.getDb();
-		this.binningMassTol = param.getBinningMassTol();
-		this.binningRtTol = param.getBinningRtTol();
+		this.withinFileBinningMassTol = param.getWithinFileBinningMassTol();
+		this.withinFileBinningRtTol = param.getWithinFileBinningRtTol();
 		this.withinFileRtSd = param.getWithinFileRtSd();
+		this.acrossFileBinningMassTol = param.getAcrossFileBinningMassTol();
 		this.acrossFileRtSd = param.getAcrossFileRtSd();
 		this.alphaMass = param.getAlphaMass();
 		this.alphaRt = param.getAlphaRt();
@@ -137,8 +139,9 @@ public class PrecursorAlignment extends BaseAlignment implements AlignmentMethod
 		map.put("outputFile", outputPath);		
 		map.put("trans", String.valueOf(this.trans));		    
 		map.put("db", String.valueOf(this.db));
-		map.put("binning_mass_tol", String.valueOf(this.binningMassTol));	
-		map.put("binning_rt_tol", String.valueOf(this.binningRtTol));
+		map.put("within_file_binning_mass_tol", String.valueOf(this.withinFileBinningMassTol));	
+		map.put("within_file_binning_rt_tol", String.valueOf(this.withinFileBinningRtTol));
+		map.put("across_file_binning_mass_tol", String.valueOf(this.acrossFileBinningMassTol));	
 		map.put("within_file_rt_sd", String.valueOf(this.withinFileRtSd));
 		map.put("across_file_rt_sd", String.valueOf(this.acrossFileRtSd));		
 		map.put("alpha_mass", String.valueOf(this.alphaMass));
@@ -150,6 +153,7 @@ public class PrecursorAlignment extends BaseAlignment implements AlignmentMethod
 		if (verbose) {
 			System.out.println(map);
 		}
+		map.put("seed", String.valueOf(this.seed));		
 		
 		// for non-blocking version, see http://commons.apache.org/proper/commons-exec/tutorial.html
 		final String execPath = this.getExecutablePath() + SCRIPT_EXEC;
@@ -167,14 +171,18 @@ public class PrecursorAlignment extends BaseAlignment implements AlignmentMethod
 		if (this.verbose) {
 			cmdLine.addArgument("-v");			
 		}
+		cmdLine.addArgument("-seed");
+		cmdLine.addArgument("${seed}");
 		
 		// alignment parameters
-		cmdLine.addArgument("-binning_mass_tol");
-		cmdLine.addArgument("${binning_mass_tol}");
-		cmdLine.addArgument("-binning_rt_tol");
-		cmdLine.addArgument("${binning_rt_tol}");
+		cmdLine.addArgument("-within_file_binning_mass_tol");
+		cmdLine.addArgument("${within_file_binning_mass_tol}");
+		cmdLine.addArgument("-within_file_binning_rt_tol");
+		cmdLine.addArgument("${within_file_binning_rt_tol}");
 		cmdLine.addArgument("-within_file_rt_sd");
 		cmdLine.addArgument("${within_file_rt_sd}");
+		cmdLine.addArgument("-across_file_binning_mass_tol");
+		cmdLine.addArgument("${across_file_binning_mass_tol}");
 		cmdLine.addArgument("-across_file_rt_sd");
 		cmdLine.addArgument("${across_file_rt_sd}");
 		cmdLine.addArgument("-alpha_mass");

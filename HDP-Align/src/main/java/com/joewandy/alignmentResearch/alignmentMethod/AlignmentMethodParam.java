@@ -8,6 +8,7 @@ public class AlignmentMethodParam {
 	private double massTolerance;
 	private double rtTolerance;
 	private boolean verbose;
+	private int seed;
 
 	// for ransac alignment
 	private double ransacRtToleranceBeforeMinute;
@@ -57,9 +58,10 @@ public class AlignmentMethodParam {
 	// for precursor clustering
 	private String trans;
 	private String db;
-	private double binningMassTol;
-	private double binningRtTol;
+	private double withinFileBinningMassTol;
+	private double withinFileBinningRtTol;
 	private double withinFileRtSd;
+	private double acrossFileBinningMassTol;
 	private double acrossFileRtSd;
 	private double alphaMass;
 	private double alphaRt;
@@ -94,6 +96,14 @@ public class AlignmentMethodParam {
 
 	public void setRtTolerance(double rtTolerance) {
 		this.rtTolerance = rtTolerance;
+	}
+
+	public int getSeed() {
+		return seed;
+	}
+
+	public void setSeed(int seed) {
+		this.seed = seed;
 	}
 
 	public boolean isUseGroup() {
@@ -385,20 +395,20 @@ public class AlignmentMethodParam {
 		this.db = db;
 	}
 
-	public double getBinningMassTol() {
-		return binningMassTol;
+	public double getWithinFileBinningMassTol() {
+		return withinFileBinningMassTol;
 	}
 
-	public void setBinningMassTol(double binningMassTol) {
-		this.binningMassTol = binningMassTol;
+	public void setWithinFileBinningMassTol(double binningMassTol) {
+		this.withinFileBinningMassTol = binningMassTol;
 	}
 
-	public double getBinningRtTol() {
-		return binningRtTol;
+	public double getWithinFileBinningRtTol() {
+		return withinFileBinningRtTol;
 	}
 
-	public void setBinningRtTol(double binningRtTol) {
-		this.binningRtTol = binningRtTol;
+	public void setWithinFileBinningRtTol(double binningRtTol) {
+		this.withinFileBinningRtTol = binningRtTol;
 	}
 
 	public double getWithinFileRtSd() {
@@ -407,6 +417,14 @@ public class AlignmentMethodParam {
 
 	public void setWithinFileRtSd(double withinFileRtSd) {
 		this.withinFileRtSd = withinFileRtSd;
+	}
+	
+	public double getAcrossFileBinningMassTol() {
+		return acrossFileBinningMassTol;
+	}
+
+	public void setAcrossFileBinningMassTol(double acrossFileBinningMassTol) {
+		this.acrossFileBinningMassTol = acrossFileBinningMassTol;
 	}
 
 	public double getAcrossFileRtSd() {

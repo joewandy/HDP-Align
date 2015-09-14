@@ -215,12 +215,14 @@ public class MultiAlignCmdOptions {
 	public String trans = null;	
 	@Option(name = "db", param = "filename", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "transformation file")
 	public String db = null;	
-	@Option(name = "binningMassTol", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "HDP global RT cluster standard deviation")
-	public double binningMassTol = MultiAlignConstants.PRECURSOR_BINNING_MASS_TOL;
-	@Option(name = "binningRtTol", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "HDP global RT cluster standard deviation")
-	public double binningRtTol = MultiAlignConstants.PRECURSOR_BINNING_RT_TOL;
+	@Option(name = "withinFileBinningMassTol", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "HDP global RT cluster standard deviation")
+	public double withinFileBinningMassTol = MultiAlignConstants.PRECURSOR_WITHIN_FILE_BINNING_MASS_TOL;
+	@Option(name = "withinFileBinningRtTol", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "HDP global RT cluster standard deviation")
+	public double withinFileBinningRtTol = MultiAlignConstants.PRECURSOR_WITHIN_FILE_BINNING_RT_TOL;
 	@Option(name = "withinFileRtSd", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "HDP global RT cluster standard deviation")
 	public double withinFileRtSd = MultiAlignConstants.PRECURSOR_WITHIN_FILE_RT_SD;
+	@Option(name = "acrossFileBinningMassTol", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "HDP global RT cluster standard deviation")
+	public double acrossFileBinningMassTol = MultiAlignConstants.PRECURSOR_ACROSS_FILE_BINNING_MASS_TOL;
 	@Option(name = "acrossFileRtSd", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "HDP global RT cluster standard deviation")
 	public double acrossFileRtSd = MultiAlignConstants.PRECURSOR_ACROSS_FILE_RT_SD;
 	@Option(name = "alphaMass", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "HDP global RT cluster standard deviation")
@@ -235,6 +237,8 @@ public class MultiAlignCmdOptions {
 	public int rtClusteringNsamps = MultiAlignConstants.PRECURSOR_RT_CLUSTERING_NSAMPS;
 	@Option(name = "rtClusteringBurnIn", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Optional. Reference file index.")
 	public int rtClusteringBurnIn = MultiAlignConstants.PRECURSOR_RT_CLUSTERING_BURNIN;
+	@Option(name = "seed", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Optional. Reference file index.")
+	public int seed = MultiAlignConstants.SEED;	
 	
 	@Option(name = "mode", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Ionisation mode. If this is provided, then the model will also annotate peaks by possible adduct transformations.")
 	public String mode = null;
@@ -299,9 +303,10 @@ public class MultiAlignCmdOptions {
 		param.setHdpClusteringResultsPath(options.hdpClusteringResultsPath);
 		param.setTrans(options.trans);
 		param.setDb(options.db);
-		param.setBinningMassTol(options.binningMassTol);
-		param.setBinningRtTol(options.binningRtTol);
+		param.setWithinFileBinningMassTol(options.withinFileBinningMassTol);
+		param.setWithinFileBinningRtTol(options.withinFileBinningRtTol);
 		param.setWithinFileRtSd(options.withinFileRtSd);
+		param.setAcrossFileBinningMassTol(options.acrossFileBinningMassTol);
 		param.setAcrossFileRtSd(options.acrossFileRtSd);
 		param.setAlphaMass(options.alphaMass);
 		param.setAlphaRt(options.alphaRt);
@@ -309,6 +314,7 @@ public class MultiAlignCmdOptions {
 		param.setMassClusteringNoIters(options.massClusteringNoIters);
 		param.setRtClusteringNsamps(options.rtClusteringNsamps);
 		param.setRtClusteringBurnIn(options.rtClusteringBurnIn);		
+		param.setSeed(options.seed);
 		return param;
 	}
 	
