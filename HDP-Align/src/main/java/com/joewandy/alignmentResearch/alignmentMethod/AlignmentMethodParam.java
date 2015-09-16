@@ -57,10 +57,11 @@ public class AlignmentMethodParam {
 	
 	// for precursor clustering
 	private String trans;
-	private double withinFileBinningMassTol;
-	private double withinFileBinningRtTol;
+	private double withinFileMassTol;
+	private double withinFileRtTol;
 	private double withinFileRtSd;
-	private double acrossFileBinningMassTol;
+	private double acrossFileMassTol;
+	private double acrossFileRtTol;
 	private double acrossFileRtSd;
 	private double alphaMass;
 	private double alphaRt;
@@ -386,20 +387,20 @@ public class AlignmentMethodParam {
 		this.trans = trans;
 	}
 
-	public double getWithinFileBinningMassTol() {
-		return withinFileBinningMassTol;
+	public double getWithinFileMassTol() {
+		return withinFileMassTol;
 	}
 
-	public void setWithinFileBinningMassTol(double binningMassTol) {
-		this.withinFileBinningMassTol = binningMassTol;
+	public void setWithinFileMassTol(double massTol) {
+		this.withinFileMassTol = massTol;
 	}
 
-	public double getWithinFileBinningRtTol() {
-		return withinFileBinningRtTol;
+	public double getWithinFileRtTol() {
+		return withinFileRtTol;
 	}
 
-	public void setWithinFileBinningRtTol(double binningRtTol) {
-		this.withinFileBinningRtTol = binningRtTol;
+	public void setWithinFileRtTol(double rtTol) {
+		this.withinFileRtTol = rtTol;
 	}
 
 	public double getWithinFileRtSd() {
@@ -410,12 +411,20 @@ public class AlignmentMethodParam {
 		this.withinFileRtSd = withinFileRtSd;
 	}
 	
-	public double getAcrossFileBinningMassTol() {
-		return acrossFileBinningMassTol;
+	public double getAcrossFileMassTol() {
+		return acrossFileMassTol;
 	}
 
-	public void setAcrossFileBinningMassTol(double acrossFileBinningMassTol) {
-		this.acrossFileBinningMassTol = acrossFileBinningMassTol;
+	public void setAcrossFileMassTol(double acrossFileMassTol) {
+		this.acrossFileMassTol = acrossFileMassTol;
+	}
+
+	public double getAcrossFileRtTol() {
+		return acrossFileRtTol;
+	}
+
+	public void setAcrossFileRtTol(double acrossFileRtTol) {
+		this.acrossFileRtTol = acrossFileRtTol;
 	}
 
 	public double getAcrossFileRtSd() {

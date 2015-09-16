@@ -45,10 +45,11 @@ public class PrecursorAlignment extends BaseAlignment implements AlignmentMethod
 
 	private String trans;
 	private String db;
-	private double withinFileBinningMassTol;
-	private double withinFileBinningRtTol;
+	private double withinFileMassTol;
+	private double withinFileRtTol;
 	private double withinFileRtSd;
-	private double acrossFileBinningMassTol;
+	private double acrossFileMassTol;
+	private double acrossFileRtTol;
 	private double acrossFileRtSd;
 	private double alphaMass;
 	private double alphaRt;
@@ -67,10 +68,11 @@ public class PrecursorAlignment extends BaseAlignment implements AlignmentMethod
 		super(dataList, param);
 		this.trans = param.getTrans();
 		this.db = param.getIdentificationDatabase();
-		this.withinFileBinningMassTol = param.getWithinFileBinningMassTol();
-		this.withinFileBinningRtTol = param.getWithinFileBinningRtTol();
+		this.withinFileMassTol = param.getWithinFileMassTol();
+		this.withinFileRtTol = param.getWithinFileRtTol();
 		this.withinFileRtSd = param.getWithinFileRtSd();
-		this.acrossFileBinningMassTol = param.getAcrossFileBinningMassTol();
+		this.acrossFileMassTol = param.getAcrossFileMassTol();
+		this.acrossFileRtTol = param.getAcrossFileRtTol();
 		this.acrossFileRtSd = param.getAcrossFileRtSd();
 		this.alphaMass = param.getAlphaMass();
 		this.alphaRt = param.getAlphaRt();
@@ -84,27 +86,35 @@ public class PrecursorAlignment extends BaseAlignment implements AlignmentMethod
 	protected AlignmentList matchFeatures() {
 
 		AlignmentList alignedList = null;
+		Path tempDirPath = null;
+		
 		try {
 
 			// create temporary input files, and execute the script on them
-			Path tempDirPath = writeTempFiles();			
+			tempDirPath = writeTempFiles();			
 			String outputPath = tempDirPath.toString() + "/" + PrecursorAlignment.SCRIPT_OUTPUT;
 			runScript(tempDirPath.toString(), outputPath);
 			
 			// read back the output
 			alignedList = new AlignmentList(outputPath, dataList, "");
-
-			// clean all files inside directory
-			FileUtils.cleanDirectory(tempDirPath.toFile());
-			tempDirPath.toFile().delete();
 			
-		} catch (IOException e) {
+		} catch (Exception e) {
+
 			e.printStackTrace();
 			System.exit(1);
+		
 		} finally {
+
+			// clean all files inside directory
+			try {
+				FileUtils.cleanDirectory(tempDirPath.toFile());
+				tempDirPath.toFile().delete();			
+			} catch (IOException e) {
+				// do nothing
+			}
 			
 		}
-
+		
 		return alignedList;
 				
 	}
@@ -139,10 +149,11 @@ public class PrecursorAlignment extends BaseAlignment implements AlignmentMethod
 		map.put("outputFile", outputPath);		
 		map.put("trans", String.valueOf(this.trans));		    
 		map.put("db", String.valueOf(this.db));
-		map.put("within_file_binning_mass_tol", String.valueOf(this.withinFileBinningMassTol));	
-		map.put("within_file_binning_rt_tol", String.valueOf(this.withinFileBinningRtTol));
-		map.put("across_file_binning_mass_tol", String.valueOf(this.acrossFileBinningMassTol));	
+		map.put("within_file_mass_tol", String.valueOf(this.withinFileMassTol));	
+		map.put("within_file_rt_tol", String.valueOf(this.withinFileRtTol));
 		map.put("within_file_rt_sd", String.valueOf(this.withinFileRtSd));
+		map.put("across_file_mass_tol", String.valueOf(this.acrossFileMassTol));	
+		map.put("across_file_rt_tol", String.valueOf(this.acrossFileRtTol));	
 		map.put("across_file_rt_sd", String.valueOf(this.acrossFileRtSd));		
 		map.put("alpha_mass", String.valueOf(this.alphaMass));
 		map.put("alpha_rt", String.valueOf(this.alphaRt));
@@ -177,14 +188,16 @@ public class PrecursorAlignment extends BaseAlignment implements AlignmentMethod
 		cmdLine.addArgument("${seed}");
 		
 		// alignment parameters
-		cmdLine.addArgument("-within_file_binning_mass_tol");
-		cmdLine.addArgument("${within_file_binning_mass_tol}");
-		cmdLine.addArgument("-within_file_binning_rt_tol");
-		cmdLine.addArgument("${within_file_binning_rt_tol}");
+		cmdLine.addArgument("-within_file_mass_tol");
+		cmdLine.addArgument("${within_file_mass_tol}");
+		cmdLine.addArgument("-within_file_rt_tol");
+		cmdLine.addArgument("${within_file_rt_tol}");
 		cmdLine.addArgument("-within_file_rt_sd");
 		cmdLine.addArgument("${within_file_rt_sd}");
-		cmdLine.addArgument("-across_file_binning_mass_tol");
-		cmdLine.addArgument("${across_file_binning_mass_tol}");
+		cmdLine.addArgument("-across_file_mass_tol");
+		cmdLine.addArgument("${across_file_mass_tol}");
+		cmdLine.addArgument("-across_file_rt_tol");
+		cmdLine.addArgument("${across_file_rt_tol}");
 		cmdLine.addArgument("-across_file_rt_sd");
 		cmdLine.addArgument("${across_file_rt_sd}");
 		cmdLine.addArgument("-alpha_mass");

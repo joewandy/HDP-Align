@@ -210,51 +210,62 @@ public class MultiAlignCmdOptions {
 	@Option(name = "hdpClusteringResultsPath", param = "filename", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "The output file for HDP clustering results.")
 	public String hdpClusteringResultsPath = null;	
 
-	// for precursor clustering alignment
-	@Option(name = "trans", param = "filename", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "transformation file")
-	public String trans = null;	
-	@Option(name = "withinFileBinningMassTol", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "HDP global RT cluster standard deviation")
-	public double withinFileBinningMassTol = MultiAlignConstants.PRECURSOR_WITHIN_FILE_BINNING_MASS_TOL;
-	@Option(name = "withinFileBinningRtTol", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "HDP global RT cluster standard deviation")
-	public double withinFileBinningRtTol = MultiAlignConstants.PRECURSOR_WITHIN_FILE_BINNING_RT_TOL;
-	@Option(name = "withinFileRtSd", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "HDP global RT cluster standard deviation")
-	public double withinFileRtSd = MultiAlignConstants.PRECURSOR_WITHIN_FILE_RT_SD;
-	@Option(name = "acrossFileBinningMassTol", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "HDP global RT cluster standard deviation")
-	public double acrossFileBinningMassTol = MultiAlignConstants.PRECURSOR_ACROSS_FILE_BINNING_MASS_TOL;
-	@Option(name = "acrossFileRtSd", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "HDP global RT cluster standard deviation")
-	public double acrossFileRtSd = MultiAlignConstants.PRECURSOR_ACROSS_FILE_RT_SD;
-	@Option(name = "alphaMass", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "HDP global RT cluster standard deviation")
-	public double alphaMass = MultiAlignConstants.PRECURSOR_ALPHA_MASS;
-	@Option(name = "alphaRt", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "HDP global RT cluster standard deviation")
-	public double alphaRt = MultiAlignConstants.PRECURSOR_ALPHA_RT;
-	@Option(name = "t", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "HDP global RT cluster standard deviation")
-	public double t = MultiAlignConstants.PRECURSOR_T;
-	@Option(name = "massClusteringNoIters", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Optional. Reference file index.")
-	public int massClusteringNoIters = MultiAlignConstants.PRECURSOR_MASS_CLUSTERING_NO_ITERS;
-	@Option(name = "rtClusteringNsamps", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Optional. Reference file index.")
-	public int rtClusteringNsamps = MultiAlignConstants.PRECURSOR_RT_CLUSTERING_NSAMPS;
-	@Option(name = "rtClusteringBurnIn", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Optional. Reference file index.")
-	public int rtClusteringBurnIn = MultiAlignConstants.PRECURSOR_RT_CLUSTERING_BURNIN;
-	@Option(name = "seed", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Optional. Reference file index.")
-	public int seed = MultiAlignConstants.SEED;	
-	
 	@Option(name = "mode", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Ionisation mode. If this is provided, then the model will also annotate peaks by possible adduct transformations.")
 	public String mode = null;
 	
-	// 	private static final String KEGG_PATH = "/home/joewandy/Project/mzMatch/scripts/standards/kegg.xml";
 	@Option(name = "idDatabase", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Identification database. If this is provided, then the model will also annotate peaks by putative identities of formulae")
 	public String idDatabase = null;	
 
-	// String databaseFile = "/home/joewandy/Dropbox/Project/documents/new_measure_experiment/input_data/standard_hdp/std1.csv";
 	@Option(name = "gtDatabase", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Ground truth database -- for debugging only")
 	public String gtDatabase = null;		
 	
-	/*
-	 * Scoring options
-	 */
 	@Option(name = "scoringMethod", param = "", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Scoring method")
-	public String scoringMethod = MultiAlignConstants.SCORING_METHOD_HDP_MASS_RT_JAVA;
+	public String scoringMethod = MultiAlignConstants.SCORING_METHOD_HDP_MASS_RT_JAVA;	
 	
+	// for precursor clustering alignment
+
+	@Option(name = "trans", param = "filename", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "transformation file")
+	public String trans = null;	
+	
+	@Option(name = "withinFileMassTol", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "mass tolerance in ppm when binning within the same file")
+	public double withinFileMassTol = MultiAlignConstants.PRECURSOR_WITHIN_FILE_MASS_TOL;
+
+	@Option(name = "withinFileRtTol", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "rt tolerance in seconds when binning within the same file")
+	public double withinFileRtTol = MultiAlignConstants.PRECURSOR_WITHIN_FILE_RT_TOL;
+	
+	@Option(name = "withinFileRtSd", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "standard deviation when clustering by precursor masses within the same file")
+	public double withinFileRtSd = MultiAlignConstants.PRECURSOR_WITHIN_FILE_RT_SD;
+	
+	@Option(name = "acrossFileMassTol", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "mass tolerance in ppm when binning across files")
+	public double acrossFileMassTol = MultiAlignConstants.PRECURSOR_ACROSS_FILE_MASS_TOL;
+
+	@Option(name = "acrossFileRtTol", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "rt tolerance in seconds when matching peak features across bins in the same cluster but coming from different files")
+	public double acrossFileRtTol = MultiAlignConstants.PRECURSOR_ACROSS_FILE_MASS_TOL;
+	
+	@Option(name = "acrossFileRtSd", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "standard deviation of mixture component when clustering bins by posterior RT across files")
+	public double acrossFileRtSd = MultiAlignConstants.PRECURSOR_ACROSS_FILE_RT_SD;
+	
+	@Option(name = "alphaMass", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Dirichlet parameter for precursor mass clustering")
+	public double alphaMass = MultiAlignConstants.PRECURSOR_ALPHA_MASS;
+	
+	@Option(name = "alphaRt", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Dirichlet Process concentration parameter for mixture on RT")
+	public double alphaRt = MultiAlignConstants.PRECURSOR_ALPHA_RT;
+	
+	@Option(name = "t", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "threshold for cluster membership for precursor mass clustering")
+	public double t = MultiAlignConstants.PRECURSOR_T;
+	
+	@Option(name = "massClusteringNoIters", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "no. of iterations for VB precursor clustering")
+	public int massClusteringNoIters = MultiAlignConstants.PRECURSOR_MASS_CLUSTERING_NO_ITERS;
+	
+	@Option(name = "rtClusteringNsamps", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "no. of total samples for Gibbs RT clustering")
+	public int rtClusteringNsamps = MultiAlignConstants.PRECURSOR_RT_CLUSTERING_NSAMPS;
+	
+	@Option(name = "rtClusteringBurnIn", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "no. of burn-in samples for Gibbs RT clustering")
+	public int rtClusteringBurnIn = MultiAlignConstants.PRECURSOR_RT_CLUSTERING_BURNIN;
+	
+	@Option(name = "seed", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "random seed for debugging")
+	public int seed = MultiAlignConstants.SEED;	
+		
 	/*
 	 * Generative model parameters
 	 */
@@ -300,10 +311,11 @@ public class MultiAlignCmdOptions {
 		param.setAlwaysRecluster(options.alwaysRecluster);
 		param.setHdpClusteringResultsPath(options.hdpClusteringResultsPath);
 		param.setTrans(options.trans);
-		param.setWithinFileBinningMassTol(options.withinFileBinningMassTol);
-		param.setWithinFileBinningRtTol(options.withinFileBinningRtTol);
+		param.setWithinFileMassTol(options.withinFileMassTol);
+		param.setWithinFileRtTol(options.withinFileRtTol);
 		param.setWithinFileRtSd(options.withinFileRtSd);
-		param.setAcrossFileBinningMassTol(options.acrossFileBinningMassTol);
+		param.setAcrossFileMassTol(options.acrossFileMassTol);
+		param.setAcrossFileRtTol(options.acrossFileRtTol);
 		param.setAcrossFileRtSd(options.acrossFileRtSd);
 		param.setAlphaMass(options.alphaMass);
 		param.setAlphaRt(options.alphaRt);
