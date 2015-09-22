@@ -114,8 +114,11 @@ public class AlignmentList {
 				if (lineSplitter.hasNext()) {
 					double mass = lineSplitter.nextDouble(); // ignored
 					double rt = lineSplitter.nextDouble(); // ignored
+				}
+				// read some more if present
+				if (lineSplitter.hasNext()) {
 					prob = lineSplitter.nextDouble();
-					annot = lineSplitter.next();
+					annot = lineSplitter.next();					
 				}
 			} catch (IndexOutOfBoundsException e) {
 				// invalid entry in the alignment result, skipping ...

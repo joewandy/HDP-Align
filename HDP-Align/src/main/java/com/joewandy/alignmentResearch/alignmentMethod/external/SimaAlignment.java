@@ -58,23 +58,32 @@ public class SimaAlignment extends BaseAlignment implements AlignmentMethod {
 	protected AlignmentList matchFeatures() {
 
 		AlignmentList alignedList = null;
+		Path tempDirPath = null;
 		try {
 
 			// create temporary input files, and execute SIMA on them
-			Path tempDirPath = writeTempFiles();			
+			tempDirPath = writeTempFiles();			
 			runSima(tempDirPath.toString());
 			
 			// read back the output from simaDir/results/result.txt
 			String outputPath = tempDirPath.toString() + SimaAlignment.SIMA_OUTPUT;
 			alignedList = new AlignmentList(outputPath, dataList, "");
 			
-			// clean all files inside directory
-			FileUtils.cleanDirectory(tempDirPath.toFile());
-			tempDirPath.toFile().delete();
-						
-		} catch (IOException e) {
+		} catch (Exception e) {
+
 			e.printStackTrace();
 			System.exit(1);
+		
+		} finally {
+
+			// clean all files inside directory
+			try {
+				FileUtils.cleanDirectory(tempDirPath.toFile());
+				tempDirPath.toFile().delete();			
+			} catch (IOException e) {
+				// do nothing
+			}
+			
 		}
 
 		return alignedList;
