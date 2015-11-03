@@ -262,6 +262,10 @@ public class MultiAlignCmdOptions {
 	
 	@Option(name = "rtClusteringBurnIn", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "no. of burn-in samples for Gibbs RT clustering")
 	public int rtClusteringBurnIn = MultiAlignConstants.PRECURSOR_RT_CLUSTERING_BURNIN;
+
+	@Option(name="fullMatching", param="boolean", type=Option.Type.NO_ARGUMENT, 
+			usage="Perform max-weightd matching")
+	public boolean fullMatching = MultiAlignConstants.HDP_SPEED_UP;
 	
 	@Option(name = "seed", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "random seed for debugging")
 	public int seed = MultiAlignConstants.SEED;	
@@ -322,7 +326,9 @@ public class MultiAlignCmdOptions {
 		param.setT(options.t);
 		param.setMassClusteringNoIters(options.massClusteringNoIters);
 		param.setRtClusteringNsamps(options.rtClusteringNsamps);
-		param.setRtClusteringBurnIn(options.rtClusteringBurnIn);		
+		param.setRtClusteringBurnIn(options.rtClusteringBurnIn);
+		param.setFullMatching(options.fullMatching);
+		
 		param.setSeed(options.seed);
 		return param;
 	}

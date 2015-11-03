@@ -57,6 +57,7 @@ public class PrecursorAlignment extends BaseAlignment implements AlignmentMethod
 	private int massClusteringNoIters;
 	private int rtClusteringNsamps;
 	private int rtClusteringBurnIn;
+	private boolean fullMatching;
 	
 	/**
 	 * Creates a simple aligner
@@ -80,6 +81,7 @@ public class PrecursorAlignment extends BaseAlignment implements AlignmentMethod
 		this.massClusteringNoIters = param.getMassClusteringNoIters();
 		this.rtClusteringNsamps = param.getRtClusteringNsamps();
 		this.rtClusteringBurnIn = param.getRtClusteringBurnIn();
+		this.fullMatching = param.isFullMatching();
 	}
 	
 	@Override
@@ -183,6 +185,9 @@ public class PrecursorAlignment extends BaseAlignment implements AlignmentMethod
 		}
 		if (this.verbose) {
 			cmdLine.addArgument("-v");			
+		}
+		if (this.fullMatching) {
+			cmdLine.addArgument("-full");			
 		}
 		cmdLine.addArgument("-seed");
 		cmdLine.addArgument("${seed}");

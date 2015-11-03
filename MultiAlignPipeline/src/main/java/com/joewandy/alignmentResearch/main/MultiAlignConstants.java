@@ -168,10 +168,11 @@ public class MultiAlignConstants {
 	public static final double PRECURSOR_ACROSS_FILE_RT_SD = 15;
 	public static final double PRECURSOR_ALPHA_MASS = 100.0;
 	public static final double PRECURSOR_ALPHA_RT = 1.0;
-	public static final double PRECURSOR_T = 0.25;
+	public static final double PRECURSOR_T = 0.0;
 	public static final int PRECURSOR_MASS_CLUSTERING_NO_ITERS = 100;
 	public static final int PRECURSOR_RT_CLUSTERING_NSAMPS = 200;
 	public static final int PRECURSOR_RT_CLUSTERING_BURNIN = 100;
+	public static final boolean PRECURSOR_FULL_MATCHING = false;	
 	public static final int SEED = -1;
 	
 	

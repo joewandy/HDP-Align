@@ -69,6 +69,7 @@ public class AlignmentMethodParam {
 	private int massClusteringNoIters;
 	private int rtClusteringNsamps;
 	private int rtClusteringBurnIn;	
+	private boolean fullMatching;
 	
 	public AlignmentMethodParam() {
 	
@@ -482,6 +483,13 @@ public class AlignmentMethodParam {
 	public void setRtClusteringBurnIn(int rtClusteringBurnIn) {
 		this.rtClusteringBurnIn = rtClusteringBurnIn;
 	}
-	
+
+	public boolean isFullMatching() {
+		return fullMatching;
+	}
+
+	public void setFullMatching(boolean fullMatching) {
+		this.fullMatching = fullMatching;
+	}
 
 }
