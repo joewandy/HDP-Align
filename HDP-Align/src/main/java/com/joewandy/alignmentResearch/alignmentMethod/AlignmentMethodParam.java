@@ -59,10 +59,8 @@ public class AlignmentMethodParam {
 	private String trans;
 	private double withinFileMassTol;
 	private double withinFileRtTol;
-	private double withinFileRtSd;
 	private double acrossFileMassTol;
 	private double acrossFileRtTol;
-	private double acrossFileRtSd;
 	private double alphaMass;
 	private double alphaRt;
 	private double t;
@@ -403,14 +401,6 @@ public class AlignmentMethodParam {
 	public void setWithinFileRtTol(double rtTol) {
 		this.withinFileRtTol = rtTol;
 	}
-
-	public double getWithinFileRtSd() {
-		return withinFileRtSd;
-	}
-
-	public void setWithinFileRtSd(double withinFileRtSd) {
-		this.withinFileRtSd = withinFileRtSd;
-	}
 	
 	public double getAcrossFileMassTol() {
 		return acrossFileMassTol;
@@ -426,14 +416,6 @@ public class AlignmentMethodParam {
 
 	public void setAcrossFileRtTol(double acrossFileRtTol) {
 		this.acrossFileRtTol = acrossFileRtTol;
-	}
-
-	public double getAcrossFileRtSd() {
-		return acrossFileRtSd;
-	}
-
-	public void setAcrossFileRtSd(double acrossFileRtSd) {
-		this.acrossFileRtSd = acrossFileRtSd;
 	}
 
 	public double getAlphaMass() {

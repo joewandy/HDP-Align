@@ -232,19 +232,13 @@ public class MultiAlignCmdOptions {
 
 	@Option(name = "withinFileRtTol", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "rt tolerance in seconds when binning within the same file")
 	public double withinFileRtTol = MultiAlignConstants.PRECURSOR_WITHIN_FILE_RT_TOL;
-	
-	@Option(name = "withinFileRtSd", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "standard deviation when clustering by precursor masses within the same file")
-	public double withinFileRtSd = MultiAlignConstants.PRECURSOR_WITHIN_FILE_RT_SD;
-	
+		
 	@Option(name = "acrossFileMassTol", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "mass tolerance in ppm when binning across files")
 	public double acrossFileMassTol = MultiAlignConstants.PRECURSOR_ACROSS_FILE_MASS_TOL;
 
 	@Option(name = "acrossFileRtTol", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "rt tolerance in seconds when matching peak features across bins in the same cluster but coming from different files")
 	public double acrossFileRtTol = MultiAlignConstants.PRECURSOR_ACROSS_FILE_MASS_TOL;
-	
-	@Option(name = "acrossFileRtSd", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "standard deviation of mixture component when clustering bins by posterior RT across files")
-	public double acrossFileRtSd = MultiAlignConstants.PRECURSOR_ACROSS_FILE_RT_SD;
-	
+		
 	@Option(name = "alphaMass", param = "double", type = Option.Type.REQUIRED_ARGUMENT, level = Option.Level.USER, usage = "Dirichlet parameter for precursor mass clustering")
 	public double alphaMass = MultiAlignConstants.PRECURSOR_ALPHA_MASS;
 	
@@ -317,10 +311,8 @@ public class MultiAlignCmdOptions {
 		param.setTrans(options.trans);
 		param.setWithinFileMassTol(options.withinFileMassTol);
 		param.setWithinFileRtTol(options.withinFileRtTol);
-		param.setWithinFileRtSd(options.withinFileRtSd);
 		param.setAcrossFileMassTol(options.acrossFileMassTol);
 		param.setAcrossFileRtTol(options.acrossFileRtTol);
-		param.setAcrossFileRtSd(options.acrossFileRtSd);
 		param.setAlphaMass(options.alphaMass);
 		param.setAlphaRt(options.alphaRt);
 		param.setT(options.t);

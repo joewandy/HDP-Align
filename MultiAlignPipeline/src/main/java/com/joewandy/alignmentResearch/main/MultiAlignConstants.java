@@ -160,15 +160,13 @@ public class MultiAlignConstants {
 	public static final double PARAM_MZ_PAIR_MAX_DISTANCE = 0.5;
 
 	// precursor clustering parameters
-	public static final double PRECURSOR_WITHIN_FILE_MASS_TOL = 2.0;
+	public static final double PRECURSOR_WITHIN_FILE_MASS_TOL = 1.0;
 	public static final double PRECURSOR_WITHIN_FILE_RT_TOL = 5.0;
-	public static final double PRECURSOR_WITHIN_FILE_RT_SD = 2.5;
 	public static final double PRECURSOR_ACROSS_FILE_MASS_TOL = 4;
-	public static final double PRECURSOR_ACROSS_FILE_RT_TOL = 30;
-	public static final double PRECURSOR_ACROSS_FILE_RT_SD = 15;
-	public static final double PRECURSOR_ALPHA_MASS = 100.0;
-	public static final double PRECURSOR_ALPHA_RT = 1.0;
-	public static final double PRECURSOR_T = 0.0;
+	public static final double PRECURSOR_ACROSS_FILE_RT_TOL = 10;
+	public static final double PRECURSOR_ALPHA_MASS = 1.0;
+	public static final double PRECURSOR_ALPHA_RT = 100.0;
+	public static final double PRECURSOR_T = 0.10;
 	public static final int PRECURSOR_MASS_CLUSTERING_NO_ITERS = 100;
 	public static final int PRECURSOR_RT_CLUSTERING_NSAMPS = 200;
 	public static final int PRECURSOR_RT_CLUSTERING_BURNIN = 100;
