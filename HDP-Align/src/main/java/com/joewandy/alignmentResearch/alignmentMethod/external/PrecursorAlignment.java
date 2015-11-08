@@ -57,7 +57,7 @@ public class PrecursorAlignment extends BaseAlignment implements AlignmentMethod
 	private int massClusteringNoIters;
 	private int rtClusteringNsamps;
 	private int rtClusteringBurnIn;
-	private boolean fullMatching;
+	private int matchMode;
 	
 	/**
 	 * Creates a simple aligner
@@ -79,7 +79,7 @@ public class PrecursorAlignment extends BaseAlignment implements AlignmentMethod
 		this.massClusteringNoIters = param.getMassClusteringNoIters();
 		this.rtClusteringNsamps = param.getRtClusteringNsamps();
 		this.rtClusteringBurnIn = param.getRtClusteringBurnIn();
-		this.fullMatching = param.isFullMatching();
+		this.matchMode = param.getMatchMode();
 	}
 	
 	@Override
@@ -159,6 +159,7 @@ public class PrecursorAlignment extends BaseAlignment implements AlignmentMethod
 		map.put("mass_clustering_n_iterations", String.valueOf(this.massClusteringNoIters));
 		map.put("rt_clustering_nsamps", String.valueOf(this.rtClusteringNsamps));
 		map.put("rt_clustering_burnin", String.valueOf(this.rtClusteringBurnIn));
+		map.put("match_mode", String.valueOf(this.matchMode));
 		if (verbose) {
 			System.out.println(map);
 		}
@@ -182,9 +183,6 @@ public class PrecursorAlignment extends BaseAlignment implements AlignmentMethod
 		if (this.verbose) {
 			cmdLine.addArgument("-v");			
 		}
-		if (this.fullMatching) {
-			cmdLine.addArgument("-full");			
-		}
 		cmdLine.addArgument("-seed");
 		cmdLine.addArgument("${seed}");
 		
@@ -203,6 +201,8 @@ public class PrecursorAlignment extends BaseAlignment implements AlignmentMethod
 		cmdLine.addArgument("${alpha_rt}");
 		cmdLine.addArgument("-t");
 		cmdLine.addArgument("${t}");
+		cmdLine.addArgument("-match_mode");
+		cmdLine.addArgument("${match_mode}");
 		cmdLine.addArgument("-mass_clustering_n_iterations");
 		cmdLine.addArgument("${mass_clustering_n_iterations}");
 		cmdLine.addArgument("-rt_clustering_nsamps");

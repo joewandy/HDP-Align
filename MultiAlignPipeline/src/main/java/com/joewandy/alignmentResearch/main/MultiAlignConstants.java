@@ -170,7 +170,7 @@ public class MultiAlignConstants {
 	public static final int PRECURSOR_MASS_CLUSTERING_NO_ITERS = 100;
 	public static final int PRECURSOR_RT_CLUSTERING_NSAMPS = 200;
 	public static final int PRECURSOR_RT_CLUSTERING_BURNIN = 100;
-	public static final boolean PRECURSOR_FULL_MATCHING = false;	
+	public static final int PRECURSOR_MATCH_MODE = 0;
 	public static final int SEED = -1;
 	
 	
