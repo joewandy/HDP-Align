@@ -105,13 +105,13 @@ public class PrecursorAlignment extends BaseAlignment implements AlignmentMethod
 		
 		} finally {
 
-			// clean all files inside directory
-			try {
-				FileUtils.cleanDirectory(tempDirPath.toFile());
-				tempDirPath.toFile().delete();			
-			} catch (IOException e) {
-				// do nothing
-			}
+//			// clean all files inside directory
+//			try {
+//				FileUtils.cleanDirectory(tempDirPath.toFile());
+//				tempDirPath.toFile().delete();			
+//			} catch (IOException e) {
+//				// do nothing
+//			}
 			
 		}
 		
